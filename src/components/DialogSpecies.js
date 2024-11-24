@@ -1,10 +1,12 @@
 import React from 'react';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import SpeciesAttribute from '../components/SpeciesAttribute.js';
+import { SortItemsList } from '../utilities/SortItemsList.js';
+import { useTranslation } from 'react-i18next';
 
 const Dialog = ({ isOpen, onClose, data, species}) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
-
   const formattedQuery = encodeURIComponent(species["Especies Características"]);
 
   const fileterdEspecies = data.filter((item) =>
@@ -12,16 +14,26 @@ const Dialog = ({ isOpen, onClose, data, species}) => {
   );
 
   const uniqueAttributes = {
-    province: [...new Set(fileterdEspecies.map((item) => item["Provincia"]))].join(', '),
-    municipality: [...new Set(fileterdEspecies.map((item) => item["Municipio"]))].join(', '),
-    averageAltitude: [...new Set(fileterdEspecies.map((item) => item["Altitud Media"]))].join(', '),
-    biogeographicSector: [...new Set(fileterdEspecies.map((item) => item["Sector Biogeográfico"]))].join(', '),
-    bioclimaticFloor: [...new Set(fileterdEspecies.map((item) => item["Piso Bioclimático"]))].join(', '),
-    ombrotype: [...new Set(fileterdEspecies.map((item) => item["Ombrotipo"]))].join(', '),
-    natureOfSubstrate: [...new Set(fileterdEspecies.map((item) => item["Naturaleza del Sustrato"]))].join(', '),
-    serieType: [...new Set(fileterdEspecies.map((item) => item["Tipo de Serie"]))].join(', '),
-    vegetationSeries: [...new Set(fileterdEspecies.map((item) => item["Serie de Vegetación"]))].join(', '),
-    potentialVegetation: [...new Set(fileterdEspecies.map((item) => item["Vegetación Potencial"]))].join(', '),
+    province: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Provincia"]))])
+      .join(", "),
+    municipality: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Municipio"]))])
+      .join(", "),
+    averageAltitude: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Altitud Media"]))])
+      .join(", "),
+    biogeographicSector: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Sector Biogeográfico"]))])
+      .join(", "),
+    bioclimaticFloor: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Piso Bioclimático"]))])
+      .join(", "),
+    ombrotype: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Ombrotipo"]))])
+      .join(", "),
+    natureOfSubstrate: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Naturaleza del Sustrato"]))])
+      .join(", "),
+    seriesType: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Tipo de Serie"]))])
+      .join(", "),
+    vegetationSeries: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Serie de Vegetación"]))])
+      .join(", "),
+    potentialVegetation: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Vegetación Potencial"]))])
+      .join(", "),
   };
 
   return (
@@ -68,16 +80,13 @@ const Dialog = ({ isOpen, onClose, data, species}) => {
       }
 
       <div className="p-4 grid grid-cols-2 gap-4 overflow-y-auto flex-grow">
-        <SpeciesAttribute title="Provincia" description={uniqueAttributes.province} />
-        <SpeciesAttribute title="Municipio" description={uniqueAttributes.municipality} />
-        <SpeciesAttribute title="Altitud media" description={uniqueAttributes.averageAltitude} />
-        <SpeciesAttribute title="Sector biogeográfico" description={uniqueAttributes.biogeographicSector} />
-        <SpeciesAttribute title="Piso bioclimático" description={uniqueAttributes.bioclimaticFloor} />
-        <SpeciesAttribute title="Ombrotipo" description={uniqueAttributes.ombrotype} />
-        <SpeciesAttribute title="Serie del sustrato" description={uniqueAttributes.natureOfSubstrate} />
-        <SpeciesAttribute title="Tipo de serie" description={uniqueAttributes.serieType} />
-        <SpeciesAttribute title="Serie de vegetación" description={uniqueAttributes.vegetationSeries} />
-        <SpeciesAttribute title="Vegetación potencial" description={uniqueAttributes.potentialVegetation} />
+        {Object.entries(uniqueAttributes).map(([key, value]) => (
+          <SpeciesAttribute
+            key={key}
+            title={t(`explore.dialogSpecies.attributes.${key}`, key)}
+            description={value}
+          />
+        ))}
       </div>
 
       <div className="flex justify-center px-4 py-2 mx-auto">
@@ -87,12 +96,12 @@ const Dialog = ({ isOpen, onClose, data, species}) => {
           rel="noopener noreferrer"
           className="text-[#0C1811] font-bold hover:underline"
         >
-          Leer más
+          {t('explore.dialogSpecies.readMoreLabel')}
         </a>
       </div>
 
       <div className="flex justify-center px-4 py-2 mx-auto mt-4">
-        <ButtonPrincipal onClick={onClose} text="Cerrar" />
+        <ButtonPrincipal onClick={onClose} text={t('explore.dialogSpecies.closeButton')} />
       </div>
     </div>
   </div>

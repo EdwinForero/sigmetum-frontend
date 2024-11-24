@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import ButtonAlternative from './ButtonAlternative.js';
 import FilterSearchBar from './FilterSearchBar.js';
+import { SortItemsList } from '../utilities/SortItemsList.js';
+import { useTranslation } from 'react-i18next';
 
 const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const { t } = useTranslation();
 
   const toggleCategory = () => {
     if (!blocked) {
@@ -20,9 +23,9 @@ const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
     onChange(category, 'clear');
   };
 
-  const filteredItems = items.filter((item) =>
+  const filteredItems = SortItemsList(items.filter((item) =>
     String(item).toLowerCase().includes(searchText.toLowerCase())
-  );
+  ));
 
   return (
     <div className="w-full max-w-md mx-auto bg-[#F9FBFA] rounded-lg shadow-lg p-2 mt-2 mb-2">
@@ -30,12 +33,12 @@ const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
         className={`text-[#0C1811] text-xl font-medium leading-normal pb-2 cursor-pointer ${blocked ? 'text-gray-500' : ''}`}
         onClick={toggleCategory}
       >
-        {category}
+        {t(`attributes.${category}`, category)}
       </p>
 
       {isExpanded && !blocked && (
         <>
-        <FilterSearchBar placeholderText={category} value={searchText} onChange={(e) => setSearchText(e.target.value)}/>
+        <FilterSearchBar placeholderText={t(`attributes.${category}`, category)} value={searchText} onChange={(e) => setSearchText(e.target.value)}/>
           <div className="space-y-3 py-1">
           {filteredItems.length > 0 ? (
               [...new Set(
@@ -54,11 +57,11 @@ const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
                 </label>
               ))
             ) : (
-              <p className="text-[#4B644A]">No hay resultados para "{searchText}"</p>
+              <p className="text-[#4B644A]">{t('filter.categoryFilter.noResultsFoundPlaceholder')} "{searchText}"</p>
             )}
           </div>
           <div className="mt-1 items-center justify-center flex space-x-4">
-            <ButtonAlternative onClick={handleClearAll} text='Limpiar Todo'/>
+            <ButtonAlternative onClick={handleClearAll} text={t('filter.categoryFilter.cleanFilterButton')}/>
           </div>
         </>
       )}

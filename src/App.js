@@ -14,10 +14,12 @@ import Sidebar from './components/Sidebar.js';
 import Filter from './components/Filter.js';
 import LoadSpinner from './components/LoadSpinner';
 import ProtectedRoute from './components/ProtectedRoute.js';
+import LanguageSwitcher from './components/LanguageSwitcher.js';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [mergedData, setMergedData] = useState(null);
+  const [selectedSpecies, setSelectedSpecies] = useState([]);
   const [filteredSpecies, setFilteredSpecies] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
@@ -29,10 +31,9 @@ function App() {
     try {
       const response = await fetch('http://localhost:8000/get-merged-data');
       const result = await response.json();
-      console.log(result);
       setMergedData(result);
       setFilteredSpecies(result);
-    setIsLoading(false);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error al obtener los datos:', error);
     }
@@ -48,8 +49,6 @@ function App() {
     setSelectedData(data);
     setFilteredData(data);
     setIsLoading(false);
-
-    console.log(data);
   };
 
   const handleFilterDataChange = (filtered) => {
@@ -60,6 +59,10 @@ function App() {
       return prev;
     });
   };
+
+  const handleOnSpeciesSelect = (speciesSelected) => {
+    setSelectedSpecies(speciesSelected);
+  }
 
   const handleFilterChange = (filteredData) => {
     setFilteredSpecies((prev) => {
@@ -77,8 +80,8 @@ function App() {
   }, [location.pathname, requireData]);
 
   const menuOptions = [
-    { id: 'filtro', name: 'Filtro',  component: <Filter data={mergedData} onFilterChange={handleFilterChange}/>, icon:"filter_alt"},
-    { id: 'dataManagementFilter', name: 'Filtro',  component: <Filter data={selectedData} onFilterChange={handleFilterDataChange}/>, icon:"filter_alt"},
+    { id: 'filtro', name: 'Filtro',  component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange}/>, icon:"filter_alt"},
+    { id: 'dataManagementFilter', name: 'Filtro',  component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange}/>, icon:"filter_alt"},
     { id: 'administrarDatos', name: 'Administrar datos', icon:"database", link:"/administrar-datos"},
     { id: 'cargarArchivos', name: 'Cargar archivos', icon:"upload", link:"/cargar-archivos"},
   ];
@@ -89,9 +92,10 @@ function App() {
         <Link to="/">
           <div className="flex items-center gap-4">
             <img src='https://www.adaptivewfs.com/wp-content/uploads/2020/07/logo-placeholder-image.png' alt='logo' className="h-14"/>
-            <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM</p>
+            <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM-A</p>
           </div>
         </Link>
+        <LanguageSwitcher/>
           <div className="flex flex-1 justify-end gap-8">
             <Navbar/>
           </div>
@@ -99,7 +103,7 @@ function App() {
 
       <div className="flex min-h-screen">
 
-        {showSideMenu && <Sidebar menuOptions={menuOptions}/>}
+        {showSideMenu && <Sidebar managementData={selectedData} exploreData={mergedData} menuOptions={menuOptions}/>}
 
         <main className='flex-grow bg-[#F9FBFA]'>
           <Routes>
@@ -112,14 +116,14 @@ function App() {
                 <LoadSpinner />
               </div>
               ) : (
-                <Explore data={mergedData} filteredSpecies={filteredSpecies}/>
+                <Explore data={mergedData} filteredSpecies={filteredSpecies} selectedSpecies={selectedSpecies}/>
               )
             }/>
             <Route path="/sobre-nosotros" element={<About/>}/>
             <Route path="/login" element={<Login/>}/>
-            <Route path="*" element={<NotFound />} />
             <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload/>}/>}/>
             <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData}/>}/>}/>
+            <Route path="*" element={<NotFound />}/>
           </Routes>
         </main>
       </div>
