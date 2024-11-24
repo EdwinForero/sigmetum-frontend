@@ -129,7 +129,7 @@ function App() {
       </div>
       <footer className='bg-[#0C1811] flex justify-center relative'>
         <Footer/>
-        <span className='text-[#F9FBFA] absolute bottom-2 right-2'>V 1.0.0</span>
+        <span className='text-[#F9FBFA] absolute bottom-2 right-2'>V 1.0.1</span>
       </footer>
     </div>
   );
