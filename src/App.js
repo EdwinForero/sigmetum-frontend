@@ -26,7 +26,7 @@ function App() {
   const location = useLocation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/explorar"].includes(location.pathname);
   const requireData = ["/explorar"].includes(location.pathname);
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+  const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:3000'
 
   const fetchData = useCallback(async () => {
     try {
