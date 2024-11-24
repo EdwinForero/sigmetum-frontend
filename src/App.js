@@ -29,7 +29,7 @@ function App() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch('${process.env.BASE_URL}/get-merged-data');
+      const response = await fetch(`${process.env.BASE_URL}/get-merged-data`);
       const result = await response.json();
       setMergedData(result);
       setFilteredSpecies(result);
@@ -129,7 +129,7 @@ function App() {
       </div>
       <footer className='bg-[#0C1811] flex justify-center relative'>
         <Footer/>
-        <span className='text-[#F9FBFA] absolute bottom-2 right-2'>V 1.0.1</span>
+        <span className='text-[#F9FBFA] absolute bottom-2 right-2'>V 1.0.0</span>
       </footer>
     </div>
   );
