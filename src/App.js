@@ -26,10 +26,11 @@ function App() {
   const location = useLocation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/explorar"].includes(location.pathname);
   const requireData = ["/explorar"].includes(location.pathname);
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.BASE_URL}/get-merged-data`);
+      const response = await fetch(`${BASE_URL}/get-merged-data`);
       const result = await response.json();
       setMergedData(result);
       setFilteredSpecies(result);

@@ -18,6 +18,8 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const fileDropdownRef = useRef(null);
   const token = localStorage.getItem('token');
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+
   useTokenExpirationHandler(token);
 
   const handleFileSelect = (jsonData, fileName) => {
@@ -36,7 +38,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const handleFileDelete = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.BASE_URL}/delete-file`, {
+      const response = await fetch(`${BASE_URL}/delete-file`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -71,7 +73,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const handleFileUpdate = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.BASE_URL}/update-file`, {
+      const response = await fetch(`${BASE_URL}/update-file`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
