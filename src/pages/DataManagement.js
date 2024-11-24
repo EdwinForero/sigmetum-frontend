@@ -36,7 +36,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const handleFileDelete = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/delete-file', {
+      const response = await fetch('${process.env.BASE_URL}/delete-file', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const handleFileUpdate = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/update-file', {
+      const response = await fetch('${process.env.BASE_URL}/update-file', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -29,7 +29,7 @@ function App() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/get-merged-data');
+      const response = await fetch('${process.env.BASE_URL}/get-merged-data');
       const result = await response.json();
       setMergedData(result);
       setFilteredSpecies(result);
