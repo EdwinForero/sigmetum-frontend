@@ -24,6 +24,10 @@ const Sidebar = ({ exploreData, menuOptions }) => {
     setActiveComponent((prevActive) => (prevActive === optionId ? null : optionId));
   };
 
+  useEffect(() => {
+    setActiveComponent(null);
+  }, [location.pathname]);
+
   return (
     <aside className="bg-[#F9FBFA] flex min-h-full p-5">
       <nav className="mb-4 flex flex-col gap-2">

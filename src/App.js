@@ -25,7 +25,6 @@ function App() {
   const [selectedData, setSelectedData] = useState([]);
   const location = useLocation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/explorar"].includes(location.pathname);
-  const requireData = ["/explorar"].includes(location.pathname);
   const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com'
 
   const fetchData = useCallback(async () => {
@@ -42,7 +41,20 @@ function App() {
 
   useEffect(() => {
     if (location.pathname === '/explorar') {
+      setIsLoading(true);
+      setFilteredSpecies([]);
+      setSelectedSpecies([]);
       fetchData();
+    } else if (location.pathname === '/administrar-datos') {
+      setSelectedData([]);
+      setFilteredData([]);
+    } else {
+      setIsLoading(true);
+      setMergedData(null);
+      setSelectedSpecies([]);
+      setFilteredSpecies([]);
+      setFilteredData([]);
+      setSelectedData([]);
     }
   }, [location.pathname, fetchData]);
 
@@ -73,12 +85,6 @@ function App() {
       return prev;
     });
   };
-
-  useEffect(() => {
-    if (requireData) {
-      setIsLoading(true);
-    }
-  }, [location.pathname, requireData]);
 
   const menuOptions = [
     { id: 'filtro', name: 'Filtro',  component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange}/>, icon:"filter_alt"},
