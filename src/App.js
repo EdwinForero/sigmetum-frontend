@@ -117,7 +117,7 @@ function App() {
             <Route exact path="/" element={<Home/>}/>
             
             <Route path="/explorar" 
-            element={isLoading && requireData ?
+            element={isLoading ?
               (
               <div className="flex bg-[#F9FBFA] justify-center items-center min-h-screen">
                 <LoadSpinner />
