@@ -18,7 +18,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const fileDropdownRef = useRef(null);
   const token = localStorage.getItem('token');
 
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:3000'
+  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
 
   useTokenExpirationHandler(token);
 
