@@ -8,7 +8,7 @@
     "homeOption": "Home",
     "exploreOption": "Explore",
     "aboutUsOption": "About us",
-    "copyright" : "2024 SIGMETUM-A. All rights reserved."
+    "copyright" : "{{currentYear}} SIGMETUM-A. All rights reserved."
   },
   "home": {
     "title": "SIGMETUM-A: EXPLORING ANDALUSIAN VEGETATION",
@@ -116,24 +116,24 @@
     "closeButton" : "Close"
   },
   "dataManagement": {
-      "title" : "Data management",
-      "downloadExcelButton": "Download excel",
-      "deleteVersionButton": "Delete version",
-      "updateDataButton": "Update data",
-      "fileSelectDropdwon": {
-        "selectFileDropdownLabel": "Choose the dataset",
-        "selectFileDropdownPlaceholder": "Choose the dataset",
-        "provinceTitle" : "Province",
-        "versionTitle" : "Version",
-        "versionPlaceholder" : "Choose a province to see the available versions.",
-        "noDataFoundPlaceholder": "No data available."
-      },
-      "table": {
-        "noDataFoundPlaceholder": "No data available."
-      }
+    "title" : "Data management",
+    "downloadExcelButton": "Download excel",
+    "deleteVersionButton": "Delete version",
+    "updateDataButton": "Update data",
+    "fileSelectDropdwon": {
+      "selectFileDropdownLabel": "Choose the dataset",
+      "selectFileDropdownPlaceholder": "Choose the dataset",
+      "provinceTitle" : "Province",
+      "versionTitle" : "Version",
+      "versionPlaceholder" : "Choose a province to see the available versions.",
+      "noDataFoundPlaceholder": "No data available."
     },
-    "language":{
-      "spanish" : "Spanish - ES",
-      "english" : "English - EN"
+    "table": {
+      "noDataFoundPlaceholder": "No data available."
     }
+  },
+  "language":{
+    "spanish" : "Español - ES",
+    "english" : "English - EN"
+  }
 }

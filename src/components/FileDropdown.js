@@ -11,6 +11,7 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
   const [provinces, setProvinces] = useState([]);
   const [versions, setVersions] = useState([]);
   const dropdownRef = useRef();
+  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
 
   useEffect(() => {
       fetchFiles();
@@ -18,7 +19,7 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
 
   const fetchFiles = async () => {
       try {
-          const response = await fetch('http://localhost:8000/list-files');
+          const response = await fetch(`${BASE_URL}/list-files`);
           const data = await response.json();
 
           const provincesSet = new Set();
@@ -57,7 +58,7 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
   const handleVersionSelect = async (fileKey, name) => {
       onLoad(true);
       try {
-          const response = await fetch(`http://localhost:8000/get-data/${fileKey}`);
+          const response = await fetch(`${BASE_URL}/get-data/${fileKey}`);
           const jsonData = await response.json();
           onFileSelect(jsonData, fileKey);
           setName(name);

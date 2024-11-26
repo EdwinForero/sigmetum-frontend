@@ -8,7 +8,7 @@
       "homeOption": "Inicio",
       "exploreOption": "Explorar",
       "aboutUsOption": "Sobre nosotros",
-      "copyright" : "2024 SIGMETUM-A. Todos los derechos reservados."
+      "copyright" : "{{currentYear}} SIGMETUM-A. Todos los derechos reservados."
     },
     "home": {
       "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
@@ -135,6 +135,6 @@
   },
   "language":{
     "spanish" : "Español - ES",
-    "english" : "Inglés - EN"
+    "english" : "English - EN"
   }
 }

@@ -9,6 +9,7 @@ const ContactForm = () => {
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const { t } = useTranslation();
+  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +22,7 @@ const ContactForm = () => {
     };
   
     try {
-      const response = await fetch("http://localhost:8000/send-email", {
+      const response = await fetch(`${BASE_URL}/send-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

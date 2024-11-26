@@ -25,7 +25,7 @@ function App() {
   const [selectedData, setSelectedData] = useState([]);
   const location = useLocation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/explorar"].includes(location.pathname);
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com'
+  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
 
   const fetchData = useCallback(async () => {
     try {
@@ -98,7 +98,6 @@ function App() {
       <header className="bg-[#F9FBFA] border-b-2 border-[#99BBA8] flex items-center justify-between whitespace-nowrap px-5 py-2">
         <Link to="/">
           <div className="flex items-center gap-4">
-            <img src='https://www.adaptivewfs.com/wp-content/uploads/2020/07/logo-placeholder-image.png' alt='logo' className="h-14"/>
             <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM-A</p>
           </div>
         </Link>

@@ -10,6 +10,7 @@ const FileUploadForm = ({onLoad}) => {
   const [dialogMessage, setDialogMessage] = useState('');
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogType, setDialogType] = useState('');
+  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
 
   function normalizeFileName(fileName) {
 
@@ -48,7 +49,7 @@ const FileUploadForm = ({onLoad}) => {
       formData.append('file', new File([file], normalizedFileName));
 
       try {
-        const response = await fetch('http://localhost:8000/upload', {
+        const response = await fetch(`${BASE_URL}/upload`, {
           method: 'POST',
           body: formData,
         });

@@ -1,11 +1,11 @@
-import React from 'react';
+import  React  from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
 
     const { t } = useTranslation();
-
+    const currentYear = new Date().getFullYear();
     return (
             <div className="flex min-w-screen flex-1 flex-col">
                 <footer className="flex flex-col gap-6 px-5 py-10 text-center">
@@ -20,7 +20,7 @@ const Footer = () => {
                         {t('footer.aboutUsOption')}
                     </Link>
                 </div>
-                <p className="text-[#FFFFFF] text-base font-normal leading-normal">&copy; {t('footer.copyright')}</p>
+                <p className="text-[#FFFFFF] text-base font-normal leading-normal">&copy; {t('footer.copyright', {currentYear})}</p>
                 </footer>
             </div>
     );
