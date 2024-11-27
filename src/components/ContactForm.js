@@ -41,7 +41,7 @@ const ContactForm = () => {
   };
 
   return (
-    <div className="bg-[#F9FBFA] p-4 max-w-md w-full mx-4">
+    <div className="bg-[#F9FBFA] max-w-md w-full">
       <form onSubmit={handleSubmit} className="flex flex-col">
         <div className="mb-4 px-4">
           <label className="block text-[#111418] text-base font-medium mb-2">

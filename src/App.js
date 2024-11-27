@@ -95,49 +95,52 @@ function App() {
 
   return (
     <div className="App">
-      <header className="bg-[#F9FBFA] border-b-2 border-[#99BBA8] flex items-center justify-between whitespace-nowrap px-5 py-2">
-        <Link to="/">
-          <div className="flex items-center gap-4">
-            <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM-A</p>
-          </div>
-        </Link>
-        <LanguageSwitcher/>
-          <div className="flex flex-1 justify-end gap-8">
-            <Navbar/>
-          </div>
-      </header>
+  <header className="bg-[#F9FBFA] border-b-2 border-[#99BBA8] flex items-center justify-between px-5 py-2">
+    <Link to="/">
+      <div className="flex items-center gap-4">
+        <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM-A</p>
+      </div>
+    </Link>
+    <LanguageSwitcher />
+    <div className="flex flex-1 justify-end gap-8">
+      <Navbar />
+    </div>
+  </header>
 
-      <div className="flex min-h-screen">
+  <div className="flex w-full min-h-screen sm:overflow-auto md:overflow-hidden">
+    {showSideMenu && (
+        <Sidebar managementData={selectedData} exploreData={mergedData} menuOptions={menuOptions} />
+    )}
 
-        {showSideMenu && <Sidebar managementData={selectedData} exploreData={mergedData} menuOptions={menuOptions}/>}
-
-        <main className='flex-grow bg-[#F9FBFA]'>
-          <Routes>
-            <Route exact path="/" element={<Home/>}/>
-            
-            <Route path="/explorar" 
-            element={isLoading ?
-              (
+    <main className="flex-grow bg-[#F9FBFA] overflow-y-auto">
+      <Routes>
+        <Route exact path="/" element={<Home />} />
+        <Route
+          path="/explorar"
+          element={
+            isLoading ? (
               <div className="flex bg-[#F9FBFA] justify-center items-center min-h-screen">
                 <LoadSpinner />
               </div>
-              ) : (
-                <Explore data={mergedData} filteredSpecies={filteredSpecies} selectedSpecies={selectedSpecies}/>
-              )
-            }/>
-            <Route path="/sobre-nosotros" element={<About/>}/>
-            <Route path="/login" element={<Login/>}/>
-            <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload/>}/>}/>
-            <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData}/>}/>}/>
-            <Route path="*" element={<NotFound />}/>
-          </Routes>
-        </main>
-      </div>
-      <footer className='bg-[#0C1811] flex justify-center relative'>
-        <Footer/>
-        <span className='text-[#F9FBFA] absolute bottom-2 right-2'>V 1.0.0</span>
-      </footer>
-    </div>
+            ) : (
+              <Explore data={mergedData} filteredSpecies={filteredSpecies} selectedSpecies={selectedSpecies} />
+            )
+          }
+        />
+        <Route path="/sobre-nosotros" element={<About />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload />} />} />
+        <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </main>
+  </div>
+
+  <footer className="bg-[#0C1811] flex justify-center relative">
+    <Footer />
+    <span className="text-[#F9FBFA] absolute bottom-2 right-2">V 1.0.0</span>
+  </footer>
+</div>
   );
 }
 

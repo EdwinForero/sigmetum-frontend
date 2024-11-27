@@ -25,25 +25,25 @@ const About = () => {
                 {t('aboutUs.title')}
               </p>
             </div>
-            <p className="text-[#14281D] text-base font-normal leading-normal pb-3 pt-1 px-4">
+            <p className="text-[#14281D] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
               {t('aboutUs.ourWorkTeam')}
             </p>
             <h3 className="text-[#14281D] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               {t('aboutUs.projectPurposeSubtitle')}
             </h3>
-            <p className="text-[#0C1811] text-base font-normal leading-normal pb-3 pt-1 px-4">
+            <p className="text-[#0C1811] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
               {t('aboutUs.projectPurposeContent')}
             </p>
             <h3 className="text-[#14281D] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               {t('aboutUs.ourMissionSubtitle')}
             </h3>
-            <p className="text-[#0C1811] text-base font-normal leading-normal pb-3 pt-1 px-4">
+            <p className="text-[#0C1811] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
               {t('aboutUs.ourMissionContent')}
             </p>
             <h3 className="text-[#14281D] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               {t('aboutUs.ourValuesSubtitle')}
             </h3>
-            <p className="text-[#0C1811] text-base font-normal leading-normal pb-3 pt-1 px-4">
+            <p className="text-[#0C1811] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
               {t('aboutUs.ourValuesContent')}
             </p>
           </div>

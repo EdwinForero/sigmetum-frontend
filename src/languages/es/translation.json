@@ -8,7 +8,8 @@
       "homeOption": "Inicio",
       "exploreOption": "Explorar",
       "aboutUsOption": "Sobre nosotros",
-      "copyright" : "{{currentYear}} SIGMETUM-A. Todos los derechos reservados."
+      "copyright" : "{{currentYear}} SIGMETUM-A. Todos los derechos reservados.",
+      "cookies" : "Cookies"
     },
     "home": {
       "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
@@ -16,9 +17,10 @@
       "searchButton" : "Buscar",
       "descriptionLabel" : "Descripción",
       "descriptionContent" : "SIGMETU-A es una base de datos interactiva a través de la cual podrás descubrir los diferentes tipos de vegetación de Andalucía mediante criterios geológicos, biogeográficos y bioclimáticos, que te llevarán a identificar la Serie de Vegetación de cualquier territorio regional, así como su formación clímax (etapa madura de cada Serie) y sus especies características.",
-      "contactLabel" : "Contáctenos",
-      "contactContent": "Para ampliar información acerca del proyecto, puede contactar a las siguientes personas:\n\n• Jaime F. Pereña Ortiz. Correo: jperena@uma.es\n• Á, Enrique Salvo Tierra. Correo: salvo@uma.es\n• Andrés V. Pérez Latorre. Correo: avperez@uma.es",
-      "locationLabel": "Nuestra ubicación",
+      "contactTitle" : "Contáctenos",
+      "emailTitle" : "Correo electrónico",
+      "emailContact" : "Para ampliar información acerca del proyecto, puede contactar a las siguientes persona:\n\n• Jaime F. Pereña Ortiz. Correo: jperena@uma.es\n• Á, Enrique Salvo Tierra. Correo: salvo@uma.es\n• Andrés V. Pérez Latorre. Correo: avperez@uma.es",
+      "locationLabel": "Ubicación",
       "locationContent": "Departamento de Botánica y Fisiología Vegetal.\nFacultad de Ciencias (Universidad de Málaga).\nBoulevard Loius Pasteur, 31, 2º planta.\n29010- Málaga",
       "contactForm": {
         "nameLabel" : "Nombre",

@@ -4,7 +4,7 @@ import ButtonPrincipal from './ButtonPrincipal';
 
 const Sidebar = ({ exploreData, menuOptions }) => {
   const [activeComponent, setActiveComponent] = useState(null);
-
+  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const location = useLocation();
 
   const exclusions = {
@@ -21,41 +21,64 @@ const Sidebar = ({ exploreData, menuOptions }) => {
   });
 
   const handleButtonClick = (optionId) => {
-    setActiveComponent((prevActive) => (prevActive === optionId ? null : optionId));
+    if (activeComponent === optionId) {
+      setIsOverlayVisible(!isOverlayVisible);
+    } else {
+      setActiveComponent(optionId);
+      setIsOverlayVisible(true);
+    }
   };
 
   useEffect(() => {
     setActiveComponent(null);
+    setIsOverlayVisible(false);
   }, [location.pathname]);
 
+  const handleOverlayClick = () => {
+    setIsOverlayVisible(false);
+  };
+
   return (
-    <aside className="bg-[#F9FBFA] flex min-h-full p-5">
-      <nav className="mb-4 flex flex-col gap-2">
-        {filteredMenuOptions.map((option) => (
-          option.link ? (
-            <Link to={option.link} key={option.id}>
+    <div className="relative flex bg-[#F9FBFA]">
+      {isOverlayVisible && (
+        <div
+          className="fixed inset-0 bg-[#0C1811] bg-opacity-70 z-10"
+          onClick={handleOverlayClick}
+        />
+      )}
+
+      <aside className="bg-[#F9FBFA] flex flex-col p-5 w-1/4 z-20 h-full">
+        <nav className="mb-4 flex flex-col gap-2 w-full">
+          {filteredMenuOptions.map((option) => (
+            option.link ? (
+              <Link to={option.link} key={option.id}>
+                <ButtonPrincipal
+                  className={`${location.pathname === option.link ? 'bg-[#15B659] text-[#F9FBFA]' : ''}`}
+                  icon={option.icon}
+                />
+              </Link>
+            ) : (
               <ButtonPrincipal
-                className={`${location.pathname === option.link ? 'bg-[#15B659] text-[#F9FBFA]' : ''}`}
+                className={`${activeComponent === option.id ? 'bg-[#15B659] text-[#F9FBFA]' : ''}`}
+                key={option.id}
+                onClick={() => handleButtonClick(option.id)}
                 icon={option.icon}
               />
-            </Link>
-          ) : (
-            <ButtonPrincipal
-              className={`${activeComponent === option.id ? 'bg-[#15B659] text-[#F9FBFA]' : ''}`}
-              key={option.id}
-              onClick={() => handleButtonClick(option.id)}
-              icon={option.icon}
-            />
-          )
-        ))}
-      </nav>
+            )
+          ))}
+        </nav>
+      </aside>
 
-      {activeComponent && (
-        <div className="content px-4 bg-[#F9FBFA] max-h-screen overflow-y-auto">
+      <div
+        className={`fixed top-0 left-0 z-30 overflow-y-auto transition-transform transform duration-300 max-w-full h-full ${
+          isOverlayVisible ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="px-4 py-6 min-h-full overflow-y-auto bg-[#F9FBFA]">
           {menuOptions.find((option) => option.id === activeComponent)?.component}
         </div>
-      )}
-    </aside>
+      </div>
+    </div>
   );
 };
 

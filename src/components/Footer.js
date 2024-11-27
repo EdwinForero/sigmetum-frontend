@@ -19,6 +19,9 @@ const Footer = () => {
                     <Link to="/sobre-nosotros" className="text-[#FFFFFF] text-base font-normal leading-normal min-w-40 hover:underline">
                         {t('footer.aboutUsOption')}
                     </Link>
+                    <Link to="/cookies" className="text-[#FFFFFF] text-base font-normal leading-normal min-w-40 hover:underline">
+                        {t('footer.cookies')}
+                    </Link>
                 </div>
                 <p className="text-[#FFFFFF] text-base font-normal leading-normal">&copy; {t('footer.copyright', {currentYear})}</p>
                 </footer>

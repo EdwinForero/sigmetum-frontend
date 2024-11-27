@@ -7,7 +7,7 @@ import ContactForm from '../components/ContactForm.js';
 const Home = () => {
 
   const { t } = useTranslation();
-
+  
   return (
     <>
         <div className="@container">
@@ -22,7 +22,7 @@ const Home = () => {
                   {t('home.title')}
                 </h1>
                 <h2 className="text-[#F9FBFA] text-sm font-normal leading-normal sm:text-2xl sm:font-normal sm:leading-normal">
-                {t('home.subtitle')}
+                  {t('home.subtitle')}
                 </h2>
                 <Link to="/explorar">
                   <ButtonPrincipal text={t('home.searchButton')}/>
@@ -30,24 +30,27 @@ const Home = () => {
               </div>
             </div>
         </div>
-
-        <div className="flex w-full">
-          <div className="basis-1/2 p-4 grid grid-cols-1 gap-6">
+        
+        <div className='px-4 py-4'>
+          <p className="text-[#0C1811] text-[32px] font-bold leading-tight text-justify py-2">
+            {t('home.descriptionContent')}
+          </p>
+        </div>
+        
+        <h2 className="text-[#15B659] tracking-light text-[32px] font-bold leading-tight px-4">
+          {t('home.contactTitle')}
+        </h2>
+        <div className="flex w-full py-8">
+          <div className="basis-1/2">
+              <ContactForm />
+          </div>
+          <div className="basis-1/2 p-2 grid grid-cols-1 gap-2">
             <div className="border-t grid grid-cols-2 border-t-[#14281D] py-5">
               <p className="text-[#4B644A] text-sm font-normal leading-normal">
-                {t('home.descriptionLabel')}
-              </p>
-              <p className="text-[#0C1811] text-sm font-normal leading-normal">
-                {t('home.descriptionContent')}
-              </p>
-            </div>
-
-            <div className="border-t grid grid-cols-2 border-t-[#14281D] py-5">
-              <p className="text-[#4B644A] text-sm font-normal leading-normal">
-              {t('home.contactLabel')}
+                {t('home.emailTitle')}
               </p>
               <span className="text-[#0C1811] text-sm font-normal leading-normal whitespace-pre-line">
-                {t('home.contactContent')}
+                {t('home.emailContact')}
               </span>
             </div>
 
@@ -59,10 +62,6 @@ const Home = () => {
                 {t('home.locationContent')}
               </span>
             </div>
-          </div>
-
-          <div className="basis-1/2">
-            <ContactForm />
           </div>
         </div>
     </>
