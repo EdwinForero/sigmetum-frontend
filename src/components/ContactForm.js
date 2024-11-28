@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import ButtonPrincipal from "./ButtonPrincipal";
+import DialogAdvice from "./DialogAdvice";
 import { useTranslation } from 'react-i18next';
 
-const ContactForm = () => {
+const ContactForm = ({onLoad}) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogType, setDialogType] = useState('');
   const { t } = useTranslation();
   const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
 
   const handleSubmit = async (e) => {
+    onLoad(true);
     e.preventDefault();
   
     const payload = {
@@ -31,13 +35,24 @@ const ContactForm = () => {
       });
   
       if (response.ok) {
-        setSuccess(true);
+        setDialogMessage(t('dialogAdvice.successEmailMessage'));
+        setDialogType('success');
+        setDialogVisible(true);
       } else {
-        console.error("Error al enviar el correo:", await response.text());
+        setDialogMessage(t('dialogAdvice.errorEmailMessage'));
+        setDialogType('error');
+        setDialogVisible(true);
       }
     } catch (error) {
       console.error("Error al conectar con el servidor:", error);
+    } finally {
+      onLoad(false);
     }
+  };
+
+  const closeDialog = () => {
+    setDialogVisible(false);
+    setDialogMessage('');
   };
 
   return (
@@ -95,13 +110,18 @@ const ContactForm = () => {
         </div>
 
         <div className="flex justify-center px-4">
-          <ButtonPrincipal text={t('home.contactForm.sendButton')} />
+          <ButtonPrincipal 
+            text={t('home.contactForm.sendButton')} 
+            disabled={!username || !email || !subject || !message}  // Deshabilitar si algún campo está vacío
+          />
         </div>
 
-        {success && (
-          <p className="text-green-600 text-center mt-4">
-            ¡Correo enviado correctamente!
-          </p>
+        {dialogVisible && (
+          <DialogAdvice 
+            dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
+            dialogMessage={dialogMessage} 
+            onClose={closeDialog}
+          />
         )}
       </form>
     </div>

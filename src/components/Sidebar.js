@@ -22,12 +22,8 @@ const Sidebar = ({ exploreData, menuOptions }) => {
   });
 
   const handleButtonClick = (optionId) => {
-    if (activeComponent === optionId) {
-      setIsOverlayVisible(!isOverlayVisible);
-    } else {
       setActiveComponent(optionId);
       setIsOverlayVisible(true);
-    }
   };
 
   const handleOverlayClick = () => {
@@ -61,7 +57,6 @@ const Sidebar = ({ exploreData, menuOptions }) => {
               </Link>
             ) : (
               <ButtonPrincipal
-                className={`${activeComponent === option.id ? 'bg-[#15B659] text-[#F9FBFA]' : ''}`}
                 key={option.id}
                 onClick={() => handleButtonClick(option.id)}
                 icon={option.icon}

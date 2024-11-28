@@ -1,12 +1,18 @@
-import React from 'react';
+import { React, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import ContactForm from '../components/ContactForm.js';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
+import LoadSpinner from '../components/LoadSpinner.js';
 
 const Home = () => {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleOnLoad = (state) => {
+    setIsLoading(state);
+  }
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -70,7 +76,7 @@ const Home = () => {
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.8 }}>
             <div className="basis-full md:basis-1/2">
-              <ContactForm />
+              <ContactForm onLoad={handleOnLoad}/>
             </div>
             <div className="basis-full md:basis-1/2 p-2 grid grid-cols-1 gap-2">
               <div className="border-t border-t-[#14281D] py-5">
@@ -94,6 +100,7 @@ const Home = () => {
           </motion.div>
           </div>
         </div>
+        {isLoading && (<LoadSpinner/>)}
     </>
   );
 };
