@@ -55,7 +55,7 @@ const SpeciesCard = ({data, species}) => {
         </div>
       </div>
 
-      <DialogSpecies isOpen={isDialogOpen} onClose={closeDialog} data={data} species={species}/>
+        <DialogSpecies isOpen={isDialogOpen} onClose={closeDialog} data={data} species={species}/>
       </>
   );
 };

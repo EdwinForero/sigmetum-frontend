@@ -7,7 +7,7 @@ const Pagination = ({currentPage, totalPages, onPageChange}) => {
     const { t } = useTranslation();
 
   return (
-    <div className="flex justify-center items-center mt-4">
+    <div className="flex justify-center items-center m-2">
       <ButtonPrincipal
         className="disabled:opacity-90"
         icon="arrow_back_ios_new"

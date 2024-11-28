@@ -1,6 +1,7 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
 import { FormatFileName } from '../utilities/FormatFileName.js';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) => {
   const { t } = useTranslation();
@@ -100,9 +101,16 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
       >
         {selectedFile ? FormatFileName(name) : t('dataManagement.fileSelectDropdwon.selectFileDropdownPlaceholder')}
       </div>
-
+      <AnimatePresence>
       {isOpen && (
-          <div className="absolute z-50 bg-white border border-[#15B659] rounded-xl shadow-lg w-full mt-2 max-h-60">
+          
+          <motion.div
+            className="absolute z-50 bg-white border border-[#15B659] rounded-xl shadow-lg w-full mt-2"
+            initial={{ clipPath: "inset(0 0 100% 0)" }}
+            animate={{ clipPath: "inset(0 0 0 0)" }}
+            exit={{ clipPath: "inset(0 0 100% 0)" }}
+            transition={{ duration: 0.3 }}
+          >
             {provinces.length > 0 ? (
               <div className="flex">
                 <div className="w-1/2 max-h-60 overflow-y-auto border-r border-[#15B659] p-2">
@@ -152,10 +160,12 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
             ) : (
               <p className="text-[#0C1811]">{t('dataManagement.fileSelectDropdwon.noDataFoundPlaceholder')}</p>
             )}
-          </div>
+          </motion.div>
+          
         )}
+        </AnimatePresence>
     </div>
-    );
-  });
+  );
+});
 
 export default FileDropdown;

@@ -1,54 +1,84 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 const About = () => {
-
   const { t } = useTranslation();
 
   return (
-    <div className="bg-[#F9FBFA] relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" >
-      <div className="layout-container flex h-full grow flex-col">
-        <div className="px-40 flex flex-1 justify-center py-5">
-          <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div className="@container">
-              <div className="@[480px]:px-4 @[480px]:py-3">
-                <div
-                  className="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-white @[480px]:rounded-xl min-h-80"
-                  style={{
-                    backgroundImage: 'url("https://img.freepik.com/premium-vector/forest-landscape-with-full-moon-background_670382-358934.jpg")'
-                  }}
-                ></div>
-              </div>
-            </div>
-            <div className="flex flex-wrap justify-between gap-3 p-4">
-              <p className="text-[#14281D] tracking-light text-[32px] font-bold leading-tight min-w-72">
-                {t('aboutUs.title')}
-              </p>
-            </div>
-            <p className="text-[#14281D] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
-              {t('aboutUs.ourWorkTeam')}
-            </p>
-            <h3 className="text-[#14281D] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
-              {t('aboutUs.projectPurposeSubtitle')}
-            </h3>
-            <p className="text-[#0C1811] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
-              {t('aboutUs.projectPurposeContent')}
-            </p>
-            <h3 className="text-[#14281D] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
-              {t('aboutUs.ourMissionSubtitle')}
-            </h3>
-            <p className="text-[#0C1811] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
-              {t('aboutUs.ourMissionContent')}
-            </p>
-            <h3 className="text-[#14281D] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
-              {t('aboutUs.ourValuesSubtitle')}
-            </h3>
-            <p className="text-[#0C1811] text-base font-normal leading-normal text-justify pb-3 pt-1 px-4">
-              {t('aboutUs.ourValuesContent')}
-            </p>
+<div className="relative flex min-h-screen flex-col bg-white group/design-root overflow-x-hidden">
+
+  <div className="bg-[#F9FBFA] px-4 py-5 min-h-screen sm:px-8 sm:py-6 flex flex-1 justify-center items-center">
+    <div className="max-w-[960px] flex-1 flex flex-col justify-center items-center">
+      <div className="@[480px]:px-4 @[480px]:py-3">
+        <div
+          className="w-full bg-cover bg-center bg-no-repeat flex flex-col justify-end overflow-hidden min-h-80 rounded-xl"
+          style={{
+            backgroundImage: 'url("https://img.freepik.com/premium-vector/forest-landscape-with-full-moon-background_670382-358934.jpg")'
+          }}
+        >
+        </div>
+        
+        <motion.h2
+          className="text-[#15B659] tracking-light text-6xl font-bold leading-tight my-4 text-center"
+        >
+          {t('aboutUs.title')}
+        </motion.h2>
+        
+        <motion.p
+          className="text-[#14281D] text-base text-justify sm:text-lg text-center"
+        >
+          {t('aboutUs.ourWorkTeam')}
+        </motion.p>
           </div>
+
+          
         </div>
       </div>
+
+      <div className="bg-[#F9FBFA] min-h-screen grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div
+            className='bg-[#15B659] px-10 flex flex-col justify-center items-center h-full'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}>
+                <h3 className="text-[#F9FBFA] text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
+                  {t('aboutUs.projectPurposeSubtitle')}
+                </h3>
+
+                <p className="text-[#0C1811] text-sm leading-tight text-justify py-2 sm:text-lg">
+                  {t('aboutUs.projectPurposeContent')}
+                </p>
+            </motion.div>
+
+            <motion.div
+            className='bg-[#F9FBFA] px-10 flex flex-col justify-center items-center h-full'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.9 }}>
+                <h3 className="text-[#15B659] text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
+                  {t('aboutUs.ourMissionSubtitle')}
+                </h3>
+
+                <p className="text-[#0C1811] text-sm leading-tight text-justify py-2 sm:text-lg">
+                  {t('aboutUs.ourMissionContent')}
+                </p>
+            </motion.div>
+
+            <motion.div
+            className='bg-[#15B659] px-10 flex flex-col justify-center items-center h-full'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 1.2 }}>
+                <h3 className="text-[#F9FBFA] text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
+                  {t('aboutUs.ourValuesSubtitle')}
+                </h3>
+
+                <p className="text-[#0C1811] text-sm leading-tight text-justify py-2 sm:text-lg">
+                  {t('aboutUs.ourValuesContent')}
+                </p>
+            </motion.div>
+          </div>
     </div>
   );
 };

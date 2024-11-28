@@ -24,6 +24,17 @@ const Table = ({ data, rowsPerPage = 5  }) => {
 
   return (
     <div className="overflow-x-auto w-full">
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(direction) => {
+          if (direction === "next" && currentPage < totalPages) {
+            setCurrentPage((prev) => prev + 1);
+          } else if (direction === "prev" && currentPage > 1) {
+            setCurrentPage((prev) => prev - 1);
+          }
+        }}
+      />
       <table className="w-full">
         <thead>
           <tr className="bg-[#15B659]">
@@ -61,18 +72,6 @@ const Table = ({ data, rowsPerPage = 5  }) => {
           ))}
         </tbody>
       </table>
-
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={(direction) => {
-          if (direction === "next" && currentPage < totalPages) {
-            setCurrentPage((prev) => prev + 1);
-          } else if (direction === "prev" && currentPage > 1) {
-            setCurrentPage((prev) => prev - 1);
-          }
-        }}
-      />
     </div>
   );
 };

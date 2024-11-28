@@ -52,7 +52,7 @@ const ContactForm = () => {
             placeholder={t('home.contactForm.namePlaceholder')}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="form-input w-full h-12 px-3 border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
           />
         </div>
 
@@ -65,7 +65,7 @@ const ContactForm = () => {
             placeholder={t('home.contactForm.emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="form-input w-full h-12 px-3 border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
           />
         </div>
 
@@ -78,7 +78,7 @@ const ContactForm = () => {
             placeholder={t('home.contactForm.subjectPlaceholder')}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="form-input w-full h-12 px-3 border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
           />
         </div>
 
@@ -90,7 +90,7 @@ const ContactForm = () => {
             placeholder={t('home.contactForm.messagePlaceholder')}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="form-input w-full h-24 px-3 border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-24 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
           />
         </div>
 

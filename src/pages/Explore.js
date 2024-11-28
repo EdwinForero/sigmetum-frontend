@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ButtonPrincipal from '../components/ButtonPrincipal';
 import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
@@ -10,6 +11,7 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
   const [uniqueSpecies, setUniqueSpecies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(24);
+  const [pageDirection, setPageDirection] = useState(0);
 
   useEffect(() => {
     const speciesArray = filteredSpecies
@@ -47,7 +49,7 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
       } else if (screenWidth >= 768) {
         setItemsPerPage(12);
       } else {
-        setItemsPerPage(8);
+        setItemsPerPage(7);
       }
     };
 
@@ -66,11 +68,27 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
   const totalPages = Math.ceil(uniqueSpecies.length / itemsPerPage);
 
   const handlePageChange = (direction) => {
+    setPageDirection(direction === "next" ? 1 : -1);
     if (direction === "next" && currentPage < totalPages) {
       setCurrentPage((prev) => prev + 1);
     } else if (direction === "prev" && currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
     }
+  };
+
+  const variants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction > 0 ? -300 : 300,
+      opacity: 0,
+    }),
   };
 
   return (
@@ -92,25 +110,39 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
                 text={t('explore.downloadExcelButton')}
               />
             </div>
-            <div className="grid gap-4 px-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 py-4">
-              {currentItems.map((species, index) => (
-                <SpeciesCard
-                  key={index}
-                  data={data}
-                  species={{
-                    ...filteredSpecies,
-                    "Especies Características": species,
-                  }}
-                />
-              ))}
-            </div>
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
-              t={t}
             />
+            <div className="relative">
+              <AnimatePresence initial={false} custom={pageDirection}>
+                <motion.div
+                  key={currentPage}
+                  custom={pageDirection}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                  className="absolute top-0 left-0 w-full grid gap-4 px-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 py-4"
+                >
+                  {currentItems.map((species, index) => (
+                    <SpeciesCard
+                      key={index}
+                      data={data}
+                      species={{
+                        ...filteredSpecies,
+                        "Especies Características": species,
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            
           </div>
+            
         </div>
       )}
     </>
