@@ -3,6 +3,7 @@ import ButtonAlternative from './ButtonAlternative';
 import ButtonPrincipal from './ButtonPrincipal';
 import DialogAdvice from './DialogAdvice';
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence } from 'framer-motion';
 
 const FileUploadForm = ({onLoad}) => {
   const { t } = useTranslation();
@@ -126,13 +127,15 @@ const FileUploadForm = ({onLoad}) => {
         {files.length > 0 && (
           <ButtonPrincipal text={t('uploadFiles.fileUploadForm.uploadFilesButton')} onClick={handleSubmit} />
         )}
-          
-        {dialogVisible && (
-          <DialogAdvice 
-          dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
-          dialogMessage={dialogMessage} 
-          onClose={closeDialog}/>
-        )}
+        
+        <AnimatePresence>
+          {dialogVisible && (
+            <DialogAdvice 
+            dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
+            dialogMessage={dialogMessage} 
+            onClose={closeDialog}/>
+          )}
+        </AnimatePresence>
       </div>
       </>
   );

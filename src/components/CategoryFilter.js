@@ -47,6 +47,9 @@ const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
             transition={{ duration: 0.3 }}
             style={{ overflow: 'hidden' }}
           >
+            <div className="mt-1 items-center justify-center flex space-x-4">
+              <ButtonAlternative onClick={handleClearAll} text={t('filter.categoryFilter.cleanFilterButton')} />
+            </div>
             <FilterSearchBar placeholderText={t(`attributes.${category}`, category)} value={searchText} onChange={(e) => setSearchText(e.target.value)} />
             {filteredItems.length > 0 ? (
               [...new Set(filteredItems.flatMap((item) => (Array.isArray(item) ? item : [item])))]
@@ -65,9 +68,6 @@ const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
             ) : (
               <p className="text-[#4B644A]">{t('filter.categoryFilter.noResultsFoundPlaceholder')} "{searchText}"</p>
             )}
-            <div className="mt-1 items-center justify-center flex space-x-4">
-              <ButtonAlternative onClick={handleClearAll} text={t('filter.categoryFilter.cleanFilterButton')} />
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

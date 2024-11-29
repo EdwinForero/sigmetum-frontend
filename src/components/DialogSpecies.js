@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 const Dialog = ({ isOpen, onClose, data, species }) => {
   const { t } = useTranslation();
+
   if (!isOpen) return null;
   const formattedQuery = encodeURIComponent(species["Especies Características"]);
 
@@ -45,6 +46,7 @@ const Dialog = ({ isOpen, onClose, data, species }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
+      onClick={onClose}
     >
       <motion.div
         className="bg-[#F9FBFA] max-h-screen overflow-auto rounded-lg p-6 w-full max-w-md flex flex-col"

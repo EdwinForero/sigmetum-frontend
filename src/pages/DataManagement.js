@@ -7,6 +7,7 @@ import { downloadXLSX } from '../utilities/CSVfunctions.js';
 import DialogAdvice from '../components/DialogAdvice';
 import useTokenExpirationHandler from '../utilities/TokenExpiration.js';
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence } from 'framer-motion';
 
 const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const { t } = useTranslation();
@@ -154,12 +155,14 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
           }
           </div>
         </div>
-        {dialogVisible && (
-          <DialogAdvice 
-          dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
-          dialogMessage={dialogMessage} 
-          onClose={closeDialog}/>
-        )}
+        <AnimatePresence>
+          {dialogVisible && (
+            <DialogAdvice 
+            dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
+            dialogMessage={dialogMessage} 
+            onClose={closeDialog}/>
+          )}
+        </AnimatePresence>
       </div>
     )
 };

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ButtonPrincipal from "./ButtonPrincipal";
 import DialogAdvice from "./DialogAdvice";
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence } from 'framer-motion';
 
 const ContactForm = ({onLoad}) => {
   const [username, setUsername] = useState("");
@@ -112,17 +113,19 @@ const ContactForm = ({onLoad}) => {
         <div className="flex justify-center px-4">
           <ButtonPrincipal 
             text={t('home.contactForm.sendButton')} 
-            disabled={!username || !email || !subject || !message}  // Deshabilitar si algún campo está vacío
+            disabled={!username || !email || !subject || !message}
           />
         </div>
 
-        {dialogVisible && (
-          <DialogAdvice 
-            dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
-            dialogMessage={dialogMessage} 
-            onClose={closeDialog}
-          />
-        )}
+        <AnimatePresence>
+          {dialogVisible && (
+            <DialogAdvice 
+              dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
+              dialogMessage={dialogMessage} 
+              onClose={closeDialog}
+            />
+          )}
+        </AnimatePresence>
       </form>
     </div>
   );
