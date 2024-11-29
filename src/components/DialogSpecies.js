@@ -10,30 +10,31 @@ const Dialog = ({ isOpen, onClose, data, species }) => {
   if (!isOpen) return null;
   const formattedQuery = encodeURIComponent(species["Especies Características"]);
 
-  const fileterdEspecies = data.filter((item) =>
-    item["Especies Características"].includes(species["Especies Características"])
+  const filteredSpecies = data.filter(
+    (item) =>
+      item["Especies Características"]?.includes(species["Especies Características"])
   );
 
   const uniqueAttributes = {
-    province: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Provincia"]))])
+    province: SortItemsList([...new Set(filteredSpecies.map((item) => item["Provincia"]))])
       .join(", "),
-    municipality: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Municipio"]))])
+    municipality: SortItemsList([...new Set(filteredSpecies.map((item) => item["Municipio"]))])
       .join(", "),
-    averageAltitude: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Altitud Media"]))])
+    averageAltitude: SortItemsList([...new Set(filteredSpecies.map((item) => item["Altitud Media"]))])
       .join(", "),
-    biogeographicSector: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Sector Biogeográfico"]))])
+    biogeographicSector: SortItemsList([...new Set(filteredSpecies.map((item) => item["Sector Biogeográfico"]))])
       .join(", "),
-    bioclimaticFloor: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Piso Bioclimático"]))])
+    bioclimaticFloor: SortItemsList([...new Set(filteredSpecies.map((item) => item["Piso Bioclimático"]))])
       .join(", "),
-    ombrotype: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Ombrotipo"]))])
+    ombrotype: SortItemsList([...new Set(filteredSpecies.map((item) => item["Ombrotipo"]))])
       .join(", "),
-    natureOfSubstrate: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Naturaleza del Sustrato"]))])
+    natureOfSubstrate: SortItemsList([...new Set(filteredSpecies.map((item) => item["Naturaleza del Sustrato"]))])
       .join(", "),
-    seriesType: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Tipo de Serie"]))])
+    seriesType: SortItemsList([...new Set(filteredSpecies.map((item) => item["Tipo de Serie"]))])
       .join(", "),
-    vegetationSeries: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Serie de Vegetación"]))])
+    vegetationSeries: SortItemsList([...new Set(filteredSpecies.map((item) => item["Serie de Vegetación"]))])
       .join(", "),
-    potentialVegetation: SortItemsList([...new Set(fileterdEspecies.map((item) => item["Vegetación Potencial"]))])
+    potentialVegetation: SortItemsList([...new Set(filteredSpecies.map((item) => item["Vegetación Potencial"]))])
       .join(", "),
   };
 

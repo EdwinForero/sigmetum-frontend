@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DialogSpecies from './DialogSpecies';
-import { AnimatePresence } from 'framer-motion'; // Importa AnimatePresence
+import { AnimatePresence } from 'framer-motion';
 
 const SpeciesCard = ({ data, species }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,7 +46,6 @@ const SpeciesCard = ({ data, species }) => {
         </div>
       </div>
 
-      {/* Envuelve el Dialog en AnimatePresence */}
       <AnimatePresence>
         {isDialogOpen && (
           <DialogSpecies

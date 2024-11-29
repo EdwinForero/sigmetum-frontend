@@ -16,7 +16,8 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
   useEffect(() => {
     const speciesArray = filteredSpecies
       .map((item) => item["Especies Características"])
-      .flat();
+      .flat()
+      .filter((species) => species && String(species).trim() !== "");;
   
     const uniqueSpeciesSet = new Set(speciesArray);
   

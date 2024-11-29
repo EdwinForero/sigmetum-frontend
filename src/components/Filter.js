@@ -12,21 +12,28 @@ const Filter = ({ data, onFilterChange, onSpeciesSelect }) => {
 
   useEffect(() => {
     const allCategories = {};
+  
     data.forEach((item) => {
       Object.entries(item).forEach(([key, value]) => {
         if (!allCategories[key] && !blockedCategories.includes(key)) {
           allCategories[key] = new Set();
         }
-        if (!blockedCategories.includes(key)) {
+  
+        if (
+          !blockedCategories.includes(key) &&
+          value !== undefined &&
+          String(value).trim() !== ""
+        ) {
           allCategories[key].add(value);
         }
       });
     });
-
+  
     const formattedCategories = {};
     for (const [key, values] of Object.entries(allCategories)) {
       formattedCategories[key] = Array.from(values);
     }
+  
     setCategories(formattedCategories);
     setFilteredCategories(formattedCategories);
   }, [data, blockedCategories]);
@@ -55,7 +62,7 @@ const Filter = ({ data, onFilterChange, onSpeciesSelect }) => {
 
   useEffect(() => {
     let filteredData = [...data];
-
+  
     Object.entries(selectedFilters).forEach(([category, selectedItems]) => {
       if (selectedItems.size > 0) {
         filteredData = filteredData.filter((item) => {
@@ -72,7 +79,7 @@ const Filter = ({ data, onFilterChange, onSpeciesSelect }) => {
   
     onSpeciesSelect(selectedFilters["Especies Características"]);
     onFilterChange(filteredData);
-
+  
     const newFilteredCategories = {};
     Object.keys(categories).forEach((cat) => {
       const options = new Set();
@@ -92,7 +99,12 @@ const Filter = ({ data, onFilterChange, onSpeciesSelect }) => {
   
       categoryFilteredData.forEach((item) => {
         const itemValue = item[cat];
-        if (!blockedCategories.includes(cat)) {
+  
+        if (
+          !blockedCategories.includes(cat) &&
+          itemValue !== undefined &&
+          String(itemValue).trim() !== ""
+        ) {
           if (Array.isArray(itemValue)) {
             itemValue.forEach((value) => options.add(value));
           } else {
