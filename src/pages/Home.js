@@ -61,7 +61,7 @@ const Home = () => {
           className="min-h-screen px-4 py-8 flex flex-col items-center justify-center bg-[#F9FBFA]"
         >
           <motion.h2 
-          className="text-[#15B659] tracking-light text-[32px] font-bold leading-tight"
+          className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight"
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
@@ -80,18 +80,18 @@ const Home = () => {
             </div>
             <div className="basis-full md:basis-1/2 p-2 grid grid-cols-1 gap-2">
               <div className="border-t border-t-[#14281D] py-5">
-                <p className="text-[#4B644A] text-sm font-normal leading-normal">
+                <h3 className="text-[#15B659] tracking-light text-xl sm:text-2xl font-bold leading-tight">
                   {t('home.emailTitle')}
-                </p>
+                </h3>
                 <span className="text-[#0C1811] text-sm font-normal leading-normal whitespace-pre-line">
                   {t('home.emailContact')}
                 </span>
               </div>
 
               <div className="border-t border-b border-t-[#14281D] border-b-[#14281D] py-5">
-                <p className="text-[#4B644A] text-sm font-normal leading-normal">
+                <h3 className="text-[#15B659] tracking-light text-xl sm:text-2xl font-bold leading-tight">
                   {t('home.locationLabel')}
-                </p>
+                </h3>
                 <span className="text-[#0C1811] text-sm font-normal leading-normal whitespace-pre-line">
                   {t('home.locationContent')}
                 </span>

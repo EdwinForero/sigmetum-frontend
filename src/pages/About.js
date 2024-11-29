@@ -4,6 +4,10 @@ import { motion } from 'framer-motion';
 
 const About = () => {
   const { t } = useTranslation();
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
 <div className="relative flex min-h-screen flex-col bg-white group/design-root overflow-x-hidden">
@@ -36,12 +40,14 @@ const About = () => {
         </div>
       </div>
 
-      <div className="bg-[#F9FBFA] min-h-screen grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="bg-[#F9FBFA] min-h-screen grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-hidden">
             <motion.div
             className='bg-[#15B659] px-10 flex flex-col justify-center items-center h-full'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 }}>
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.7 }}
+            transition={{ duration: 0.8, delay:0.3 }}>
                 <h3 className="text-[#F9FBFA] text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
                   {t('aboutUs.projectPurposeSubtitle')}
                 </h3>
@@ -53,9 +59,11 @@ const About = () => {
 
             <motion.div
             className='bg-[#F9FBFA] px-10 flex flex-col justify-center items-center h-full'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.9 }}>
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.7 }}
+            transition={{ duration: 0.8, delay: 0.6 }}>
                 <h3 className="text-[#15B659] text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
                   {t('aboutUs.ourMissionSubtitle')}
                 </h3>
@@ -67,9 +75,11 @@ const About = () => {
 
             <motion.div
             className='bg-[#15B659] px-10 flex flex-col justify-center items-center h-full'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 1.2 }}>
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.7 }}
+              transition={{ duration: 0.8, delay: 0.9 }}>
                 <h3 className="text-[#F9FBFA] text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
                   {t('aboutUs.ourValuesSubtitle')}
                 </h3>
