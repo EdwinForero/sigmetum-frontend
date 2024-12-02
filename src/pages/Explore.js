@@ -5,6 +5,7 @@ import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
+import ImageCarousel from '../components/ImageCarrousel';
 
 const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
   const { t } = useTranslation();
@@ -116,7 +117,8 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />
-            <div className="relative">
+            
+            <div className="relative min-h-[700px]">
               <AnimatePresence initial={false} custom={pageDirection}>
                 <motion.div
                   key={currentPage}
@@ -142,8 +144,11 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
               </AnimatePresence>
             </div>
             
+            <div className="relative overflow-hidden h-[300px] flex justify-center items-center">
+              <ImageCarousel/>
+            </div>
+
           </div>
-            
         </div>
       )}
     </>

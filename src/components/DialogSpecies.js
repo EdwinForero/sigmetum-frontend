@@ -61,38 +61,6 @@ const Dialog = ({ isOpen, onClose, data, species }) => {
           </h2>
         </div>
 
-        {species.image ? (
-          <div
-            className="bg-center bg-no-repeat bg-cover h-80 w-full mb-4"
-            style={{
-              backgroundImage: 'url("' + species.image + '")'
-            }}
-          ></div>
-        ) : (
-          <div className="bg-center bg-no-repeat bg-cover h-80 w-full mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 64 64"
-              className="h-full w-full"
-              preserveAspectRatio="xMidYMid meet"
-              fill="none"
-            >
-              <rect width="64" height="64" fill="#B5E4A5" rx="10" />
-              <path
-                d="M32 44c6.627 0 12-5.373 12-12S38.627 20 32 20s-12 5.373-12 12 5.373 12 12 12z"
-                fill="#4CAF50"
-              />
-              <path
-                d="M32 44V18M36 22s6 2 6 10c0 6-6 10-6 10M28 22s-6 2-6 10c0 6 6 10 6 10"
-                stroke="#2E7D32"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        )}
-
         <div className="p-4 grid grid-cols-2 gap-4 overflow-y-auto flex-grow">
           {Object.entries(uniqueAttributes).map(([key, value]) => (
             <SpeciesAttribute

@@ -121,7 +121,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
           </h3>
           <div className="flex justify-stretch w-full">
             <label className="flex flex-col w-full min-w-40 py-3 flex-1">
-                <FileDropdown ref={fileDropdownRef} onLoad={handleOnLoad} onFileSelect={handleFileSelect} selectedFile={fileName}/>
+                <FileDropdown ref={fileDropdownRef} onLoad={handleOnLoad} onFileSelect={handleFileSelect} selectedFile={fileName} className="file-dropdown"/>
             </label>
             {fileName && fileName !== "" && (
             <>
