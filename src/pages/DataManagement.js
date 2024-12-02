@@ -5,7 +5,6 @@ import FileDropdown from '../components/FileDropdown.js';
 import LoadSpinner from '../components/LoadSpinner.js';
 import { downloadXLSX } from '../utilities/CSVfunctions.js';
 import DialogAdvice from '../components/DialogAdvice';
-import useTokenExpirationHandler from '../utilities/TokenExpiration.js';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 
@@ -17,11 +16,8 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const fileDropdownRef = useRef(null);
-  const token = localStorage.getItem('token');
 
   const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
-
-  useTokenExpirationHandler(token);
 
   const handleFileSelect = (jsonData, fileName) => {
     onFileDropdownSelect(jsonData);

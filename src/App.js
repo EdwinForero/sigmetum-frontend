@@ -96,14 +96,14 @@ function App() {
 
   return (
     <div className="App">
-  <header className="bg-[#F9FBFA] border-b-2 border-[#99BBA8] flex items-center justify-between px-5 py-2">
+    <header className="bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16">
     <Link to="/">
       <div className="flex items-center gap-4">
         <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM-A</p>
       </div>
     </Link>
     <LanguageSwitcher />
-    <div className="flex flex-1 justify-end gap-8">
+    <div className="flex flex-1 h-full justify-end gap-8 items-center">
       <Navbar />
     </div>
   </header>

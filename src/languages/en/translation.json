@@ -34,6 +34,14 @@
       "sendButton" : "Send"
     }
   },
+  "notFound":{
+    "content" : "We couldn't find the page you were looking for",
+    "returnButton" : "Return home"
+  },
+  "tokenExpiration" :{
+    "title":"Session expired",
+    "content" : "Your session has expired. Please log in again."
+  },
   "explore": {
     "noDataFoundPlaceholder": "No data available.",
     "downloadExcelButton": "Download excel",

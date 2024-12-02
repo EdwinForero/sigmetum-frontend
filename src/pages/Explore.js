@@ -17,7 +17,7 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
     const speciesArray = filteredSpecies
       .map((item) => item["Especies Características"])
       .flat()
-      .filter((species) => species && String(species).trim() !== "");;
+      .filter((species) => species && String(species).trim() !== "");
   
     const uniqueSpeciesSet = new Set(speciesArray);
   
@@ -94,7 +94,7 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
 
   return (
     <>
-      {filteredSpecies.length === 0 ? (
+      {currentItems.length === 0 ? (
         <div className="flex justify-center items-center min-h-[300px]">
           <p className="text-[#0C1811] text-lg font-semibold">
             {t('explore.noDataFoundPlaceholder')}

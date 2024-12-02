@@ -1,9 +1,25 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import LoadSpinner from './LoadSpinner';
+import { jwtDecode } from 'jwt-decode';
+import DialogAdvice from '../components/DialogAdvice';
+import LoadSpinner from '../components/LoadSpinner';
+import { useTranslation } from 'react-i18next';
 
-const ProtectedRoute = ({ element, ...rest }) => {
+const isTokenExpired = (token) => {
+  try {
+    const decoded = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    return decoded.exp < currentTime;
+  } catch (error) {
+    console.error('Error al decodificar el token:', error);
+    return true;
+  }
+};
+
+const ProtectedRoute = ({ element }) => {
+  const { t } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
   const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
 
   const fetchProtectedData = async () => {
@@ -22,6 +38,13 @@ const ProtectedRoute = ({ element, ...rest }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token || isTokenExpired(token)) {
+        setShowDialog(true);
+        return;
+      }
+
       const authValid = await fetchProtectedData();
       setIsAuthenticated(authValid);
     };
@@ -29,8 +52,24 @@ const ProtectedRoute = ({ element, ...rest }) => {
     checkAuth();
   }, []);
 
+  const handleCloseDialog = () => {
+    setShowDialog(false);
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+  };
+
   if (isAuthenticated === null) {
-    return <LoadSpinner/>;
+    return <LoadSpinner />;
+  }
+
+  if (showDialog) {
+    return (
+      <DialogAdvice
+        onClose={handleCloseDialog}
+        dialogTitle={t('tokenExpiration.title')}
+        dialogMessage={t('tokenExpiration.content')}
+      />
+    );
   }
 
   return isAuthenticated ? element : <Navigate to="/login" />;

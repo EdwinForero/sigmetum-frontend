@@ -1,6 +1,8 @@
-import { jwtDecode } from 'jwt-decode';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { useTranslation } from 'react-i18next';
+import DialogAdvice from '../components/DialogAdvice';
 
 const isTokenExpired = (token) => {
   try {
@@ -14,14 +16,32 @@ const isTokenExpired = (token) => {
 };
 
 const useTokenExpirationHandler = (token) => {
-    const navigate = useNavigate();
-  
-    useEffect(() => {
-      if (token && isTokenExpired(token)) {
-        alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-        navigate('/login');
-      }
-    }, [token, navigate]);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
+
+  useEffect(() => {
+    if (token && isTokenExpired(token)) {
+      setShowDialog(true);
+    }
+  }, [token]);
+
+  const handleCloseDialog = () => {
+    setShowDialog(false);
+    navigate('/login');
   };
-  
-  export default useTokenExpirationHandler;
+
+  return (
+    <>
+      {showDialog && (
+        <DialogAdvice
+          onClose={handleCloseDialog}
+          dialogTitle={t('tokenExpiration.title')}
+          dialogMessage={t('tokenExpiration.content')}
+        />
+      )}
+    </>
+  );
+};
+
+export default useTokenExpirationHandler;

@@ -34,6 +34,15 @@
         "sendButton" : "Enviar"
       }
     },
+    "notFound":{
+      "content" : "No pudimos encontrar la página que buscas",
+      "returnButton" : "Volver al inicio"
+    },
+    "tokenExpiration" :{
+      "title":"Sesión expirada",
+      "content" : "Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
+    }
+    ,
     "explore": {
       "noDataFoundPlaceholder": "No hay datos disponibles.",
       "downloadExcelButton": "Descargar excel",

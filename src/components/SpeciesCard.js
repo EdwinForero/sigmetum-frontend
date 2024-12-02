@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DialogSpecies from './DialogSpecies';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const SpeciesCard = ({ data, species }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -10,9 +10,11 @@ const SpeciesCard = ({ data, species }) => {
 
   return (
     <>
-      <div
+      <motion.div
         onClick={openDialog}
-        className="cursor-pointer bg-[#F9FBFA] flex items-center gap-2 rounded-lg min-h-[72px] px-2 py-2 border border-[#99BBA8] hover:bg-[#99BBA8]"
+        initial={{ backgroundColor: '#F9FBFA' }}
+        whileHover={{ backgroundColor: '#99BBA8', transition: { duration: 0.3 } }}
+        className="cursor-pointer flex items-center gap-2 rounded-lg min-h-[72px] px-2 py-2 border border-[#99BBA8]"
       >
         {species.image ? (
           <div
@@ -44,7 +46,7 @@ const SpeciesCard = ({ data, species }) => {
             {species["Especies Características"]}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {isDialogOpen && (

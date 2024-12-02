@@ -1,14 +1,11 @@
 import {React, useState} from 'react';
 import FileUpload from '../components/FileUpload.js';
 import LoadSpinner from '../components/LoadSpinner.js';
-import useTokenExpirationHandler from '../utilities/TokenExpiration.js';
 import { useTranslation } from 'react-i18next';
 
 const FilesUpload = () => {
   const { t } = useTranslation();
-  const token = localStorage.getItem('token');
   const [isLoading, setIsLoading] = useState(false);
-  useTokenExpirationHandler(token);
 
   const handleOnLoad = (state) => {
     setIsLoading(state);
