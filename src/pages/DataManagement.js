@@ -17,7 +17,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const [dialogType, setDialogType] = useState('');
   const fileDropdownRef = useRef(null);
 
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
+  const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:8000';
 
   const handleFileSelect = (jsonData, fileName) => {
     onFileDropdownSelect(jsonData);
