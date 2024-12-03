@@ -17,7 +17,7 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const [dialogType, setDialogType] = useState('');
   const fileDropdownRef = useRef(null);
 
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:8000';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const handleFileSelect = (jsonData, fileName) => {
     onFileDropdownSelect(jsonData);

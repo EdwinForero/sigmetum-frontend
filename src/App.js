@@ -25,7 +25,7 @@ function App() {
   const [selectedData, setSelectedData] = useState([]);
   const location = useLocation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/explorar"].includes(location.pathname);
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:8000';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const fetchData = useCallback(async () => {
     try {
