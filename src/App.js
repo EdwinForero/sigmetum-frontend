@@ -102,7 +102,9 @@ function App() {
               <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM-A</p>
             </div>
           </Link>
-          <LanguageSwitcher />
+          <div className="mx-6">
+            <LanguageSwitcher />
+          </div>
           <div className="flex flex-1 h-full justify-end gap-8 items-center">
             <Navbar />
           </div>

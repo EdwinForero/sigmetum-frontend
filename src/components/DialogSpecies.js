@@ -54,6 +54,7 @@ const Dialog = ({ isOpen, onClose, data, species }) => {
         animate={{ y: 0 }}
         exit={{ y: 1000 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        onClick={(event) => event.stopPropagation()}
       >
         <div className="flex justify-center px-4 py-2 mx-auto w-full">
           <h2 className="text-[#4B644A] text-4xl mb-4 italic font-bold text-center break-words whitespace-normal">

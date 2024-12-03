@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import ContactForm from '../components/ContactForm.js';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import LoadSpinner from '../components/LoadSpinner.js';
+import ScrollIndicator from '../components/ScrollIndicator.js';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ const Home = () => {
   return (
     <>
       <div
-        className="bg-[#F9FBFA] flex min-h-screen w-full flex-col gap-6 bg-cover bg-center bg-no-repeat md:gap-8 items-start justify-end px-4 pb-20 md:px-5"
+        className="bg-[#F9FBFA] flex min-h-screen w-full flex-col gap-6 bg-cover bg-center bg-no-repeat md:gap-8 items-start justify-center px-4 pb-20 md:px-5"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url("https://images.alphacoders.com/862/862181.jpg")`,
         }}
@@ -45,7 +46,7 @@ const Home = () => {
           className="min-h-screen px-4 py-4 flex items-center justify-center bg-[#0C1811]"
         >
           <motion.p
-          className="text-[#F9FBFA] text-2xl font-bold leading-tight text-justify mx-10 py-2 sm:text-4xl sm:mx-40"
+          className="text-[#F9FBFA] text-2xl font-bold leading-tight text-center mx-10 py-2 sm:text-4xl sm:mx-40"
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
@@ -99,6 +100,7 @@ const Home = () => {
             </div>
           </motion.div>
           </div>
+          <ScrollIndicator />
         </div>
         {isLoading && (<LoadSpinner/>)}
     </>

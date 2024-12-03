@@ -6,6 +6,7 @@ import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
 import ImageCarousel from '../components/ImageCarrousel';
+import ScrollIndicator from '../components/ScrollIndicator';
 
 const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
   const { t } = useTranslation();
@@ -144,11 +145,18 @@ const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
               </AnimatePresence>
             </div>
             
+            <motion.h2 
+              className="text-[#15B659] text-center my-4 tracking-light text-2xl sm:text-4xl font-bold leading-tight"
+              >
+                {t('explore.vegetationCaroselTitle')}
+            </motion.h2>
             <div className="relative overflow-hidden h-[300px] flex justify-center items-center">
               <ImageCarousel/>
             </div>
 
           </div>
+
+          <ScrollIndicator/>
         </div>
       )}
     </>

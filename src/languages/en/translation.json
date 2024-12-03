@@ -60,7 +60,8 @@
         "vegetationSeries": "Vegetation series",
         "potentialVegetation": "Potential vegetation"
       }
-    }
+    },
+    "vegetationCaroselTitle" : "Type of vegetation"
   },
   "pagination": {
     "pageInfo": "Page {{currentPage}} of {{totalPages}}"

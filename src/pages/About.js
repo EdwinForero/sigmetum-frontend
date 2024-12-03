@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import ScrollIndicator from '../components/ScrollIndicator';
 
 const About = () => {
   const { t } = useTranslation();
@@ -89,6 +90,7 @@ const About = () => {
                 </p>
             </motion.div>
           </div>
+          <ScrollIndicator />
     </div>
   );
 };

@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 
-const ButtonAlternative = ({onClick, text, dropdownOptions, icon, className, onOptionSelect, getButtonText}) => {
+const ButtonAlternative = ({
+  onClick,
+  text,
+  dropdownOptions,
+  icon,
+  className,
+  onOptionSelect,
+  getButtonText,
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(text);
   const dropdownRef = useRef(null);
@@ -45,15 +53,18 @@ const ButtonAlternative = ({onClick, text, dropdownOptions, icon, className, onO
     <div className="relative inline-block" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className={`bg-[#F9FBFA] border-2 border-[#15B659] flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 sm:h-12 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:text-base sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className}`}
+        className={`bg-[#F9FBFA] border-2 border-[#15B659] flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-between overflow-hidden rounded-xl h-10 px-4 sm:h-10 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:text-base sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className}`}
       >
-        {icon ? (
-          <span className="material-symbols-outlined text-3xl mx-auto">
-            {icon}
-          </span>
-        ) : (
-          <span className="text-[#15B659] sm:text-sm md:text-base lg:text-xl truncate">
-            {displayText}
+        <span className="text-[#15B659] sm:text-sm md:text-base lg:text-xl truncate">
+          {displayText}
+        </span>
+        {dropdownOptions && (
+          <span className="ml-2">
+            {isDropdownOpen ? (
+              <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto">keyboard_arrow_up</span>
+            ) : (
+              <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto">keyboard_arrow_down</span>
+            )}
           </span>
         )}
       </button>
