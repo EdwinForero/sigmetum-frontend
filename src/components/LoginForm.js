@@ -12,8 +12,8 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showLoginError, setLoginError] = useState(false);
-    const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
-
+    const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
+    
     const handleLogin = async () => {
       try {
         const response = await fetch(`${BASE_URL}/log`, {

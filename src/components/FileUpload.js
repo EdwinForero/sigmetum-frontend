@@ -11,7 +11,7 @@ const FileUploadForm = ({onLoad}) => {
   const [dialogMessage, setDialogMessage] = useState('');
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogType, setDialogType] = useState('');
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   function normalizeFileName(fileName) {
 

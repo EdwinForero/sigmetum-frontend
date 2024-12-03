@@ -20,7 +20,7 @@ const ProtectedRoute = ({ element }) => {
   const { t } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const fetchProtectedData = async () => {
     const token = localStorage.getItem('token');

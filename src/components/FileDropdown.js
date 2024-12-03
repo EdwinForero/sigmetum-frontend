@@ -12,7 +12,7 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
   const [provinces, setProvinces] = useState([]);
   const [versions, setVersions] = useState([]);
   const dropdownRef = useRef();
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   useEffect(() => {
       fetchFiles();

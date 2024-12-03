@@ -13,7 +13,7 @@ const ContactForm = ({onLoad}) => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const { t } = useTranslation();
-  const BASE_URL = process.env.VITE_BASE_URL || 'http://sigmetum-backend.eu-west-3.elasticbeanstalk.com';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const handleSubmit = async (e) => {
     onLoad(true);
