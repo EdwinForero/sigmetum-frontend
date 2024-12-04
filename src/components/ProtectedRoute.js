@@ -40,7 +40,8 @@ const ProtectedRoute = ({ element }) => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
 
-      if (!token || isTokenExpired(token)) {
+      
+      if (token && isTokenExpired(token)) {
         setShowDialog(true);
         return;
       }

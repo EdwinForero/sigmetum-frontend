@@ -133,7 +133,7 @@ function App() {
                 />
                 <Route path="/sobre-nosotros" element={<About />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload />} />} />
+                <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload/>} />} />
                 <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
