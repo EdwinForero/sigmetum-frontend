@@ -119,6 +119,7 @@
   "dialogAdvice": {
     "successTitle": "Éxito",
     "errorTitle": "Error",
+    "adviceTitle": "Aviso",
     "successUploadMessage": "Todos los archivos se subieron con éxito.",
     "successDeleteMessage": "Datos eliminados con éxito.",
     "successUpdateMessage": "Datos actualizados con éxito.",
@@ -127,7 +128,11 @@
     "errorDeleteMessage": "Error al eliminar datos. Inténtalo de nuevo.",
     "errorUpdateMessage": "Error al actualizar los datos. Inténtalo de nuevo.",
     "errorEmailMessage": "Error al enviar el correo. Inténtalo de nuevo.",
-    "closeButton" : "Cerrar"
+    "fieldsMissingMessage": "¿Está seguro de cargar el archivo {{filename}}? Se encontraron campos vacíos en los siguientes registros:",
+    "rowEmpty": "Fila {{rowIndex}}",
+    "closeButton" : "Cerrar",
+    "confirmButton" : "Confirmar",
+    "cancelButton" : "Cancelar"
   },
   "dataManagement": {
     "title" : "Administrar datos",

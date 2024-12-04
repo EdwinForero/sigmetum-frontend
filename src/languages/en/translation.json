@@ -118,6 +118,7 @@
   "dialogAdvice": {
     "successTitle": "Success",
     "errorTitle": "Error",
+    "adviceTitle": "Advice",
     "successUploadMessage": "All files were uploaded successfully.",
     "successDeleteMessage": "Data deleted successfully.",
     "successUpdateMessage": "Data updated successfully.",
@@ -126,7 +127,11 @@
     "errorDeleteMessage": "Error deleting data. Please try again.",
     "errorUpdateMessage": "Error updating data. Please try again.",
     "errorEmailMessage": "Error sending mail. Please try again.",
-    "closeButton" : "Close"
+    "fieldsMissingMessage": "Are you sure you want to upload the file {{filename}}? Empty fields were found in the following records:",
+    "rowEmpty": "Row {{rowIndex}}",
+    "closeButton" : "Close",
+    "confirmButton" : "Confirm",
+    "cancelButton" : "Cancel"
   },
   "dataManagement": {
     "title" : "Data management",

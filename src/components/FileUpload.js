@@ -8,9 +8,10 @@ import { AnimatePresence } from 'framer-motion';
 const FileUploadForm = ({onLoad}) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
+  const [dialogTitle, setDialogTitle] = useState('');
   const [dialogMessage, setDialogMessage] = useState('');
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [dialogType, setDialogType] = useState('');
+  const [dialogActions, setDialogActions] = useState({ onConfirm: null});
   const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   function normalizeFileName(fileName) {
@@ -38,34 +39,77 @@ const FileUploadForm = ({onLoad}) => {
     event.target.value = null;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async () => {
     onLoad(true);
     let allFilesUploadedSuccessfully = true;
-
+  
     for (const file of files) {
       if (!file) continue;
-
+  
       const normalizedFileName = normalizeFileName(file.name);
       const formData = new FormData();
       formData.append('file', new File([file], normalizedFileName));
-
+  
       try {
         const response = await fetch(`${BASE_URL}/upload`, {
           method: 'POST',
           body: formData,
         });
-
+  
+        const responseData = await response.json();
+  
         if (!response.ok) {
-          allFilesUploadedSuccessfully = false;
-          setDialogMessage(t('dialogAdvice.errorUploadMessage'));
-          setDialogType('error');
-          setDialogVisible(true);
-          break;
+          if (responseData.emptyFields) {
+            onLoad(false);
+            const emptyFieldSummary = responseData.emptyFields
+              .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
+              .join(', ');
+  
+            setDialogMessage(
+              `${t('dialogAdvice.fieldsMissingMessage', { filename: file.name})}\n\n${emptyFieldSummary}`
+            );
+            setDialogTitle(t('dialogAdvice.adviceTitle'));
+            setDialogVisible(true);
+  
+            const confirmed = await new Promise((resolve) => {
+              setDialogActions({
+                onConfirm: () => resolve(true)
+              });
+            });
+  
+            setDialogVisible(false);
+            setDialogActions({ onConfirm: null});
+  
+            if (confirmed) {
+              onLoad(true);
+              const confirmedResponse = await fetch(`${BASE_URL}/upload/confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  confirmed: true,
+                  fileData: responseData.processedData,
+                }),
+              });
+  
+              if (!confirmedResponse.ok) {
+                throw new Error('Error al confirmar la subida');
+              }
+            } else {
+              allFilesUploadedSuccessfully = false;
+              break;
+            }
+          } else {
+            allFilesUploadedSuccessfully = false;
+            setDialogMessage(t('dialogAdvice.errorUploadMessage'));
+            setDialogTitle(t('dialogAdvice.errorTitle'));
+            setDialogVisible(true);
+            break;
+          }
         }
       } catch (error) {
         allFilesUploadedSuccessfully = false;
         setDialogMessage(t('dialogAdvice.errorUploadMessage'));
-        setDialogType('error');
+        setDialogTitle(t('dialogAdvice.errorTitle'));
         setDialogVisible(true);
         setFiles([]);
         break;
@@ -73,12 +117,13 @@ const FileUploadForm = ({onLoad}) => {
         onLoad(false);
       }
     }
-
+  
     if (allFilesUploadedSuccessfully) {
       setDialogMessage(t('dialogAdvice.successUploadMessage'));
-      setDialogType('success');
+      setDialogTitle(t('dialogAdvice.successTitle'));
       setDialogVisible(true);
       setFiles([]);
+      setDialogActions({ onConfirm: null });
     }
   };
 
@@ -129,12 +174,15 @@ const FileUploadForm = ({onLoad}) => {
         )}
         
         <AnimatePresence>
-          {dialogVisible && (
-            <DialogAdvice 
-            dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
-            dialogMessage={dialogMessage} 
-            onClose={closeDialog}/>
-          )}
+        {dialogVisible && (
+          <DialogAdvice
+            dialogTitle={dialogTitle}
+            dialogMessage={dialogMessage}
+            onConfirm={dialogActions.onConfirm}
+            onClose={closeDialog}
+            showActions={!!dialogActions.onConfirm}
+          />
+        )}
         </AnimatePresence>
       </div>
       </>
