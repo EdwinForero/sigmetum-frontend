@@ -69,15 +69,15 @@ const Dialog = ({
           </h2>
         </div>
 
-        <div className="p-4 grid grid-cols-2 gap-4 overflow-y-auto flex-grow">
+        <div className="p-4 grid grid-cols-1 gap-4 overflow-y-auto flex-grow">
           {Object.entries(uniqueAttributes).map(([key, value]) => (
-            <SpeciesAttribute
-              key={key}
-              title={t(`explore.dialogSpecies.attributes.${key}`, key)}
-              description={value}
-            />
+              <SpeciesAttribute
+                  key={key}
+                  title={t(`explore.dialogSpecies.attributes.${key}`, key)}
+                  description={value}
+              />
           ))}
-        </div>
+      </div>
 
         <div className="flex justify-center px-4 py-2 mx-auto">
           <a
