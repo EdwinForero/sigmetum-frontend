@@ -8,7 +8,11 @@ import DialogAdvice from '../components/DialogAdvice';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 
-const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
+const DataManagement = ({
+  onFileDropdownSelect, 
+  filteredSpecies
+}) => {
+
   const { t } = useTranslation();
   const [fileName, setFileName] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +20,6 @@ const DataManagement = ({onFileDropdownSelect, filteredSpecies}) => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const fileDropdownRef = useRef(null);
-
   const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const handleFileSelect = (jsonData, fileName) => {

@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 
-const ButtonPrincipal = ({ onClick, text, dropdownOptions, icon, className, onOptionSelect, disabled=false }) => {
+const ButtonPrincipal = ({ 
+  onClick,
+  text, 
+  dropdownOptions, 
+  icon, 
+  className, 
+  onOptionSelect, 
+  disabled=false 
+}) => {
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(text);
   const dropdownRef = useRef(null);

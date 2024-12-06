@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from '../components/ButtonPrincipal';
 
 const NotFound = () => {
+  
   const { t } = useTranslation();
 
   return (

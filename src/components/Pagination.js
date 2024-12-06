@@ -2,9 +2,13 @@ import React from "react";
 import ButtonPrincipal from "./ButtonPrincipal";
 import { useTranslation } from 'react-i18next';
 
-const Pagination = ({currentPage, totalPages, onPageChange}) => {
+const Pagination = ({
+  currentPage, 
+  totalPages, 
+  onPageChange
+}) => {
 
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="flex justify-center items-center m-2">

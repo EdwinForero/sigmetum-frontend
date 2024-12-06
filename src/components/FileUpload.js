@@ -5,7 +5,9 @@ import DialogAdvice from './DialogAdvice';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 
-const FileUploadForm = ({onLoad}) => {
+const FileUploadForm = ({
+  onLoad
+}) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [dialogTitle, setDialogTitle] = useState('');

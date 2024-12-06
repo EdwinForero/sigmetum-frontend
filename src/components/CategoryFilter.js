@@ -5,16 +5,17 @@ import { SortItemsList } from '../utilities/SortItemsList.js';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [searchText, setSearchText] = useState("");
+const CategoryFilter = ({ 
+  category, 
+  items, 
+  blocked, 
+  onChange, 
+  selected, 
+  isExpanded,
+  onExpand
+}) => {
+  const [searchText, setSearchText] = useState('');
   const { t } = useTranslation();
-
-  const toggleCategory = () => {
-    if (!blocked) {
-      setIsExpanded((prev) => !prev);
-    }
-  };
 
   const handleCheckboxChange = (item) => {
     onChange(category, item);
@@ -34,7 +35,7 @@ const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
         className={`flex justify-between items-center cursor-pointer pb-2 ${
           blocked ? 'text-gray-500' : ''
         }`}
-        onClick={toggleCategory}
+        onClick={onExpand}
       >
         <p className="text-[#0C1811] text-xl font-medium leading-normal">
           {t(`attributes.${category}`, category)}
@@ -70,19 +71,18 @@ const CategoryFilter = ({ category, items, blocked, onChange, selected }) => {
               onChange={(e) => setSearchText(e.target.value)}
             />
             {filteredItems.length > 0 ? (
-              [...new Set(filteredItems.flatMap((item) => (Array.isArray(item) ? item : [item])))]
-                .map((item) => (
-                  <label key={item} className="flex items-center cursor-pointer space-x-2">
-                    <input
-                      type="checkbox"
-                      name={`${category}-${item}`}
-                      checked={selected.has(item)}
-                      onChange={() => handleCheckboxChange(item)}
-                      className="appearance-none h-6 w-6 border-2 border-[#15B659] rounded-md cursor-pointer hover:bg-[#15B659] checked:bg-[#15B659] checked:border-transparent"
-                    />
-                    <span className="text-[#0C1811] text-1xl capitalize">{item}</span>
-                  </label>
-                ))
+              filteredItems.map((item) => (
+                <label key={item} className="flex items-center cursor-pointer space-x-2">
+                  <input
+                    type="checkbox"
+                    name={`${category}-${item}`}
+                    checked={selected.has(item)}
+                    onChange={() => handleCheckboxChange(item)}
+                    className="appearance-none h-6 w-6 border-2 border-[#15B659] rounded-md cursor-pointer hover:bg-[#15B659] checked:bg-[#15B659] checked:border-transparent"
+                  />
+                  <span className="text-[#0C1811] text-1xl capitalize">{item}</span>
+                </label>
+              ))
             ) : (
               <p className="text-[#4B644A]">
                 {t('filter.categoryFilter.noResultsFoundPlaceholder')} "{searchText}"

@@ -6,6 +6,7 @@ const Footer = () => {
 
     const { t } = useTranslation();
     const currentYear = new Date().getFullYear();
+    
     return (
             <div className="flex min-w-screen flex-1 flex-col">
                 <footer className="flex flex-col gap-6 px-5 py-10 text-center">

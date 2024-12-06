@@ -4,7 +4,10 @@ import DialogAdvice from "./DialogAdvice";
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 
-const ContactForm = ({onLoad}) => {
+const ContactForm = ({
+  onLoad
+}) => {
+  
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");

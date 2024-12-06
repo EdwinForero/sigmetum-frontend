@@ -9,9 +9,14 @@ const ButtonAlternative = ({
   onOptionSelect,
   getButtonText,
 }) => {
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(text);
   const dropdownRef = useRef(null);
+
+  const displayText = getButtonText
+    ? getButtonText(selectedOption)
+    : selectedOption;
 
   const toggleDropdown = () => {
     if (dropdownOptions) {
@@ -28,7 +33,7 @@ const ButtonAlternative = ({
       onOptionSelect(option);
     }
   };
-
+  
   useEffect(() => {
     setSelectedOption(text);
   }, [text]);
@@ -44,10 +49,6 @@ const ButtonAlternative = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  const displayText = getButtonText
-    ? getButtonText(selectedOption)
-    : selectedOption;
 
   return (
     <div className="relative inline-block" ref={dropdownRef}>

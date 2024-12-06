@@ -8,7 +8,12 @@ import Pagination from '../components/Pagination';
 import ImageCarousel from '../components/ImageCarrousel';
 import ScrollIndicator from '../components/ScrollIndicator';
 
-const Explore = ({ data, filteredSpecies, selectedSpecies }) => {
+const Explore = ({ 
+  data, 
+  filteredSpecies, 
+  selectedSpecies
+ }) => {
+  
   const { t } = useTranslation();
   const [uniqueSpecies, setUniqueSpecies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);

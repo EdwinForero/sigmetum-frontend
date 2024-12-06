@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import DialogSpecies from './DialogSpecies';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SpeciesCard = ({ data, species }) => {
+const SpeciesCard = ({ 
+  data, 
+  species 
+}) => {
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
 

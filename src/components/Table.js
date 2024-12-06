@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import Pagination from "./Pagination";
 import { useTranslation } from 'react-i18next';
 
-const Table = ({ data, rowsPerPage = 5  }) => {
+const Table = ({ 
+  data, 
+  rowsPerPage = 5  
+}) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -41,7 +44,7 @@ const Table = ({ data, rowsPerPage = 5  }) => {
             {columnNames.map((col) => (
               <th
                 key={col}
-                className="px-4 py-2 text-left text-sm font-bold text-[#F9FBFA] border-b border-[#99BBA8]"
+                className="px-4 py-2 text-left text-base font-bold text-[#F9FBFA] border-b border-[#99BBA8]"
               >
                 {t(`attributes.${col}`, col)}
               </th>

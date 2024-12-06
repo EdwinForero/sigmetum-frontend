@@ -1,6 +1,9 @@
 import React from 'react';
 
-const SpeciesAttribute = ({title, description}) => {
+const SpeciesAttribute = ({
+    title, 
+    description
+}) => {
   
     const items = typeof description === 'string' ? description.split(',') : [];
 

@@ -3,21 +3,24 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ButtonPrincipal from './ButtonPrincipal';
 
-const Sidebar = ({ exploreData, menuOptions }) => {
+const Sidebar = ({ 
+  exploreData, 
+  menuOptions 
+}) => {
   const [activeComponent, setActiveComponent] = useState(null);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const location = useLocation();
 
   const exclusions = {
-    '/explorar': ['administrarDatos', 'cargarArchivos', 'dataManagementFilter'],
-    '/cargar-archivos': ['filtro', 'dataManagementFilter'],
-    '/administrar-datos': ['filtro'],
+    '/explorar': ['dataManagement', 'uploadFiles', 'dataManagementFilter'],
+    '/cargar-archivos': ['filter', 'dataManagementFilter'],
+    '/administrar-datos': ['filter'],
   };
 
   const filteredMenuOptions = menuOptions.filter(option => {
     const excludedOptions = exclusions[location.pathname] || [];
     if (excludedOptions.includes(option.id)) return false;
-    if (location.pathname === '/explorar' && option.id === 'filtro' && !exploreData) return false;
+    if (location.pathname === '/explorar' && option.id === 'filter' && !exploreData) return false;
     return true;
   });
 

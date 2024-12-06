@@ -17,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute.js';
 import LanguageSwitcher from './components/LanguageSwitcher.js';
 
 function App() {
+
   const [isLoading, setIsLoading] = useState(true);
   const [mergedData, setMergedData] = useState(null);
   const [selectedSpecies, setSelectedSpecies] = useState([]);
@@ -88,10 +89,10 @@ function App() {
   };
 
   const menuOptions = [
-    { id: 'filtro', name: 'Filtro',  component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange}/>, icon:"filter_alt"},
+    { id: 'filter', name: 'Filtro',  component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange}/>, icon:"filter_alt"},
     { id: 'dataManagementFilter', name: 'Filtro',  component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange}/>, icon:"filter_alt"},
-    { id: 'administrarDatos', name: 'Administrar datos', icon:"database", link:"/administrar-datos"},
-    { id: 'cargarArchivos', name: 'Cargar archivos', icon:"upload", link:"/cargar-archivos"}
+    { id: 'dataManagement', name: 'Administrar datos', icon:"database", link:"/administrar-datos"},
+    { id: 'uploadFiles', name: 'Cargar archivos', icon:"upload", link:"/cargar-archivos"}
   ];
 
   return (

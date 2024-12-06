@@ -5,10 +5,17 @@ import SpeciesAttribute from '../components/SpeciesAttribute.js';
 import { SortItemsList } from '../utilities/SortItemsList.js';
 import { useTranslation } from 'react-i18next';
 
-const Dialog = ({ isOpen, onClose, data, species }) => {
+const Dialog = ({ 
+  isOpen, 
+  onClose, 
+  data, 
+  species 
+}) => {
+  
   const { t } = useTranslation();
 
   if (!isOpen) return null;
+  
   const formattedQuery = encodeURIComponent(species["Especies Características"]);
 
   const filteredSpecies = data.filter(

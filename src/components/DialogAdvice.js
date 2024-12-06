@@ -10,6 +10,7 @@ const DialogAdvice = ({
   onConfirm,
   showActions = false
 }) => {
+  
   const { t } = useTranslation();
 
   return (

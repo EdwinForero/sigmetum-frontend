@@ -3,7 +3,13 @@ import { FormatFileName } from '../utilities/FormatFileName.js';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) => {
+const FileDropdown = forwardRef(({ 
+  onLoad, 
+  onFileSelect, 
+  selectedFile }, 
+  ref
+) => {
+  
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -114,7 +120,7 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
             {provinces.length > 0 ? (
               <div className="flex">
                 <div className="w-1/2 max-h-60 overflow-y-auto border-r border-[#15B659] p-2">
-                  <h3 className="font-bold text-sm mb-2">{t('dataManagement.fileSelectDropdwon.provinceTitle')}</h3>
+                  <h3 className="font-bold text-base mb-2">{t('dataManagement.fileSelectDropdwon.provinceTitle')}</h3>
                   <ul>
                     {provinces.map((province) => (
                       <li
@@ -133,7 +139,7 @@ const FileDropdown = forwardRef(({ onLoad, onFileSelect, selectedFile }, ref) =>
                 </div>
 
                 <div className="w-1/2 max-h-60 overflow-y-auto p-2">
-                  <h3 className="font-bold text-sm mb-2">{t('dataManagement.fileSelectDropdwon.versionTitle')}</h3>
+                  <h3 className="font-bold text-base mb-2">{t('dataManagement.fileSelectDropdwon.versionTitle')}</h3>
                   {selectedProvince ? (
                     <ul>
                       {versions.map(({ fullKey, name }) => (

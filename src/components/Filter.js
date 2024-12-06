@@ -3,12 +3,22 @@ import CategoryFilter from './CategoryFilter';
 import ButtonAlternative from '../components/ButtonAlternative.js';
 import { useTranslation } from 'react-i18next';
 
-const Filter = ({ data, onFilterChange, onSpeciesSelect }) => {
+const Filter = ({ 
+  data, 
+  onFilterChange, 
+  onSpeciesSelect 
+}) => {
+  
   const [categories, setCategories] = useState({});
   const [filteredCategories, setFilteredCategories] = useState({});
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [expandedCategory, setExpandedCategory] = useState(null);
   const blockedCategories = useMemo(() => ['image'], []);
   const { t } = useTranslation();
+
+  const handleExpand = (category) => {
+    setExpandedCategory((prev) => (prev === category ? null : category));
+  };
 
   useEffect(() => {
     const allCategories = {};
@@ -122,6 +132,7 @@ const Filter = ({ data, onFilterChange, onSpeciesSelect }) => {
   const handleClearAllFilters = () => {
     setSelectedFilters({});
     onFilterChange(data);
+    setExpandedCategory(null);
   };
 
   return (
@@ -140,6 +151,8 @@ const Filter = ({ data, onFilterChange, onSpeciesSelect }) => {
           blocked={blockedCategories.includes(category)}
           onChange={handleFilterChange}
           selected={selectedFilters[category] || new Set()}
+          isExpanded={expandedCategory === category}
+          onExpand={() => handleExpand(category)}
         />
       ))}
     </>

@@ -5,7 +5,9 @@ import DialogAdvice from '../components/DialogAdvice';
 import LoadSpinner from '../components/LoadSpinner';
 import { useTranslation } from 'react-i18next';
 
-const isTokenExpired = (token) => {
+const isTokenExpired = (
+  token
+) => {
   try {
     const decoded = jwtDecode(token);
     const currentTime = Date.now() / 1000;
@@ -39,15 +41,13 @@ const ProtectedRoute = ({ element }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
+      const authValid = await fetchProtectedData();
+      setIsAuthenticated(authValid);
 
-      
-      if (token && isTokenExpired(token)) {
+      if (isAuthenticated && isTokenExpired(token)) {
         setShowDialog(true);
         return;
       }
-
-      const authValid = await fetchProtectedData();
-      setIsAuthenticated(authValid);
     };
 
     checkAuth();

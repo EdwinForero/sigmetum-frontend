@@ -1,6 +1,10 @@
 import React from 'react';
 
-const FilterSearchBar = ({placeholderText, searchText, onChange}) => {
+const FilterSearchBar = ({
+    placeholderText, 
+    searchText, 
+    onChange
+}) => {
 
     return (
         <label className="form-input bg-[#F9FBFA] my-2 w-full flex resize-none overflow-hidden rounded-xl text-[#111418] focus:outline-0 focus:ring-0 border border-[#15B659] focus:border-[#15B659] h-14 placeholder:text-[#0C1811] placeholder:text-[#637588] text-base font-normal leading-normal">
