@@ -62,9 +62,9 @@ const ButtonAlternative = ({
         {dropdownOptions && (
           <span className="ml-2">
             {isDropdownOpen ? (
-              <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto">keyboard_arrow_up</span>
+              <span className="material-symbols-outlined text-xl sm:text-3xl text-[#15B659] mx-auto">keyboard_arrow_up</span>
             ) : (
-              <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto">keyboard_arrow_down</span>
+              <span className="material-symbols-outlined text-xl sm:text-3xl text-[#15B659] mx-auto">keyboard_arrow_down</span>
             )}
           </span>
         )}
