@@ -100,7 +100,7 @@ function App() {
         <header className="bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16">
           <Link to="/">
             <div className="flex items-center gap-4">
-              <p className="font-bold text-[#0C1811] text-xl ml-4">SIGMETUM-A</p>
+              <p className="font-bold text-[#0C1811] text-base sm:text-xl ml-4">SIGMETUM-A</p>
             </div>
           </Link>
           <div className="mx-6">
