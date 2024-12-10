@@ -17,10 +17,10 @@ const SpeciesCard = ({
         onClick={openDialog}
         initial={{ backgroundColor: '#F9FBFA' }}
         whileHover={{ backgroundColor: '#99BBA8', transition: { duration: 0.3 } }}
-        className="cursor-pointer flex items-center gap-2 rounded-lg min-h-[72px] px-2 py-2 border border-[#99BBA8]"
+        className="cursor-pointer flex items-center gap-2 rounded-lg min-h-[72px] py-2 border border-[#99BBA8]"
       >
         <div className="flex flex-col justify-center">
-          <p className="text-[#0C1811] text-base italic font-medium leading-normal whitespace-normal overflow-hidden text-ellipsis">
+          <p className="text-[#0C1811] text-base italic font-medium leading-normal whitespace-normal overflow-hidden text-ellipsis px-2">
             {species["Especies Características"]}
           </p>
         </div>

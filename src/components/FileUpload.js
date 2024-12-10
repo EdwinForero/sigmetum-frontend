@@ -14,7 +14,7 @@ const FileUploadForm = ({
   const [dialogMessage, setDialogMessage] = useState('');
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogActions, setDialogActions] = useState({ onConfirm: null});
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
+  const BASE_URL = 'http://localhost:8000';
 
   function normalizeFileName(fileName) {
 
@@ -55,6 +55,9 @@ const FileUploadForm = ({
       try {
         const response = await fetch(`${BASE_URL}/upload`, {
           method: 'POST',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
           body: formData,
         });
   
@@ -86,7 +89,10 @@ const FileUploadForm = ({
               onLoad(true);
               const confirmedResponse = await fetch(`${BASE_URL}/upload/confirm`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
                 body: JSON.stringify({
                   confirmed: true,
                   fileData: responseData.processedData,

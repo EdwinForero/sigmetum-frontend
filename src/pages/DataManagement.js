@@ -42,20 +42,20 @@ const DataManagement = ({
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ fileName }),
     });
-
       if (!response.ok) {
         setDialogMessage(t('dialogAdvice.errorDeleteMessage'));
         setDialogType('error');
         setDialogVisible(true);
-      }
-
+      }else{
       setDialogMessage(t('dialogAdvice.successDeleteMessage'));
       setDialogType('success');
       setDialogVisible(true);
       resetDropdown();
+    }
 
     } catch (error) {
       setDialogMessage(t('dialogAdvice.errorDeleteMessage'));
@@ -77,24 +77,25 @@ const DataManagement = ({
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ fileName }),
     });
 
       if (!response.ok) {
         setDialogMessage(t('dialogAdvice.errorUpdateMessage'));
-      setDialogType('error');
-      setDialogVisible(true);
+        setDialogType('error');
+        setDialogVisible(true);
+      }else{
+
+        if (fileDropdownRef.current) {
+          fileDropdownRef.current.fetchFiles();
+        }
+
+        setDialogMessage(t('dialogAdvice.successUpdateMessage'));;
+        setDialogType('success');
+        setDialogVisible(true);
       }
-
-      if (fileDropdownRef.current) {
-        fileDropdownRef.current.fetchFiles();
-      }
-
-      setDialogMessage(t('dialogAdvice.successUpdateMessage'));;
-      setDialogType('success');
-      setDialogVisible(true);
-
     } catch (error) {
       setDialogMessage(t('dialogAdvice.errorUpdateMessage'));
       setDialogType('error');
