@@ -78,7 +78,9 @@ const ButtonAlternative = ({
               className="cursor-pointer px-4 py-2 hover:bg-gray-100"
               onClick={() => handleOptionClick(option)}
             >
-              {option.label || option}
+              <span className="text-[#0C1811]">
+                {option.label || option}
+              </span>
             </div>
           ))}
         </div>

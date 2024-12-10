@@ -8,7 +8,7 @@ const SpeciesAttribute = ({
 
     return (
         <details className="mb-2">
-            <summary className="font-bold text-[#4B644A] cursor-pointer">
+            <summary className="font-bold text-xl text-[#4B644A] cursor-pointer">
                 {title}
             </summary>
             <div className="mt-2 max-h-32 overflow-y-auto bg-[#F9FBFA] p-2 rounded">

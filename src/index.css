@@ -6,7 +6,7 @@
   body {
     @apply font-primary;
   }
-  h1, h2, h3, th {
+  h1, h2, h3, th, summary {
     @apply font-primary;
   }
   p, button, a, label, span, button, input, td, li {

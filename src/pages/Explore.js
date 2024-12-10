@@ -108,7 +108,7 @@ const Explore = ({
           </p>
         </div>
       ) : (
-        <div className="min-h-screen gap-1 px-6 flex flex-1 py-5">
+        <div className="min-h-screen gap-1 px-2 flex flex-1 py-5">
           <div className="layout-content-container flex flex-col flex-1 whitespace-nowrap">
             <div className="flex items-center gap-4 px-4">
               <ButtonPrincipal
@@ -149,21 +149,19 @@ const Explore = ({
                 </motion.div>
               </AnimatePresence>
             </div>
-            
-            <motion.h2 
-              className="text-[#15B659] text-center my-4 tracking-light text-2xl sm:text-4xl font-bold leading-tight"
-              >
-                {t('explore.vegetationCaroselTitle')}
-            </motion.h2>
-            <div className="relative overflow-hidden h-[300px] flex justify-center items-center">
-              <ImageCarousel/>
-            </div>
-
           </div>
 
           <ScrollIndicator/>
         </div>
       )}
+      <motion.h2 
+        className="text-[#15B659] text-center my-4 tracking-light text-2xl sm:text-4xl font-bold leading-tight"
+        >
+          {t('explore.vegetationCaroselTitle')}
+      </motion.h2>
+      <div className="relative overflow-hidden w-full h-[300px] my-4 flex justify-center items-center">
+        <ImageCarousel/>
+      </div>
     </>
   );
 };
