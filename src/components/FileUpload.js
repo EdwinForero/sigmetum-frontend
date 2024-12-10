@@ -14,7 +14,7 @@ const FileUploadForm = ({
   const [dialogMessage, setDialogMessage] = useState('');
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogActions, setDialogActions] = useState({ onConfirm: null});
-  const BASE_URL = 'http://localhost:8000';
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   function normalizeFileName(fileName) {
 
