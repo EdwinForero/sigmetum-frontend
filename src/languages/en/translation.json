@@ -13,7 +13,7 @@
   },
   "home": {
     "title": "SIGMETUM-A: EXPLORING ANDALUSIAN VEGETATION",
-    "subtitle": "Discover the wealth of plant landscapes in Andalusia, exploring in an interactive way",
+    "subtitle": "Discover the wealth of plant landscapes in Andalusia, exploring in an interactive way.",
     "searchButton" : "Search",
     "descriptionLabel" : "Description",
     "descriptionContent" : "SIGMETUM-A is an interactive database through which you can discover the different types of vegetation in Andalusia by means of geological, biogeographical and bioclimatic criteria, which will lead you to identify the Vegetation Series of any regional territory, as well as its climax formation (mature stage of each Series) and its characteristic species.",
@@ -21,7 +21,7 @@
     "emailTitle" : "E-mail",
     "emailContact" : "For further information about the project, you can contact the following people at the Department of Botany and Plant Physiology of the University of Malaga:\n\n• Jaime F. Pereña Ortiz. E-mail: jperena@uma.es\n• Á, Enrique Salvo Tierra. E-mail: salvo@uma.es\n• Andrés V. Pérez Latorre. E-mail: avperez@uma.es\n• Noelia Hidalgo Triana. E-mail: nhidalgo@uma.es\n• Marianela Zanolla Balbuena. E-mail: marianela@uma.es",
     "locationLabel": "Location",
-    "locationContent": "Department of Botany and Plant Physiology.\nFaculty of Science (University of Malaga).\nBoulevard Loius Pasteur, 31, 2nd floor.\n29010- Málaga",
+    "locationContent": "Department of Botany and Plant Physiology.\nFaculty of Science (University of Malaga).\nBoulevard Loius Pasteur, 31, 2nd floor.\n29010 - Málaga",
     "contactForm": {
       "nameLabel" : "Name",
       "namePlaceholder" : "Name",
@@ -149,6 +149,34 @@
     "table": {
       "noDataFoundPlaceholder": "No data available."
     }
+  },
+  "cookies":{
+    "title" : "Cookie Policy",
+    "subtitleAboutCookies" : "What Are Cookies and What Are They Used For?",
+    "descriptionAboutCookies" : "A cookie is a simple text file that a website stores on your device to remember information such as your preferences or browsing data. Each cookie is unique to your browser and includes data like an anonymous identifier and the website’s name. Cookies enhance your browsing experience by remembering your preferences or enabling functionalities such as a shopping cart.\n\nWhile our website can function without cookies, disabling them may limit certain features and functionalities.",
+    "subtitleAboutPixel" : "What Is a Pixel?",
+    "descriptionAboutPixel" : "A pixel is a small piece of code that enables cookies to be downloaded onto your device. Pixels are often used by third parties to deliver personalized ads based on your browsing activity.\n\nFor more information about cookies and pixels, visit the website: <a>Information Commissioner’s Office (ICO)</a>.",
+    "subtitleTypeCookies" : "Types of Cookies on Our Website",
+    "descriptionTypeCookies": "• <strong>First-party cookies</strong>: Set directly by our website to enable basic functionality or improve your experience.\n\n• <strong>Third-party cookies</strong>: Set by external partners (e.g., advertisers or social media platforms) to collect data that is sent to these third parties.",
+    "subtitleCookiesUse" : "How We Use Cookies",
+    "descriptionCookiesUse" : "We use cookies on our website to:\n\n• Simplify navigation and enable essential features, such as managing preferences.\n\n• Remember personal settings, such as language or region.\n\n• Analyze how you use the website to improve its design and functionality.\n\n• Monitor website traffic and user activity.\n\n• Deliver relevant advertisements based on your interests.\n\nWe do not sell data collected via first-party cookies, but some third parties may access the data from their own cookies.",
+    "subtitleCookiesCategories" : "Categories of Cookies We Use",
+    "subtitleFirstCookiesCategory" : "1. Strictly Necessary",
+    "descriptionFirstCookiesCategory" : "Enable essential functions like logging in or remembering your privacy settings. Without these, parts of the website may not work properly.",
+    "subtitleSecondCookiesCategory" : "2. Functional",
+    "descriptionSecondCookiesCategory" : "Enhance your experience by storing settings such as language or region.",
+    "subtitleThirdCookiesCategory" : "3. Performance",
+    "descriptionThirdCookiesCategory" : "Collect anonymous data on how you use the website, helping us measure and improve its performance.",
+    "subtitleFourthCookiesCategory" : "4. Targeted Advertising",
+    "descriptionFourthCookiesCategory" : "Used by advertising partners to show you relevant ads on other websites based on your interests.",
+    "subtitleCookiesManagement" : "How to manage cookies",
+    "descriptionCookiesManagement" : "You can update your preferences for the cookies on our website through your profile. Please note that our websites will work without cookies, but you will lose some features and functionality if you choose to disable them.\n\nIf you wish to restrict or block web browser cookies which are set on your device then you can do this through your browser settings. Here is how to do this for the most popular browsers, but if yours is not listed you should be able to find this in your browser’s Help section or on  <a>aboutcookies.org</a>:",
+    "browserChrome" : "• <a>Chrome</a>.",
+    "browserInternetExplorer" : "• <a>Internet Explorer</a>.",
+    "browserSafari" : "• <a>Safari</a>.",
+    "browserMicrosoftEdge" : "• <a>Microsoft Edge</a>.",
+    "browserFirefox" : "• <a>Firefox</a>.",
+    "browserOpera" : "• <a>Opera</a>."
   },
   "language":{
     "spanish" : "Español - ES",

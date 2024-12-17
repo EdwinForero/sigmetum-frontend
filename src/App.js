@@ -6,6 +6,7 @@ import About from './pages/About.js';
 import Explore from './pages/Explore.js';
 import NotFound from './pages/NotFound.js';
 import Login from './pages/Login.js';
+import Cookies from './pages/Cookies.js';
 import DataManagement from './pages/DataManagement.js';
 import DataConfiguration from './pages/DataConfiguration.js';
 import FilesUpload from './pages/FilesUpload.js';
@@ -135,7 +136,8 @@ function App() {
                   }
                 />
                 <Route path="/sobre-nosotros" element={<About />} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<Login/>} />
+                <Route path="/cookies" element={<Cookies/>} />
                 <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload/>} />} />
                 <Route path="/configurar-datos" element={<ProtectedRoute element={<DataConfiguration/>} />} />
                 <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />

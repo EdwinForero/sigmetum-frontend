@@ -7,7 +7,7 @@ const SpeciesAttribute = ({
     const items = typeof description === 'string' ? description.split(',') : [];
 
     return (
-        <details className="mb-2">
+        <details className="mb-2" open>
             <summary className="font-bold text-xl text-[#4B644A] cursor-pointer">
                 {title}
             </summary>

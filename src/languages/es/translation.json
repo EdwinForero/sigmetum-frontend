@@ -13,7 +13,7 @@
     },
     "home": {
       "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
-      "subtitle": "Descubre la riqueza de paisajes vegetales en Andalucía, explorando de manera interactiva",
+      "subtitle": "Descubre la riqueza de paisajes vegetales en Andalucía, explorando de manera interactiva.",
       "searchButton" : "Buscar",
       "descriptionLabel" : "Descripción",
       "descriptionContent" : "SIGMETUM-A es una base de datos interactiva a través de la cual podrás descubrir los diferentes tipos de vegetación de Andalucía mediante criterios geológicos, biogeográficos y bioclimáticos, que te llevarán a identificar la Serie de Vegetación de cualquier territorio regional, así como su formación clímax (etapa madura de cada Serie) y sus especies características.",
@@ -21,7 +21,7 @@
       "emailTitle" : "Correo electrónico",
       "emailContact" : "Para ampliar información acerca del proyecto, puede contactar a las siguientes persona:\n\n• Jaime F. Pereña Ortiz. Correo: jperena@uma.es\n• Á, Enrique Salvo Tierra. Correo: salvo@uma.es\n• Andrés V. Pérez Latorre. Correo: avperez@uma.es\n• Noelia Hidalgo Triana. Correo: nhidalgo@uma.es\n• Marianela Zanolla Balbuena. Correo: marianela@uma.es",
       "locationLabel": "Ubicación",
-      "locationContent": "Departamento de Botánica y Fisiología Vegetal.\nFacultad de Ciencias (Universidad de Málaga).\nBoulevard Loius Pasteur, 31, 2º planta.\n29010- Málaga",
+      "locationContent": "Departamento de Botánica y Fisiología Vegetal.\nFacultad de Ciencias (Universidad de Málaga).\nBoulevard Loius Pasteur, 31, 2º planta.\n29010 - Málaga",
       "contactForm": {
         "nameLabel" : "Nombre",
         "namePlaceholder" : "Nombre",
@@ -154,6 +154,34 @@
   },
   "dataConfiguration": {
     "title" : "Configuración de datos"
+  },
+  "cookies":{
+    "title" : "Política de Cookies",
+    "subtitleAboutCookies" : "¿Qué son las cookies y para qué se usan?",
+    "descriptionAboutCookies" : "Una cookie es un archivo de texto simple que un sitio web almacena en tu dispositivo para recordar información, como tus preferencias o datos de navegación. Cada cookie es única para tu navegador e incluye datos como un identificador anónimo y el nombre del sitio. Las cookies mejoran la experiencia de navegación al recordar tus preferencias o permitir funcionalidades como un carrito de compras.\n\nSi bien nuestro sitio funciona sin cookies, desactivarlas podría limitar ciertas características y funcionalidades.",
+    "subtitleAboutPixel" : "¿Qué es un píxel?",
+    "descriptionAboutPixel" : "Un píxel es un fragmento de código que permite que se descarguen cookies en tu dispositivo. A menudo son usados por terceros para mostrar publicidad personalizada basada en tu actividad de navegación.\n\nPara más información sobre cookies y píxeles, consulta el sitio web: <a>Information Commissioner’s Office (ICO)</a>.",
+    "subtitleTypeCookies" : "Tipos de Cookies en Nuestro Sitio",
+    "descriptionTypeCookies": "• <strong>First party</strong>: Estas cookies son configuradas directamente por nuestro sitio para funcionalidades básicas o mejorar tu experiencia.\n\n• <strong>Third party</strong>: Configuradas por socios externos (como anunciantes y redes sociales), estas cookies recopilan datos que luego son enviados a dichos terceros.",
+    "subtitleCookiesUse" : "Cómo Utilizamos las Cookies",
+    "descriptionCookiesUse" : "En nuestro sitio usamos cookies para: \n\n• Facilitar la navegación y permitir funciones esenciales, como la gestión de preferencias.\n\n• Recordar configuraciones personales, como idioma o región.\n\n• Analizar cómo usas el sitio para mejorar su diseño y funcionalidad.\n\n• Monitorear el tráfico del sitio y la actividad de los usuarios.\n\n• Mostrarte publicidad relevante basada en tus intereses.\n\nNo vendemos los datos recopilados por las cookies de first party, pero algunos terceros pueden acceder a la información de sus cookies.",
+    "subtitleCookiesCategories" : "Categorías de Cookies que Usamos",
+    "subtitleFirstCookiesCategory" : "1. Estrictamente Necesarias",
+    "descriptionFirstCookiesCategory" : "Habilitan funciones esenciales como iniciar sesión o recordar tus preferencias de privacidad. Sin ellas, algunas partes del sitio no funcionarían correctamente.",
+    "subtitleSecondCookiesCategory" : "2. Funcionales",
+    "descriptionSecondCookiesCategory" : "Mejoran tu experiencia al almacenar configuraciones como idioma o región.",
+    "subtitleThirdCookiesCategory" : "3. De Rendimiento",
+    "descriptionThirdCookiesCategory" : "Recopilan datos anónimos sobre cómo usas el sitio, permitiéndonos medir y mejorar su funcionamiento.",
+    "subtitleFourthCookiesCategory" : "4. De Publicidad Dirigida",
+    "descriptionFourthCookiesCategory" : "Utilizadas por socios publicitarios para mostrar anuncios relevantes en otros sitios según tus intereses.",
+    "subtitleCookiesManagement" : "Cómo gestionar las cookies",
+    "descriptionCookiesManagement" : "Puede actualizar sus preferencias sobre las cookies de nuestro sitio web a través de su perfil. Tenga en cuenta que nuestros sitios web funcionarán sin cookies, pero perderá algunas características y funcionalidades si decide desactivarlas.\n\nSi desea restringir o bloquear las cookies del navegador web que se instalan en su dispositivo, puede hacerlo a través de la configuración de su navegador. A continuación, le indicamos cómo hacerlo para los navegadores más populares, pero si el suyo no aparece en la lista, podrá encontrar información al respecto en la sección de Ayuda de su navegador o en <a>aboutcookies.org</a>:",
+    "browserChrome" : "• <a>Chrome</a>.",
+    "browserInternetExplorer" : "• <a>Internet Explorer</a>.",
+    "browserSafari" : "• <a>Safari</a>.",
+    "browserMicrosoftEdge" : "• <a>Microsoft Edge</a>.",
+    "browserFirefox" : "• <a>Firefox</a>.",
+    "browserOpera" : "• <a>Opera</a>."
   },
   "language":{
     "spanish" : "Español - ES",
