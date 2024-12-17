@@ -7,6 +7,7 @@ import Explore from './pages/Explore.js';
 import NotFound from './pages/NotFound.js';
 import Login from './pages/Login.js';
 import DataManagement from './pages/DataManagement.js';
+import DataConfiguration from './pages/DataConfiguration.js';
 import FilesUpload from './pages/FilesUpload.js';
 import Navbar from './components/Navbar.js';
 import Footer from './components/Footer.js';
@@ -25,7 +26,7 @@ function App() {
   const [filteredData, setFilteredData] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
   const location = useLocation();
-  const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/explorar"].includes(location.pathname);
+  const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/configurar-datos", "/explorar"].includes(location.pathname);
   const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const fetchData = useCallback(async () => {
@@ -92,6 +93,7 @@ function App() {
     { id: 'filter', name: 'Filtro',  component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange}/>, icon:"filter_alt"},
     { id: 'dataManagementFilter', name: 'Filtro',  component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange}/>, icon:"filter_alt"},
     { id: 'dataManagement', name: 'Administrar datos', icon:"database", link:"/administrar-datos"},
+    { id: 'dataConfiguration', name: 'Configurar datos', icon:"settings", link:"/configurar-datos"},
     { id: 'uploadFiles', name: 'Cargar archivos', icon:"upload", link:"/cargar-archivos"}
   ];
 
@@ -135,6 +137,7 @@ function App() {
                 <Route path="/sobre-nosotros" element={<About />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload/>} />} />
+                <Route path="/configurar-datos" element={<ProtectedRoute element={<DataConfiguration/>} />} />
                 <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

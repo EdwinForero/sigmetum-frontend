@@ -5,8 +5,8 @@ import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
-import ImageCarousel from '../components/ImageCarrousel';
-import ScrollIndicator from '../components/ScrollIndicator';
+//import ImageCarousel from '../components/ImageCarrousel';
+//import ScrollIndicator from '../components/ScrollIndicator';
 
 const Explore = ({ 
   data, 
@@ -151,9 +151,13 @@ const Explore = ({
             </div>
           </div>
 
+          {/*
           <ScrollIndicator/>
+          */}
         </div>
       )}
+      
+      {/*
       <motion.h2 
         className="text-[#15B659] text-center my-4 tracking-light text-2xl sm:text-4xl font-bold leading-tight"
         >
@@ -162,6 +166,7 @@ const Explore = ({
       <div className="relative overflow-hidden w-full h-[300px] my-4 flex justify-center items-center">
         <ImageCarousel/>
       </div>
+      */}
     </>
   );
 };

@@ -152,6 +152,9 @@
       "noDataFoundPlaceholder": "No hay datos disponibles."
     }
   },
+  "dataConfiguration": {
+    "title" : "Configuración de datos"
+  },
   "language":{
     "spanish" : "Español - ES",
     "english" : "English - EN"
