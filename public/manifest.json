@@ -1,0 +1,11 @@
+{
+  "short_name": "SIGMETUM-A",
+  "name": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
+  "icons": [
+    
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
