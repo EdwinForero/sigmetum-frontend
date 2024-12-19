@@ -116,8 +116,13 @@ const Explore = ({
           </p>
         </div>
       ) : (
-        <div className="min-h-screen gap-1 px-2 flex flex-1 py-5">
+        <div className="gap-1 px-2 flex flex-1 py-5">
           <div className="layout-content-container flex flex-col flex-1 whitespace-nowrap">
+
+          <h2 className="text-[#15B659] tracking-light text-[32px] font-bold leading-tight px-4 mb-10">
+              {t('explore.title')}
+            </h2>
+
           <div className="flex flex-col sm:flex-row items-center justify-between px-4">
 
             <span className="text-[#4B644A] text-lg mx-2">

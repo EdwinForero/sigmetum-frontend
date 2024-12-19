@@ -120,6 +120,11 @@ const DataManagement = ({
               </h2>
             </div>
           </div>
+
+          <p className="text-[#14281D] text-base text-justify sm:text-lg text-center">
+            {t('dataManagement.description')}
+          </p>
+
           <h3 className="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em] pb-2 pt-4">
             {t('dataManagement.fileSelectDropdwon.selectFileDropdownLabel')}
           </h3>

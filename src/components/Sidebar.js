@@ -12,10 +12,10 @@ const Sidebar = ({
   const location = useLocation();
 
   const exclusions = {
-    '/explorar': ['dataManagement', 'uploadFiles', 'dataManagementFilter', 'dataConfiguration'],
+    '/explorar': ['dataManagement', 'uploadFiles', 'dataManagementFilter', 'contentManagement'],
     '/cargar-archivos': ['filter', 'dataManagementFilter'],
     '/administrar-datos': ['filter'],
-    '/configurar-datos': ['filter', 'dataManagementFilter'],
+    '/administrar-contenido': ['filter', 'dataManagementFilter'],
   };
 
   const filteredMenuOptions = menuOptions.filter(option => {

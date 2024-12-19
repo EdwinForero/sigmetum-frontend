@@ -44,6 +44,7 @@
     "content" : "Your session has expired. Please log in again."
   },
   "explore": {
+    "title": "Species record",
     "noDataFoundPlaceholder": "No data available.",
     "downloadExcelButton": "Download results",
     "resultsInfo": "Showing {{currentResults}} of {{totalResults}} results",
@@ -112,6 +113,7 @@
   },
   "uploadFiles": {
     "title" : "Upload files",
+    "description" : "On this page, you can upload any Excel files you have on your device. Remember that the information in a file must correspond to a single province, and be sure to check the spelling and inclusion of all data to avoid inconsistencies.",
     "fileUploadForm": {
       "selectFilesButton": "Select files",
       "uploadFilesButton": "Upload files"
@@ -143,6 +145,7 @@
   },
   "dataManagement": {
     "title" : "Data management",
+    "description" : "On this page, you can manage the uploaded files associated with each province and view the data they contain. You also have the option to download the data in Excel format. Make sure that there is at least one file uploaded via the 'upload files' page.",
     "downloadExcelButton": "Download excel",
     "deleteVersionButton": "Delete version",
     "updateDataButton": "Update data",
@@ -160,6 +163,7 @@
   },
   "contentManagement": {
     "title" : "Content management",
+    "description" : "On this page, you can manage the content displayed in certain sections of the website.",
     "noLatinTermsPlaceholder" : "Term",
     "noTermsFoundPlaceholder": "No data available."
   },

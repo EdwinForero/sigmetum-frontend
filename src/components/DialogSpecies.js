@@ -102,7 +102,7 @@ const Dialog = ({
           </div>
         </div>
 
-        <div className="p-4 grid grid-cols-1 gap-4 overflow-y-auto flex-grow">
+        <div className="p-4 grid grid-cols-1 gap-4 overflow-y-auto flex-grow mb-10">
             {Object.entries(uniqueAttributes).map(([key, value]) => (
                 <SpeciesAttribute
                     key={key}
@@ -112,20 +112,23 @@ const Dialog = ({
             ))}
         </div>
 
-        <div className="flex justify-center px-4 py-2 mx-auto">
-          <a
-            href={`https://www.ipni.org/?q=${formattedQuery}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-[#0C1811] font-bold"
-          >
-            <span className="hover:underline">{t('explore.dialogSpecies.readMoreLabel')}</span>
-            <span className="material-symbols-outlined items-center text-[#15B659] mx-auto">open_in_new</span>
-          </a>
-        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4">
 
-        <div className="flex justify-center px-4 py-2 mx-auto mt-4">
-          <ButtonPrincipal onClick={onClose} text={t('explore.dialogSpecies.closeButton')} />
+          <div className="flex justify-center px-4 py-2 mx-auto mt-4">
+            <ButtonPrincipal onClick={onClose} text={t('explore.dialogSpecies.closeButton')} />
+          </div>
+
+          <div className="flex px-4 py-2 mx-auto">
+            <a
+              href={`https://www.ipni.org/?q=${formattedQuery}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-sm text-gray-600"
+            >
+              <span className="hover:underline">{t('explore.dialogSpecies.readMoreLabel')}</span>
+              <span className="material-symbols-outlined items-center mx-auto">open_in_new</span>
+            </a>
+          </div>
         </div>
       </motion.div>
     </motion.div>

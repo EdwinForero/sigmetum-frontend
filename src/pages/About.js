@@ -13,7 +13,7 @@ const About = () => {
   return (
     <div className="relative flex min-h-screen flex-col bg-white group/design-root overflow-x-hidden">
 
-    <div className="bg-[#F9FBFA] px-4 py-5 min-h-screen sm:px-8 sm:py-6 flex flex-1 justify-center items-center">
+    <div className="bg-[#F9FBFA] px-4 py-5 min-h-[80vh] sm:px-8 sm:py-6 flex flex-1 justify-center items-center">
     <div className="max-w-[960px] flex-1 flex flex-col justify-center items-center">
       <div className="@[480px]:px-4 @[480px]:py-3">
         <div
@@ -41,7 +41,7 @@ const About = () => {
         </div>
       </div>
 
-      <div className="bg-[#F9FBFA] min-h-screen grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-hidden">
+      <div className="bg-[#F9FBFA] min-h-[50vh] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-hidden">
         <motion.div
         className='bg-[#15B659] px-10 flex flex-col justify-center items-center h-full'
         variants={sectionVariants}

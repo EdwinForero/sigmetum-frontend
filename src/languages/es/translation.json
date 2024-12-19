@@ -45,6 +45,7 @@
     }
     ,
     "explore": {
+      "title": "Registro de especies",
       "noDataFoundPlaceholder": "No hay datos disponibles.",
       "downloadExcelButton": "Descargar resultados",
       "resultsInfo": "Mostrando {{currentResults}} de {{totalResults}} resultados",
@@ -113,6 +114,7 @@
   },
   "uploadFiles": {
     "title" : "Cargar archivos",
+    "description" : "En esta página, puede cargar los archivos excel que tenga en su dispositivo. Recuerde que la información de un archivo debe corresponder a una sola provincia, además, asegúrese de revisar la escritura y la inclusión de todos los datos para evitar inconsistencias.",
     "fileUploadForm": {
       "selectFilesButton": "Seleccionar archivos",
       "uploadFilesButton": "Cargar archivos"
@@ -144,6 +146,7 @@
   },
   "dataManagement": {
     "title" : "Administrar datos",
+    "description" : "En está página, puede gestionar los archivos cargados asociados a cada provincia y visualizar los datos que contienen. También tiene la opción de descargar los datos en formato Excel. Asegúrese de que haya al menos un archivo cargado a trvés de la página 'cargar archivos'.",
     "downloadExcelButton": "Descargar excel",
     "deleteVersionButton": "Eliminar versión",
     "updateDataButton": "Actualizar datos",
@@ -162,6 +165,7 @@
   },
   "contentManagement": {
     "title" : "Administrar contenido",
+    "description" : "En esta página, puede gestionar el contenido que se muestra en ciertas secciones del sitio web.",
     "noLatinTermsPlaceholder" : "Término",
     "noTermsFoundPlaceholder": "No hay datos disponibles."
   },

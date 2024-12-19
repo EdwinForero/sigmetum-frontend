@@ -20,6 +20,9 @@ const FilesUpload = () => {
             </h2>
           </div>
         </div>
+        <p className="text-[#14281D] text-base text-justify sm:text-lg text-center">
+            {t('uploadFiles.description')}
+        </p>
         <div className="px-40 flex flex-1 justify-center py-5">
           <div className="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5 max-w-[960px] flex-1">
             <div className="flex flex-col p-4">
