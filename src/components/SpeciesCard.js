@@ -4,12 +4,37 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const SpeciesCard = ({ 
   data, 
-  species 
+  species, 
+  noItalicTerms 
 }) => {
-  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
+
+  const highlightTerms = (text, terms) => {
+    if (!text || !terms || !Array.isArray(terms) || terms.length === 0) {
+      return [{ text, isItalic: true }];
+    }
+
+    const filteredTerms = terms
+      .map(term => (typeof term === 'object' && term.term ? term.term : term))
+      .filter(term => typeof term === 'string' && term.trim() !== '');
+
+    if (filteredTerms.length === 0) {
+      return [{ text, isItalic: true }];
+    }
+
+    const regex = new RegExp(`(\\s|^)(${filteredTerms.join('|')})(\\s|$)`, 'gi');
+
+    const parts = text.split(regex).map(part => ({
+      text: part,
+      isItalic: !filteredTerms.some(term => term.toLowerCase() === part.toLowerCase()),
+    }));
+
+    return parts;
+  };
+
+  const textParts = highlightTerms(species["Especies Características"], noItalicTerms);
 
   return (
     <>
@@ -20,8 +45,15 @@ const SpeciesCard = ({
         className="cursor-pointer flex items-center gap-2 rounded-lg min-h-[72px] py-2 border border-[#99BBA8]"
       >
         <div className="flex flex-col justify-center">
-          <p className="text-[#0C1811] text-base italic font-medium leading-normal whitespace-normal overflow-hidden text-ellipsis px-2">
-            {species["Especies Características"]}
+          <p className="text-[#0C1811] text-base font-medium leading-normal whitespace-normal overflow-hidden text-ellipsis px-2">
+            {textParts.map((part, index) => (
+              <span
+                key={index}
+                className={part.isItalic ? 'italic' : ''}
+              >
+                {part.text}
+              </span>
+            ))}
           </p>
         </div>
       </motion.div>
@@ -33,6 +65,7 @@ const SpeciesCard = ({
             onClose={closeDialog}
             data={data}
             species={species}
+            noItalicTerms={noItalicTerms}
           />
         )}
       </AnimatePresence>

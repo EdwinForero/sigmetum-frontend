@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ButtonPrincipal from '../components/ButtonPrincipal';
 import SpeciesCard from '../components/SpeciesCard';
@@ -11,15 +11,16 @@ import Pagination from '../components/Pagination';
 const Explore = ({ 
   data, 
   filteredSpecies, 
-  selectedSpecies
+  selectedSpecies,
+  noItalicTerms
  }) => {
-  
   const { t } = useTranslation();
   const [uniqueSpecies, setUniqueSpecies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(24);
   const [pageDirection, setPageDirection] = useState(0);
-
+  const totalResults = useRef(null);
+  
   useEffect(() => {
     const speciesArray = filteredSpecies
       .map((item) => item["Especies Características"])
@@ -43,6 +44,11 @@ const Explore = ({
     );
   
     setUniqueSpecies(sortedSpecies);
+    
+    if (totalResults.current === null) {
+      totalResults.current = sortedSpecies.length;
+    }
+
     setCurrentPage(1);
   }, [filteredSpecies, selectedSpecies]);
 
@@ -74,6 +80,8 @@ const Explore = ({
   const currentItems = uniqueSpecies.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalPages = Math.ceil(uniqueSpecies.length / itemsPerPage);
+
+  const currentResults = uniqueSpecies.length;
 
   const handlePageChange = (direction) => {
     setPageDirection(direction === "next" ? 1 : -1);
@@ -110,19 +118,28 @@ const Explore = ({
       ) : (
         <div className="min-h-screen gap-1 px-2 flex flex-1 py-5">
           <div className="layout-content-container flex flex-col flex-1 whitespace-nowrap">
-            <div className="flex items-center gap-4 px-4">
-              <ButtonPrincipal
-                onClick={() => {
-                  downloadXLSX(filteredSpecies);
-                }}
-                text={t('explore.downloadExcelButton')}
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4">
+
+            <span className="text-[#4B644A] text-lg mx-2">
+              {t("explore.resultsInfo", { currentResults, totalResults: totalResults.current })}
+            </span>
+
+            <div className="flex-grow text-center sm:w-auto">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
               />
             </div>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+
+            <ButtonPrincipal
+              onClick={() => {
+                downloadXLSX(filteredSpecies);
+              }}
+              text={t('explore.downloadExcelButton')}
             />
+          </div>
+            
             
             <div className="relative min-h-[700px]">
               <AnimatePresence initial={false} custom={pageDirection}>
@@ -140,6 +157,7 @@ const Explore = ({
                     <SpeciesCard
                       key={index}
                       data={data}
+                      noItalicTerms={noItalicTerms}
                       species={{
                         ...filteredSpecies,
                         "Especies Características": species,

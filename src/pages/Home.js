@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import ContactForm from '../components/ContactForm.js';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
+import EmailContactGrid from '../components/EmailContactGrid.js';
 import LoadSpinner from '../components/LoadSpinner.js';
 import ScrollIndicator from '../components/ScrollIndicator.js';
 
@@ -87,6 +88,7 @@ const Home = () => {
                 <span className="text-[#0C1811] text-sm font-normal leading-normal whitespace-pre-line">
                   {t('home.emailContact')}
                 </span>
+                <EmailContactGrid/>
               </div>
 
               <div className="border-t border-b border-t-[#14281D] border-b-[#14281D] py-5">

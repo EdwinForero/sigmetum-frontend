@@ -24,8 +24,9 @@ const Footer = () => {
                         {t('footer.cookies')}
                     </Link>
                 </div>
-                <p className="text-[#FFFFFF] text-base font-normal leading-normal">&copy; {t('footer.copyright', {currentYear})}</p>
+                
                 </footer>
+                <p className="text-[#FFFFFF] text-base text-center font-normal leading-normal mb-2">&copy; {t('footer.copyright', {currentYear})}</p>
             </div>
     );
   };

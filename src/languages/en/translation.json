@@ -19,7 +19,8 @@
     "descriptionContent" : "SIGMETUM-A is an interactive database through which you can discover the different types of vegetation in Andalusia by means of geological, biogeographical and bioclimatic criteria, which will lead you to identify the Vegetation Series of any regional territory, as well as its climax formation (mature stage of each Series) and its characteristic species.",
     "contactTitle" : "Contact us",
     "emailTitle" : "E-mail",
-    "emailContact" : "For further information about the project, you can contact the following people at the Department of Botany and Plant Physiology of the University of Malaga:\n\n• Jaime F. Pereña Ortiz. E-mail: jperena@uma.es\n• Á, Enrique Salvo Tierra. E-mail: salvo@uma.es\n• Andrés V. Pérez Latorre. E-mail: avperez@uma.es\n• Noelia Hidalgo Triana. E-mail: nhidalgo@uma.es\n• Marianela Zanolla Balbuena. E-mail: marianela@uma.es",
+    "emailContact" : "For further information about the project, you can contact the following people at the Department of Botany and Plant Physiology of the University of Malaga:",
+    "emailsData" : "Jaime F. Pereña Ortiz/jperena@uma.es/Á, Enrique Salvo Tierra/salvo@uma.es/Andrés V. Pérez Latorre/avperez@uma.es/Noelia Hidalgo Triana/nhidalgo@uma.es/Marianela Zanolla Balbuena/marianela@uma.es",
     "locationLabel": "Location",
     "locationContent": "Department of Botany and Plant Physiology.\nFaculty of Science (University of Malaga).\nBoulevard Loius Pasteur, 31, 2nd floor.\n29010 - Málaga",
     "contactForm": {
@@ -44,9 +45,10 @@
   },
   "explore": {
     "noDataFoundPlaceholder": "No data available.",
-    "downloadExcelButton": "Download excel",
+    "downloadExcelButton": "Download results",
+    "resultsInfo": "Showing {{currentResults}} of {{totalResults}} results",
     "dialogSpecies": {
-      "readMoreLabel" : "Read more",
+      "readMoreLabel" : "Search in IPNI",
       "closeButton" : "Close",
       "attributes": {
         "province": "Province",
@@ -120,13 +122,19 @@
     "errorTitle": "Error",
     "adviceTitle": "Advice",
     "successUploadMessage": "All files were uploaded successfully.",
+    "successUploadTerm": "Term uploaded successfully.",
     "successDeleteMessage": "Data deleted successfully.",
+    "successDeleteTerm": "Term deleted successfully.",
     "successUpdateMessage": "Data updated successfully.",
     "successEmailMessage": "Mail sent successfully.",
     "errorUploadMessage": "Error uploading file. Please try again.",
+    "errorUploadTerm": "Error uploading term. Please try again.",
+    "errorDeleteTerm": "Error deleting term. Please try again.",
     "errorDeleteMessage": "Error deleting data. Please try again.",
     "errorUpdateMessage": "Error updating data. Please try again.",
     "errorEmailMessage": "Error sending mail. Please try again.",
+    "adviceEmptyValues": "Empty values ​​cannot be entered.",
+    "adviceDuplicatedTerm": "Duplicate values ​​cannot be entered.",
     "fieldsMissingMessage": "Are you sure you want to upload the file {{filename}}? Empty fields were found in the following records:",
     "rowEmpty": "Row {{rowIndex}}",
     "closeButton" : "Close",
@@ -149,6 +157,11 @@
     "table": {
       "noDataFoundPlaceholder": "No data available."
     }
+  },
+  "contentManagement": {
+    "title" : "Content management",
+    "noLatinTermsPlaceholder" : "Term",
+    "noTermsFoundPlaceholder": "No data available."
   },
   "cookies":{
     "title" : "Cookie Policy",

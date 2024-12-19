@@ -71,7 +71,7 @@ const Sidebar = ({
       </aside>
 
       <motion.div
-        className="fixed top-0 left-0 z-30 overflow-y-auto max-w-full h-full bg-[#F9FBFA]"
+        className="fixed top-0 left-0 z-30 overflow-y-auto max-w-full h-full bg-[#F9FBFA] py-16"
         initial={{ x: '-100%' }}
         animate={{ x: isOverlayVisible ? 0 : '-100%' }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}

@@ -9,7 +9,8 @@ const Dialog = ({
   isOpen, 
   onClose, 
   data, 
-  species 
+  species, 
+  noItalicTerms 
 }) => {
   
   const { t } = useTranslation();
@@ -22,6 +23,31 @@ const Dialog = ({
     (item) =>
       item["Especies Características"]?.includes(species["Especies Características"])
   );
+
+  const highlightTerms = (text, terms) => {
+    if (!text || !terms || !Array.isArray(terms) || terms.length === 0) {
+      return [{ text, isItalic: true }];
+    }
+
+    const filteredTerms = terms
+      .map(term => (typeof term === 'object' && term.term ? term.term : term))
+      .filter(term => typeof term === 'string' && term.trim() !== '');
+
+    if (filteredTerms.length === 0) {
+      return [{ text, isItalic: true }];
+    }
+
+    const regex = new RegExp(`(\\s|^)(${filteredTerms.join('|')})(\\s|$)`, 'gi');
+
+    const parts = text.split(regex).map(part => ({
+      text: part,
+      isItalic: !filteredTerms.some(term => term.toLowerCase() === part.toLowerCase()),
+    }));
+
+    return parts;
+  };
+
+  const textParts = highlightTerms(species["Especies Características"], noItalicTerms);
 
   const uniqueAttributes = {
     province: SortItemsList([...new Set(filteredSpecies.map((item) => item["Provincia"]))])
@@ -64,29 +90,37 @@ const Dialog = ({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex justify-center px-4 py-2 mx-auto w-full">
-          <h2 className="text-[#4B644A] text-4xl mb-4 italic font-bold text-center break-words whitespace-normal">
-            {species["Especies Características"]}
-          </h2>
+          <div className="text-[#4B644A] text-4xl mb-4 font-bold text-center break-words whitespace-normal">
+            {textParts.map((part, index) => (
+                <h2
+                  key={index}
+                  className={part.isItalic ? 'italic' : ''}
+                >
+                  {part.text}
+                </h2>
+              ))}
+          </div>
         </div>
 
         <div className="p-4 grid grid-cols-1 gap-4 overflow-y-auto flex-grow">
-          {Object.entries(uniqueAttributes).map(([key, value]) => (
-              <SpeciesAttribute
-                  key={key}
-                  title={t(`explore.dialogSpecies.attributes.${key}`, key)}
-                  description={value}
-              />
-          ))}
-      </div>
+            {Object.entries(uniqueAttributes).map(([key, value]) => (
+                <SpeciesAttribute
+                    key={key}
+                    title={t(`explore.dialogSpecies.attributes.${key}`, key)}
+                    description={value}
+                />
+            ))}
+        </div>
 
         <div className="flex justify-center px-4 py-2 mx-auto">
           <a
             href={`https://www.ipni.org/?q=${formattedQuery}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#0C1811] font-bold hover:underline"
+            className="flex items-center text-[#0C1811] font-bold"
           >
-            {t('explore.dialogSpecies.readMoreLabel')}
+            <span className="hover:underline">{t('explore.dialogSpecies.readMoreLabel')}</span>
+            <span className="material-symbols-outlined items-center text-[#15B659] mx-auto">open_in_new</span>
           </a>
         </div>
 

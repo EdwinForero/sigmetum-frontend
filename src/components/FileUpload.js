@@ -161,19 +161,19 @@ const FileUploadForm = ({
         <ButtonAlternative text={t('uploadFiles.fileUploadForm.selectFilesButton')} onClick={() => document.getElementById('fileInput').click()}/>
         
         <div className="mt-4">
-        {files.map((file, index) => (
-          <div key={index} className="flex items-center justify-between text-gray-700 mb-2">
-            <p>{file.name}</p>
-            <button
-              onClick={() => handleRemoveFile(index)}
-              className="text-[#15B659] cursor-pointer"
-            >
-            <span className="material-symbols-outlined text-3xl mx-auto">
-              delete
-            </span>
-          </button>
-          </div>
-        ))}
+          {files.map((file, index) => (
+            <div key={index} className="flex items-center justify-between text-gray-700 mb-2">
+              <p>{file.name}</p>
+              <button
+                onClick={() => handleRemoveFile(index)}
+                className="text-[#15B659] cursor-pointer"
+              >
+              <span className="material-symbols-outlined text-3xl mx-auto">
+                delete
+              </span>
+            </button>
+            </div>
+          ))}
         </div>
       </div>
       <div className="flex px-4 py-3 justify-center">

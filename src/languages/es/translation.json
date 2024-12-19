@@ -19,7 +19,8 @@
       "descriptionContent" : "SIGMETUM-A es una base de datos interactiva a través de la cual podrás descubrir los diferentes tipos de vegetación de Andalucía mediante criterios geológicos, biogeográficos y bioclimáticos, que te llevarán a identificar la Serie de Vegetación de cualquier territorio regional, así como su formación clímax (etapa madura de cada Serie) y sus especies características.",
       "contactTitle" : "Contáctenos",
       "emailTitle" : "Correo electrónico",
-      "emailContact" : "Para ampliar información acerca del proyecto, puede contactar a las siguientes persona:\n\n• Jaime F. Pereña Ortiz. Correo: jperena@uma.es\n• Á, Enrique Salvo Tierra. Correo: salvo@uma.es\n• Andrés V. Pérez Latorre. Correo: avperez@uma.es\n• Noelia Hidalgo Triana. Correo: nhidalgo@uma.es\n• Marianela Zanolla Balbuena. Correo: marianela@uma.es",
+      "emailContact" : "Para ampliar información acerca del proyecto, puede contactar a las siguientes personas:",
+      "emailsData" : "Jaime F. Pereña Ortiz/jperena@uma.es/Á, Enrique Salvo Tierra/salvo@uma.es/Andrés V. Pérez Latorre/avperez@uma.es/Noelia Hidalgo Triana/nhidalgo@uma.es/Marianela Zanolla Balbuena/marianela@uma.es",
       "locationLabel": "Ubicación",
       "locationContent": "Departamento de Botánica y Fisiología Vegetal.\nFacultad de Ciencias (Universidad de Málaga).\nBoulevard Loius Pasteur, 31, 2º planta.\n29010 - Málaga",
       "contactForm": {
@@ -45,9 +46,10 @@
     ,
     "explore": {
       "noDataFoundPlaceholder": "No hay datos disponibles.",
-      "downloadExcelButton": "Descargar excel",
+      "downloadExcelButton": "Descargar resultados",
+      "resultsInfo": "Mostrando {{currentResults}} de {{totalResults}} resultados",
       "dialogSpecies": {
-        "readMoreLabel" : "Leer más",
+        "readMoreLabel" : "Buscar en IPNI",
         "closeButton" : "Cerrar",
         "attributes": {
           "province": "Provincia",
@@ -121,13 +123,19 @@
     "errorTitle": "Error",
     "adviceTitle": "Aviso",
     "successUploadMessage": "Todos los archivos se subieron con éxito.",
+    "successUploadTerm": "Término subido con éxito.",
     "successDeleteMessage": "Datos eliminados con éxito.",
+    "successDeleteTerm": "Término eliminado con éxito.",
     "successUpdateMessage": "Datos actualizados con éxito.",
     "successEmailMessage": "Correo enviado con éxito.",
     "errorUploadMessage": "Error al subir un archivo. Inténtalo de nuevo.",
+    "errorUploadTerm": "Error al subir el término. Inténtalo de nuevo.",
+    "errorDeleteTerm": "Error al eliminar el término. Inténtalo de nuevo.",
     "errorDeleteMessage": "Error al eliminar datos. Inténtalo de nuevo.",
     "errorUpdateMessage": "Error al actualizar los datos. Inténtalo de nuevo.",
     "errorEmailMessage": "Error al enviar el correo. Inténtalo de nuevo.",
+    "adviceEmptyValues": "No se pueden introducir valores vacíos.",
+    "adviceDuplicatedTerm": "No se pueden introducir términos duplicados.",
     "fieldsMissingMessage": "¿Está seguro de cargar el archivo {{filename}}? Se encontraron campos vacíos en los siguientes registros:",
     "rowEmpty": "Fila {{rowIndex}}",
     "closeButton" : "Cerrar",
@@ -152,8 +160,10 @@
       "noDataFoundPlaceholder": "No hay datos disponibles."
     }
   },
-  "dataConfiguration": {
-    "title" : "Configuración de datos"
+  "contentManagement": {
+    "title" : "Administrar contenido",
+    "noLatinTermsPlaceholder" : "Término",
+    "noTermsFoundPlaceholder": "No hay datos disponibles."
   },
   "cookies":{
     "title" : "Política de Cookies",

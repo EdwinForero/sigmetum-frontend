@@ -21,6 +21,7 @@ import LanguageSwitcher from './components/LanguageSwitcher.js';
 function App() {
 
   const [isLoading, setIsLoading] = useState(true);
+  const [noItalicTerms, setNoItalicTerms] = useState([]);
   const [mergedData, setMergedData] = useState(null);
   const [selectedSpecies, setSelectedSpecies] = useState([]);
   const [filteredSpecies, setFilteredSpecies] = useState([]);
@@ -30,13 +31,23 @@ function App() {
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/configurar-datos", "/explorar"].includes(location.pathname);
   const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
+  const fetchTerms = useCallback(async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/list-terms`);
+      const data = await response.json();
+      setNoItalicTerms(data.terms);
+    } catch (error) {
+      console.error('Error al obtener los términos:', error);
+    }
+    
+  }, []);
+
   const fetchData = useCallback(async () => {
     try {
       const response = await fetch(`${BASE_URL}/get-merged-data`);
       const result = await response.json();
       setMergedData(result);
       setFilteredSpecies(result);
-      setIsLoading(false);
     } catch (error) {
       console.error('Error al obtener los datos:', error);
     }
@@ -48,7 +59,11 @@ function App() {
       setIsLoading(true);
       setFilteredSpecies([]);
       setSelectedSpecies([]);
-      fetchData();
+      setNoItalicTerms([]);
+      Promise.all([fetchData(), fetchTerms()])
+      .finally(() => {
+        setIsLoading(false);
+      });
     } else if (location.pathname === '/administrar-datos') {
       setSelectedData([]);
       setFilteredData([]);
@@ -60,7 +75,7 @@ function App() {
       setFilteredData([]);
       setSelectedData([]);
     }
-  }, [location.pathname, fetchData]);
+  }, [location.pathname, fetchData, fetchTerms]);
 
   const handleFileDropdownSelect = (data) => {
     setSelectedData(data);
@@ -100,7 +115,7 @@ function App() {
 
   return (
       <div className="App">
-        <header className="bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16">
+        <header className="fixed top-0 left-0 w-full bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16 z-50">
           <Link to="/">
             <div className="flex items-center gap-4">
               <p className="font-bold text-[#0C1811] text-base sm:text-xl ml-4">SIGMETUM-A</p>
@@ -114,7 +129,7 @@ function App() {
           </div>
         </header>
 
-        <div className="flex w-full min-h-screen sm:overflow-auto md:overflow-hidden">
+        <div className="flex w-full min-h-screen sm:overflow-auto md:overflow-hidden mt-16">
           {showSideMenu && (
               <Sidebar managementData={selectedData} exploreData={mergedData} menuOptions={menuOptions} />
           )}
@@ -131,7 +146,7 @@ function App() {
                         <LoadSpinner />
                       </div>
                     ) : (
-                      <Explore data={mergedData} filteredSpecies={filteredSpecies} selectedSpecies={selectedSpecies} />
+                      <Explore data={mergedData} filteredSpecies={filteredSpecies} selectedSpecies={selectedSpecies} noItalicTerms={noItalicTerms}/>
                     )
                   }
                 />
