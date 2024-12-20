@@ -47,6 +47,7 @@
     "title": "Species record",
     "noDataFoundPlaceholder": "No data available.",
     "downloadExcelButton": "Download results",
+    "downloadExcelButtonTooltip": "By clicking this button, you can download an Excel file containing the filtered results based on the options you have previously selected.",
     "resultsInfo": "Showing {{currentResults}} of {{totalResults}} results",
     "dialogSpecies": {
       "readMoreLabel" : "Search in IPNI",
@@ -116,6 +117,7 @@
     "description" : "On this page, you can upload any Excel files you have on your device. Remember that the information in a file must correspond to a single province, and be sure to check the spelling and inclusion of all data to avoid inconsistencies.",
     "fileUploadForm": {
       "selectFilesButton": "Select files",
+      "selectFilesButtonTooltip": "Once you click the button, select the files you want to upload to the website. If everything goes well, the data will be displayed on the 'explore' page and you can manage it on the 'data management' page. Only Excel files are supported.",
       "uploadFilesButton": "Upload files"
     }
   },
@@ -147,11 +149,15 @@
     "title" : "Data management",
     "description" : "On this page, you can manage the uploaded files associated with each province and view the data they contain. You also have the option to download the data in Excel format. Make sure that there is at least one file uploaded via the 'upload files' page.",
     "downloadExcelButton": "Download excel",
+    "downloadExcelButtonTooltip": "By clicking this button, you can download an Excel file containing the filtered results based on the options you have previously selected.",
     "deleteVersionButton": "Delete version",
+    "deleteVersionButtonTooltip": "Pressing this button will permanently delete the file you previously selected. If there are other versions of the file, it will be restored with the data from the most recent version.",
     "updateDataButton": "Update data",
+    "updateDataButtonTooltip": "Pressing this button will set the data displayed on the 'Explore' page for the province corresponding to the previously chosen file.",
     "fileSelectDropdwon": {
       "selectFileDropdownLabel": "Choose the dataset",
       "selectFileDropdownPlaceholder": "Choose the dataset",
+      "selectFileDropdownTooltip": "By clicking on the bar below, you will first need to choose a province on the left side and then the file you want to manage. Provinces that do not have at least one corresponding file will not appear in the list.",
       "provinceTitle" : "Province",
       "versionTitle" : "Version",
       "versionPlaceholder" : "Choose a province to see the available versions.",
@@ -164,6 +170,8 @@
   "contentManagement": {
     "title" : "Content management",
     "description" : "On this page, you can manage the content displayed in certain sections of the website.",
+    "noLatinTermsTitle" : "Non-Latinisms Exception",
+    "noLatinTermsTooltip" : "In this section you can add or remove terms that you do not want to appear in italics on the 'explore' page.",
     "noLatinTermsPlaceholder" : "Term",
     "noTermsFoundPlaceholder": "No data available."
   },

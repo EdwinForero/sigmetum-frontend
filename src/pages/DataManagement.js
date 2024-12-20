@@ -5,6 +5,7 @@ import FileDropdown from '../components/FileDropdown.js';
 import LoadSpinner from '../components/LoadSpinner.js';
 import { downloadXLSX } from '../utilities/CSVfunctions.js';
 import DialogAdvice from '../components/DialogAdvice';
+import InfoButton from '../components/InfoButton.js';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 
@@ -125,9 +126,15 @@ const DataManagement = ({
             {t('dataManagement.description')}
           </p>
 
-          <h3 className="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em] pb-2 pt-4">
-            {t('dataManagement.fileSelectDropdwon.selectFileDropdownLabel')}
-          </h3>
+          <div className="flex gap-3 flex-wrap py-3 items-center">
+            <h3 className="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">
+              {t('dataManagement.fileSelectDropdwon.selectFileDropdownLabel')}
+            </h3>
+            <InfoButton 
+              tooltipText={t('dataManagement.fileSelectDropdwon.selectFileDropdownTooltip')}
+            />
+          </div>
+
           <div className="flex justify-stretch w-full">
             <label className="flex flex-col w-full min-w-40 py-3 flex-1">
                 <FileDropdown ref={fileDropdownRef} onLoad={handleOnLoad} onFileSelect={handleFileSelect} selectedFile={fileName} className="file-dropdown"/>
@@ -136,12 +143,21 @@ const DataManagement = ({
             <>
               <div className="flex gap-3 flex-wrap px-3 py-3 justify-end">
                 <ButtonAlternative onClick={() => {downloadXLSX(filteredSpecies)}} text={t('dataManagement.downloadExcelButton')}/>
+                  <InfoButton 
+                  tooltipText={t('dataManagement.downloadExcelButtonTooltip')}
+                />
               </div>
               <div className="flex gap-3 flex-wrap px-3 py-3 justify-end">
                 <ButtonAlternative onClick={handleFileDelete} text={t('dataManagement.deleteVersionButton')} />
+                <InfoButton 
+                  tooltipText={t('dataManagement.deleteVersionButtonTooltip')}
+                />
               </div>
               <div className="flex gap-3 flex-wrap px-3 py-3 justify-end">
                 <ButtonAlternative onClick={handleFileUpdate} text={t('dataManagement.updateDataButton')} />
+                <InfoButton 
+                  tooltipText={t('dataManagement.downloadExcelButtonTooltip')}
+                />
               </div>
             </>
             )}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ButtonAlternative from './ButtonAlternative';
 import ButtonPrincipal from './ButtonPrincipal';
 import DialogAdvice from './DialogAdvice';
+import InfoButton from './InfoButton';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 
@@ -158,8 +159,13 @@ const FileUploadForm = ({
           id="fileInput"
         />
         
-        <ButtonAlternative text={t('uploadFiles.fileUploadForm.selectFilesButton')} onClick={() => document.getElementById('fileInput').click()}/>
-        
+        <div className="flex justify-center items-center m-2">
+          <ButtonAlternative text={t('uploadFiles.fileUploadForm.selectFilesButton')} onClick={() => document.getElementById('fileInput').click()}/>
+          <InfoButton 
+            tooltipText={t('uploadFiles.fileUploadForm.selectFilesButtonTooltip')}
+          />
+        </div>
+
         <div className="mt-4">
           {files.map((file, index) => (
             <div key={index} className="flex items-center justify-between text-gray-700 mb-2">

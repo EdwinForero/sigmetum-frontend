@@ -1,5 +1,6 @@
 import { React, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import InfoButton from '../components/InfoButton.js';
 import TextInput from '../components/TextInput.js';
 import LoadSpinner from '../components/LoadSpinner.js';
 import DialogAdvice from '../components/DialogAdvice.js';
@@ -140,8 +141,17 @@ const ContentManagement = () => {
           <div className="flex w-full flex-wrap justify-between gap-3 py-4">
             
             <div className="flex min-w-72 flex-col gap-3">
-              
+              <div className="flex gap-3 flex-wrap items-center">
+                <h3 className="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">
+                  {t('contentManagement.noLatinTermsTitle')}
+                </h3>
+                <InfoButton 
+                  tooltipText={t('contentManagement.noLatinTermsTooltip')}
+                />
+              </div>
+
               <div className="flex justify-stretch items-center w-full">
+                
                 <TextInput
                   placeholderText={t('contentManagement.noLatinTermsPlaceholder')}
                   value={term}

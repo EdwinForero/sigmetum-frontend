@@ -48,6 +48,7 @@
       "title": "Registro de especies",
       "noDataFoundPlaceholder": "No hay datos disponibles.",
       "downloadExcelButton": "Descargar resultados",
+      "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
       "resultsInfo": "Mostrando {{currentResults}} de {{totalResults}} resultados",
       "dialogSpecies": {
         "readMoreLabel" : "Buscar en IPNI",
@@ -114,9 +115,10 @@
   },
   "uploadFiles": {
     "title" : "Cargar archivos",
-    "description" : "En esta página, puede cargar los archivos excel que tenga en su dispositivo. Recuerde que la información de un archivo debe corresponder a una sola provincia, además, asegúrese de revisar la escritura y la inclusión de todos los datos para evitar inconsistencias.",
+    "description" : "En esta página, puede cargar los archivos Excel que tenga en su dispositivo. Recuerde que la información de un archivo debe corresponder a una sola provincia, además, asegúrese de revisar la escritura y la inclusión de todos los datos para evitar inconsistencias.",
     "fileUploadForm": {
       "selectFilesButton": "Seleccionar archivos",
+      "selectFilesButtonTooltip": "Al pulsar el botón, seleccione los archivos que desea cargar al sitio web. Si todo sale bien, se mostrarán los datos en la página 'explorar' y podrá gestionarlos en la página 'administrar datos'. Solo se admiten archivos Excel.",
       "uploadFilesButton": "Cargar archivos"
     }
   },
@@ -148,12 +150,16 @@
     "title" : "Administrar datos",
     "description" : "En está página, puede gestionar los archivos cargados asociados a cada provincia y visualizar los datos que contienen. También tiene la opción de descargar los datos en formato Excel. Asegúrese de que haya al menos un archivo cargado a trvés de la página 'cargar archivos'.",
     "downloadExcelButton": "Descargar excel",
+    "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
     "deleteVersionButton": "Eliminar versión",
+    "deleteVersionButtonTooltip": "Al presionar este botón, se eliminará permanentemente el archivo que haya elegido previamente. En caso de existir otras versiones del archivo, se restablecerá con los datos de la versión más reciente.",
     "updateDataButton": "Actualizar datos",
+    "updateDataButtonTooltip": "Al presionar este botón, se establecerán los datos que se muestran en la página 'Explorar' para la provincia correspondiente al archivo elegido previamente.",
     "noDataFoundPlaceholder": "No hay datos disponibles.",
     "fileSelectDropdwon": {
       "selectFileDropdownLabel": "Elegir conjunto de datos",
       "selectFileDropdownPlaceholder": "Elegir conjunto de datos",
+      "selectFileDropdownTooltip": "Al pulsar la barra que se encuentra debajo, deberá elegir primero una provincia del lado izquierdo y después el archivo que desea gestionar. Las provincias que no tengan al menos un archivo correspondiente no aparecerán en el listado.",
       "provinceTitle" : "Provincia",
       "versionTitle" : "Versión",
       "versionPlaceholder" : "Selecciona una provincia para ver las versiones disponibles.",
@@ -166,6 +172,8 @@
   "contentManagement": {
     "title" : "Administrar contenido",
     "description" : "En esta página, puede gestionar el contenido que se muestra en ciertas secciones del sitio web.",
+    "noLatinTermsTitle" : "Excepción de no latinismos",
+    "noLatinTermsTooltip" : "En esta sección puede incluir o eliminar los términos que desee que no aparezcan en cursiva en la página 'explorar'.",
     "noLatinTermsPlaceholder" : "Término",
     "noTermsFoundPlaceholder": "No hay datos disponibles."
   },

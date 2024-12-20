@@ -5,6 +5,7 @@ import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
+import InfoButton from '../components/InfoButton';
 //import ImageCarousel from '../components/ImageCarrousel';
 //import ScrollIndicator from '../components/ScrollIndicator';
 
@@ -142,6 +143,10 @@ const Explore = ({
                 downloadXLSX(filteredSpecies);
               }}
               text={t('explore.downloadExcelButton')}
+            />
+
+            <InfoButton 
+              tooltipText={t('explore.downloadExcelButtonTooltip')}
             />
           </div>
             
