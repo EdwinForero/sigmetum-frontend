@@ -7,6 +7,7 @@ import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import EmailContactGrid from '../components/EmailContactGrid.js';
 import LoadSpinner from '../components/LoadSpinner.js';
 import ScrollIndicator from '../components/ScrollIndicator.js';
+import ImageComponent from '../components/ImageComponent.js';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -23,14 +24,9 @@ const Home = () => {
 
   return (
     <>
-      <div
-        className="bg-[#F9FBFA] flex min-h-[95vh] w-full flex-col gap-6 bg-cover bg-center bg-no-repeat md:gap-8 items-start justify-center px-4 pb-20 md:px-5"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url("https://images.alphacoders.com/862/862181.jpg")`,
-        }}
-      >
+      <ImageComponent imageKey="Home.jpg" isBackground={true} className="flex items-center justify-left px-2">
         <div className="flex flex-col gap-5 text-left">
-          <h1 className="text-[#F9FBFA] text-4xl font-black leading-tight tracking-[-0.033em] sm:text-6xl sm:font-black sm:leading-tight sm:tracking-[-0.033em]">
+          <h1 className="text-[#F9FBFA] text-4xl font-black sm:text-6xl sm:font-black">
             {t('home.title')}
           </h1>
           <h2 className="text-[#F9FBFA] text-sm font-normal leading-normal sm:text-2xl sm:font-normal sm:leading-normal">
@@ -40,7 +36,7 @@ const Home = () => {
             <ButtonPrincipal text={t('home.searchButton')} />
           </Link>
         </div>
-      </div>
+        </ImageComponent>
 
       <div className="overflow-hidden">
         <div

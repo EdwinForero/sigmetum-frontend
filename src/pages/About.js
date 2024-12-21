@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import ScrollIndicator from '../components/ScrollIndicator';
+import ImageComponent from '../components/ImageComponent';
 
 const About = () => {
   const { t } = useTranslation();
@@ -16,14 +17,10 @@ const About = () => {
     <div className="bg-[#F9FBFA] px-4 py-5 min-h-[80vh] sm:px-8 sm:py-6 flex flex-1 justify-center items-center">
     <div className="max-w-[960px] flex-1 flex flex-col justify-center items-center">
       <div className="@[480px]:px-4 @[480px]:py-3">
-        <div
-          className="w-full bg-cover bg-center bg-no-repeat flex flex-col justify-end overflow-hidden min-h-80 rounded-xl"
-          style={{
-            backgroundImage: 'url("https://img.freepik.com/premium-vector/forest-landscape-with-full-moon-background_670382-358934.jpg")'
-          }}
-        >
-        </div>
-        
+      <div className="w-full h-[400px] bg-no-repeat flex flex-col justify-end overflow-hidden rounded-xl">
+        <ImageComponent imageKey="AboutUs.jpg" />
+      </div>
+
         <motion.h2
           className="text-[#15B659] tracking-light text-6xl font-bold leading-tight my-4 text-center"
         >
