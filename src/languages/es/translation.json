@@ -140,7 +140,8 @@
     "errorEmailMessage": "Error al enviar el correo. Inténtalo de nuevo.",
     "adviceEmptyValues": "No se pueden introducir valores vacíos.",
     "adviceDuplicatedTerm": "No se pueden introducir términos duplicados.",
-    "fieldsMissingMessage": "¿Está seguro de cargar el archivo {{filename}}? Se encontraron campos vacíos en los siguientes registros:",
+    "fieldsMissingMessage": "¿Está seguro de cargar el archivo {{filename}}? Se encontraron campos vacíos algunos registros.",
+    "emptyFieldsSummary": "Mostrar detalles",
     "rowEmpty": "Fila {{rowIndex}}",
     "closeButton" : "Cerrar",
     "confirmButton" : "Confirmar",
@@ -203,7 +204,27 @@
     "browserSafari" : "• <a>Safari</a>.",
     "browserMicrosoftEdge" : "• <a>Microsoft Edge</a>.",
     "browserFirefox" : "• <a>Firefox</a>.",
-    "browserOpera" : "• <a>Opera</a>."
+    "browserOpera" : "• <a>Opera</a>.",
+    "banner" : {
+      "title": "Política de Cookies",
+      "description": "Usamos cookies para reconocer tu dispositivo, optimizar tu experiencia, personalizar contenido, mostrar publicidad relevante y garantizar la seguridad. No almacenamos datos personales sin tu consentimiento o cuando no sea estrictamente necesario para los servicios que utilizas. Para mayor información, consulta <a>aquí</a>.",
+      "acceptAllButton": "Aceptar todo",
+      "cookiesConfigurationButton": "Configurar cookies"
+    },
+    "modal" : {
+      "title": "Preferencia de cookies",
+      "description": "Configure sus preferencias de cookies seleccionando las categorías que desea habilitar.",
+      "cancelButton": "Cancelar",
+      "applyButton": "Aplicar",
+      "categories": {
+        "all": "Aceptar todas las cookies",
+        "advertising": "Cookies de publicidad",
+        "advertisingTracking": "Cookies de seguimiento de publicidad",
+        "functionality": "Cookies de funcionalidad",
+        "personalization": "Cookies de personalización",
+        "security": "Cookies de seguridad"
+      }
+    }
   },
   "language":{
     "spanish" : "Español - ES",

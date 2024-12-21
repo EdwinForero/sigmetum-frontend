@@ -17,6 +17,7 @@ import Filter from './components/Filter.js';
 import LoadSpinner from './components/LoadSpinner';
 import ProtectedRoute from './components/ProtectedRoute.js';
 import LanguageSwitcher from './components/LanguageSwitcher.js';
+import CookieBanner from './components/CookieBanner.js';
 
 function App() {
 
@@ -165,6 +166,8 @@ function App() {
           <Footer />
           <span className="text-[#F9FBFA] absolute bottom-2 right-2">V 1.0.0</span>
         </footer>
+
+        <CookieBanner/>
       </div>
   );
 }

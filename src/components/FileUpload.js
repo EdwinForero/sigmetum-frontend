@@ -13,6 +13,7 @@ const FileUploadForm = ({
   const [files, setFiles] = useState([]);
   const [dialogTitle, setDialogTitle] = useState('');
   const [dialogMessage, setDialogMessage] = useState('');
+  const [dialogDetails, setDialogDetails] = useState(null);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogActions, setDialogActions] = useState({ onConfirm: null});
   const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
@@ -71,26 +72,28 @@ const FileUploadForm = ({
               .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
               .join(', ');
   
-            setDialogMessage(
-              `${t('dialogAdvice.fieldsMissingMessage', { filename: file.name})}\n\n${emptyFieldSummary}`
-            );
+            setDialogMessage(`${t('dialogAdvice.fieldsMissingMessage', { filename: file.name })}`);
             setDialogTitle(t('dialogAdvice.adviceTitle'));
+            setDialogDetails({
+              title: t('dialogAdvice.emptyFieldsSummary'),
+              content: emptyFieldSummary,
+            });
             setDialogVisible(true);
   
             const confirmed = await new Promise((resolve) => {
               setDialogActions({
-                onConfirm: () => resolve(true)
+                onConfirm: () => resolve(true),
               });
             });
   
             setDialogVisible(false);
-            setDialogActions({ onConfirm: null});
+            setDialogActions({ onConfirm: null });
   
             if (confirmed) {
               onLoad(true);
               const confirmedResponse = await fetch(`${BASE_URL}/upload/confirm`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                   'Content-Type': 'application/json',
                   Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -111,6 +114,7 @@ const FileUploadForm = ({
             allFilesUploadedSuccessfully = false;
             setDialogMessage(t('dialogAdvice.errorUploadMessage'));
             setDialogTitle(t('dialogAdvice.errorTitle'));
+            setDialogDetails(null);
             setDialogVisible(true);
             break;
           }
@@ -119,6 +123,7 @@ const FileUploadForm = ({
         allFilesUploadedSuccessfully = false;
         setDialogMessage(t('dialogAdvice.errorUploadMessage'));
         setDialogTitle(t('dialogAdvice.errorTitle'));
+        setDialogDetails(null);
         setDialogVisible(true);
         setFiles([]);
         break;
@@ -130,6 +135,7 @@ const FileUploadForm = ({
     if (allFilesUploadedSuccessfully) {
       setDialogMessage(t('dialogAdvice.successUploadMessage'));
       setDialogTitle(t('dialogAdvice.successTitle'));
+      setDialogDetails(null);
       setDialogVisible(true);
       setFiles([]);
       setDialogActions({ onConfirm: null });
@@ -192,6 +198,7 @@ const FileUploadForm = ({
           <DialogAdvice
             dialogTitle={dialogTitle}
             dialogMessage={dialogMessage}
+            dialogDetails={dialogDetails}
             onConfirm={dialogActions.onConfirm}
             onClose={closeDialog}
             showActions={!!dialogActions.onConfirm}

@@ -8,10 +8,22 @@ const DialogAdvice = ({
   dialogTitle, 
   dialogMessage, 
   onConfirm,
-  showActions = false
+  showActions = false,
+  dialogDetails = null
 }) => {
-  
   const { t } = useTranslation();
+
+  const renderDialogDetails = () => {
+    if (dialogDetails) {
+      return (
+        <details className="py-2 text-xl">
+          <summary className="font-bold">{dialogDetails.title}</summary>
+          <p>{dialogDetails.content}</p>
+        </details>
+      );
+    }
+    return null;
+  };
 
   return (
     <motion.div
@@ -28,6 +40,7 @@ const DialogAdvice = ({
         animate={{ y: 0 }}
         exit={{ y: 1000 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        onClick={(event) => event.stopPropagation()}
       >
         <div className="flex justify-center px-4 py-2 mx-auto">
           <h3 className="text-[#15B659] text-4xl mb-4 font-bold">
@@ -35,8 +48,9 @@ const DialogAdvice = ({
           </h3>
         </div>
 
-        <div className="flex max-h-[300px] overflow-y-auto justify-center px-4 py-2 mx-auto">
+        <div className="p-4 grid grid-cols-1 gap-4 max-h-[300px] overflow-y-auto flex-grow mb-10">
           <p className="py-2 text-xl whitespace-pre-wrap">{dialogMessage}</p>
+          {renderDialogDetails()}
         </div>
 
         <div className="flex justify-center gap-4 px-4 py-2 mx-auto">
@@ -46,7 +60,6 @@ const DialogAdvice = ({
                 text={t("dialogAdvice.confirmButton")}
                 onClick={onConfirm}
               />
-
               <ButtonPrincipal
                 text={t("dialogAdvice.cancelButton")}
                 onClick={onClose}

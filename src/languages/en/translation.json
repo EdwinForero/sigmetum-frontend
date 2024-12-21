@@ -139,7 +139,8 @@
     "errorEmailMessage": "Error sending mail. Please try again.",
     "adviceEmptyValues": "Empty values ​​cannot be entered.",
     "adviceDuplicatedTerm": "Duplicate values ​​cannot be entered.",
-    "fieldsMissingMessage": "Are you sure you want to upload the file {{filename}}? Empty fields were found in the following records:",
+    "fieldsMissingMessage": "Are you sure you want to upload the file {{filename}}? Empty fields were found in some records.",
+    "emptyFieldsSummary": "Show details",
     "rowEmpty": "Row {{rowIndex}}",
     "closeButton" : "Close",
     "confirmButton" : "Confirm",
@@ -201,7 +202,27 @@
     "browserSafari" : "• <a>Safari</a>.",
     "browserMicrosoftEdge" : "• <a>Microsoft Edge</a>.",
     "browserFirefox" : "• <a>Firefox</a>.",
-    "browserOpera" : "• <a>Opera</a>."
+    "browserOpera" : "• <a>Opera</a>.",
+    "banner" : {
+      "title": "Cookie policy",
+      "description": "We use cookies to recognize your device, optimize your experience, personalize content, display relevant advertising and ensure security. We do not store personal data without your consent or when it is not strictly necessary for the services you use. For more info, please click <a>here</a>.",
+      "acceptAllButton": "Accept all",
+      "cookiesConfigurationButton": "Configure cookies"
+    },
+    "modal" : {
+      "title": "Cookie preferences",
+      "description": "Configure your cookie preferences by selecting the categories you wish to enable.",
+      "cancelButton": "Cancel",
+      "applyButton": "Apply",
+      "categories": {
+        "all": "Accept all cookies",
+        "advertising": "Advertising cookies",
+        "advertisingTracking": "Advertising tracking cookies",
+        "functionality": "Functionality cookies",
+        "personalization": "Personalization cookies",
+        "security": "Security cookies"
+      }
+    }
   },
   "language":{
     "spanish" : "Español - ES",
