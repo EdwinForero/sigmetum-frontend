@@ -28,6 +28,7 @@ function App() {
   const [filteredSpecies, setFilteredSpecies] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
+  const [faviconUrl, setFaviconUrl] = useState(null);
   const location = useLocation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/administrar-contenido", "/explorar"].includes(location.pathname);
   const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
@@ -61,6 +62,7 @@ function App() {
         const data = await response.json();
         const linkTag = document.querySelector("link[rel='icon']");
         linkTag.href = data.imageUrl;
+        setFaviconUrl(data.imageUrl);
       } catch (err) {
         console.error('Error fetching signed favicon URL:', err);
       }
@@ -134,7 +136,8 @@ function App() {
         <header className="fixed top-0 left-0 w-full bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16 z-50">
           <Link to="/">
             <div className="flex items-center gap-4">
-              <p className="font-bold text-[#0C1811] text-base sm:text-xl ml-4">SIGMETUM-A</p>
+              <img src={faviconUrl} alt="Imagen" className="max-h-14 ml-4"/>
+              <p className="font-bold text-[#0C1811] text-base sm:text-xl">SIGMETUM-A</p>
             </div>
           </Link>
           <div className="mx-6">
