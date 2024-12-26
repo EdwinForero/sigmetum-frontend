@@ -21,6 +21,7 @@ const Explore = ({
   const [itemsPerPage, setItemsPerPage] = useState(24);
   const [pageDirection, setPageDirection] = useState(0);
   const totalResults = useRef(null);
+  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
   
   useEffect(() => {
     const speciesArray = filteredSpecies
@@ -93,6 +94,22 @@ const Explore = ({
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/get-file?fileKey=Glossary.pdf`);
+      const data = await response.json();
+
+      if (data.fileUrl) {
+        const link = document.createElement('a');
+        link.href = data.fileUrl;
+        link.download = `myfile.pdf`;
+        link.click();
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
   const variants = {
     enter: (direction) => ({
       x: direction > 0 ? 300 : -300,
@@ -137,6 +154,15 @@ const Explore = ({
                 onPageChange={handlePageChange}
               />
             </div>
+
+            <ButtonPrincipal
+              onClick={handleDownload}
+              text={t('explore.downloadGlossaryButton')}
+            />
+
+            <InfoButton 
+              tooltipText={t('explore.downloadGlossaryButtonTooltip')}
+            />
 
             <ButtonPrincipal
               onClick={() => {

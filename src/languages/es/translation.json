@@ -23,6 +23,9 @@
       "emailsData" : "Jaime F. Pereña Ortiz/jperena@uma.es/Á, Enrique Salvo Tierra/salvo@uma.es/Andrés V. Pérez Latorre/avperez@uma.es/Noelia Hidalgo Triana/nhidalgo@uma.es/Marianela Zanolla Balbuena/marianela@uma.es",
       "locationLabel": "Ubicación",
       "locationContent": "Departamento de Botánica y Fisiología Vegetal.\nFacultad de Ciencias (Universidad de Málaga).\nBoulevard Loius Pasteur, 31, 2º planta.\n29010 - Málaga",
+      "projectLeaderTitle": "Proyecto liderado por la Universidad de Málaga",
+      "otherUniversitiesTitle": "Otras universidades",
+      "collaboratingEntitiesTitle": "Entidades colaboradoras",
       "contactForm": {
         "nameLabel" : "Nombre",
         "namePlaceholder" : "Nombre",
@@ -49,6 +52,8 @@
       "noDataFoundPlaceholder": "No hay datos disponibles.",
       "downloadExcelButton": "Descargar resultados",
       "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
+      "downloadGlossaryButton": "Descargar glosario",
+    "downloadGlossaryButtonTooltip": "Al pulsar este botón, usted podrá descargar un archivo donde se encuentra el glosario de abreviaturas para la serie de vegetación.",
       "resultsInfo": "Mostrando {{currentResults}} de {{totalResults}} resultados",
       "dialogSpecies": {
         "readMoreLabel" : "Buscar en IPNI",

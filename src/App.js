@@ -55,6 +55,21 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const fetchFaviconUrl = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/get-image?imageKey=Logo.PNG`);
+        const data = await response.json();
+        const linkTag = document.querySelector("link[rel='icon']");
+        linkTag.href = data.imageUrl;
+      } catch (err) {
+        console.error('Error fetching signed favicon URL:', err);
+      }
+    };
+  
+    fetchFaviconUrl();
+  }, []);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     if (location.pathname === '/explorar') {
       setIsLoading(true);

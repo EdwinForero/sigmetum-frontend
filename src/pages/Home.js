@@ -13,6 +13,19 @@ const Home = () => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
+  const anotherUniverities = [
+    { key: 'UAL.jpg', url: 'https://www.ual.es'},
+    { key: 'UGR.jpg', url: 'https://www.ugr.es'},
+    { key: 'UHU.jpg', url: 'https://www.uhu.es'},
+    { key: 'UJA.jpg', url: 'https://www.ujaen.es'}
+  ];
+
+  const anotherEntities = [
+    { key: 'EFYVE.jpg', url: 'http://www.efyve.com'},
+    { key: 'GEOSPACE.jpg', url: 'https://3dgeospace.com'},
+    { key: 'MaFo.jpg', url: 'https://malaguenaforestal.com'}
+  ];
+
   const handleOnLoad = (state) => {
     setIsLoading(state);
   }
@@ -52,6 +65,105 @@ const Home = () => {
             {t('home.descriptionContent')}
           </motion.p>
         </div>
+      </div>
+
+      <div className="container mx-auto py-8">
+        <motion.h2 
+          className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center mt-12" 
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.8 }}>
+            {t('home.projectLeaderTitle')}
+        </motion.h2>
+        <motion.div className="flex w-full flex-wrap justify-center gap-6 mt-4"
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.8 }}>
+          <div className="flex items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 sm:mt-8">
+            <a
+              href="https://www.uma.es"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <ImageComponent
+                imageKey={"UMA.jpg"}
+                className="object-contain mix-blend-multiply"
+              />
+            </a>
+          </div>
+        </motion.div>
+
+        <motion.h2 
+          className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center mt-12" 
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.8 }}>
+            {t('home.otherUniversitiesTitle')}
+        </motion.h2>
+        <motion.div className="flex w-full flex-wrap justify-center gap-6 mt-4"
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.8 }}>
+          {anotherUniverities.map(({ key, url }, index) => (
+            <div
+              key={index}
+              className="flex items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
+            >
+              <a href={url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="block">
+                <ImageComponent
+                  imageKey={key}
+                  className="object-contain mix-blend-multiply"
+                />
+              </a>
+            </div>
+          ))}
+        </motion.div>
+
+        <motion.h2 
+          className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center mt-12" 
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.8 }}>
+            {t('home.collaboratingEntitiesTitle')}
+        </motion.h2>
+
+        <motion.div className="flex w-full flex-wrap justify-center gap-6"
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.8 }}>
+          {anotherEntities.map(({ key, url }, index) => (
+            <div
+              key={index}
+              className="flex items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
+            >
+              <a href={url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="block">
+                <ImageComponent
+                  imageKey={key}
+                  className="object-contain mix-blend-multiply"
+                />
+              </a>
+            </div>
+          ))}
+        </motion.div>
       </div>
 
       <div className="overflow-hidden">
