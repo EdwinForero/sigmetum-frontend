@@ -37,7 +37,7 @@ const Home = () => {
 
   return (
     <>
-      <ImageComponent imageKey="Home.jpg" isBackground={true} className="flex items-center justify-left px-2">
+      <ImageComponent imageKey="Banner.jpg" isBackground={true} className="flex items-center justify-left px-2">
         <div className="flex flex-col gap-5 text-left">
           <h1 className="text-[#F9FBFA] text-4xl font-black sm:text-6xl sm:font-black">
             {t('home.title')}

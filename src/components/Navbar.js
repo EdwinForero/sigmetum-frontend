@@ -33,6 +33,7 @@ const Navbar = () => {
   const menuItems = [
     { label: t('navbar.homeOption'), path: '/' },
     { label: t('navbar.exploreOption'), path: '/explorar' },
+    { label: t('navbar.galleryOption'), path: '/galeria' },
     { label: t('navbar.aboutUsOption'), path: '/sobre-nosotros' },
   ];
 

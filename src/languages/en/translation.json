@@ -2,6 +2,7 @@
   "navbar": {
     "homeOption": "Home",
     "exploreOption": "Explore",
+    "galleryOption": "Gallery",
     "aboutUsOption": "About us"
   },
   "footer": {
@@ -10,6 +11,9 @@
     "aboutUsOption": "About us",
     "copyright" : "{{currentYear}} SIGMETUM-A. All rights reserved.",
     "cookies" : "Cookies"
+  },
+  "gallery": {
+      "title": "Gallery"
   },
   "home": {
     "title": "SIGMETUM-A: EXPLORING ANDALUSIAN VEGETATION",
@@ -139,11 +143,16 @@
     "errorUploadMessage": "Error uploading file. Please try again.",
     "errorUploadTerm": "Error uploading term. Please try again.",
     "errorDeleteTerm": "Error deleting term. Please try again.",
+    "successDeleteImage": "Image deleted successfully.",
+    "errorDeleteImage": "Error deleting image. Please try again.",
+    "successUploadImage": "Image uploaded successfully.",
+    "errorUploadImage": "Error uploading image. Please try again.",
     "errorDeleteMessage": "Error deleting data. Please try again.",
     "errorUpdateMessage": "Error updating data. Please try again.",
     "errorEmailMessage": "Error sending mail. Please try again.",
     "adviceEmptyValues": "Empty values ​​cannot be entered.",
     "adviceDuplicatedTerm": "Duplicate values ​​cannot be entered.",
+    "adviceNoImageData": "Be sure to select an image and enter a title.",
     "fieldsMissingMessage": "Are you sure you want to upload the file {{filename}}? Empty fields were found in some records.",
     "emptyFieldsSummary": "Show details",
     "rowEmpty": "Row {{rowIndex}}",
@@ -179,7 +188,12 @@
     "noLatinTermsTitle" : "Non-Latinisms Exception",
     "noLatinTermsTooltip" : "In this section you can add or remove terms that you do not want to appear in italics on the 'explore' page.",
     "noLatinTermsPlaceholder" : "Term",
-    "noTermsFoundPlaceholder": "No data available."
+    "noTermsFoundPlaceholder": "No data available.",
+    "galleryManagementTitle" : "Gallery management",
+    "galleryManagementTooltip" : "In this section you can add or delete images that are on the 'gallery' page.",
+    "galleryManagementPlaceholder" : "Image title",
+    "noImagesFoundPlaceholder": "No data available.",
+    "selectImageButton": "Select image"
   },
   "cookies":{
     "title" : "Cookie Policy",

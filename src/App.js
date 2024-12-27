@@ -18,6 +18,7 @@ import LoadSpinner from './components/LoadSpinner';
 import ProtectedRoute from './components/ProtectedRoute.js';
 import LanguageSwitcher from './components/LanguageSwitcher.js';
 import CookieBanner from './components/CookieBanner.js';
+import VegetationGallery from './pages/VegetationGallery.js';
 
 function App() {
 
@@ -136,7 +137,7 @@ function App() {
         <header className="fixed top-0 left-0 w-full bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16 z-50">
           <Link to="/">
             <div className="flex items-center gap-4">
-              <img src={faviconUrl} alt="Imagen" className="max-h-14 ml-4"/>
+              <img src={faviconUrl} alt="Imagen" className="max-h-14 ml-4 mix-blend-multiply"/>
               <p className="font-bold text-[#0C1811] text-base sm:text-xl">SIGMETUM-A</p>
             </div>
           </Link>
@@ -171,6 +172,7 @@ function App() {
                 />
                 <Route path="/sobre-nosotros" element={<About />} />
                 <Route path="/login" element={<Login/>} />
+                <Route path="/galeria" element={<VegetationGallery/>} />
                 <Route path="/cookies" element={<Cookies/>} />
                 <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload/>} />} />
                 <Route path="/administrar-contenido" element={<ProtectedRoute element={<ContentManagement/>} />} />

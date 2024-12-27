@@ -2,6 +2,7 @@
     "navbar": {
       "homeOption": "Inicio",
       "exploreOption": "Explorar",
+      "galleryOption": "Galería",
       "aboutUsOption": "Sobre nosotros"
     },
     "footer": {
@@ -10,6 +11,9 @@
       "aboutUsOption": "Sobre nosotros",
       "copyright" : "{{currentYear}} SIGMETUM-A. Todos los derechos reservados.",
       "cookies" : "Cookies"
+    },
+    "gallery": {
+      "title": "Galería"
     },
     "home": {
       "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
@@ -140,11 +144,16 @@
     "errorUploadMessage": "Error al subir un archivo. Inténtalo de nuevo.",
     "errorUploadTerm": "Error al subir el término. Inténtalo de nuevo.",
     "errorDeleteTerm": "Error al eliminar el término. Inténtalo de nuevo.",
+    "successDeleteImage": "Imagen eliminada con éxito.",
+    "errorDeleteImage": "Error al eliminar la imagen. Inténtalo de nuevo.",
+    "successUploadImage": "Imagen subida con éxito.",
+    "errorUploadImage": "Error al subir la imagen. Inténtalo de nuevo.",
     "errorDeleteMessage": "Error al eliminar datos. Inténtalo de nuevo.",
     "errorUpdateMessage": "Error al actualizar los datos. Inténtalo de nuevo.",
     "errorEmailMessage": "Error al enviar el correo. Inténtalo de nuevo.",
     "adviceEmptyValues": "No se pueden introducir valores vacíos.",
     "adviceDuplicatedTerm": "No se pueden introducir términos duplicados.",
+    "adviceNoImageData": "Asegúrese de seleccionar una imagen e introducir un título.",
     "fieldsMissingMessage": "¿Está seguro de cargar el archivo {{filename}}? Se encontraron campos vacíos algunos registros.",
     "emptyFieldsSummary": "Mostrar detalles",
     "rowEmpty": "Fila {{rowIndex}}",
@@ -181,7 +190,12 @@
     "noLatinTermsTitle" : "Excepción de no latinismos",
     "noLatinTermsTooltip" : "En esta sección puede incluir o eliminar los términos que desee que no aparezcan en cursiva en la página 'explorar'.",
     "noLatinTermsPlaceholder" : "Término",
-    "noTermsFoundPlaceholder": "No hay datos disponibles."
+    "noTermsFoundPlaceholder": "No hay datos disponibles.",
+    "galleryManagementTitle" : "Gestionar galería",
+    "galleryManagementTooltip" : "En esta sección, puede añadir o eliminar las imágenes que se encuentran en la página 'galería'.",
+    "galleryManagementPlaceholder" : "Título de la imagen",
+    "noImagesFoundPlaceholder": "No hay datos disponibles.",
+    "selectImageButton": "Seleccionar imagen"
   },
   "cookies":{
     "title" : "Política de Cookies",
