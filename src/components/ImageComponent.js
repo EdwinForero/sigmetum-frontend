@@ -28,6 +28,7 @@ const ImageComponent = ({ imageKey, isBackground = false, className = '', childr
           backgroundImage: `linear-gradient(rgba(12, 24, 17, 0.7), rgba(12, 24, 17, 0.7)), url(${imageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
           minHeight: '95vh',
         }}
       >
