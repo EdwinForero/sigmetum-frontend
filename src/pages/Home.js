@@ -92,21 +92,21 @@ const Home = () => {
             >
               <ImageComponent
                 imageKey={"UMA.jpg"}
-                className="object-contain mix-blend-multiply"
+                className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
               />
             </a>
           </div>
         </motion.div>
 
-        <motion.h2 
-          className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center mt-12" 
+        <motion.h3
+          className="text-[#15B659] tracking-light text-xl sm:text-2xl font-bold leading-tight text-center mt-12" 
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.8 }}>
             {t('home.otherUniversitiesTitle')}
-        </motion.h2>
+        </motion.h3>
         <motion.div className="flex w-full flex-wrap justify-center gap-6 mt-4"
           variants={sectionVariants}
           initial="hidden"
@@ -124,22 +124,22 @@ const Home = () => {
               className="block">
                 <ImageComponent
                   imageKey={key}
-                  className="object-contain mix-blend-multiply"
+                  className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
                 />
               </a>
             </div>
           ))}
         </motion.div>
 
-        <motion.h2 
-          className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center mt-12" 
+        <motion.h3 
+          className="text-[#15B659] tracking-light text-xl sm:text-2xl font-bold leading-tight text-center mt-12" 
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.8 }}>
             {t('home.collaboratingEntitiesTitle')}
-        </motion.h2>
+        </motion.h3>
 
         <motion.div className="flex w-full flex-wrap justify-center gap-6"
           variants={sectionVariants}
@@ -158,7 +158,7 @@ const Home = () => {
               className="block">
                 <ImageComponent
                   imageKey={key}
-                  className="object-contain mix-blend-multiply"
+                  className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
                 />
               </a>
             </div>
