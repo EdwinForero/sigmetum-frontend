@@ -19,9 +19,11 @@ import ProtectedRoute from './components/ProtectedRoute.js';
 import LanguageSwitcher from './components/LanguageSwitcher.js';
 import CookieBanner from './components/CookieBanner.js';
 import VegetationGallery from './pages/VegetationGallery.js';
+import { useTranslation } from 'react-i18next';
 
 function App() {
 
+  const [eeVisible, setEEVisible] = useState(false);  
   const [isLoading, setIsLoading] = useState(true);
   const [noItalicTerms, setNoItalicTerms] = useState([]);
   const [mergedData, setMergedData] = useState(null);
@@ -31,8 +33,13 @@ function App() {
   const [selectedData, setSelectedData] = useState([]);
   const [faviconUrl, setFaviconUrl] = useState(null);
   const location = useLocation();
+  const { t } = useTranslation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/administrar-contenido", "/explorar"].includes(location.pathname);
   const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
+
+  const handleEEClick = () => {
+    setEEVisible(!eeVisible);
+  };
 
   const fetchTerms = useCallback(async () => {
     try {
@@ -184,7 +191,16 @@ function App() {
 
         <footer className="bg-[#0C1811] flex justify-center relative">
           <Footer />
-          <span className="text-[#F9FBFA] absolute bottom-2 right-2">V 1.0.0</span>
+          <span 
+            className="text-[#F9FBFA] absolute bottom-2 right-2"
+            onClick={handleEEClick}>
+              V 1.0.0
+          </span>
+          {eeVisible && (
+          <div className="absolute bottom-12 right-2 bg-[#F9FBFA] text-[#0C1811] p-2 rounded shadow-lg">
+            {t('ee')}
+          </div>
+          )}
         </footer>
 
         <CookieBanner/>
