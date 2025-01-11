@@ -66,7 +66,7 @@ function App() {
   useEffect(() => {
     const fetchFaviconUrl = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/get-image?imageKey=Logo.PNG`);
+        const response = await fetch(`${BASE_URL}/get-image?imageKey=Logo.JPG`);
         const data = await response.json();
         const linkTag = document.querySelector("link[rel='icon']");
         linkTag.href = data.imageUrl;
