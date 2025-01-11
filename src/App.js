@@ -145,7 +145,9 @@ function App() {
           <Link to="/">
             <div className="flex items-center gap-4">
               <img src={faviconUrl} alt="Imagen" className="max-h-14 ml-4 mix-blend-multiply"/>
-              <p className="font-bold text-[#0C1811] text-base sm:text-xl">SIGMETUM-A</p>
+              <p className="font-bold text-[#0C1811] text-base sm:text-xl">
+                SIGMET<span className="text-red-500">U</span><span className="text-blue-500">M</span>-<span className="text-[#15B659]">A</span>
+              </p>
             </div>
           </Link>
           <div className="mx-6">

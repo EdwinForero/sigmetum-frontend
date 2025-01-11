@@ -13,11 +13,25 @@ const Home = () => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
+  const umaCollaborators = [
+    'Jaime F. Pereña Ortiz',
+    'Á, Enrique Salvo Tierra',
+    'Noelia Hidalgo Triana',
+    'Andrés V. Pérez Latorre',
+    'Marianela Zanolla Balbuena',
+    'Teresa Navarro',
+    'Yara Katerine Forero Gómez',
+    'Ángel Ruiz Valero',
+    'Pablo Cozano',
+    'Begoña Galindo',
+    'Ángel Valencia'
+  ];
+
   const anotherUniverities = [
-    { key: 'UAL.jpg', url: 'https://www.ual.es'},
-    { key: 'UGR.jpg', url: 'https://www.ugr.es'},
-    { key: 'UHU.jpg', url: 'https://www.uhu.es'},
-    { key: 'UJA.jpg', url: 'https://www.ujaen.es'}
+    { key: 'UAL.jpg', url: 'https://www.ual.es', collaborators: ['Juan F. Mota Poveda']},
+    { key: 'UGR.jpg', url: 'https://www.ugr.es', collaborators: ['Francisco Valle Tendero', 'Juan Lorite Moreno']},
+    { key: 'UHU.jpg', url: 'https://www.uhu.es', collaborators: ['Pablo Hidalgo Fernández']},
+    { key: 'UJA.jpg', url: 'https://www.ujaen.es', collaborators: ['José Antonio Carreira de la Fuente']}
   ];
 
   const anotherEntities = [
@@ -77,13 +91,14 @@ const Home = () => {
           transition={{ duration: 0.8 }}>
             {t('home.projectLeaderTitle')}
         </motion.h2>
-        <motion.div className="flex w-full flex-wrap justify-center gap-6 mt-4"
+        <motion.div 
+          className="gap-8 mt-4 justify-items-center items-center"
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.8 }}>
-          <div className="flex items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 sm:mt-8">
+          <div className="flex flex-col items-center justify-center p-4">
             <a
               href="https://www.uma.es"
               target="_blank"
@@ -95,6 +110,13 @@ const Home = () => {
                 className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
               />
             </a>
+            {umaCollaborators && umaCollaborators.length > 0 && (
+              <div className="mt-2 text-center">
+                {umaCollaborators.map((name, idx) => (
+                  <p key={idx} className="text-sm text-gray-700">{name}</p>
+                ))}
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -113,20 +135,24 @@ const Home = () => {
           whileInView="visible"
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.8 }}>
-          {anotherUniverities.map(({ key, url }, index) => (
+          {anotherUniverities.map(({ key, url, collaborators }, index) => (
             <div
               key={index}
-              className="flex items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
+              className="flex flex-col items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
             >
-              <a href={url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block">
+              <a href={url} target="_blank" rel="noopener noreferrer" className="block">
                 <ImageComponent
                   imageKey={key}
                   className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
                 />
               </a>
+              {collaborators && collaborators.length > 0 && (
+              <div className="mt-2 text-center">
+                {collaborators.map((name, idx) => (
+                  <p key={idx} className="text-sm text-gray-700">{name}</p>
+                ))}
+              </div>
+              )}
             </div>
           ))}
         </motion.div>
@@ -147,20 +173,24 @@ const Home = () => {
           whileInView="visible"
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.8 }}>
-          {anotherEntities.map(({ key, url }, index) => (
+          {anotherEntities.map(({ key, url, collaborators }, index) => (
             <div
               key={index}
-              className="flex items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
+              className="flex flex-col items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
             >
-              <a href={url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block">
+              <a href={url} target="_blank" rel="noopener noreferrer" className="block">
                 <ImageComponent
                   imageKey={key}
                   className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
                 />
               </a>
+              {collaborators && collaborators.length > 0 && (
+              <div className="mt-2 text-center">
+                {collaborators.map((name, idx) => (
+                  <p key={idx} className="text-sm text-gray-700">{name}</p>
+                ))}
+              </div>
+              )}
             </div>
           ))}
         </motion.div>
