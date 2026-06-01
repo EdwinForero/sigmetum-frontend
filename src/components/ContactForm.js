@@ -1,62 +1,30 @@
-import React, { useState } from "react";
-import ButtonPrincipal from "./ButtonPrincipal";
-import DialogAdvice from "./DialogAdvice";
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import env from '../config/env';
+import { useTranslation } from 'react-i18next';
+import ButtonPrincipal from './ButtonPrincipal';
+import DialogAdvice from './DialogAdvice';
+import api from '../services/api';
+import useDialog from '../hooks/useDialog';
 
-const ContactForm = ({
-  onLoad
-}) => {
-  
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
-  const [dialogMessage, setDialogMessage] = useState('');
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const [dialogType, setDialogType] = useState('');
+const ContactForm = ({ onLoad }) => {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
   const { t } = useTranslation();
+  const { dialog, showDialog, closeDialog } = useDialog();
 
   const handleSubmit = async (e) => {
     onLoad(true);
     e.preventDefault();
-  
-    const payload = {
-      username,
-      email,
-      subject,
-      message,
-    };
-  
     try {
-      const response = await fetch(`${env.BASE_URL}/send-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-  
-      if (response.ok) {
-        setDialogMessage(t('dialogAdvice.successEmailMessage'));
-        setDialogType('success');
-        setDialogVisible(true);
-      } else {
-        setDialogMessage(t('dialogAdvice.errorEmailMessage'));
-        setDialogType('error');
-        setDialogVisible(true);
-      }
-    } catch (error) {
-      console.error("Error al conectar con el servidor:", error);
+      await api.post('/send-email', { username, email, subject, message });
+      showDialog(t('dialogAdvice.successTitle'), t('dialogAdvice.successEmailMessage'));
+    } catch {
+      showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorEmailMessage'));
     } finally {
       onLoad(false);
     }
-  };
-
-  const closeDialog = () => {
-    setDialogVisible(false);
-    setDialogMessage('');
   };
 
   return (
@@ -114,17 +82,17 @@ const ContactForm = ({
         </div>
 
         <div className="flex justify-center px-4">
-          <ButtonPrincipal 
-            text={t('home.contactForm.sendButton')} 
+          <ButtonPrincipal
+            text={t('home.contactForm.sendButton')}
             disabled={!username || !email || !subject || !message}
           />
         </div>
 
         <AnimatePresence>
-          {dialogVisible && (
-            <DialogAdvice 
-              dialogTitle={`${dialogType === 'success' ? t('dialogAdvice.successTitle') : t('dialogAdvice.errorTitle')}`}
-              dialogMessage={dialogMessage} 
+          {dialog.visible && (
+            <DialogAdvice
+              dialogTitle={dialog.title}
+              dialogMessage={dialog.message}
               onClose={closeDialog}
             />
           )}

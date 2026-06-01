@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import api from '../services/api';
 import env from '../config/env';
 
 const FALLBACK_IMAGES = [
@@ -15,25 +16,16 @@ const ImageCarrousel = () => {
   useEffect(() => {
     if (env.CAROUSEL_IMAGE_KEYS.length === 0) return;
 
-    const fetchImages = async () => {
-      try {
-        const results = await Promise.all(
-          env.CAROUSEL_IMAGE_KEYS.map(async (key) => {
-            const response = await fetch(`${env.BASE_URL}/get-image?imageKey=${key}`);
-            const data = await response.json();
-            return {
-              src: data.imageUrl,
-              description: key.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
-            };
-          })
-        );
-        setImages(results);
-      } catch (error) {
-        console.error('Error fetching carousel images:', error);
-      }
-    };
-
-    fetchImages();
+    Promise.all(
+      env.CAROUSEL_IMAGE_KEYS.map((key) =>
+        api.get(`/get-image?imageKey=${key}`).then((data) => ({
+          src: data.imageUrl,
+          description: key.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+        }))
+      )
+    )
+      .then(setImages)
+      .catch((error) => console.error('Error fetching carousel images:', error));
   }, []);
 
   return (
@@ -42,11 +34,7 @@ const ImageCarrousel = () => {
         className="flex gap-4"
         initial={{ x: 0 }}
         animate={{ x: `-${images.length * 316}px` }}
-        transition={{
-          duration: images.length * 8,
-          ease: 'linear',
-          repeat: Infinity,
-        }}
+        transition={{ duration: images.length * 8, ease: 'linear', repeat: Infinity }}
       >
         {[...images, ...images, ...images].map((image, index) => (
           <ImageWithFallback key={index} src={image.src} text={image.description} alt={`Slide ${index}`} />
@@ -61,16 +49,12 @@ const ImageWithFallback = ({ src, text, alt }) => {
 
   return (
     <div className="relative group flex-shrink-0 w-[300px] h-[400px] overflow-hidden">
-      {!isLoaded && (
-        <div className="w-full h-full bg-gray-200 rounded-lg"></div>
-      )}
+      {!isLoaded && <div className="w-full h-full bg-gray-200 rounded-lg"></div>}
       <img
         src={src}
         alt={alt}
         onLoad={() => setIsLoaded(true)}
-        className={`w-full h-full object-cover rounded-lg transition-opacity duration-500 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`w-full h-full object-cover rounded-lg transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       />
       <div className="absolute inset-0 flex items-center justify-center bg-[#0C1811] bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
         <p className="text-[#F9FBFA] text-xl font-bold">{text}</p>

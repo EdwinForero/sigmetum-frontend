@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { useTranslation } from 'react-i18next';
 import DialogAdvice from '../components/DialogAdvice';
 import LoadSpinner from '../components/LoadSpinner';
-import { useTranslation } from 'react-i18next';
-import env from '../config/env';
+import api from '../services/api';
 
-const isTokenExpired = (
-  token
-) => {
+const isTokenExpired = (token) => {
   try {
     const decoded = jwtDecode(token);
-    const currentTime = Date.now() / 1000;
-    return decoded.exp < currentTime;
-  } catch (error) {
-    console.error('Error al decodificar el token:', error);
+    return decoded.exp < Date.now() / 1000;
+  } catch {
     return true;
   }
 };
@@ -24,32 +20,22 @@ const ProtectedRoute = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
 
-  const fetchProtectedData = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
-
-    const response = await fetch(`${env.BASE_URL}/auth`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    return response.ok;
-  };
-
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
-      const authValid = await fetchProtectedData();
-      setIsAuthenticated(authValid);
+      if (!token) { setIsAuthenticated(false); return; }
 
-      if (isAuthenticated && isTokenExpired(token)) {
-        setShowDialog(true);
-        return;
+      try {
+        await api.getAuth('/auth');
+        if (isTokenExpired(token)) {
+          setShowDialog(true);
+        } else {
+          setIsAuthenticated(true);
+        }
+      } catch {
+        setIsAuthenticated(false);
       }
     };
-
     checkAuth();
   }, []);
 
@@ -59,9 +45,7 @@ const ProtectedRoute = ({ element }) => {
     setIsAuthenticated(false);
   };
 
-  if (isAuthenticated === null) {
-    return <LoadSpinner />;
-  }
+  if (isAuthenticated === null) return <LoadSpinner />;
 
   if (showDialog) {
     return (

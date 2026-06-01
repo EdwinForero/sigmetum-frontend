@@ -1,29 +1,34 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ButtonPrincipal from '../components/ButtonPrincipal';
+import DialogAdvice from '../components/DialogAdvice';
 import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
 import InfoButton from '../components/InfoButton';
-import env from '../config/env';
+import api from '../services/api';
+import useDialog from '../hooks/useDialog';
 //import ImageCarousel from '../components/ImageCarrousel';
 //import ScrollIndicator from '../components/ScrollIndicator';
 
-const Explore = ({ 
-  data, 
-  filteredSpecies, 
+const Explore = ({
+  data,
+  filteredSpecies,
   selectedSpecies,
-  noItalicTerms
- }) => {
+  noItalicTerms,
+  hasError = false,
+}) => {
   const { t } = useTranslation();
   const [uniqueSpecies, setUniqueSpecies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(24);
   const [pageDirection, setPageDirection] = useState(0);
   const totalResults = useRef(null);
-  
+  const { dialog, showDialog, closeDialog } = useDialog();
+
   useEffect(() => {
+    if (!Array.isArray(filteredSpecies)) return;
     const speciesArray = filteredSpecies
       .map((item) => item["Especies Características"])
       .flat()
@@ -96,17 +101,15 @@ const Explore = ({
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`${env.BASE_URL}/get-file?fileKey=Glossary.pdf`);
-      const data = await response.json();
-
+      const data = await api.get('/get-file?fileKey=Glossary.pdf');
       if (data.fileUrl) {
         const link = document.createElement('a');
         link.href = data.fileUrl;
-        link.download = `myfile.pdf`;
+        link.download = 'myfile.pdf';
         link.click();
       }
-    } catch (error) {
-      console.error('Error downloading file:', error);
+    } catch {
+      showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorDownloadFile'));
     }
   };
 
@@ -127,7 +130,13 @@ const Explore = ({
 
   return (
     <>
-      {currentItems.length === 0 ? (
+      {hasError ? (
+        <div className="flex justify-center items-center min-h-[300px]">
+          <p className="text-[#0C1811] text-lg font-semibold">
+            {t('explore.errorLoadPlaceholder')}
+          </p>
+        </div>
+      ) : currentItems.length === 0 ? (
         <div className="flex justify-center items-center min-h-[300px]">
           <p className="text-[#0C1811] text-lg font-semibold">
             {t('explore.noDataFoundPlaceholder')}
@@ -212,7 +221,7 @@ const Explore = ({
       )}
       
       {/*
-      <motion.h2 
+      <motion.h2
         className="text-[#15B659] text-center my-4 tracking-light text-2xl sm:text-4xl font-bold leading-tight"
         >
           {t('explore.vegetationCaroselTitle')}
@@ -221,6 +230,16 @@ const Explore = ({
         <ImageCarousel/>
       </div>
       */}
+
+      <AnimatePresence>
+        {dialog.visible && (
+          <DialogAdvice
+            dialogTitle={dialog.title}
+            dialogMessage={dialog.message}
+            onClose={closeDialog}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

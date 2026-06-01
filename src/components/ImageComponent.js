@@ -1,28 +1,19 @@
 import { React, useState, useEffect } from 'react';
-import env from '../config/env';
+import api from '../services/api';
 
 const ImageComponent = ({ imageKey, isBackground = false, className = '', children }) => {
   const [imageUrl, setImageUrl] = useState('');
 
-  const fetchImage = async (imageKey) => {
-    try {
-      const response = await fetch(`${env.BASE_URL}/get-image?imageKey=${imageKey}`);
-      const data = await response.json();
-      setImageUrl(data.imageUrl);
-    } catch (error) {
-      console.error('Error fetching image:', error);
-    }
-  };
-
   useEffect(() => {
-    if (imageKey) {
-      fetchImage(imageKey);
-    }
+    if (!imageKey) return;
+    api.get(`/get-image?imageKey=${imageKey}`)
+      .then((data) => setImageUrl(data.imageUrl))
+      .catch((error) => console.error('Error fetching image:', error));
   }, [imageKey]);
 
   if (isBackground) {
     return (
-        <div
+      <div
         className={`${className} relative`}
         style={{
           backgroundImage: `linear-gradient(rgba(12, 24, 17, 0.7), rgba(12, 24, 17, 0.7)), url(${imageUrl})`,

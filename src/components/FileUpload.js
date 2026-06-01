@@ -6,17 +6,14 @@ import InfoButton from './InfoButton';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import env from '../config/env';
+import useDialog from '../hooks/useDialog';
 
 const FileUploadForm = ({
   onLoad
 }) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
-  const [dialogTitle, setDialogTitle] = useState('');
-  const [dialogMessage, setDialogMessage] = useState('');
-  const [dialogDetails, setDialogDetails] = useState(null);
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const [dialogActions, setDialogActions] = useState({ onConfirm: null});
+  const { dialog, showDialog, closeDialog } = useDialog();
 
   function normalizeFileName(fileName) {
 
@@ -71,23 +68,18 @@ const FileUploadForm = ({
             const emptyFieldSummary = responseData.emptyFields
               .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
               .join(', ');
-  
-            setDialogMessage(`${t('dialogAdvice.fieldsMissingMessage', { filename: file.name })}`);
-            setDialogTitle(t('dialogAdvice.adviceTitle'));
-            setDialogDetails({
-              title: t('dialogAdvice.emptyFieldsSummary'),
-              content: emptyFieldSummary,
-            });
-            setDialogVisible(true);
-  
+
             const confirmed = await new Promise((resolve) => {
-              setDialogActions({
-                onConfirm: () => resolve(true),
-              });
+              showDialog(
+                t('dialogAdvice.adviceTitle'),
+                t('dialogAdvice.fieldsMissingMessage', { filename: file.name }),
+                {
+                  details: { title: t('dialogAdvice.emptyFieldsSummary'), content: emptyFieldSummary },
+                  onConfirm: () => resolve(true),
+                }
+              );
             });
-  
-            setDialogVisible(false);
-            setDialogActions({ onConfirm: null });
+            closeDialog();
   
             if (confirmed) {
               onLoad(true);
@@ -112,19 +104,13 @@ const FileUploadForm = ({
             }
           } else {
             allFilesUploadedSuccessfully = false;
-            setDialogMessage(t('dialogAdvice.errorUploadMessage'));
-            setDialogTitle(t('dialogAdvice.errorTitle'));
-            setDialogDetails(null);
-            setDialogVisible(true);
+            showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorUploadMessage'));
             break;
           }
         }
       } catch (error) {
         allFilesUploadedSuccessfully = false;
-        setDialogMessage(t('dialogAdvice.errorUploadMessage'));
-        setDialogTitle(t('dialogAdvice.errorTitle'));
-        setDialogDetails(null);
-        setDialogVisible(true);
+        showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorUploadMessage'));
         setFiles([]);
         break;
       } finally {
@@ -133,22 +119,13 @@ const FileUploadForm = ({
     }
   
     if (allFilesUploadedSuccessfully) {
-      setDialogMessage(t('dialogAdvice.successUploadMessage'));
-      setDialogTitle(t('dialogAdvice.successTitle'));
-      setDialogDetails(null);
-      setDialogVisible(true);
+      showDialog(t('dialogAdvice.successTitle'), t('dialogAdvice.successUploadMessage'));
       setFiles([]);
-      setDialogActions({ onConfirm: null });
     }
   };
 
   const handleRemoveFile = (indexToRemove) => {
     setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove));
-  };
-
-  const closeDialog = () => {
-    setDialogVisible(false);
-    setDialogMessage('');
   };
 
   return (
@@ -194,16 +171,16 @@ const FileUploadForm = ({
         )}
         
         <AnimatePresence>
-        {dialogVisible && (
-          <DialogAdvice
-            dialogTitle={dialogTitle}
-            dialogMessage={dialogMessage}
-            dialogDetails={dialogDetails}
-            onConfirm={dialogActions.onConfirm}
-            onClose={closeDialog}
-            showActions={!!dialogActions.onConfirm}
-          />
-        )}
+          {dialog.visible && (
+            <DialogAdvice
+              dialogTitle={dialog.title}
+              dialogMessage={dialog.message}
+              dialogDetails={dialog.details}
+              onConfirm={dialog.onConfirm}
+              onClose={closeDialog}
+              showActions={!!dialog.onConfirm}
+            />
+          )}
         </AnimatePresence>
       </div>
       </>
