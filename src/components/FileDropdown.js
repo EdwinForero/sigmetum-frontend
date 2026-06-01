@@ -2,14 +2,15 @@ import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } f
 import { FormatFileName } from '../utilities/FormatFileName.js';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import env from '../config/env';
 
-const FileDropdown = forwardRef(({ 
-  onLoad, 
-  onFileSelect, 
-  selectedFile }, 
+const FileDropdown = forwardRef(({
+  onLoad,
+  onFileSelect,
+  selectedFile },
   ref
 ) => {
-  
+
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +19,6 @@ const FileDropdown = forwardRef(({
   const [provinces, setProvinces] = useState([]);
   const [versions, setVersions] = useState([]);
   const dropdownRef = useRef();
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   useEffect(() => {
       fetchFiles();
@@ -26,7 +26,7 @@ const FileDropdown = forwardRef(({
 
   const fetchFiles = async () => {
       try {
-          const response = await fetch(`${BASE_URL}/list-files`);
+          const response = await fetch(`${env.BASE_URL}/list-files`);
           const data = await response.json();
 
           const provincesSet = new Set();
@@ -65,7 +65,7 @@ const FileDropdown = forwardRef(({
   const handleVersionSelect = async (fileKey, name) => {
       onLoad(true);
       try {
-          const response = await fetch(`${BASE_URL}/get-data/${fileKey}`);
+          const response = await fetch(`${env.BASE_URL}/get-data/${fileKey}`);
           const jsonData = await response.json();
           onFileSelect(jsonData, fileKey);
           setName(name);

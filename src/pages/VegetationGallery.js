@@ -1,15 +1,15 @@
 import { React, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import env from '../config/env';
 
 const VegetationGallery = () => {
     const { t } = useTranslation();
     const [imageUrls, setImageUrls] = useState([]);
-    const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
     useEffect(() => {
     const fetchImageUrls = async () => {
         try {
-        const response = await fetch(`${BASE_URL}/list-images`);
+        const response = await fetch(`${env.BASE_URL}/list-images`);
         const data = await response.json();
 
         if (data.urls) {

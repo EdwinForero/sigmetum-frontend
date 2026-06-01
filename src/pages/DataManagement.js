@@ -8,6 +8,7 @@ import DialogAdvice from '../components/DialogAdvice';
 import InfoButton from '../components/InfoButton.js';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
+import env from '../config/env';
 
 const DataManagement = ({
   onFileDropdownSelect, 
@@ -21,7 +22,6 @@ const DataManagement = ({
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const fileDropdownRef = useRef(null);
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const handleFileSelect = (jsonData, fileName) => {
     onFileDropdownSelect(jsonData);
@@ -39,7 +39,7 @@ const DataManagement = ({
   const handleFileDelete = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/delete-file`, {
+      const response = await fetch(`${env.BASE_URL}/delete-file`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ const DataManagement = ({
   const handleFileUpdate = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/update-file`, {
+      const response = await fetch(`${env.BASE_URL}/update-file`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

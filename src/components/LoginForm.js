@@ -3,6 +3,7 @@ import ButtonPrincipal from "./ButtonPrincipal";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import env from '../config/env';
 
 const LoginForm = () => {
 
@@ -12,11 +13,10 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showLoginError, setLoginError] = useState(false);
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
   
   const handleLogin = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/log`, {
+      const response = await fetch(`${env.BASE_URL}/log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

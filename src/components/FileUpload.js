@@ -5,6 +5,7 @@ import DialogAdvice from './DialogAdvice';
 import InfoButton from './InfoButton';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
+import env from '../config/env';
 
 const FileUploadForm = ({
   onLoad
@@ -16,7 +17,6 @@ const FileUploadForm = ({
   const [dialogDetails, setDialogDetails] = useState(null);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogActions, setDialogActions] = useState({ onConfirm: null});
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   function normalizeFileName(fileName) {
 
@@ -55,7 +55,7 @@ const FileUploadForm = ({
       formData.append('file', new File([file], normalizedFileName));
   
       try {
-        const response = await fetch(`${BASE_URL}/upload`, {
+        const response = await fetch(`${env.BASE_URL}/upload`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -91,7 +91,7 @@ const FileUploadForm = ({
   
             if (confirmed) {
               onLoad(true);
-              const confirmedResponse = await fetch(`${BASE_URL}/upload/confirm`, {
+              const confirmedResponse = await fetch(`${env.BASE_URL}/upload/confirm`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

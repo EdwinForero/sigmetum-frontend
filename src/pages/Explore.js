@@ -6,6 +6,7 @@ import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
 import InfoButton from '../components/InfoButton';
+import env from '../config/env';
 //import ImageCarousel from '../components/ImageCarrousel';
 //import ScrollIndicator from '../components/ScrollIndicator';
 
@@ -21,7 +22,6 @@ const Explore = ({
   const [itemsPerPage, setItemsPerPage] = useState(24);
   const [pageDirection, setPageDirection] = useState(0);
   const totalResults = useRef(null);
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
   
   useEffect(() => {
     const speciesArray = filteredSpecies
@@ -96,7 +96,7 @@ const Explore = ({
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/get-file?fileKey=Glossary.pdf`);
+      const response = await fetch(`${env.BASE_URL}/get-file?fileKey=Glossary.pdf`);
       const data = await response.json();
 
       if (data.fileUrl) {

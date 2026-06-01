@@ -20,10 +20,11 @@ import LanguageSwitcher from './components/LanguageSwitcher.js';
 import CookieBanner from './components/CookieBanner.js';
 import VegetationGallery from './pages/VegetationGallery.js';
 import { useTranslation } from 'react-i18next';
+import env from './config/env';
 
 function App() {
 
-  const [eeVisible, setEEVisible] = useState(false);  
+  const [eeVisible, setEEVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [noItalicTerms, setNoItalicTerms] = useState([]);
   const [mergedData, setMergedData] = useState(null);
@@ -35,7 +36,6 @@ function App() {
   const location = useLocation();
   const { t } = useTranslation();
   const showSideMenu = ["/cargar-archivos", "/administrar-datos", "/administrar-contenido", "/explorar"].includes(location.pathname);
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const handleEEClick = () => {
     setEEVisible(!eeVisible);
@@ -43,7 +43,7 @@ function App() {
 
   const fetchTerms = useCallback(async () => {
     try {
-      const response = await fetch(`${BASE_URL}/list-terms`);
+      const response = await fetch(`${env.BASE_URL}/list-terms`);
       const data = await response.json();
       setNoItalicTerms(data.terms);
     } catch (error) {
@@ -54,7 +54,7 @@ function App() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch(`${BASE_URL}/get-merged-data`);
+      const response = await fetch(`${env.BASE_URL}/get-merged-data`);
       const result = await response.json();
       setMergedData(result);
       setFilteredSpecies(result);
@@ -66,7 +66,7 @@ function App() {
   useEffect(() => {
     const fetchFaviconUrl = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/get-image?imageKey=Logo.JPG`);
+        const response = await fetch(`${env.BASE_URL}/get-image?imageKey=Logo.JPG`);
         const data = await response.json();
         const linkTag = document.querySelector("link[rel='icon']");
         linkTag.href = data.imageUrl;

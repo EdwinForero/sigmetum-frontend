@@ -3,6 +3,7 @@ import ButtonPrincipal from "./ButtonPrincipal";
 import DialogAdvice from "./DialogAdvice";
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
+import env from '../config/env';
 
 const ContactForm = ({
   onLoad
@@ -16,7 +17,6 @@ const ContactForm = ({
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const { t } = useTranslation();
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const handleSubmit = async (e) => {
     onLoad(true);
@@ -30,7 +30,7 @@ const ContactForm = ({
     };
   
     try {
-      const response = await fetch(`${BASE_URL}/send-email`, {
+      const response = await fetch(`${env.BASE_URL}/send-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

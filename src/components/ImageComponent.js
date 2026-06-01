@@ -1,12 +1,12 @@
 import { React, useState, useEffect } from 'react';
+import env from '../config/env';
 
 const ImageComponent = ({ imageKey, isBackground = false, className = '', children }) => {
   const [imageUrl, setImageUrl] = useState('');
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const fetchImage = async (imageKey) => {
     try {
-      const response = await fetch(`${BASE_URL}/get-image?imageKey=${imageKey}`);
+      const response = await fetch(`${env.BASE_URL}/get-image?imageKey=${imageKey}`);
       const data = await response.json();
       setImageUrl(data.imageUrl);
     } catch (error) {

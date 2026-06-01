@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import DialogAdvice from '../components/DialogAdvice';
 import LoadSpinner from '../components/LoadSpinner';
 import { useTranslation } from 'react-i18next';
+import env from '../config/env';
 
 const isTokenExpired = (
   token
@@ -22,13 +23,12 @@ const ProtectedRoute = ({ element }) => {
   const { t } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   const fetchProtectedData = async () => {
     const token = localStorage.getItem('token');
     if (!token) return false;
 
-    const response = await fetch(`${BASE_URL}/auth`, {
+    const response = await fetch(`${env.BASE_URL}/auth`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,

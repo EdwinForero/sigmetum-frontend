@@ -1,13 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import env from '../config/env';
+
+const FALLBACK_IMAGES = [
+  { src: 'https://via.placeholder.com/300x400/FF5733', description: 'Image 1' },
+  { src: 'https://via.placeholder.com/300x400/33FF57', description: 'Image 2' },
+  { src: 'https://via.placeholder.com/300x400/3357FF', description: 'Image 3' },
+  { src: 'https://via.placeholder.com/300x400/FF33A5', description: 'Image 4' },
+];
 
 const ImageCarrousel = () => {
-  const images = [
-    { src: 'https://via.placeholder.com/300x400/FF5733', description: 'Text 1' },
-    { src: 'https://via.placeholder.com/300x400/33FF57', description: 'Text 2' },
-    { src: 'https://via.placeholder.com/300x400/3357FF', description: 'Text 3' },
-    { src: 'https://via.placeholder.com/300x400/FF33A5', description: 'Text 4' },
-  ];
+  const [images, setImages] = useState(FALLBACK_IMAGES);
+
+  useEffect(() => {
+    if (env.CAROUSEL_IMAGE_KEYS.length === 0) return;
+
+    const fetchImages = async () => {
+      try {
+        const results = await Promise.all(
+          env.CAROUSEL_IMAGE_KEYS.map(async (key) => {
+            const response = await fetch(`${env.BASE_URL}/get-image?imageKey=${key}`);
+            const data = await response.json();
+            return {
+              src: data.imageUrl,
+              description: key.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+            };
+          })
+        );
+        setImages(results);
+      } catch (error) {
+        console.error('Error fetching carousel images:', error);
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   return (
     <div className="overflow-hidden w-full">

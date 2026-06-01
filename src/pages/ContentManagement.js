@@ -7,6 +7,7 @@ import DialogAdvice from '../components/DialogAdvice.js';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import { AnimatePresence } from 'framer-motion';
 import ButtonAlternative from '../components/ButtonAlternative.js';
+import env from '../config/env';
 
 const ContentManagement = () => {
 
@@ -21,7 +22,6 @@ const ContentManagement = () => {
   const [dialogActions] = useState({ onConfirm: null});
   const [imageFile, setImageFile] = useState(null);
   const [images, setImages] = useState([]);
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
 
   useEffect(() => {
     fetchTerms();
@@ -37,7 +37,7 @@ const ContentManagement = () => {
 
   const fetchImageUrls = async () => {
     try {
-    const response = await fetch(`${BASE_URL}/list-images`);
+    const response = await fetch(`${env.BASE_URL}/list-images`);
     const data = await response.json();
 
     if (data.urls) {
@@ -52,7 +52,7 @@ const ContentManagement = () => {
   const deleteImage = async (imageKey) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/delete-image`, {
+      const response = await fetch(`${env.BASE_URL}/delete-image`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ const ContentManagement = () => {
         formData.append('file', imageFile);
         formData.append('title', imageTitle);
 
-        const response = await fetch(`${BASE_URL}/upload-image`, {
+        const response = await fetch(`${env.BASE_URL}/upload-image`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -123,7 +123,7 @@ const ContentManagement = () => {
   const fetchTerms = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/list-terms`);
+      const response = await fetch(`${env.BASE_URL}/list-terms`);
       const data = await response.json();
       setTerms(data.terms);
     } catch (error) {
@@ -137,7 +137,7 @@ const ContentManagement = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/delete-term`, {
+      const response = await fetch(`${env.BASE_URL}/delete-term`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ const ContentManagement = () => {
     }
   
     try {
-      const response = await fetch(`${BASE_URL}/upload-term`, {
+      const response = await fetch(`${env.BASE_URL}/upload-term`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
