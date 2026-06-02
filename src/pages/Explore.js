@@ -9,6 +9,7 @@ import Pagination from '../components/Pagination';
 import InfoButton from '../components/InfoButton';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
+import ASSETS from '../config/assets';
 //import ImageCarousel from '../components/ImageCarrousel';
 //import ScrollIndicator from '../components/ScrollIndicator';
 
@@ -101,7 +102,7 @@ const Explore = ({
 
   const handleDownload = async () => {
     try {
-      const data = await api.get('/get-file?fileKey=Glossary.pdf');
+      const data = await api.get(`/get-file?fileKey=${ASSETS.GLOSSARY}`);
       if (data.fileUrl) {
         const link = document.createElement('a');
         link.href = data.fileUrl;

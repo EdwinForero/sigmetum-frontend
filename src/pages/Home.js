@@ -8,6 +8,7 @@ import EmailContactGrid from '../components/EmailContactGrid.js';
 import LoadSpinner from '../components/LoadSpinner.js';
 import ScrollIndicator from '../components/ScrollIndicator.js';
 import ImageComponent from '../components/ImageComponent.js';
+import ASSETS from '../config/assets';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -28,16 +29,16 @@ const Home = () => {
   ];
 
   const anotherUniverities = [
-    { key: 'UAL.jpg', url: 'https://www.ual.es', collaborators: ['Juan F. Mota Poveda']},
-    { key: 'UGR.jpg', url: 'https://www.ugr.es', collaborators: ['Francisco Valle Tendero', 'Juan Lorite Moreno']},
-    { key: 'UHU.jpg', url: 'https://www.uhu.es', collaborators: ['Pablo Hidalgo Fernández']},
-    { key: 'UJA.jpg', url: 'https://www.ujaen.es', collaborators: ['José Antonio Carreira de la Fuente']}
+    { key: ASSETS.LOGOS.UAL, url: 'https://www.ual.es', collaborators: ['Juan F. Mota Poveda']},
+    { key: ASSETS.LOGOS.UGR, url: 'https://www.ugr.es', collaborators: ['Francisco Valle Tendero', 'Juan Lorite Moreno']},
+    { key: ASSETS.LOGOS.UHU, url: 'https://www.uhu.es', collaborators: ['Pablo Hidalgo Fernández']},
+    { key: ASSETS.LOGOS.UJA, url: 'https://www.ujaen.es', collaborators: ['José Antonio Carreira de la Fuente']},
   ];
 
   const anotherEntities = [
-    { key: 'EFYVE.jpg', url: 'http://www.efyve.com'},
-    { key: 'GEOSPACE.jpg', url: 'https://3dgeospace.com'},
-    { key: 'MaFo.jpg', url: 'https://malaguenaforestal.com'}
+    { key: ASSETS.LOGOS.EFYVE,    url: 'http://www.efyve.com' },
+    { key: ASSETS.LOGOS.GEOSPACE, url: 'https://3dgeospace.com' },
+    { key: ASSETS.LOGOS.MAFO,     url: 'https://malaguenaforestal.com' },
   ];
 
   const handleOnLoad = (state) => {
@@ -51,7 +52,7 @@ const Home = () => {
 
   return (
     <>
-      <ImageComponent imageKey="Banner.jpg" isBackground={true} className="flex items-center justify-left px-2">
+      <ImageComponent imageKey={ASSETS.BANNER} isBackground={true} className="flex items-center justify-left px-2">
         <div className="flex flex-col gap-5 text-left">
           <h1 className="text-[#F9FBFA] text-4xl font-black sm:text-6xl sm:font-black">
             {t('home.title')}
@@ -106,7 +107,7 @@ const Home = () => {
               className="block"
             >
               <ImageComponent
-                imageKey={"UMA.jpg"}
+                imageKey={ASSETS.LOGOS.UMA}
                 className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
               />
             </a>

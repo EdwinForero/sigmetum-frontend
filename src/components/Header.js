@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import LanguageSwitcher from './LanguageSwitcher';
 import api from '../services/api';
+import ASSETS from '../config/assets';
 
 const Header = () => {
   const [faviconUrl, setFaviconUrl] = useState(null);
 
   useEffect(() => {
-    api.get('/get-image?imageKey=Logo.JPG')
+    api.get(`/get-image?imageKey=${ASSETS.LOGO}`)
       .then((data) => {
         const linkTag = document.querySelector("link[rel='icon']");
         if (linkTag) linkTag.href = data.imageUrl;
