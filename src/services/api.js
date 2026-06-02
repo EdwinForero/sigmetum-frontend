@@ -7,19 +7,24 @@ const authHeader = () => ({
 async function request(path, options = {}) {
   let response;
   try {
-    response = await fetch(`${env.BASE_URL}${path}`, options);
+    response = await fetch(`${env.BASE_URL}${env.API_PREFIX}${path}`, options);
   } catch {
     const error = new Error('network_error');
     error.type = 'network';
     throw error;
   }
-  if (!response.ok) {
-    const error = new Error(`http_${response.status}`);
+
+  const json = await response.json();
+
+  if (!response.ok || !json.success) {
+    const error = new Error(json.error || `http_${response.status}`);
     error.type = 'http';
     error.status = response.status;
+    error.serverMessage = json.error;
     throw error;
   }
-  return response.json();
+
+  return json.data;
 }
 
 const api = {

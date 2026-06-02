@@ -11,8 +11,8 @@ const VegetationGallery = () => {
   useEffect(() => {
     api.get('/list-images')
       .then((data) => {
-        if (data.urls) {
-          setImageUrls(data.urls.filter((image) => image.fileName.trim() !== ''));
+        if (data) {
+          setImageUrls(data.filter((image) => image.fileName.trim() !== ''));
         }
       })
       .catch(() => setIsError(true))

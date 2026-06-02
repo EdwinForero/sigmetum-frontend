@@ -25,8 +25,8 @@ const ImageGalleryManager = () => {
     setIsError(false);
     try {
       const data = await api.get('/list-images');
-      if (data.urls) {
-        setImages(data.urls.filter((image) => image.fileName.trim() !== ''));
+      if (data) {
+        setImages(data.filter((image) => image.fileName.trim() !== ''));
       }
     } catch {
       setIsError(true);

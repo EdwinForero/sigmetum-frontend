@@ -36,7 +36,7 @@ const FileDropdown = forwardRef(({
       const provincesSet = new Set();
       const filesByProvince = {};
 
-      data.files.forEach((file) => {
+      data.forEach((file) => {
         const parts = file.key.split('/');
         if (parts.length > 1) {
           const province = parts[1];

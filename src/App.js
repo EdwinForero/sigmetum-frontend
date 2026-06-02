@@ -37,7 +37,7 @@ function App() {
   const fetchTerms = useCallback(async () => {
     try {
       const data = await api.get('/list-terms');
-      setNoItalicTerms(data.terms);
+      setNoItalicTerms(data);
     } catch {
       setExploreError(true);
     }

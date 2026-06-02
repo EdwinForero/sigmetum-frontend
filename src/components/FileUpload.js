@@ -52,20 +52,20 @@ const FileUploadForm = ({
       formData.append('file', new File([file], normalizedFileName));
   
       try {
-        const response = await fetch(`${env.BASE_URL}/upload`, {
+        const response = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
           body: formData,
         });
-  
+
         const responseData = await response.json();
-  
+
         if (!response.ok) {
-          if (responseData.emptyFields) {
+          if (responseData.data?.emptyFields) {
             onLoad(false);
-            const emptyFieldSummary = responseData.emptyFields
+            const emptyFieldSummary = responseData.data.emptyFields
               .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
               .join(', ');
 
@@ -83,7 +83,7 @@ const FileUploadForm = ({
   
             if (confirmed) {
               onLoad(true);
-              const confirmedResponse = await fetch(`${env.BASE_URL}/upload/confirm`, {
+              const confirmedResponse = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ const FileUploadForm = ({
                 },
                 body: JSON.stringify({
                   confirmed: true,
-                  fileData: responseData.processedData,
+                  fileData: responseData.data.processedData,
                 }),
               });
   

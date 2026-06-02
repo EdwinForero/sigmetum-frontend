@@ -1,5 +1,6 @@
 const env = {
   BASE_URL: process.env.REACT_APP_BASE_URL || 'http://localhost:8000',
+  API_PREFIX: process.env.REACT_APP_API_PREFIX || '/api/v1',
   S3_URL: process.env.REACT_APP_S3_URL || '',
   CAROUSEL_IMAGE_KEYS: (process.env.REACT_APP_CAROUSEL_IMAGE_KEYS || '')
     .split(',')

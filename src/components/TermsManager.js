@@ -24,7 +24,7 @@ const TermsManager = () => {
     setIsError(false);
     try {
       const data = await api.get('/list-terms');
-      setTerms(data.terms);
+      setTerms(data);
     } catch {
       setIsError(true);
     } finally {
