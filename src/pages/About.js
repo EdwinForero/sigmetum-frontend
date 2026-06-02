@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import ScrollIndicator from '../components/ScrollIndicator';
 import ImageComponent from '../components/ImageComponent';
-import ASSETS from '../config/assets';
+import ASSETS, { assetUrl } from '../config/assets';
 
 const About = () => {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ const About = () => {
     <div className="max-w-[960px] flex-1 flex flex-col justify-center items-center">
       <div className="@[480px]:px-4 @[480px]:py-3">
       <div className="w-full h-[400px] bg-no-repeat flex flex-col justify-end overflow-hidden rounded-xl">
-        <ImageComponent imageKey={ASSETS.ABOUT} />
+        <ImageComponent directUrl={assetUrl(ASSETS.ABOUT)} />
       </div>
 
         <motion.h2

@@ -65,6 +65,7 @@ const FileUploadForm = ({
         if (!response.ok) {
           if (responseData.data?.emptyFields) {
             onLoad(false);
+            const { draftKey } = responseData.data;
             const emptyFieldSummary = responseData.data.emptyFields
               .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
               .join(', ');
@@ -80,7 +81,7 @@ const FileUploadForm = ({
               );
             });
             closeDialog();
-  
+
             if (confirmed) {
               onLoad(true);
               const confirmedResponse = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
@@ -89,16 +90,21 @@ const FileUploadForm = ({
                   'Content-Type': 'application/json',
                   Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-                body: JSON.stringify({
-                  confirmed: true,
-                  fileData: responseData.data.processedData,
-                }),
+                body: JSON.stringify({ confirmed: true, draftKey }),
               });
-  
+
               if (!confirmedResponse.ok) {
                 throw new Error('Error al confirmar la subida');
               }
             } else {
+              await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify({ confirmed: false, draftKey }),
+              });
               allFilesUploadedSuccessfully = false;
               break;
             }

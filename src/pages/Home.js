@@ -8,7 +8,7 @@ import EmailContactGrid from '../components/EmailContactGrid.js';
 import LoadSpinner from '../components/LoadSpinner.js';
 import ScrollIndicator from '../components/ScrollIndicator.js';
 import ImageComponent from '../components/ImageComponent.js';
-import ASSETS from '../config/assets';
+import ASSETS, { assetUrl } from '../config/assets';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -52,7 +52,7 @@ const Home = () => {
 
   return (
     <>
-      <ImageComponent imageKey={ASSETS.BANNER} isBackground={true} className="flex items-center justify-left px-2">
+      <ImageComponent directUrl={assetUrl(ASSETS.BANNER)} isBackground={true} className="flex items-center justify-left px-2">
         <div className="flex flex-col gap-5 text-left">
           <h1 className="text-[#F9FBFA] text-4xl font-black sm:text-6xl sm:font-black">
             {t('home.title')}
@@ -107,7 +107,7 @@ const Home = () => {
               className="block"
             >
               <ImageComponent
-                imageKey={ASSETS.LOGOS.UMA}
+                directUrl={assetUrl(ASSETS.LOGOS.UMA)}
                 className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
               />
             </a>
@@ -143,7 +143,7 @@ const Home = () => {
             >
               <a href={url} target="_blank" rel="noopener noreferrer" className="block">
                 <ImageComponent
-                  imageKey={key}
+                  directUrl={assetUrl(key)}
                   className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
                 />
               </a>
@@ -158,8 +158,8 @@ const Home = () => {
           ))}
         </motion.div>
 
-        <motion.h3 
-          className="text-[#15B659] tracking-light text-xl sm:text-2xl font-bold leading-tight text-center mt-12" 
+        <motion.h3
+          className="text-[#15B659] tracking-light text-xl sm:text-2xl font-bold leading-tight text-center mt-12"
           variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
@@ -181,7 +181,7 @@ const Home = () => {
             >
               <a href={url} target="_blank" rel="noopener noreferrer" className="block">
                 <ImageComponent
-                  imageKey={key}
+                  directUrl={assetUrl(key)}
                   className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
                 />
               </a>

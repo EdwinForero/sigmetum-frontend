@@ -1,15 +1,19 @@
 import { React, useState, useEffect } from 'react';
 import api from '../services/api';
 
-const ImageComponent = ({ imageKey, isBackground = false, className = '', children }) => {
-  const [imageUrl, setImageUrl] = useState('');
+const ImageComponent = ({ imageKey, directUrl, isBackground = false, className = '', children }) => {
+  const [imageUrl, setImageUrl] = useState(directUrl || '');
 
   useEffect(() => {
+    if (directUrl) {
+      setImageUrl(directUrl);
+      return;
+    }
     if (!imageKey) return;
     api.get(`/get-image?imageKey=${imageKey}`)
       .then((data) => setImageUrl(data.imageUrl))
       .catch((error) => console.error('Error fetching image:', error));
-  }, [imageKey]);
+  }, [imageKey, directUrl]);
 
   if (isBackground) {
     return (

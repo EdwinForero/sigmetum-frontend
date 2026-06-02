@@ -9,7 +9,7 @@ import Pagination from '../components/Pagination';
 import InfoButton from '../components/InfoButton';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
-import ASSETS from '../config/assets';
+import ASSETS, { assetUrl } from '../config/assets';
 //import ImageCarousel from '../components/ImageCarrousel';
 //import ScrollIndicator from '../components/ScrollIndicator';
 
@@ -100,15 +100,12 @@ const Explore = ({
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     try {
-      const data = await api.get(`/get-file?fileKey=${ASSETS.GLOSSARY}`);
-      if (data.fileUrl) {
-        const link = document.createElement('a');
-        link.href = data.fileUrl;
-        link.download = 'myfile.pdf';
-        link.click();
-      }
+      const link = document.createElement('a');
+      link.href = assetUrl(ASSETS.GLOSSARY);
+      link.download = 'glossary.pdf';
+      link.click();
     } catch {
       showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorDownloadFile'));
     }

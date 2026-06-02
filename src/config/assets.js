@@ -1,3 +1,5 @@
+import env from './env';
+
 const ASSETS = {
   LOGO:    'assets/logos/app-logo.jpg',
   BANNER:  'assets/banners/home-banner.jpg',
@@ -14,5 +16,7 @@ const ASSETS = {
     MAFO:     'assets/logos/collaborators/MaFo.jpg',
   },
 };
+
+export const assetUrl = (key) => `${env.S3_URL}/${key}`;
 
 export default ASSETS;

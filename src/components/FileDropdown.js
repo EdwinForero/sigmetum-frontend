@@ -32,26 +32,8 @@ const FileDropdown = forwardRef(({
     setIsError(false);
     try {
       const data = await api.get('/list-files');
-
-      const provincesSet = new Set();
-      const filesByProvince = {};
-
-      data.forEach((file) => {
-        const parts = file.key.split('/');
-        if (parts.length > 1) {
-          const province = parts[1];
-          provincesSet.add(province);
-          if (!filesByProvince[province]) filesByProvince[province] = [];
-          filesByProvince[province].push({
-            version: parts.slice(2).join('/'),
-            fullKey: file.key,
-            name: file.name,
-          });
-        }
-      });
-
-      setProvinces(Array.from(provincesSet));
-      setFiles(filesByProvince);
+      setProvinces(Object.keys(data));
+      setFiles(data);
       setSelectedProvince(null);
     } catch {
       setIsError(true);
@@ -80,7 +62,7 @@ const FileDropdown = forwardRef(({
   useImperativeHandle(ref, () => ({ fetchFiles }));
 
   useEffect(() => {
-    if (selectedFile && !Object.values(files).flat().some((file) => file.fullKey === selectedFile)) {
+    if (selectedFile && !Object.values(files).flat().some((file) => file.key === selectedFile)) {
       onFileSelect([], null);
     }
   }, [files, selectedFile, onFileSelect]);
@@ -136,11 +118,11 @@ const FileDropdown = forwardRef(({
                     <h3 className="font-bold text-base mb-2">{t('dataManagement.fileSelectDropdwon.versionTitle')}</h3>
                     {selectedProvince ? (
                       <ul>
-                        {versions.map(({ fullKey, name }) => (
+                        {versions.map(({ key, name }) => (
                           <li
-                            key={fullKey}
-                            className={`p-2 cursor-pointer rounded ${selectedFile === fullKey ? 'bg-[#99BBA8]' : 'hover:bg-[#99BBA8]'}`}
-                            onClick={() => handleVersionSelect(fullKey, name)}
+                            key={key}
+                            className={`p-2 cursor-pointer rounded ${selectedFile === key ? 'bg-[#99BBA8]' : 'hover:bg-[#99BBA8]'}`}
+                            onClick={() => handleVersionSelect(key, name)}
                           >
                             {FormatFileName(name)}
                           </li>
