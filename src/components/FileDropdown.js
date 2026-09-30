@@ -6,12 +6,12 @@ import DialogAdvice from './DialogAdvice';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
 
-const FileDropdown = forwardRef(({
+const FileDropdown = forwardRef(function FileDropdown({
   onLoad,
   onFileSelect,
   selectedFile },
   ref
-) => {
+) {
 
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);

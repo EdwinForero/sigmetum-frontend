@@ -85,7 +85,7 @@ const CategoryFilter = ({
               ))
             ) : (
               <p className="text-[#4B644A]">
-                {t('filter.categoryFilter.noResultsFoundPlaceholder')} "{searchText}"
+                {t('filter.categoryFilter.noResultsFoundPlaceholder')} &quot;{searchText}&quot;
               </p>
             )}
           </motion.div>

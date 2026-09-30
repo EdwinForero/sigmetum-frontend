@@ -32,7 +32,7 @@ El contrato con el backend coincide: todas las rutas que llama el frontend exist
 | Archivos de test | 6 |
 | Claves de traducción (por idioma) | 197 |
 | Tests | 15 en 6 archivos (Vitest): utilidades, campos de texto, flujo de subida y traducciones |
-| Linter | Ninguno (Create React App traía ESLint; Vite no). Pendiente de añadir |
+| Linter | ESLint 9 (`npm run lint`): 0 errores y un tope de avisos que no puede crecer. `npm run quality` añade seguridad |
 | Tipado | Ninguno (JavaScript sin PropTypes ni TypeScript) |
 
 Estas son las **únicas** cifras del repositorio de documentación: el resto de documentos no deben repetirlas. `npm run docs:check` verifica las cuatro primeras filas con el código, y `npm run docs:check -- --metrics` las imprime para actualizarlas. El número de tests sale de `npm test`. De los 34 componentes, 2 no se usan (`UploadButton`, `ImageCarrousel`).
@@ -93,6 +93,10 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 | M9 | `console.log(selectedFilters)` olvidado en producción | `Filter.js:70` |
 | M10 | Favicon fijo en `index.html` apuntando al bucket antiguo `s3-sigmetumtest`. `Header` lo reescribe en tiempo de ejecución, pero hasta entonces se pide a un bucket que puede no existir | `public/index.html` |
 | M12 | `DialogSpecies` busca las filas de una especie con `item["Especies Características"]?.includes(nombre)`. Si el valor es una cadena (una sola especie en la fila), `includes` busca **subcadenas**: abrir "Quercus ilex" mezcla atributos de filas cuyo texto solo contiene ese nombre. Con arrays la comparación es exacta | `DialogSpecies.js:25` |
+| M13 | Las tipografías e iconos se cargan desde Google Fonts (terceros): hay una petición a Google antes de que el usuario acepte cookies (implicación de privacidad), añade una dependencia externa y el atributo `onload` inline de los `<link>` impide una Content-Security-Policy estricta. Solución: alojar las fuentes (Amaranth, Sen, Material Symbols) en el propio sitio | `index.html:18-19` |
+| M14 | Dependencias de producción con avisos sin arreglo compatible: `xlsx` (alto; solo se usa para **escribir**, los avisos afectan a la lectura) y `react-router` (moderado; la corrección está solo en la v7 y ningún dato del usuario llega a `Link`/`navigate`). Están aceptadas con su justificación en `scripts/quality-check.mjs`; revisarlas al actualizar | `package.json` |
+| M15 | Las cookies propias (`cookieConsent`, `cookiePreferences`) se crean sin `SameSite` ni `Secure` | `CookieBanner.js:29-45` |
+| M16 | Un único paquete JavaScript supera el aviso de 500 kB de Vite: todas las rutas y `xlsx` se descargan al entrar. Cargar las rutas con `React.lazy` y `xlsx` con `import()` al descargar | `vite build` |
 | M11 | Las preferencias de cookies se guardan pero nada las lee. Si la web no usa cookies de publicidad ni de seguimiento, el banner y la política deberían reflejarlo | `CookieBanner.js` |
 
 ### Prioridad baja (accesibilidad, calidad y detalles)
@@ -110,6 +114,12 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 | B10 | `LanguageSwitcher` deduce el idioma comparando el texto de la etiqueta en lugar de usar `value` | `LanguageSwitcher.js:23` |
 | B11 | La descarga del glosario usa `<a download>` hacia otro dominio (S3). El navegador ignora `download` y abre el PDF, y el `try/catch` nunca detecta errores | `Explore.js:103-112` |
 | B13 | Colores hexadecimales repetidos en cientos de clases (`#15B659`, `#0C1811`...) en lugar de definirlos como colores del tema de Tailwind | todo `src/` |
+| B14 | Enlace `http://` a una entidad colaboradora (por confirmar si admite https) | `Home.js:39` |
+| B15 | El `<html lang>` es fijo (`es-ES`) aunque la interfaz cambie a inglés: los lectores de pantalla pronuncian mal el texto | `index.html`, `LanguageSwitcher` |
+| B16 | No hay ningún atributo `aria-*` ni `role` en el código: los iconos (texto de Material Symbols) se leen como palabras, los diálogos no son modales para un lector, el spinner no se anuncia y los tooltips no se asocian a su botón | toda la interfaz |
+| B17 | `outline-none` en 12 sitios sin una alternativa de foco visible | 6 archivos |
+| B18 | Solo `Home`, `Cookies` y `NotFound` tienen `<h1>`; el resto de páginas abre con `<h2>` | páginas |
+| B19 | No se respeta `prefers-reduced-motion`: fondo con parallax (`background-attachment: fixed`), flecha con rebote infinito y transiciones de página | `ImageComponent`, `ScrollIndicator`, `Explore` |
 
 ## Hoja de ruta sugerida
 

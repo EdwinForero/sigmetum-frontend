@@ -39,6 +39,8 @@ npm run dev                 # http://localhost:3000
 | `npm run preview` | Sirve `dist/` en local para probar el build |
 | `npm test` | Ejecuta todos los tests una vez (Vitest) |
 | `npm run test:watch` | Tests en modo observación |
+| `npm run lint` | ESLint. Falla si hay errores o si los avisos superan el tope fijado en el script (`--max-warnings`). Al corregir avisos, se baja el tope |
+| `npm run quality` | Puerta de calidad y seguridad: patrones prohibidos, secretos, `npm audit` de producción y ESLint |
 | `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [MANTENIMIENTO.md](MANTENIMIENTO.md)) |
 
 ## Despliegue
