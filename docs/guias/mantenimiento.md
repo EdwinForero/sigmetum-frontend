@@ -143,13 +143,51 @@ Ciclo de vida de un hallazgo:
 
 Los ids no se reutilizan. Si un hallazgo se descarta, se queda con una nota ("No procede: motivo").
 
-## 6. Avisar al backend y a la infraestructura
+## 6. Convención entre repositorios y avisos
 
-`integracion/para-backend.md` y `integracion/para-infra.md` son la fuente de verdad de **lo que espera el frontend**. Cada repositorio tiene un `INTEGRACION.md` que apunta a ellos.
+SIGMETUM-A son **tres repositorios** (`sigmetum-frontend`, `sigmetum-backend`, `sigmetum-infra`) que se despliegan por separado. Esta convención es **la misma en los tres**.
 
-- **Cambias algo que afecta al otro lado:** actualiza el documento de `integracion/` **y** deja constancia en la PR (qué cambia y qué debe hacer el otro equipo).
-- **El otro repositorio cambia algo:** revisa la sección "Si cambias algo" del documento de `integracion/` y actualiza el frontend y este documento.
-- **Discrepancia resuelta en el otro repositorio:** pásala de la tabla de discrepancias a una línea en el historial de 09 y verifica el cambio contra su código.
+### 6.1 Dónde vive cada cosa
+
+Cada repositorio tiene `docs/integracion/` con **un documento por cada uno de los otros dos**: `para-<destinatario>.md`.
+
+| Repositorio | Documentos de `docs/integracion/` |
+|---|---|
+| `sigmetum-frontend` | `para-backend.md`, `para-infra.md` |
+| `sigmetum-backend` | `para-frontend.md`, `para-infra.md` |
+| `sigmetum-infra` | `para-frontend.md`, `para-backend.md` |
+
+Un `para-X.md` **está escrito para quien mantiene X**. Dice qué necesita y qué espera este repositorio de X, qué ofrece y garantiza a X, el estado de las discrepancias y qué debe avisarse si algo cambia. Además, cada repositorio tiene un `INTEGRACION.md` en la raíz, de pocas líneas, que apunta a esos documentos y a los de los hermanos.
+
+### 6.2 Quién es dueño de cada hecho
+
+Cada dato se documenta **en el repositorio que lo decide**. Los demás lo enlazan y, si lo necesitan, lo contrastan; no lo copian.
+
+| Hecho | Dueño | Fuente |
+|---|---|---|
+| Endpoints, formatos de respuesta, columnas del Excel, JWT, variables del backend | `sigmetum-backend` | `docs/04-api.md`, `config/validateEnv.js` |
+| Variables `VITE_*`, recursos estáticos que pide la web, forma de llamar a la API | `sigmetum-frontend` | `.env.example`, `src/config/assets.js`, `src/services/api.js` |
+| Recursos de AWS, valores de las variables en cada entorno, dominios, cabeceras, reglas de Amplify | `sigmetum-infra` | Los `.tf` y `docs/referencia-modulos.md` |
+
+### 6.3 Estructura de un `para-X.md`
+
+1. **Propósito y verificación:** a quién va dirigido, fecha y commits contrastados, y la leyenda **(verificado)** / **(por confirmar)**.
+2. **Resumen:** tabla de lo que falta o no encaja, con id, problema y efecto.
+3. **Contrato:** lo que este repositorio espera de X (y lo que ofrece a X), con datos concretos y contrastados contra el código.
+4. **Discrepancias:** tabla con id, qué pasa, dónde, responsable y qué hacer. Solo lo vigente.
+5. **Si cambias algo:** tabla "si cambias A, actualiza B en mi repositorio".
+6. **Cómo mantener el documento.**
+
+### 6.4 Identificadores
+
+Cada documento numera sus discrepancias con su propio prefijo (`D1`, `I1`, `F1`...). **Al citar uno de otro repositorio se escribe con el nombre del repositorio:** `frontend:I1`, `backend:F2`. Sin eso, dos `I1` distintos se confunden.
+
+### 6.5 Qué hacer cuando cambia algo
+
+- **Cambias algo que afecta a otro repositorio:** actualiza el `para-X.md` correspondiente **y** deja constancia en la PR (qué cambia, qué debe hacer el otro equipo y en qué orden desplegar).
+- **Otro repositorio cambia algo:** revisa la sección "Si cambias algo" de su documento y actualiza el tuyo.
+- **Discrepancia resuelta en el otro repositorio:** verifica el cambio contra su código, pásala a una línea en el historial del documento de estado y quítala de la tabla de discrepancias.
+- **El orden de despliegue importa:** si un cambio exige cambios coordinados (por ejemplo, variables nuevas en Amplify antes de fusionar el frontend), se dice en la PR.
 
 ## 7. Estilo
 
