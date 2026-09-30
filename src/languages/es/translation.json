@@ -174,7 +174,6 @@
     "deleteVersionButtonTooltip": "Al presionar este botón, se eliminará permanentemente el archivo que haya elegido previamente. En caso de existir otras versiones del archivo, se restablecerá con los datos de la versión más reciente.",
     "updateDataButton": "Actualizar datos",
     "updateDataButtonTooltip": "Al presionar este botón, se establecerán los datos que se muestran en la página 'Explorar' para la provincia correspondiente al archivo elegido previamente.",
-    "noDataFoundPlaceholder": "No hay datos disponibles.",
     "fileSelectDropdwon": {
       "selectFileDropdownLabel": "Elegir conjunto de datos",
       "selectFileDropdownPlaceholder": "Elegir conjunto de datos",
