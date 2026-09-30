@@ -20,7 +20,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "docs:check": "node scripts/docs-check.mjs"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",

@@ -42,4 +42,4 @@ docs/          Documentación técnica
 
 ## Documentación
 
-Toda la documentación técnica está en [`docs/`](docs/README.md): arquitectura, API, páginas, componentes, guía de desarrollo y estado actual con la deuda técnica.
+Toda la documentación técnica está en [`docs/`](docs/README.md): arquitectura, API, páginas, componentes, guía de desarrollo y estado actual con la deuda técnica. Tras cada cambio, sigue [`docs/MANTENIMIENTO.md`](docs/MANTENIMIENTO.md) y ejecuta `npm run docs:check`.

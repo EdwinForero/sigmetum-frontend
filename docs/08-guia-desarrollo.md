@@ -39,6 +39,7 @@ npm run dev                 # http://localhost:3000
 | `npm run preview` | Sirve `dist/` en local para probar el build |
 | `npm test` | Ejecuta todos los tests una vez (Vitest) |
 | `npm run test:watch` | Tests en modo observación |
+| `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [MANTENIMIENTO.md](MANTENIMIENTO.md)) |
 
 ## Despliegue
 
@@ -96,6 +97,7 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 | `utilities/highlightTerms.test.js` | Términos no latinos en redonda, escape de caracteres especiales y punto literal |
 | `components/TextInput.test.js`, `FilterSearchBar.test.js` | Los campos son controlados y se vacían cuando el padre los vacía |
 | `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false` |
+| `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, y que no haya traducciones vacías |
 
 ### Pendiente
 
@@ -115,3 +117,5 @@ El repositorio incluye `.claude/settings.json` con plugins compartidos, que se a
 | `understand-anything` | Mapa del código y guía de incorporación al proyecto |
 | `humanizer` | Revisar textos institucionales para que suenen naturales (no usar sobre contenido científico) |
 | `design-taste-frontend` (skill local en `.claude/skills/`) | Guía de diseño para landing pages. Útil solo para la portada |
+
+El archivo [CLAUDE.md](../CLAUDE.md) de la raíz resume las reglas del proyecto para Claude Code y le indica que siga [MANTENIMIENTO.md](MANTENIMIENTO.md) tras cada feature o fix.

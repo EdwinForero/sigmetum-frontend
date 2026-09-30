@@ -26,14 +26,16 @@ El contrato con el backend coincide: todas las rutas que llama el frontend exist
 
 | Métrica | Valor |
 |---|---|
-| Archivos JS en `src/` | 56 |
-| Líneas de JS | ~4.200 |
+| Archivos de código (sin tests) | 57 |
 | Páginas | 10 |
-| Componentes | 34 (3 sin uso) |
-| Claves de traducción | 198 en ES y 197 en EN |
-| Tests | 12 en 5 archivos (Vitest): utilidades, campos de texto y flujo de subida |
+| Componentes | 34 |
+| Archivos de test | 6 |
+| Claves de traducción (por idioma) | 197 |
+| Tests | 15 en 6 archivos (Vitest): utilidades, campos de texto, flujo de subida y traducciones |
 | Linter | Ninguno (Create React App traía ESLint; Vite no). Pendiente de añadir |
 | Tipado | Ninguno (JavaScript sin PropTypes ni TypeScript) |
+
+Estas son las **únicas** cifras del repositorio de documentación: el resto de documentos no deben repetirlas. `npm run docs:check` verifica las cuatro primeras filas con el código, y `npm run docs:check -- --metrics` las imprime para actualizarlas. El número de tests sale de `npm test`. De los 34 componentes, 2 no se usan (`UploadButton`, `ImageCarrousel`).
 
 ## Valoración general
 
@@ -52,6 +54,7 @@ La base funciona y la refactorización reciente la ha mejorado: hay un servicio 
 | M3 | `framer-motion` importado sin estar declarado | Todas las importaciones pasan a `motion/react` | `eed9c39` |
 | M4 | Dependencias sobrantes (`install`, `npm`, `react-joyride`, `web-vitals`) | Eliminadas | `eed9c39` |
 | M5 | Create React App abandonado | Migración a Vite 6 y Vitest 3 | `eed9c39` |
+| B8 | La clave `dataManagement.noDataFoundPlaceholder` solo existía en español | Era una clave huérfana que ningún código usaba: se eliminó y un test comprueba la paridad de traducciones | `19351ae` |
 
 Cada corrección de A1 a A4 tiene su test, que se comprobó que fallaba antes del arreglo.
 
@@ -103,7 +106,6 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 | B5 | `alt="Imagen"` genérico en todas las imágenes, incluidos los logos institucionales | `ImageComponent.js` |
 | B6 | `import { React, useState } from 'react'`: `React` no es una exportación con nombre y vale `undefined`. Funciona solo gracias al runtime JSX automático | `Home`, `DataManagement`, `FilesUpload`, `ContentManagement`, `VegetationGallery`, `TermsManager`, `ImageGalleryManager`, `ImageComponent` |
 | B7 | Textos fijos sin traducir: pantalla del `ErrorBoundary`, nombres del menú lateral (`'Filtro'`, `'Administrar datos'`) y colaboradores de la portada | `ErrorBoundary.js`, `App.js`, `Home.js` |
-| B8 | La clave `dataManagement.noDataFoundPlaceholder` solo existe en español | `languages/en/translation.json` |
 | B9 | El botón "Actualizar datos" reutiliza el tooltip de "Descargar Excel" | `DataManagement.js:98` |
 | B10 | `LanguageSwitcher` deduce el idioma comparando el texto de la etiqueta en lugar de usar `value` | `LanguageSwitcher.js:23` |
 | B11 | La descarga del glosario usa `<a download>` hacia otro dominio (S3). El navegador ignora `download` y abre el PDF, y el `try/catch` nunca detecta errores | `Explore.js:103-112` |

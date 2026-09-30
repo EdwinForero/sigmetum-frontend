@@ -6,7 +6,7 @@
 |---|---|---|---|
 | `react`, `react-dom` | ^18.3.1 | Librería de UI | Toda la app |
 | `react-router-dom` | ^6.27.0 | Enrutado (`Routes`, `Route`, `Link`, `Navigate`, `useLocation`, `useNavigate`) | `index.js`, `App.js`, páginas y navegación |
-| `motion` | ^11.12.0 | Animaciones. Se importa desde `motion/react` | 15 componentes y páginas |
+| `motion` | ^11.12.0 | Animaciones. Se importa desde `motion/react` | Componentes y páginas animados |
 | `i18next` | ^23.16.8 | Motor de traducciones | `i18n.js` |
 | `react-i18next` | ^15.1.1 | `useTranslation`, `Trans` | Casi todos los componentes |
 | `i18next-browser-languagedetector` | ^8.0.0 | Detecta el idioma del navegador y lo guarda en `localStorage['i18nextLng']` | `i18n.js` |
