@@ -2,7 +2,7 @@ import React from 'react';
 
 const FilterSearchBar = ({
     placeholderText, 
-    searchText, 
+    value,
     onChange
 }) => {
 
@@ -27,7 +27,7 @@ const FilterSearchBar = ({
                 </div>
                 <input
                 id="buscar"
-                value={searchText}
+                value={value}
                 onChange={onChange}
                 placeholder={`${placeholderText}`}
                 className="form-input bg-[#F9FBFA] flex w-full min-w-0 resize-none overflow-hidden text-[#0C1811] focus:outline-none focus:ring-0 h-full placeholder:text-[#99BBA8] px-[15px] text-sm font-normal sm:text-base"
