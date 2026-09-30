@@ -37,7 +37,7 @@ const FileUploadForm = ({
   
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   
-    event.target.value = null;
+    event.target.value = '';
   };
 
   const handleSubmit = async () => {
@@ -77,6 +77,7 @@ const FileUploadForm = ({
                 {
                   details: { title: t('dialogAdvice.emptyFieldsSummary'), content: emptyFieldSummary },
                   onConfirm: () => resolve(true),
+                  onCancel: () => resolve(false),
                 }
               );
             });
@@ -183,7 +184,10 @@ const FileUploadForm = ({
               dialogMessage={dialog.message}
               dialogDetails={dialog.details}
               onConfirm={dialog.onConfirm}
-              onClose={closeDialog}
+              onClose={() => {
+                dialog.onCancel?.();
+                closeDialog();
+              }}
               showActions={!!dialog.onConfirm}
             />
           )}
