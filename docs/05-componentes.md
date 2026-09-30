@@ -142,7 +142,7 @@ Una categoría del filtro: cabecera plegable, botón "Limpiar", buscador y lista
 
 ### FilterSearchBar
 Campo de búsqueda con icono de lupa.
-Props: `placeholderText`, `searchText`, `onChange`. **Error:** quien lo usa le pasa `value` en lugar de `searchText` (hallazgo A4).
+Props: `placeholderText`, `value`, `onChange`. Es un campo controlado: muestra siempre `value`.
 
 ### SpeciesCard
 Tarjeta de una especie en la cuadrícula del explorador.
@@ -156,7 +156,7 @@ Tarjeta de una especie en la cuadrícula del explorador.
 | Estado / función | Descripción |
 |---|---|
 | `isDialogOpen`, `openDialog()`, `closeDialog()` | Control del diálogo de detalle |
-| `highlightTerms(text, terms)` | Divide el nombre en fragmentos `{ text, isItalic }`: los términos de `terms` (por ejemplo `subsp.`, `var.`) van en redonda y el resto en cursiva, como exige la nomenclatura botánica. Genera una `RegExp` con los términos **sin escapar** (hallazgo A3) |
+| `highlightTerms(text, terms)` | Utilidad compartida (`utilities/highlightTerms.js`): divide el nombre en fragmentos `{ text, isItalic }`. Los términos de `terms` (por ejemplo `subsp.`, `var.`) van en redonda y el resto en cursiva, como exige la nomenclatura botánica. Escapa los caracteres especiales de cada término antes de construir la expresión regular |
 
 ### DialogSpecies
 Modal de detalle de una especie.
@@ -166,7 +166,7 @@ Modal de detalle de una especie.
 | `filteredSpecies` | Registros de `data` cuyo `Especies Características` incluye esta especie |
 | `uniqueAttributes` | Por cada atributo (provincia, municipio, altitud media, sector biogeográfico, piso bioclimático, ombrotipo, naturaleza del sustrato, tipo de serie, serie de vegetación y vegetación potencial), los valores únicos ordenados con `SortItemsList` y unidos por comas |
 | `formattedQuery` | Nombre codificado para el enlace `https://www.ipni.org/?q=...` |
-| `highlightTerms` | Copia de la función de `SpeciesCard` |
+| `highlightTerms` | La misma utilidad compartida que usa `SpeciesCard` |
 
 Muestra el título con cursivas, un `SpeciesAttribute` por atributo, el botón "Cerrar" y el enlace "Leer más" a IPNI. Se cierra al pulsar fuera.
 
@@ -222,7 +222,7 @@ Formulario de carga múltiple de Excel o CSV.
 | `handleRemoveFile(i)` | Quita un archivo de la cola |
 | `handleSubmit()` | Sube los archivos **uno a uno** con `POST /upload`. Si hay campos vacíos (400 con `emptyFields`), pregunta al usuario y confirma con `POST /upload/confirm`. Cualquier otro error detiene el bucle y muestra un aviso. Si todos suben bien, muestra el éxito y vacía la cola |
 
-Ver el diagrama en [01-arquitectura.md](01-arquitectura.md#flujo-de-subida-de-datos-api-v2) y el hallazgo A1.
+Si el usuario cancela o cierra el diálogo de confirmación, se envía `confirmed: false`, se detiene la cola y no se muestra el éxito. Ver el diagrama en [01-arquitectura.md](01-arquitectura.md#flujo-de-subida-de-datos-api-v2).
 
 ### TermsManager
 Gestión de términos que no se escriben en cursiva.
@@ -264,7 +264,7 @@ Formulario de contacto (nombre, email, asunto y mensaje).
 Lee `home.emailsData`, una cadena con el formato `Nombre / email / Nombre / email ...`, la divide por `/` en pares `{ name, email }` y los muestra en dos columnas con enlaces `mailto:`.
 
 ### TextInput
-Campo de texto con el estilo del proyecto. Props: `placeholderText`, `term` y `onChange`. **Error:** quien lo usa le pasa `value` (hallazgo A4).
+Campo de texto con el estilo del proyecto. Props: `placeholderText`, `value` y `onChange`. Es un campo controlado: muestra siempre `value`.
 
 ---
 
@@ -323,7 +323,7 @@ Imagen o fondo a partir de una URL directa o de una clave de S3.
 ## Sin uso
 
 ### ImageCarrousel
-Carrusel infinito con imágenes de `REACT_APP_CAROUSEL_IMAGE_KEYS` (vía `GET /get-image`) o, si no hay, de `via.placeholder.com`. Solo aparece comentado en `Explore`.
+Carrusel infinito con imágenes de `VITE_CAROUSEL_IMAGE_KEYS` (vía `GET /get-image`) o, si no hay, de `via.placeholder.com`. Solo aparece comentado en `Explore`.
 
 ### UploadButton
 Prototipo antiguo de subida con `alert()` que no envía nada. Se puede borrar.

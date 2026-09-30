@@ -12,7 +12,7 @@ sigmetum-frontend/
 │   ├── index.css            # Directivas de Tailwind y tipografías base
 │   ├── App.css              # Solo .App { text-align: center }
 │   ├── config/
-│   │   ├── env.js           # Lectura centralizada de variables REACT_APP_*
+│   │   ├── env.js           # Lectura centralizada de variables VITE_*
 │   │   └── assets.js        # Claves de S3 de los recursos estáticos y assetUrl()
 │   ├── services/
 │   │   └── api.js           # Cliente HTTP único (fetch + envoltorio { success, data })
@@ -150,7 +150,7 @@ sequenceDiagram
     FU->>U: diálogo de éxito
 ```
 
-Al cancelar, el frontend debería enviar `confirmed: false` para que el backend borre el borrador. Hoy no lo hace: es el hallazgo [A1](09-estado-actual-y-deuda-tecnica.md#prioridad-alta-errores-funcionales).
+Al cancelar (botón "Cancelar" o clic fuera del diálogo), el frontend envía `confirmed: false` para que el backend borre el borrador y detiene la cola de subida. Antes de la corrección A1 no lo hacía (ver [09](09-estado-actual-y-deuda-tecnica.md)).
 
 ## Autenticación
 
@@ -161,4 +161,4 @@ Al cancelar, el frontend debería enviar `confirmed: false` para que el backend 
 
 ## Recursos estáticos
 
-Logos, banner, imagen de "Sobre nosotros" y glosario PDF se sirven directamente desde S3 o CloudFront con URL pública: `assetUrl(clave) = REACT_APP_S3_URL + '/' + clave`. Las imágenes de la galería llegan como URLs prefirmadas desde `GET /list-images`.
+Logos, banner, imagen de "Sobre nosotros" y glosario PDF se sirven directamente desde S3 o CloudFront con URL pública: `assetUrl(clave) = VITE_S3_URL + '/' + clave`. Las imágenes de la galería llegan como URLs prefirmadas desde `GET /list-images`.

@@ -4,7 +4,7 @@ Frontend de **SIGMETUM-A**, la base de datos interactiva de las series de vegeta
 
 La web permite al público explorar las especies características y sus atributos ecológicos (provincia, piso bioclimático, ombrotipo, serie de vegetación...) y a los investigadores cargar y versionar los datos.
 
-React 18 · Create React App · Tailwind CSS · i18next (ES/EN). Consume la API de `sigmetum-backend` y los recursos de S3.
+React 18 · Vite · Tailwind CSS · i18next (ES/EN). Consume la API de `sigmetum-backend` y los recursos de S3.
 
 ## Instalación
 
@@ -13,16 +13,16 @@ Requisitos: Node.js 20 y el backend en marcha (en local o desplegado).
 ```bash
 npm ci
 cp .env.example .env   # rellena las variables (ver abajo)
-npm start              # http://localhost:3000
+npm run dev            # http://localhost:3000
 ```
 
 | Variable | Ejemplo |
 |---|---|
-| `REACT_APP_BASE_URL` | `http://localhost:8000` |
-| `REACT_APP_API_PREFIX` | `/api/v1` |
-| `REACT_APP_S3_URL` | URL pública del bucket o de CloudFront |
+| `VITE_BASE_URL` | `http://localhost:8000` |
+| `VITE_API_PREFIX` | `/api/v1` |
+| `VITE_S3_URL` | URL pública del bucket o de CloudFront |
 
-`npm run build` genera la versión de producción en `build/`.
+`npm run build` genera la versión de producción en `dist/` y `npm test` ejecuta los tests (Vitest).
 
 ## Contenido del repositorio
 

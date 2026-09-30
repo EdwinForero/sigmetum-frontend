@@ -3,14 +3,14 @@
 ## Configuración (`src/config/`)
 
 ### `env.js`
-Único punto de lectura de `process.env`. CRA sustituye las variables `REACT_APP_*` **en tiempo de build**: cambiarlas exige volver a compilar.
+Único punto de lectura de `import.meta.env`. Vite sustituye las variables `VITE_*` **en tiempo de build**: cambiarlas exige volver a compilar. Las variables sin el prefijo `VITE_` no llegan al navegador.
 
 | Clave | Variable | Valor por defecto | Uso |
 |---|---|---|---|
-| `BASE_URL` | `REACT_APP_BASE_URL` | `http://localhost:8000` | Origen del backend |
-| `API_PREFIX` | `REACT_APP_API_PREFIX` | `/api/v1` | Prefijo de versión (debe coincidir con el backend) |
-| `S3_URL` | `REACT_APP_S3_URL` | `''` | Base pública de S3 o CloudFront para los recursos estáticos |
-| `CAROUSEL_IMAGE_KEYS` | `REACT_APP_CAROUSEL_IMAGE_KEYS` | `[]` | Claves separadas por comas para `ImageCarrousel` (sin uso) |
+| `BASE_URL` | `VITE_BASE_URL` | `http://localhost:8000` | Origen del backend |
+| `API_PREFIX` | `VITE_API_PREFIX` | `/api/v1` | Prefijo de versión (debe coincidir con el backend) |
+| `S3_URL` | `VITE_S3_URL` | `''` | Base pública de S3 o CloudFront para los recursos estáticos |
+| `CAROUSEL_IMAGE_KEYS` | `VITE_CAROUSEL_IMAGE_KEYS` | `[]` | Claves separadas por comas para `ImageCarrousel` (sin uso) |
 
 ### `assets.js`
 Catálogo de claves de S3 de los recursos estáticos y la función `assetUrl`.
@@ -43,8 +43,8 @@ Estado estándar de un diálogo `DialogAdvice`.
 
 | Devuelve | Descripción |
 |---|---|
-| `dialog` | `{ visible, title, message, details, onConfirm }` |
-| `showDialog(title, message, { details?, onConfirm? })` | Abre el diálogo |
+| `dialog` | `{ visible, title, message, details, onConfirm, onCancel }` |
+| `showDialog(title, message, { details?, onConfirm?, onCancel? })` | Abre el diálogo. `onCancel` permite al llamador saber que el usuario lo cerró sin confirmar (la subida de archivos lo usa para cancelar el borrador) |
 | `closeDialog()` | Lo cierra y reinicia el estado |
 
 Patrón de uso:
@@ -71,9 +71,20 @@ Devuelve `true` cuando la ventana está a 5 px o menos del final del documento. 
 Crea un libro de SheetJS con una hoja `Sigmetum-A` a partir de un array de objetos (`json_to_sheet`).
 
 ### `downloadXLSX(filteredData)` (`CSVfunctions.js`)
-1. Convierte cada valor array en una cadena `'a, b, c'`. **Lo hace sobre los objetos originales** (hallazgo A2).
+1. Crea copias de las filas y convierte cada valor array en una cadena `'a, b, c'`. **No modifica los datos originales** (corregido en A2).
 2. Genera el libro con `convertToXLSX`, lo escribe como `ArrayBuffer` y crea un `Blob`.
 3. Crea un enlace temporal con `download="Sigmetum-A.xlsx"`, lo pulsa y lo retira. No libera la URL con `URL.revokeObjectURL`.
+
+### `highlightTerms(text, terms)` (`highlightTerms.js`)
+Divide un nombre científico en fragmentos `{ text, isItalic }` para pintar en redonda los términos no latinos (`subsp.`, `var.`...) y en cursiva el resto.
+
+| Entrada | Salida |
+|---|---|
+| Sin términos o lista vacía | `[{ text, isItalic: true }]` |
+| `terms` como `[{ term }]` (respuesta de la API) o como cadenas | Se aceptan ambos formatos |
+| Términos con `.`, `(`, `+`, etc. | Se escapan: el punto es literal y un paréntesis sin cerrar no lanza error |
+
+Lo usan `SpeciesCard` y `DialogSpecies`.
 
 ### `FormatFileName(fileName)` (`FormatFileName.js`)
 Convierte el nombre técnico de una versión en un texto legible.

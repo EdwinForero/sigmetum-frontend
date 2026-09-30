@@ -5,7 +5,7 @@
 La URL base se forma con dos variables de entorno ([src/config/env.js](../src/config/env.js)):
 
 ```
-${REACT_APP_BASE_URL}${REACT_APP_API_PREFIX}${ruta}
+${VITE_BASE_URL}${VITE_API_PREFIX}${ruta}
 p. ej. http://localhost:8000/api/v1/list-files
 ```
 
@@ -65,7 +65,7 @@ Rutas verificadas contra `sigmetum-backend/routes/*.js`.
 | `POST /update-file` | Sí | `{ fileName }` (la `key` de la versión) | Mensaje. Activa esa versión como vigente | `DataManagement.handleFileUpdate` |
 | `POST /delete-file` | Sí | `{ fileName }` | Mensaje | `DataManagement.handleFileDelete` |
 
-**Nota sobre `/upload`:** el backend guarda **siempre** el Excel en S3 antes de validar. Si hay campos vacíos, ese Excel queda como borrador hasta que llega `/upload/confirm`. Si el frontend no envía `confirmed: false` al cancelar, el borrador se queda en el bucket (hallazgo A1).
+**Nota sobre `/upload`:** el backend guarda **siempre** el Excel en S3 antes de validar. Si hay campos vacíos, ese Excel queda como borrador hasta que llega `/upload/confirm`. El frontend envía `confirmed: false` al cancelar para que el borrador no quede huérfano en el bucket (corregido en A1).
 
 ### Contenido (`routes/content.js`)
 

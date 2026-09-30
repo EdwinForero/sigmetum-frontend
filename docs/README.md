@@ -26,11 +26,12 @@ Estado de la documentación: 30/09/2026, rama `feature/sigmetum_front_v2` (commi
 
 | Aspecto | Detalle |
 |---|---|
-| Stack | React 18, Create React App (`react-scripts` 5), React Router 6, Tailwind CSS 3, Framer Motion 11, i18next (ES/EN), SheetJS (`xlsx`) |
+| Stack | React 18, Vite 6, React Router 6, Tailwind CSS 3, Motion 11, i18next (ES/EN), SheetJS (`xlsx`) |
+| Tests | Vitest 3 con Testing Library (jsdom): `npm test` |
 | Backend | API Express (`sigmetum-backend`) bajo `/api/v1`, con respuestas `{ success, data \| error }` |
 | Almacenamiento | S3 en `eu-west-3`: datos por provincia, Excel versionados, imágenes de la galería y recursos estáticos |
-| Despliegue | AWS Amplify, definido en `sigmetum-infra` (Terraform) |
-| Tamaño | 63 archivos fuente (56 de JavaScript), unas 4.200 líneas, 10 páginas, 34 componentes y 0 tests |
+| Despliegue | AWS Amplify, definido en `sigmetum-infra` (Terraform). Pendiente de ajustar, ver riesgos |
+| Tamaño | 63 archivos fuente (56 de JavaScript), unas 4.200 líneas, 10 páginas, 34 componentes y 12 tests |
 | Zona pública | Inicio, explorador de especies con filtros facetados, galería, "Sobre nosotros" y política de cookies |
 | Zona privada (JWT) | Carga de Excel por provincia con control de campos vacíos, gestión de versiones y gestión de términos no latinos e imágenes |
 
@@ -44,12 +45,16 @@ Estado de la documentación: 30/09/2026, rama `feature/sigmetum_front_v2` (commi
 | Borrador (`draftKey`) | Excel subido con filas incompletas, pendiente de que el administrador confirme o cancele |
 | Términos no latinos | Palabras como `subsp.` o `var.` que no se escriben en cursiva dentro de un nombre científico |
 
-## Riesgos principales
+## Estado de los riesgos
 
-Detallados en [09-estado-actual-y-deuda-tecnica.md](09-estado-actual-y-deuda-tecnica.md#hallazgos-priorizados):
+Detallado en [09-estado-actual-y-deuda-tecnica.md](09-estado-actual-y-deuda-tecnica.md#hallazgos-priorizados).
 
-1. Cancelar una subida con campos vacíos deja el proceso colgado y un borrador huérfano en S3.
-2. Exportar a Excel modifica los datos en memoria y rompe los filtros.
-3. Un término no latino con caracteres especiales puede tumbar toda la aplicación.
-4. Los campos de texto no son controlados y no se vacían tras guardar.
-5. La configuración de Amplify en Terraform está pensada para Vite y no despliega este proyecto CRA.
+| Riesgo | Estado |
+|---|---|
+| Cancelar una subida con campos vacíos dejaba el proceso colgado y un borrador huérfano en S3 | Corregido y con test |
+| Exportar a Excel modificaba los datos y rompía los filtros | Corregido y con test |
+| Un término no latino con caracteres especiales tumbaba toda la aplicación | Corregido y con test |
+| Los campos de texto no se vaciaban tras guardar | Corregido y con test |
+| Create React App abandonado | Migrado a Vite y Vitest |
+| Amplify en Terraform: variables `VITE_*`, regla de la SPA y CloudFront para los recursos estáticos | **Pendiente** en `sigmetum-infra` |
+| Contraste de la paleta por debajo de WCAG AA, token de sesión en `localStorage`, cobertura de tests parcial | Pendiente |
