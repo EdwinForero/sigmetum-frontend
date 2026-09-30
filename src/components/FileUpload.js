@@ -4,7 +4,7 @@ import ButtonPrincipal from './ButtonPrincipal';
 import DialogAdvice from './DialogAdvice';
 import InfoButton from './InfoButton';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import env from '../config/env';
 import useDialog from '../hooks/useDialog';
 

@@ -1,7 +1,7 @@
 import React from "react";
 import ButtonPrincipal from "./ButtonPrincipal";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const DialogAdvice = ({ 
   onClose, 

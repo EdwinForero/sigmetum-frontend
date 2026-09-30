@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import ButtonPrincipal from '../components/ButtonPrincipal';
 import DialogAdvice from '../components/DialogAdvice';
 import SpeciesCard from '../components/SpeciesCard';

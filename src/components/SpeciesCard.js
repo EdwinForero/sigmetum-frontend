@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DialogSpecies from './DialogSpecies';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 const SpeciesCard = ({ 
   data, 

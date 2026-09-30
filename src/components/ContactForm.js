@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
 import DialogAdvice from './DialogAdvice';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import ScrollIndicator from '../components/ScrollIndicator';
 import ImageComponent from '../components/ImageComponent';
 import ASSETS, { assetUrl } from '../config/assets';

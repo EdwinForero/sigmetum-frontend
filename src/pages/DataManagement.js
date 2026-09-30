@@ -1,5 +1,5 @@
 import { React, useState, useRef } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import ButtonAlternative from '../components/ButtonAlternative';
 import Table from '../components/Table';

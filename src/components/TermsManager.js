@@ -1,5 +1,5 @@
 import { React, useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import InfoButton from './InfoButton';
 import TextInput from './TextInput';

@@ -3,7 +3,7 @@ import ButtonAlternative from './ButtonAlternative.js';
 import FilterSearchBar from './FilterSearchBar.js';
 import { SortItemsList } from '../utilities/SortItemsList.js';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 const CategoryFilter = ({ 
   category, 
