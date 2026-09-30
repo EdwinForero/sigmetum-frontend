@@ -9,14 +9,11 @@ export const convertToXLSX = (data) => {
 };
 
 export const downloadXLSX = (filteredData) => {
-  const modifiedData = filteredData.map(row => {
-    Object.keys(row).forEach(key => {
-      if (Array.isArray(row[key])) {
-        row[key] = row[key].join(', ');
-      }
-    });
-    return row;
-  });
+  const modifiedData = filteredData.map(row =>
+    Object.fromEntries(
+      Object.entries(row).map(([key, value]) => [key, Array.isArray(value) ? value.join(', ') : value])
+    )
+  );
 
   const workbook = convertToXLSX(modifiedData);
 
