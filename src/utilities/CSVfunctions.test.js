@@ -35,7 +35,13 @@ describe('downloadXLSX', () => {
   it('exporta los valores de tipo array como texto separado por comas', async () => {
     downloadXLSX(buildRows());
 
-    const workbook = XLSX.read(await exportedBlob.arrayBuffer());
+    const buffer = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(exportedBlob);
+    });
+    const workbook = XLSX.read(buffer);
     const sheet = XLSX.utils.sheet_to_json(workbook.Sheets['Sigmetum-A']);
 
     expect(sheet[0]['Especies Características']).toBe('Quercus suber, Pistacia lentiscus');
