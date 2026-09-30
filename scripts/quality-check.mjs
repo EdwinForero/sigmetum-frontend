@@ -130,10 +130,31 @@ const ACCEPTED_ADVISORIES = {
 // 4. ESLint
 {
   const lint = run('npm', ['run', '--silent', 'lint']);
+  const ceiling = Number(read('package.json').match(/--max-warnings\s+(\d+)/)?.[1]);
+  const notes = [];
+  const extra = [];
+  if (lint.status === 0 && Number.isFinite(ceiling)) {
+    const json = run('npx', ['eslint', '.', '-f', 'json']);
+    let actual = null;
+    try {
+      actual = JSON.parse(json.stdout).reduce((sum, file) => sum + file.warningCount, 0);
+    } catch {
+      notes.push('No se pudo contar los avisos de ESLint.');
+    }
+    if (actual !== null && actual < ceiling) {
+      extra.push(`Hay ${actual} avisos y el tope es ${ceiling}: baja --max-warnings a ${actual} en package.json para no perder la mejora`);
+    } else if (actual !== null) {
+      notes.push(`${actual} avisos de ESLint (tope ${ceiling}): deuda de accesibilidad y calidad, ver docs/guias/accesibilidad.md`);
+    }
+  }
   const lines = lint.stdout.split('\n');
   const errors = lines.filter((line) => /\s+error\s+/.test(line)).slice(0, 5);
   const total = lines.find((line) => /problems?/.test(line)) ?? '';
-  check('ESLint (sin errores y sin superar el tope de avisos)', lint.status === 0 ? [] : [`npm run lint falla ${total.trim()}`, ...errors.map((line) => line.trim())]);
+  check(
+    'ESLint (sin errores, sin superar el tope de avisos y con el tope ajustado)',
+    lint.status === 0 ? extra : [`npm run lint falla ${total.trim()}`, ...errors.map((line) => line.trim())],
+    notes
+  );
 }
 
 let failed = 0;

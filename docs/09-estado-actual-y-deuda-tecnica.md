@@ -54,6 +54,8 @@ La base funciona y la refactorización reciente la ha mejorado: hay un servicio 
 | M3 | `framer-motion` importado sin estar declarado | Todas las importaciones pasan a `motion/react` | `eed9c39` |
 | M4 | Dependencias sobrantes (`install`, `npm`, `react-joyride`, `web-vitals`) | Eliminadas | `eed9c39` |
 | M5 | Create React App abandonado | Migración a Vite 6 y Vitest 3 | `eed9c39` |
+| Audit | `npm audit` de producción: 7 vulnerabilidades, 5 de ellas altas (`react-router-dom`, `postcss` y `styled-components`, con arreglo compatible) | `npm audit fix` sin `--force`: quedan 3, las aceptadas en M14 | `31c4e64` |
+| ESLint | 4 errores al introducir ESLint: comillas sin escapar, `forwardRef` anónimo y un bloque vacío | Corregidos sin cambiar el comportamiento. El resto queda como avisos con un tope que no puede crecer | `f632364` |
 | B8 | La clave `dataManagement.noDataFoundPlaceholder` solo existía en español | Era una clave huérfana que ningún código usaba: se eliminó y un test comprueba la paridad de traducciones | `19351ae` |
 
 Cada corrección de A1 a A4 tiene su test, que se comprobó que fallaba antes del arreglo.
@@ -97,6 +99,7 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 | M14 | Dependencias de producción con avisos sin arreglo compatible: `xlsx` (alto; solo se usa para **escribir**, los avisos afectan a la lectura) y `react-router` (moderado; la corrección está solo en la v7 y ningún dato del usuario llega a `Link`/`navigate`). Están aceptadas con su justificación en `scripts/quality-check.mjs`; revisarlas al actualizar | `package.json` |
 | M15 | Las cookies propias (`cookieConsent`, `cookiePreferences`) se crean sin `SameSite` ni `Secure` | `CookieBanner.js:29-45` |
 | M16 | Un único paquete JavaScript supera el aviso de 500 kB de Vite: todas las rutas y `xlsx` se descargan al entrar. Cargar las rutas con `React.lazy` y `xlsx` con `import()` al descargar | `vite build` |
+| M17 | No hay política de privacidad ni aviso de tratamiento de datos en el formulario de contacto, que recoge nombre y correo. Solo existe la política de cookies, cuyo texto del banner menciona publicidad y personalización que la web no usa (ver M11). Determinar con el servicio jurídico qué es obligatorio | `ContactForm.js`, `Cookies.js` |
 | M11 | Las preferencias de cookies se guardan pero nada las lee. Si la web no usa cookies de publicidad ni de seguimiento, el banner y la política deberían reflejarlo | `CookieBanner.js` |
 
 ### Prioridad baja (accesibilidad, calidad y detalles)

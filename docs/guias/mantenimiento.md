@@ -1,42 +1,48 @@
 # Mantenimiento de la documentación
 
-Este documento dice **qué hay que revisar y actualizar en `docs/` después de cada feature o fix**. Es la regla de trabajo del repositorio: Claude Code la sigue a través de [CLAUDE.md](../CLAUDE.md), y las personas, con la lista de la PR.
+Este documento dice **qué hay que revisar y actualizar en `docs/` después de cada feature o fix**. Es la regla de trabajo del repositorio: Claude Code la sigue a través de [CLAUDE.md](../../CLAUDE.md), y las personas, con la lista de la PR.
 
 ## 1. La regla
 
 1. **La documentación se actualiza en el mismo commit (o la misma PR) que el cambio.** Un cambio no está terminado hasta que pasa la lista de este documento.
 2. **Se contrasta con el código, nunca de memoria.** Si no puedes comprobar algo, márcalo como **(por confirmar)**.
-3. **Cada dato vive en un solo sitio.** Los demás documentos enlazan, no copian. Las cifras (archivos, componentes, tests, claves) viven solo en [09](09-estado-actual-y-deuda-tecnica.md#métricas).
-4. **Antes de dar el trabajo por terminado:** `npm test`, `npm run build` y `npm run docs:check` en verde.
+3. **Cada dato vive en un solo sitio.** Los demás documentos enlazan, no copian. Las cifras (archivos, componentes, tests, claves) viven solo en [09](../09-estado-actual-y-deuda-tecnica.md#métricas).
+4. **Antes de dar el trabajo por terminado:** `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check` en verde. Son los cinco de la definición de terminado de [buenas-practicas-frontend.md](buenas-practicas-frontend.md#1-definición-de-terminado).
+5. **Las guías de esta carpeta mandan.** Si lo que te piden contradice una guía (buenas prácticas, seguridad o accesibilidad), se avisa y se pregunta antes de hacerlo.
 
 ## 2. Qué documento tocar según el cambio
 
 | Si cambias... | Actualiza | Comprueba |
 |---|---|---|
-| Una **página** o **ruta** | [01](01-arquitectura.md) (tabla de rutas), [04](04-paginas.md) | La ruta es pública o protegida; `Navbar`/`Footer` si aparece en el menú |
-| Un **componente** nuevo o su comportamiento | [05](05-componentes.md) | Props, estado, métodos y en qué grupo va |
-| **Estado global** de `App.js` o el flujo de datos | [01](01-arquitectura.md), [04](04-paginas.md) (sección `App`) | Los diagramas de secuencia siguen siendo ciertos |
-| `services/api.js` o **un endpoint** que consumes | [03](03-api.md) y [integracion/para-backend.md](integracion/para-backend.md) (secciones 2 y 7) | Campos que lee el frontend, método, ruta y quién lo llama |
-| Una **variable `VITE_*`** | `.env.example`, [06](06-utilidades-hooks-config.md), [08](08-guia-desarrollo.md) y [integracion/para-infra.md](integracion/para-infra.md) (sección 3) | Valor por entorno (dev, prod) |
-| Un **recurso de `config/assets.js`** | [06](06-utilidades-hooks-config.md) y [integracion/para-infra.md](integracion/para-infra.md) (sección 5) | La ruta existe en el bucket |
-| Una **utilidad**, **hook** o servicio | [06](06-utilidades-hooks-config.md) | Entradas, salidas y ejemplo |
-| **Traducciones** | [07](07-i18n-y-estilos.md) | Claves en `es` y `en`; `npm test` comprueba la paridad |
-| **Colores, tipografías o animaciones** | [07](07-i18n-y-estilos.md) | Contraste de los colores nuevos (WCAG AA) |
-| Una **dependencia**, la versión de Node o la herramienta de build | [02](02-tecnologias.md), [08](08-guia-desarrollo.md) y, si afecta al build, [integracion/para-infra.md](integracion/para-infra.md) (secciones 2 y 3) | Que el requisito de Node sigue siendo válido para Amplify y para el backend |
-| Un **script** de `package.json` | [08](08-guia-desarrollo.md) (tabla de scripts) | |
-| Un **test** nuevo | [08](08-guia-desarrollo.md) (tabla de cobertura) | Sale de "Pendiente" si estaba allí |
-| Un **fallo corregido** | [09](09-estado-actual-y-deuda-tecnica.md): pasa el hallazgo a "Resueltos" con su commit | Quítalo también de `integracion/` si estaba allí |
-| Una **deuda o discrepancia nueva** | [09](09-estado-actual-y-deuda-tecnica.md) y, si afecta al backend o la infra, `integracion/` | Id, prioridad, archivo y qué hay que hacer |
-| Algo que **cambia el contrato con el backend** (forma de una respuesta, columnas del Excel, autenticación) | [integracion/para-backend.md](integracion/para-backend.md) y avisar al backend (sección 6 de este documento) | |
-| Algo que **cambia lo que necesita la infraestructura** (build, variables, dominios, recursos estáticos) | [integracion/para-infra.md](integracion/para-infra.md) y avisar a infra (sección 6) | |
-| Los **plugins o skills de Claude** | `.claude/` y la tabla de herramientas de [08](08-guia-desarrollo.md) | |
-| Los **documentos** (nuevos, renombrados o movidos) | Índice de [README.md](README.md) y del README de la raíz | `npm run docs:check` valida los enlaces |
+| Una **página** o **ruta** | [01](../01-arquitectura.md) (tabla de rutas), [04](../04-paginas.md) | La ruta es pública o protegida; `Navbar`/`Footer` si aparece en el menú |
+| Un **componente** nuevo o su comportamiento | [05](../05-componentes.md) | Props, estado, métodos y en qué grupo va |
+| **Estado global** de `App.js` o el flujo de datos | [01](../01-arquitectura.md), [04](../04-paginas.md) (sección `App`) | Los diagramas de secuencia siguen siendo ciertos |
+| `services/api.js` o **un endpoint** que consumes | [03](../03-api.md) y [integracion/para-backend.md](../integracion/para-backend.md) (secciones 2 y 7) | Campos que lee el frontend, método, ruta y quién lo llama |
+| Una **variable `VITE_*`** | `.env.example`, [06](../06-utilidades-hooks-config.md), [08](../08-guia-desarrollo.md) y [integracion/para-infra.md](../integracion/para-infra.md) (sección 3) | Valor por entorno (dev, prod) |
+| Un **recurso de `config/assets.js`** | [06](../06-utilidades-hooks-config.md) y [integracion/para-infra.md](../integracion/para-infra.md) (sección 5) | La ruta existe en el bucket |
+| Una **utilidad**, **hook** o servicio | [06](../06-utilidades-hooks-config.md) | Entradas, salidas y ejemplo |
+| **Traducciones** | [07](../07-i18n-y-estilos.md) | Claves en `es` y `en`; `npm test` comprueba la paridad |
+| **Colores, tipografías o animaciones** | [07](../07-i18n-y-estilos.md) | Contraste de los colores nuevos (WCAG AA) |
+| Una **dependencia**, la versión de Node o la herramienta de build | [02](../02-tecnologias.md), [08](../08-guia-desarrollo.md) y, si afecta al build, [integracion/para-infra.md](../integracion/para-infra.md) (secciones 2 y 3) | Que el requisito de Node sigue siendo válido para Amplify y para el backend |
+| Un **script** de `package.json` | [08](../08-guia-desarrollo.md) (tabla de scripts) | |
+| **ESLint**: una regla nueva o relajada, o el tope de avisos (`--max-warnings`) | [buenas-practicas-frontend.md](buenas-practicas-frontend.md#14-eslint-y-el-tope-de-avisos) y [02](../02-tecnologias.md) | Si corregiste avisos, el tope baja al número real (`npm run quality` lo exige) |
+| Una **vulnerabilidad aceptada** (`ACCEPTED_ADVISORIES`) o una **deuda conocida** de `quality-check.mjs` | [seguridad.md](seguridad.md) (regla S6 y estado actual) y [09](../09-estado-actual-y-deuda-tecnica.md) | Motivo por escrito |
+| Algo de **seguridad**: sesión, cookies, cabeceras, privacidad, subida de archivos | [seguridad.md](seguridad.md) (regla y estado) y [09](../09-estado-actual-y-deuda-tecnica.md) | Lista de comprobación de la PR |
+| Algo de **accesibilidad**: contraste, teclado, diálogos, idioma, foco | [accesibilidad.md](accesibilidad.md) (regla y estado) y [07](../07-i18n-y-estilos.md) si cambia la paleta | Recalcular el contraste |
+| Un **test** nuevo | [08](../08-guia-desarrollo.md) (tabla de cobertura) | Sale de "Pendiente" si estaba allí |
+| Un **fallo corregido** | [09](../09-estado-actual-y-deuda-tecnica.md): pasa el hallazgo a "Resueltos" con su commit | Quítalo también de `integracion/` si estaba allí |
+| Una **deuda o discrepancia nueva** | [09](../09-estado-actual-y-deuda-tecnica.md) y, si afecta al backend o la infra, `integracion/` | Id, prioridad, archivo y qué hay que hacer |
+| Algo que **cambia el contrato con el backend** (forma de una respuesta, columnas del Excel, autenticación) | [integracion/para-backend.md](../integracion/para-backend.md) y avisar al backend (sección 6 de este documento) | |
+| Algo que **cambia lo que necesita la infraestructura** (build, variables, dominios, recursos estáticos) | [integracion/para-infra.md](../integracion/para-infra.md) y avisar a infra (sección 6) | |
+| Los **plugins o skills de Claude** | `.claude/` y la tabla de herramientas de [08](../08-guia-desarrollo.md) | |
+| Los **documentos** o **guías** (nuevos, renombrados o movidos) | Índice de [README.md](../README.md), el README de la raíz y [CLAUDE.md](../../CLAUDE.md) | `npm run docs:check` valida los enlaces y que cada guía figure en el índice |
 
 ## 3. Listas de comprobación por tipo de cambio
 
 ### Feature nueva
 
-- [ ] Pasa `npm test`, `npm run build` y `npm run docs:check`.
+- [ ] Pasan `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`.
+- [ ] Cumple las guías de [buenas prácticas](buenas-practicas-frontend.md), y de [seguridad](seguridad.md) y [accesibilidad](accesibilidad.md) si toca sesión, formularios, URLs, dependencias o interfaz.
 - [ ] Páginas, componentes y rutas nuevos están en 01, 04 y 05.
 - [ ] Si llama a un endpoint, está en 03 y en `integracion/para-backend.md`.
 - [ ] Si necesita una variable o un recurso nuevo, está en `.env.example`, 06, 08 y `integracion/para-infra.md`.
@@ -56,6 +62,7 @@ Este documento dice **qué hay que revisar y actualizar en `docs/` después de c
 - [ ] 02 (tabla con versión y uso) y 08 (requisitos y scripts).
 - [ ] Si toca el build o Node: `integracion/para-infra.md` (sección 2).
 - [ ] Se comprueba que los tests siguen funcionando con la versión de Node del backend y de Amplify.
+- [ ] Se ejecuta `npm audit` (lo hace `npm run quality`) y se anota cualquier excepción en [seguridad.md](seguridad.md).
 
 ### Refactor sin cambio de comportamiento
 
@@ -71,14 +78,14 @@ Este documento dice **qué hay que revisar y actualizar en `docs/` después de c
 ### Antes de fusionar la rama
 
 - [ ] Se vuelve a ejecutar la comprobación de métricas: `npm run docs:check -- --metrics`, y se actualiza la tabla de 09 si cambió alguna cifra.
-- [ ] La fecha y el commit del encabezado de 09 y de [README.md](README.md) son los de la fusión.
+- [ ] La fecha y el commit del encabezado de 09 y de [README.md](../README.md) son los de la fusión.
 - [ ] No quedan menciones a cosas que ya no existen (búsqueda de términos obsoletos, sección 4).
 
 ## 4. Validación
 
 ### Lo que comprueba `npm run docs:check`
 
-El script ([scripts/docs-check.mjs](../scripts/docs-check.mjs)) compara el código con la documentación y **falla con código de salida 1** si algo no coincide:
+El script ([scripts/docs-check.mjs](../../scripts/docs-check.mjs)) compara el código con la documentación y **falla con código de salida 1** si algo no coincide:
 
 | Comprobación | Código | Documento |
 |---|---|---|
@@ -93,9 +100,12 @@ El script ([scripts/docs-check.mjs](../scripts/docs-check.mjs)) compara el códi
 | Dependencias | `package.json` | 02 |
 | Scripts | `package.json` | 08 |
 | Tests | `src/**/*.test.js` | Tabla de cobertura de 08 |
+| Guías | `docs/guias/*.md` | Deben figurar en el índice de `docs/README.md` y en `CLAUDE.md` |
 | Métricas | Recuento real de páginas, componentes, tests y claves | Tabla de 09, que debe ser la **única** con cifras |
 
 `npm run docs:check -- --metrics` imprime los valores reales para actualizar 09.
+
+Por su parte, `npm run quality` ([scripts/quality-check.mjs](../../scripts/quality-check.mjs)) es la puerta de seguridad y calidad: patrones prohibidos, secretos, `npm audit` de producción y ESLint. Además exige que el tope `--max-warnings` de `package.json` coincida con los avisos reales, para que la deuda que se paga no se vuelva a acumular.
 
 Además, `npm test` incluye `translations.test.js`: comprueba que español e inglés tienen las mismas claves y marcadores de interpolación.
 
@@ -114,7 +124,7 @@ Esto es revisión manual, y por eso está en las listas de la sección 3:
 
 ## 5. Hallazgos y deuda técnica
 
-Se registran en [09](09-estado-actual-y-deuda-tecnica.md).
+Se registran en [09](../09-estado-actual-y-deuda-tecnica.md).
 
 | Prefijo | Significado |
 |---|---|
@@ -145,7 +155,7 @@ Los ids no se reutilizan. Si un hallazgo se descarta, se queda con una nota ("No
 - **Idioma:** español. El código y los mensajes de commit, en inglés.
 - **Formato:** tablas para datos comparables, listas para pasos, diagramas de `mermaid` para flujos.
 - **Certeza:** marca **(verificado)** lo comprobado contra el código y **(por confirmar)** lo deducido.
-- **Enlaces:** a archivos con ruta relativa (`[05](05-componentes.md#speciescard)`). No copies contenido que ya existe en otro documento.
+- **Enlaces:** a archivos con ruta relativa (`[05](../05-componentes.md#speciescard)`). No copies contenido que ya existe en otro documento.
 - **Código:** cita `archivo:línea` solo cuando ayuda a localizar un fallo; los números de línea envejecen.
 - **Sin secretos:** nunca valores de `.env`, tokens ni contraseñas. Solo nombres de variables.
 - **Fechas:** absolutas (`30/09/2026`), no relativas.

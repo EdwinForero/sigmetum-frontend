@@ -42,4 +42,4 @@ docs/          Documentación técnica
 
 ## Documentación
 
-Toda la documentación técnica está en [`docs/`](docs/README.md): arquitectura, API, páginas, componentes, guía de desarrollo y estado actual con la deuda técnica. Tras cada cambio, sigue [`docs/MANTENIMIENTO.md`](docs/MANTENIMIENTO.md) y ejecuta `npm run docs:check`.
+Toda la documentación técnica está en [`docs/`](docs/README.md): arquitectura, API, páginas, componentes, guía de desarrollo y estado actual con la deuda técnica. Las normas de trabajo están en [`docs/guias/`](docs/README.md#guías-de-trabajo): buenas prácticas, seguridad, accesibilidad y mantenimiento de la documentación. Antes de dar un cambio por terminado, ejecuta `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`.

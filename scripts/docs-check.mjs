@@ -1,7 +1,7 @@
 // Comprueba que la documentación sigue el ritmo del código.
 // Uso: npm run docs:check            (sale con código 1 si hay algo desactualizado)
 //      npm run docs:check -- --metrics  (imprime las métricas reales para pegarlas en el documento 09)
-// Las reglas y lo que NO se comprueba automáticamente están en docs/MANTENIMIENTO.md.
+// Las reglas y lo que NO se comprueba automáticamente están en docs/guias/mantenimiento.md.
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, relative, resolve, sep } from 'node:path';
@@ -190,12 +190,28 @@ const anchorsOf = (text) => {
   );
 }
 
-// 10. Métricas: una sola fuente (documento 09) y con valores reales
+// 10. Guías: cada archivo de docs/guias debe figurar en el índice de docs y en CLAUDE.md
+{
+  const guides = walk('docs/guias').filter((file) => file.endsWith('.md'));
+  const claude = read('CLAUDE.md');
+  const index = docs['docs/README.md'];
+  const problems = guides.flatMap((file) => {
+    const name = file.split('/').pop();
+    return [
+      ...(index.includes(`guias/${name}`) ? [] : [`${file} no figura en docs/README.md`]),
+      ...(claude.includes(`docs/guias/${name}`) ? [] : [`${file} no figura en CLAUDE.md`]),
+    ];
+  });
+  check('Guías (docs/guias → docs/README.md y CLAUDE.md)', problems);
+}
+
+// 11. Métricas: una sola fuente (documento 09) y con valores reales
 {
   const problems = [];
-  const volatile = /\b\d{1,4}\s+(componentes|páginas|tests|claves|archivos|líneas)\b/i;
+  // Se ignoran las relaciones de contraste ("3:1 componentes") y los decimales ("4,5 archivos").
+  const volatile = /(?<![:,.\d])\b\d{1,4}\s+(componentes|páginas|tests|claves|archivos|líneas)\b/i;
   for (const [file, text] of Object.entries(docs)) {
-    if (file === 'docs/09-estado-actual-y-deuda-tecnica.md' || file === 'docs/MANTENIMIENTO.md') continue;
+    if (file === 'docs/09-estado-actual-y-deuda-tecnica.md' || file === 'docs/guias/mantenimiento.md') continue;
     text.split('\n').forEach((line, index) => {
       if (volatile.test(line)) problems.push(`${file}:${index + 1} repite una cifra que solo debe estar en el documento 09`);
     });
@@ -215,5 +231,5 @@ for (const { name, problems } of results) {
   problems.forEach((problem) => console.log(`    - ${problem}`));
   failed += problems.length;
 }
-console.log(failed === 0 ? '\nLa documentación está al día.' : `\n${failed} problema(s). Corrige la documentación (ver docs/MANTENIMIENTO.md).`);
+console.log(failed === 0 ? '\nLa documentación está al día.' : `\n${failed} problema(s). Corrige la documentación (ver docs/guias/mantenimiento.md).`);
 process.exit(failed === 0 ? 0 : 1);

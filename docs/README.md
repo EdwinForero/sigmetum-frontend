@@ -17,7 +17,17 @@ Estado de la documentación: 30/09/2026, rama `feature/sigmetum_front_v2` (commi
 | [09-estado-actual-y-deuda-tecnica.md](09-estado-actual-y-deuda-tecnica.md) | Estado de git, métricas, errores y deuda técnica priorizados, y hoja de ruta |
 | [integracion/para-backend.md](integracion/para-backend.md) | **Para quien mantiene el backend:** qué endpoints y campos consume el frontend, qué da por hecho, discrepancias verificadas y qué actualizar si se cambia la API |
 | [integracion/para-infra.md](integracion/para-infra.md) | **Para quien mantiene la infraestructura:** build, variables `VITE_*`, recursos estáticos, reglas de Amplify, dominios, comprobación tras desplegar y reversión |
-| [MANTENIMIENTO.md](MANTENIMIENTO.md) | **Cómo mantener esta documentación:** qué documentos actualizar tras cada feature o fix, listas de comprobación, validación con `npm run docs:check` y convención de hallazgos |
+
+## Guías de trabajo
+
+Son **normativas**: dicen cómo se trabaja, no cómo es el sistema. Claude Code las lee según el tipo de tarea (ver [CLAUDE.md](../CLAUDE.md)).
+
+| Guía | Cuándo leerla |
+|---|---|
+| [guias/buenas-practicas-frontend.md](guias/buenas-practicas-frontend.md) | Antes de escribir o cambiar código. Incluye la definición de terminado y el funcionamiento de ESLint |
+| [guias/seguridad.md](guias/seguridad.md) | Si se toca sesión, formularios, subida de archivos, URLs, HTML dinámico, dependencias o variables de entorno |
+| [guias/accesibilidad.md](guias/accesibilidad.md) | Si se toca la interfaz: colores, formularios, diálogos, navegación o animaciones |
+| [guias/mantenimiento.md](guias/mantenimiento.md) | Al terminar cualquier feature o fix: qué documentos actualizar, listas de comprobación y validación |
 
 ## Por dónde empezar
 
@@ -25,7 +35,8 @@ Estado de la documentación: 30/09/2026, rama `feature/sigmetum_front_v2` (commi
 - **Si vas a tocar la integración con el backend:** 03 (API) y el flujo de subida de datos en 01.
 - **Si vas a planificar trabajo:** 09 (estado actual y deuda técnica).
 - **Si mantienes el backend o la infraestructura:** `integracion/` (un documento para cada uno).
-- **Antes de cerrar cualquier feature o fix:** [MANTENIMIENTO.md](MANTENIMIENTO.md).
+- **Antes de escribir código:** [guias/buenas-practicas-frontend.md](guias/buenas-practicas-frontend.md).
+- **Antes de cerrar cualquier feature o fix:** [guias/mantenimiento.md](guias/mantenimiento.md).
 
 ## Resumen técnico
 

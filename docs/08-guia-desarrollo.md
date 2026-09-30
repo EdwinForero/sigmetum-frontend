@@ -41,7 +41,7 @@ npm run dev                 # http://localhost:3000
 | `npm run test:watch` | Tests en modo observación |
 | `npm run lint` | ESLint. Falla si hay errores o si los avisos superan el tope fijado en el script (`--max-warnings`). Al corregir avisos, se baja el tope |
 | `npm run quality` | Puerta de calidad y seguridad: patrones prohibidos, secretos, `npm audit` de producción y ESLint |
-| `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [MANTENIMIENTO.md](MANTENIMIENTO.md)) |
+| `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [mantenimiento.md](guias/mantenimiento.md)) |
 
 ## Despliegue
 
@@ -56,6 +56,8 @@ Checklist para que un despliegue funcione:
 5. `ALLOWED_ORIGIN` del backend igual al dominio final.
 
 ## Convenciones del código
+
+Es un resumen. Las normas completas, con el motivo y cómo se comprueban, están en las [guías de trabajo](README.md#guías-de-trabajo).
 
 - **Componentes:** funcionales, en PascalCase, uno por archivo y con exportación por defecto. Las props se desestructuran en la firma.
 - **Llamadas HTTP:** siempre a través de `services/api.js`, nunca con `fetch` directo. Los errores se capturan en el componente y se muestran con `useDialog` y `DialogAdvice`.
@@ -120,4 +122,4 @@ El repositorio incluye `.claude/settings.json` con plugins compartidos, que se a
 | `humanizer` | Revisar textos institucionales para que suenen naturales (no usar sobre contenido científico) |
 | `design-taste-frontend` (skill local en `.claude/skills/`) | Guía de diseño para landing pages. Útil solo para la portada |
 
-El archivo [CLAUDE.md](../CLAUDE.md) de la raíz resume las reglas del proyecto para Claude Code y le indica que siga [MANTENIMIENTO.md](MANTENIMIENTO.md) tras cada feature o fix.
+El archivo [CLAUDE.md](../CLAUDE.md) de la raíz resume las reglas del proyecto para Claude Code y le indica qué [guía](README.md#guías-de-trabajo) leer según la tarea: buenas prácticas, seguridad, accesibilidad y [mantenimiento](guias/mantenimiento.md) tras cada feature o fix.
