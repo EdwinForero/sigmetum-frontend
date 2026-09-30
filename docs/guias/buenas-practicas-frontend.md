@@ -18,6 +18,8 @@ Un cambio está terminado cuando pasan los cinco comandos y la documentación es
 | `npm run quality` | Patrones prohibidos, secretos, `npm audit` de producción y ESLint |
 | `npm run docs:check` | Que la documentación sigue al código |
 
+La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta los mismos cinco en cada PR y cada lunes (para detectar vulnerabilidades nuevas). Ver [08](../08-guia-desarrollo.md#integración-continua-y-dependencias).
+
 ## 2. Estructura y nombres
 
 | Regla | Por qué | Se comprueba |

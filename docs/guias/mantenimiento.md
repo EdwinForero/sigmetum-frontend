@@ -101,6 +101,7 @@ El script ([scripts/docs-check.mjs](../../scripts/docs-check.mjs)) compara el c�
 | Scripts | `package.json` | 08 |
 | Tests | `src/**/*.test.js` | Tabla de cobertura de 08 |
 | Guías | `docs/guias/*.md` | Deben figurar en el índice de `docs/README.md` y en `CLAUDE.md` |
+| Comandos | `package.json`, `CLAUDE.md`, guías y `.github/workflows/ci.yml` | Los cinco comandos de la definición de terminado están en todos, y todo `npm run X` citado existe |
 | Métricas | Recuento real de páginas, componentes, tests y claves | Tabla de 09, que debe ser la **única** con cifras |
 
 `npm run docs:check -- --metrics` imprime los valores reales para actualizar 09.
@@ -162,13 +163,7 @@ Los ids no se reutilizan. Si un hallazgo se descarta, se queda con una nota ("No
 
 ## 8. Plantilla para la PR
 
-```markdown
-## Documentación
-- [ ] `npm test`, `npm run build` y `npm run docs:check` en verde
-- [ ] Documentos actualizados: (lista)
-- [ ] Afecta al backend o a la infra: sí / no. Si sí, qué tienen que hacer
-- [ ] Hallazgos resueltos o nuevos en 09: (ids)
-```
+La plantilla vive en [.github/pull_request_template.md](../../.github/pull_request_template.md) y GitHub la rellena sola en cada PR. Es la **única** copia: si cambia la definición de terminado, se cambia ahí, en la CI y en las guías (`npm run docs:check` comprueba que coinciden).
 
 ## 9. Mantener este documento
 

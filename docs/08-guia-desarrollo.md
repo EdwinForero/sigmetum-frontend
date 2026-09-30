@@ -109,6 +109,22 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 2. `FormatFileName` y `SortItemsList`.
 3. E2E con Playwright: portada → explorar → filtrar → abrir especie → descargar Excel.
 
+## Integración continua y dependencias
+
+| Pieza | Qué hace |
+|---|---|
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Con Node 20 ejecuta `npm ci`, `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
+| [.github/pull_request_template.md](../.github/pull_request_template.md) | Plantilla de la PR con la definición de terminado, las guías que aplican y si afecta al backend o a la infraestructura |
+| [.github/dependabot.yml](../.github/dependabot.yml) | Propone cada lunes las actualizaciones de `npm` y de las acciones de GitHub, agrupando las menores. Ignora las versiones mayores de `jsdom` (exige Node 22) y `eslint` (los plugins aún no lo admiten) |
+| [.gitattributes](../.gitattributes) | Fija los finales de línea en LF en todos los sistemas |
+
+**Ajustes de GitHub que no están en el código** (los hace quien administre el repositorio):
+
+1. Proteger `master` y `feature/testing`: exigir que el trabajo **CI** esté en verde y una revisión antes de fusionar. Sin esto, la CI avisa pero no bloquea.
+2. Activar *Dependabot security updates* en Settings > Code security.
+
+**Amplify no ejecuta estos controles:** solo compila. Conviene añadir `npm test` en el `preBuild` del módulo `amplify` de `sigmetum-infra` para no desplegar una versión rota (ver [para-infra.md](integracion/para-infra.md)).
+
 ## Herramientas de Claude Code del proyecto
 
 El repositorio incluye `.claude/settings.json` con plugins compartidos, que se activan al confiar en la carpeta:

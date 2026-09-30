@@ -40,6 +40,7 @@ Si lo que te piden **contradice una guía, avisa y pregunta antes de hacerlo**. 
 3. Contrasta lo que escribas con el código; lo que no puedas comprobar, márcalo como **(por confirmar)**.
 4. Si el cambio afecta al backend o a la infraestructura, actualiza `docs/integracion/` y dilo en el resumen final.
 5. Las cifras (archivos, componentes, tests, claves) solo viven en `docs/09-estado-actual-y-deuda-tecnica.md`.
+6. La CI (`.github/workflows/ci.yml`) ejecuta esos mismos cinco comandos en cada PR, y la PR usa la plantilla de `.github/pull_request_template.md`: rellénala.
 
 ## Reglas de trabajo
 

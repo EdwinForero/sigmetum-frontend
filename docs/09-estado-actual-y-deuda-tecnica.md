@@ -136,3 +136,6 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 8. **Accesibilidad básica** (B1-B5 y el contraste de la paleta, ver [07](07-i18n-y-estilos.md#paleta)): es un sitio universitario público y le aplican las pautas WCAG 2.1 AA (RD 1112/2018 en España).
 9. **Paleta en `tailwind.config.js`** (B13) y E2E con Playwright.
 10. **Seguridad de sesión** (M1), coordinado con el backend.
+11. **Proteger las ramas** `master` y `feature/testing` exigiendo la CI en verde, y activar *Dependabot security updates* (ajustes de GitHub, ver [08](08-guia-desarrollo.md#integración-continua-y-dependencias)).
+12. **Ejecutar `npm test` en el `preBuild` de Amplify** (en `sigmetum-infra`).
+13. **Revisión humana de las guías** (sobre todo lo legal: RD 1112/2018 y privacidad) y decisión sobre la paleta.

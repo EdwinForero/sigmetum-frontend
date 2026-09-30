@@ -205,7 +205,33 @@ const anchorsOf = (text) => {
   check('Guías (docs/guias → docs/README.md y CLAUDE.md)', problems);
 }
 
-// 11. Métricas: una sola fuente (documento 09) y con valores reales
+// 11. Comandos: la definición de terminado debe coincidir en CLAUDE.md, las guías y la CI,
+//     y todo `npm run X` citado en la documentación debe existir en package.json
+{
+  const DONE = ['npm test', 'npm run build', 'npm run lint', 'npm run quality', 'npm run docs:check'];
+  const scripts = Object.keys(JSON.parse(read('package.json')).scripts);
+  const problems = [];
+  const mustList = {
+    'CLAUDE.md': read('CLAUDE.md'),
+    'docs/guias/mantenimiento.md': docs['docs/guias/mantenimiento.md'],
+    'docs/guias/buenas-practicas-frontend.md': docs['docs/guias/buenas-practicas-frontend.md'],
+    '.github/workflows/ci.yml': existsSync(join(ROOT, '.github/workflows/ci.yml')) ? read('.github/workflows/ci.yml') : '',
+  };
+  for (const [file, text] of Object.entries(mustList)) {
+    if (!text) problems.push(`${file} no existe o está vacío`);
+    for (const command of DONE.filter(() => text)) {
+      if (!text.includes(command)) problems.push(`${file} no incluye \`${command}\``);
+    }
+  }
+  for (const [file, text] of Object.entries({ ...docs, 'CLAUDE.md': mustList['CLAUDE.md'] })) {
+    for (const [, name] of text.matchAll(/npm run ([a-z][\w:-]*)/g)) {
+      if (!scripts.includes(name)) problems.push(`${file} cita \`npm run ${name}\`, que no existe en package.json`);
+    }
+  }
+  check('Comandos (CLAUDE.md, guías y CI coinciden con package.json)', problems);
+}
+
+// 12. Métricas: una sola fuente (documento 09) y con valores reales
 {
   const problems = [];
   // Se ignoran las relaciones de contraste ("3:1 componentes") y los decimales ("4,5 archivos").
