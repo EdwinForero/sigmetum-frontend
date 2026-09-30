@@ -67,6 +67,17 @@ El frontend ya encaja con el `build_spec` de `sigmetum-infra/modules/amplify/mai
 
 Ver la lista completa de comprobaciones en [08](08-guia-desarrollo.md#despliegue).
 
+#### Integración con el backend y la infraestructura
+
+Al escribir los documentos de [integración](integracion/para-backend.md) se comprobó el código del backend y de `sigmetum-infra`. Los hallazgos nuevos, con su detalle y responsable, están allí:
+
+| Origen | Hallazgos | Documento |
+|---|---|---|
+| Frontend frente a backend | **D1** abrir una versión en "Administrar datos" falla: pide un Excel a un endpoint que parsea JSON (por confirmar). D2 formato de nombre de versión. D3 acepta `.csv`/`.xls` y el backend solo `.xlsx`. D4 columnas de la tabla del primer registro. D6 y D7 gestión de 401 y 429 | [para-backend.md](integracion/para-backend.md#6-discrepancias-verificadas-hoy) |
+| Frontend frente a infraestructura | **I1** variables `VITE_*` no definidas. **I2** recursos estáticos sin acceso público ni CloudFront. **I3** sin regla de reescritura de la SPA. **I4** backend de dev en HTTP. **I5** faltan `ALLOWED_ORIGIN` y `ADMIN_*` en el backend desplegado. I6, I7 | [para-infra.md](integracion/para-infra.md#1-resumen-qué-falta-para-que-el-frontend-funcione) |
+
+D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acordado en el backend); I1 a I7 en `sigmetum-infra`. Esto **sustituye y amplía A5**.
+
 ### Prioridad media (seguridad, robustez y mantenibilidad)
 
 | Id | Hallazgo | Ubicación |
@@ -78,6 +89,7 @@ Ver la lista completa de comprobaciones en [08](08-guia-desarrollo.md#despliegue
 | M8 | Código muerto: `UploadButton.js` (usa `alert` y no sube nada), `ImageCarrousel.js` (comentado en `Explore`, con imágenes de `via.placeholder.com`) y `utilities/TokenExpiration.js` (duplica la lógica de `ProtectedRoute`) | `components/`, `utilities/` |
 | M9 | `console.log(selectedFilters)` olvidado en producción | `Filter.js:70` |
 | M10 | Favicon fijo en `index.html` apuntando al bucket antiguo `s3-sigmetumtest`. `Header` lo reescribe en tiempo de ejecución, pero hasta entonces se pide a un bucket que puede no existir | `public/index.html` |
+| M12 | `DialogSpecies` busca las filas de una especie con `item["Especies Características"]?.includes(nombre)`. Si el valor es una cadena (una sola especie en la fila), `includes` busca **subcadenas**: abrir "Quercus ilex" mezcla atributos de filas cuyo texto solo contiene ese nombre. Con arrays la comparación es exacta | `DialogSpecies.js:25` |
 | M11 | Las preferencias de cookies se guardan pero nada las lee. Si la web no usa cookies de publicidad ni de seguimiento, el banner y la política deberían reflejarlo | `CookieBanner.js` |
 
 ### Prioridad baja (accesibilidad, calidad y detalles)
@@ -99,11 +111,13 @@ Ver la lista completa de comprobaciones en [08](08-guia-desarrollo.md#despliegue
 
 ## Hoja de ruta sugerida
 
-1. **Ajustar `sigmetum-infra` (A5):** variables `VITE_*`, regla de reescritura de la SPA y CloudFront para los recursos estáticos.
-2. **Tests de caracterización** de `Filter`, `FormatFileName` y `SortItemsList` (M6).
-3. **Limpiar código muerto** (M8, M9, M10): `UploadButton`, `ImageCarrousel`, `TokenExpiration`, el `console.log` de `Filter` y el favicon del bucket antiguo.
-4. **Añadir ESLint** con las reglas de React y de hooks, ya que Vite no lo incluye.
-5. **Usar `services/api.js` en `FileUpload`** (M2). Requiere que el error del servicio conserve `data` para leer `emptyFields` y `draftKey`.
-6. **Accesibilidad básica** (B1-B5 y el contraste de la paleta, ver [07](07-i18n-y-estilos.md#paleta)): es un sitio universitario público y le aplican las pautas WCAG 2.1 AA (RD 1112/2018 en España).
-7. **Paleta en `tailwind.config.js`** (B13) y E2E con Playwright.
-8. **Seguridad de sesión** (M1), coordinado con el backend.
+1. **Ajustar `sigmetum-infra` (A5, I1 a I7):** variables `VITE_*`, regla de reescritura de la SPA, CloudFront para los recursos estáticos, backend de dev en HTTPS y variables del backend (`ALLOWED_ORIGIN`, `ADMIN_*`). Es lo que bloquea publicar.
+2. **Resolver D1 con el backend:** sin un endpoint que entregue una versión como registros, "Administrar datos" no puede abrirla. No cerrar `/get-data` antes.
+3. **Correcciones propias del frontend:** D2, D3, D4, D6, D7 y M12, cada una con su test.
+4. **Tests de caracterización** de `Filter`, `FormatFileName` y `SortItemsList` (M6).
+5. **Limpiar código muerto** (M8, M9, M10): `UploadButton`, `ImageCarrousel`, `TokenExpiration`, el `console.log` de `Filter` y el favicon del bucket antiguo.
+6. **Añadir ESLint** con las reglas de React y de hooks, ya que Vite no lo incluye.
+7. **Usar `services/api.js` en `FileUpload`** (M2). Requiere que el error del servicio conserve `data` para leer `emptyFields` y `draftKey`.
+8. **Accesibilidad básica** (B1-B5 y el contraste de la paleta, ver [07](07-i18n-y-estilos.md#paleta)): es un sitio universitario público y le aplican las pautas WCAG 2.1 AA (RD 1112/2018 en España).
+9. **Paleta en `tailwind.config.js`** (B13) y E2E con Playwright.
+10. **Seguridad de sesión** (M1), coordinado con el backend.

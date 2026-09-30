@@ -44,6 +44,8 @@ Si el servidor devuelve algo que no es JSON (por ejemplo, una página 502 de un 
 
 ## Endpoints consumidos
 
+La referencia completa de la API está en `sigmetum-backend/docs/04-api.md`. Qué campos lee el frontend de cada respuesta, y qué discrepancias hay hoy, está en [integracion/para-backend.md](integracion/para-backend.md).
+
 Rutas verificadas contra `sigmetum-backend/routes/*.js`.
 
 ### Autenticación (`routes/auth.js`)
@@ -58,7 +60,7 @@ Rutas verificadas contra `sigmetum-backend/routes/*.js`.
 | Método y ruta | Auth | Petición | `data` de respuesta | Quién lo llama |
 |---|---|---|---|---|
 | `GET /list-files` | No | — | `{ [provincia]: [{ key, name }] }`: versiones de Excel por provincia | `FileDropdown.fetchFiles` |
-| `GET /get-data/:path` | No | `path` = `key` de la versión | `Array<Registro>` | `FileDropdown.handleVersionSelect` |
+| `GET /get-data/:path` | No | `path` = `key` de la versión | `Array<Registro>` | `FileDropdown.handleVersionSelect`. **Con el backend actual no funciona para versiones**: ver [integración con el backend](integracion/para-backend.md#6-discrepancias-verificadas-hoy) (D1) |
 | `GET /get-merged-data` | No | — | `Array<Registro>` de todas las provincias activas | `App.fetchData` |
 | `POST /upload` | Sí | `multipart`, campo `file` | Éxito: `{ message, key }`. Con campos vacíos: **400** con `data: { emptyFields: [{ rowIndex, ... }], processedData, draftKey }` | `FileUpload.handleSubmit` (con `fetch` directo) |
 | `POST /upload/confirm` | Sí | `{ confirmed: boolean, draftKey }` | Mensaje | `FileUpload.handleSubmit` (con `fetch` directo) |

@@ -89,6 +89,8 @@ Lo usan `SpeciesCard` y `DialogSpecies`.
 ### `FormatFileName(fileName)` (`FormatFileName.js`)
 Convierte el nombre técnico de una versión en un texto legible.
 
+> **Desactualizada:** el backend actual nombra las versiones `AAAA-MM-DD_vN.xlsx` (por ejemplo `2026-09-15_v3.xlsx`), así que esta función nunca coincide y devuelve el nombre sin cambios. Ver D2 en [integración con el backend](integracion/para-backend.md#6-discrepancias-verificadas-hoy).
+
 | Entrada | Salida |
 |---|---|
 | `Málaga_V003_15_09_2026.json` | `Málaga V3 (15/09/2026)` |

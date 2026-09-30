@@ -26,7 +26,7 @@ Notas:
 | `vite` | ^6.4 | Servidor de desarrollo (puerto 3000) y build de producción en `dist/` |
 | `@vitejs/plugin-react` | ^4.7 | Transformación de JSX y recarga en caliente |
 | `vitest` | ^3.2 | Ejecutor de tests, integrado con la configuración de Vite |
-| `jsdom` | ^30 | Entorno de navegador simulado para los tests |
+| `jsdom` | ^26 | Entorno de navegador simulado para los tests. Se fija en la 26 porque las versiones 27 y posteriores exigen Node 22 o superior y el proyecto debe funcionar con Node 20 |
 | `@testing-library/react`, `dom`, `user-event`, `jest-dom` | ^16, ^10, ^14, ^6 | Pruebas de componentes y aserciones sobre el DOM |
 | `tailwindcss` | ^3.4.14 | Estilos utilitarios. Configuración en `tailwind.config.js` (fuentes) |
 | `postcss`, `autoprefixer` | ^8.5, ^10.6 | Procesado de Tailwind (`postcss.config.js`) |
@@ -56,7 +56,7 @@ No hay linter configurado desde la migración: Create React App traía ESLint in
 | Servicio | Uso |
 |---|---|
 | `sigmetum-backend` (Express, Node) | API REST bajo `/api/v1` |
-| Amazon S3 (`eu-west-3`) | Datos por provincia, Excel versionados, imágenes y recursos estáticos |
+| Amazon S3 (`eu-west-1` en `sigmetum-infra`; el bucket antiguo estaba en `eu-west-3`) | Datos por provincia, Excel versionados, imágenes y recursos estáticos |
 | AWS Amplify | Despliegue del frontend, definido en `sigmetum-infra` |
 | IPNI (`ipni.org`) | Enlace "Leer más" de cada especie |
 

@@ -2,7 +2,7 @@
 
 ## Requisitos
 
-- Node.js 20.19 o superior (Vite 6 lo exige; el backend usa Node 20 en Elastic Beanstalk) y npm.
+- Node.js 20 o superior (la misma versión que el backend en Elastic Beanstalk y que Amplify) y npm. No subas `jsdom` a la 27 o posterior sin subir antes Node: exigen Node 22.
 - El backend `sigmetum-backend` arrancado en local o una URL de un entorno desplegado.
 - Acceso de lectura al bucket de S3 o a su CloudFront para ver logos, banner y glosario.
 
@@ -22,7 +22,7 @@ npm run dev                 # http://localhost:3000
 |---|---|---|---|
 | `VITE_BASE_URL` | Sí | `http://localhost:8000` | Origen del backend, sin barra final |
 | `VITE_API_PREFIX` | Sí | `/api/v1` | Debe coincidir con `API_PREFIX` del backend |
-| `VITE_S3_URL` | Sí | `https://<bucket>.s3.eu-west-3.amazonaws.com` o la URL de CloudFront | Base pública de los recursos estáticos |
+| `VITE_S3_URL` | Sí | URL pública desde la que se sirven los `assets/…` (CloudFront, ver [integración con infraestructura](integracion/para-infra.md)) | Base pública de los recursos estáticos |
 | `VITE_CAROUSEL_IMAGE_KEYS` | No | `gallery/a.jpg,gallery/b.jpg` | Solo para el carrusel, que no se usa |
 
 - `.env` está en `.gitignore`: nunca lo subas al repositorio.
@@ -42,7 +42,7 @@ npm run dev                 # http://localhost:3000
 
 ## Despliegue
 
-Según `sigmetum-infra`, el frontend se despliega con **AWS Amplify** (región `eu-west-3`, dominio `sigmetum-a.org`), con compilación automática en cada push a la rama configurada. El frontend ya es un proyecto Vite, como espera el `build_spec` de Terraform, pero el módulo de Amplify sigue pendiente de ajustes: ver el hallazgo [A5](09-estado-actual-y-deuda-tecnica.md#prioridad-alta-pendiente).
+Según `sigmetum-infra`, el frontend se despliega con **AWS Amplify** (región `eu-west-1`, dominio `sigmetum-a.org`), con compilación automática en cada push a la rama configurada. El frontend ya es un proyecto Vite, como espera el `build_spec` de Terraform, pero el módulo de Amplify sigue pendiente de ajustes: ver el hallazgo [A5](09-estado-actual-y-deuda-tecnica.md#prioridad-alta-pendiente).
 
 Checklist para que un despliegue funcione:
 
