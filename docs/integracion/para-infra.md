@@ -56,10 +56,11 @@ Vite **incrusta las variables en el JavaScript al compilar**, y solo las que emp
 
 ```hcl
 environment_variables = {
-  VITE_BASE_URL   = var.backend_url   # sin barra final y sin /api/v1
-  VITE_API_PREFIX = "/api/v1"
-  VITE_S3_URL     = var.s3_url        # vacío hasta resolver I2/C2
-  NODE_ENV        = var.environment
+  VITE_BASE_URL            = var.backend_url        # sin barra final y sin /api/v1
+  VITE_API_PREFIX          = "/api/v1"
+  VITE_S3_URL              = var.s3_url             # vacío hasta resolver I2/C2
+  VITE_CAROUSEL_IMAGE_KEYS = var.carousel_image_keys
+  NODE_ENV                 = var.environment
 }
 ```
 
