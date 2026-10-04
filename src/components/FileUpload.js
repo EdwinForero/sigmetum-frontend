@@ -4,19 +4,16 @@ import ButtonPrincipal from './ButtonPrincipal';
 import DialogAdvice from './DialogAdvice';
 import InfoButton from './InfoButton';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
+import env from '../config/env';
+import useDialog from '../hooks/useDialog';
 
 const FileUploadForm = ({
   onLoad
 }) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
-  const [dialogTitle, setDialogTitle] = useState('');
-  const [dialogMessage, setDialogMessage] = useState('');
-  const [dialogDetails, setDialogDetails] = useState(null);
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const [dialogActions, setDialogActions] = useState({ onConfirm: null});
-  const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8000';
+  const { dialog, showDialog, closeDialog } = useDialog();
 
   function normalizeFileName(fileName) {
 
@@ -40,7 +37,7 @@ const FileUploadForm = ({
   
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   
-    event.target.value = null;
+    event.target.value = '';
   };
 
   const handleSubmit = async () => {
@@ -55,76 +52,72 @@ const FileUploadForm = ({
       formData.append('file', new File([file], normalizedFileName));
   
       try {
-        const response = await fetch(`${BASE_URL}/upload`, {
+        const response = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
           body: formData,
         });
-  
+
         const responseData = await response.json();
-  
+
         if (!response.ok) {
-          if (responseData.emptyFields) {
+          if (responseData.data?.emptyFields) {
             onLoad(false);
-            const emptyFieldSummary = responseData.emptyFields
+            const { draftKey } = responseData.data;
+            const emptyFieldSummary = responseData.data.emptyFields
               .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
               .join(', ');
-  
-            setDialogMessage(`${t('dialogAdvice.fieldsMissingMessage', { filename: file.name })}`);
-            setDialogTitle(t('dialogAdvice.adviceTitle'));
-            setDialogDetails({
-              title: t('dialogAdvice.emptyFieldsSummary'),
-              content: emptyFieldSummary,
-            });
-            setDialogVisible(true);
-  
+
             const confirmed = await new Promise((resolve) => {
-              setDialogActions({
-                onConfirm: () => resolve(true),
-              });
+              showDialog(
+                t('dialogAdvice.adviceTitle'),
+                t('dialogAdvice.fieldsMissingMessage', { filename: file.name }),
+                {
+                  details: { title: t('dialogAdvice.emptyFieldsSummary'), content: emptyFieldSummary },
+                  onConfirm: () => resolve(true),
+                  onCancel: () => resolve(false),
+                }
+              );
             });
-  
-            setDialogVisible(false);
-            setDialogActions({ onConfirm: null });
-  
+            closeDialog();
+
             if (confirmed) {
               onLoad(true);
-              const confirmedResponse = await fetch(`${BASE_URL}/upload/confirm`, {
+              const confirmedResponse = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                   Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-                body: JSON.stringify({
-                  confirmed: true,
-                  fileData: responseData.processedData,
-                }),
+                body: JSON.stringify({ confirmed: true, draftKey }),
               });
-  
+
               if (!confirmedResponse.ok) {
                 throw new Error('Error al confirmar la subida');
               }
             } else {
+              await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify({ confirmed: false, draftKey }),
+              });
               allFilesUploadedSuccessfully = false;
               break;
             }
           } else {
             allFilesUploadedSuccessfully = false;
-            setDialogMessage(t('dialogAdvice.errorUploadMessage'));
-            setDialogTitle(t('dialogAdvice.errorTitle'));
-            setDialogDetails(null);
-            setDialogVisible(true);
+            showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorUploadMessage'));
             break;
           }
         }
       } catch (error) {
         allFilesUploadedSuccessfully = false;
-        setDialogMessage(t('dialogAdvice.errorUploadMessage'));
-        setDialogTitle(t('dialogAdvice.errorTitle'));
-        setDialogDetails(null);
-        setDialogVisible(true);
+        showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorUploadMessage'));
         setFiles([]);
         break;
       } finally {
@@ -133,22 +126,13 @@ const FileUploadForm = ({
     }
   
     if (allFilesUploadedSuccessfully) {
-      setDialogMessage(t('dialogAdvice.successUploadMessage'));
-      setDialogTitle(t('dialogAdvice.successTitle'));
-      setDialogDetails(null);
-      setDialogVisible(true);
+      showDialog(t('dialogAdvice.successTitle'), t('dialogAdvice.successUploadMessage'));
       setFiles([]);
-      setDialogActions({ onConfirm: null });
     }
   };
 
   const handleRemoveFile = (indexToRemove) => {
     setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove));
-  };
-
-  const closeDialog = () => {
-    setDialogVisible(false);
-    setDialogMessage('');
   };
 
   return (
@@ -194,16 +178,19 @@ const FileUploadForm = ({
         )}
         
         <AnimatePresence>
-        {dialogVisible && (
-          <DialogAdvice
-            dialogTitle={dialogTitle}
-            dialogMessage={dialogMessage}
-            dialogDetails={dialogDetails}
-            onConfirm={dialogActions.onConfirm}
-            onClose={closeDialog}
-            showActions={!!dialogActions.onConfirm}
-          />
-        )}
+          {dialog.visible && (
+            <DialogAdvice
+              dialogTitle={dialog.title}
+              dialogMessage={dialog.message}
+              dialogDetails={dialog.details}
+              onConfirm={dialog.onConfirm}
+              onClose={() => {
+                dialog.onCancel?.();
+                closeDialog();
+              }}
+              showActions={!!dialog.onConfirm}
+            />
+          )}
         </AnimatePresence>
       </div>
       </>

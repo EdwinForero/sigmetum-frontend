@@ -54,6 +54,7 @@
     "explore": {
       "title": "Registro de especies",
       "noDataFoundPlaceholder": "No hay datos disponibles.",
+      "errorLoadPlaceholder": "Error al cargar los datos. Por favor, recarga la página.",
       "downloadExcelButton": "Descargar resultados",
       "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
       "downloadGlossaryButton": "Descargar glosario",
@@ -159,7 +160,10 @@
     "rowEmpty": "Fila {{rowIndex}}",
     "closeButton" : "Cerrar",
     "confirmButton" : "Confirmar",
-    "cancelButton" : "Cancelar"
+    "cancelButton" : "Cancelar",
+    "errorLoadData": "Error al cargar los datos. Inténtalo de nuevo.",
+    "errorLoadFile": "Error al cargar el archivo seleccionado. Inténtalo de nuevo.",
+    "errorDownloadFile": "Error al descargar el archivo. Inténtalo de nuevo."
   },
   "dataManagement": {
     "title" : "Administrar datos",
@@ -170,7 +174,6 @@
     "deleteVersionButtonTooltip": "Al presionar este botón, se eliminará permanentemente el archivo que haya elegido previamente. En caso de existir otras versiones del archivo, se restablecerá con los datos de la versión más reciente.",
     "updateDataButton": "Actualizar datos",
     "updateDataButtonTooltip": "Al presionar este botón, se establecerán los datos que se muestran en la página 'Explorar' para la provincia correspondiente al archivo elegido previamente.",
-    "noDataFoundPlaceholder": "No hay datos disponibles.",
     "fileSelectDropdwon": {
       "selectFileDropdownLabel": "Elegir conjunto de datos",
       "selectFileDropdownPlaceholder": "Elegir conjunto de datos",

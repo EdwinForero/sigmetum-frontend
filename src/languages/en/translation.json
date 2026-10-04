@@ -53,6 +53,7 @@
   "explore": {
     "title": "Species record",
     "noDataFoundPlaceholder": "No data available.",
+    "errorLoadPlaceholder": "Error loading data. Please reload the page.",
     "downloadExcelButton": "Download results",
     "downloadExcelButtonTooltip": "By clicking this button, you can download an Excel file containing the filtered results based on the options you have previously selected.",
     "downloadGlossaryButton": "Download glossary",
@@ -158,7 +159,10 @@
     "rowEmpty": "Row {{rowIndex}}",
     "closeButton" : "Close",
     "confirmButton" : "Confirm",
-    "cancelButton" : "Cancel"
+    "cancelButton" : "Cancel",
+    "errorLoadData": "Error loading data. Please try again.",
+    "errorLoadFile": "Error loading the selected file. Please try again.",
+    "errorDownloadFile": "Error downloading the file. Please try again."
   },
   "dataManagement": {
     "title" : "Data management",

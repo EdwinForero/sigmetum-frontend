@@ -1,8 +1,9 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import SpeciesAttribute from '../components/SpeciesAttribute.js';
 import { SortItemsList } from '../utilities/SortItemsList.js';
+import { highlightTerms } from '../utilities/highlightTerms.js';
 import { useTranslation } from 'react-i18next';
 
 const Dialog = ({ 
@@ -23,29 +24,6 @@ const Dialog = ({
     (item) =>
       item["Especies Características"]?.includes(species["Especies Características"])
   );
-
-  const highlightTerms = (text, terms) => {
-    if (!text || !terms || !Array.isArray(terms) || terms.length === 0) {
-      return [{ text, isItalic: true }];
-    }
-
-    const filteredTerms = terms
-      .map(term => (typeof term === 'object' && term.term ? term.term : term))
-      .filter(term => typeof term === 'string' && term.trim() !== '');
-
-    if (filteredTerms.length === 0) {
-      return [{ text, isItalic: true }];
-    }
-
-    const regex = new RegExp(`(\\s|^)(${filteredTerms.join('|')})(\\s|$)`, 'gi');
-
-    const parts = text.split(regex).map(part => ({
-      text: part,
-      isItalic: !filteredTerms.some(term => term.toLowerCase() === part.toLowerCase()),
-    }));
-
-    return parts;
-  };
 
   const textParts = highlightTerms(species["Especies Características"], noItalicTerms);
 

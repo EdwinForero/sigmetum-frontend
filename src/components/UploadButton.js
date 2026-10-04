@@ -19,8 +19,7 @@ const UploadButton = () => {
   };
 
   const handleUpload = () => {
-    if (file) {
-    } else {
+    if (!file) {
       alert('Por favor, selecciona un archivo antes de subir.');
     }
   };

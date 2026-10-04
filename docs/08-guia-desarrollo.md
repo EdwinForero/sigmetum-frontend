@@ -1,0 +1,141 @@
+# 08. Guía de desarrollo
+
+## Requisitos
+
+- Node.js 20 o superior (la misma versión que el backend en Elastic Beanstalk y que Amplify) y npm. No subas `jsdom` a la 27 o posterior sin subir antes Node: exigen Node 22.
+- El backend `sigmetum-backend` arrancado en local o una URL de un entorno desplegado.
+- Acceso de lectura al bucket de S3 o a su CloudFront para ver logos, banner y glosario.
+
+## Puesta en marcha
+
+```bash
+git clone <repo> sigmetum-frontend
+cd sigmetum-frontend
+npm ci
+cp .env.example .env        # y rellena los valores
+npm run dev                 # http://localhost:3000
+```
+
+### Variables de entorno (`.env`)
+
+| Variable | Obligatoria | Ejemplo | Descripción |
+|---|---|---|---|
+| `VITE_BASE_URL` | Sí | `http://localhost:8000` | Origen del backend, sin barra final |
+| `VITE_API_PREFIX` | Sí | `/api/v1` | Debe coincidir con `API_PREFIX` del backend |
+| `VITE_S3_URL` | Sí | URL pública desde la que se sirven los `assets/…` (CloudFront, ver [integración con infraestructura](integracion/para-infra.md)) | Base pública de los recursos estáticos |
+| `VITE_CAROUSEL_IMAGE_KEYS` | No | `gallery/a.jpg,gallery/b.jpg` | Solo para el carrusel, que no se usa |
+
+- `.env` está en `.gitignore`: nunca lo subas al repositorio.
+- Vite incrusta estas variables en el JavaScript al compilar y solo expone las que empiezan por `VITE_`. **Todo lo que pongas aquí es público**: no guardes secretos.
+- Si vienes de la versión anterior (Create React App), renombra las claves de tu `.env` de `REACT_APP_*` a `VITE_*`.
+- El backend debe tener `ALLOWED_ORIGIN` apuntando al origen del frontend (por ejemplo `http://localhost:3000`) o el navegador bloqueará las peticiones por CORS.
+
+## Scripts
+
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` (o `npm start`) | Servidor de desarrollo con recarga en caliente en el puerto 3000 |
+| `npm run build` | Build de producción optimizado en `dist/` |
+| `npm run preview` | Sirve `dist/` en local para probar el build |
+| `npm test` | Ejecuta todos los tests una vez (Vitest) |
+| `npm run test:watch` | Tests en modo observación |
+| `npm run lint` | ESLint. Falla si hay errores o si los avisos superan el tope fijado en el script (`--max-warnings`). Al corregir avisos, se baja el tope |
+| `npm run quality` | Puerta de calidad y seguridad: patrones prohibidos, secretos, `npm audit` de producción y ESLint |
+| `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [mantenimiento.md](guias/mantenimiento.md)) |
+
+## Despliegue
+
+Según `sigmetum-infra`, el frontend se despliega con **AWS Amplify** (región `eu-west-1`, dominio `sigmetum-a.org`), con compilación automática en cada push a la rama configurada. El frontend ya es un proyecto Vite, como espera el `build_spec` de Terraform, pero el módulo de Amplify sigue pendiente de ajustes: ver el hallazgo [A5](09-estado-actual-y-deuda-tecnica.md#prioridad-alta-pendiente).
+
+Checklist para que un despliegue funcione:
+
+1. Directorio de artefactos: `dist` (coincide con el `build_spec` de `sigmetum-infra`).
+2. Variables de entorno de Amplify con los nombres que lee el código: `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL`. **`sigmetum-infra` solo define `VITE_API_URL`**, que este código no lee: hay que ajustar el módulo de Amplify.
+3. Regla de reescritura de la SPA: origen `</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp|pdf)$)([^.]+$)/>`, destino `/index.html`, tipo `200`.
+4. Recursos estáticos accesibles: CloudFront con OAC delante del bucket y `VITE_S3_URL` apuntando a esa distribución.
+5. `ALLOWED_ORIGIN` del backend igual al dominio final.
+
+## Convenciones del código
+
+Es un resumen. Las normas completas, con el motivo y cómo se comprueban, están en las [guías de trabajo](README.md#guías-de-trabajo).
+
+- **Componentes:** funcionales, en PascalCase, uno por archivo y con exportación por defecto. Las props se desestructuran en la firma.
+- **Llamadas HTTP:** siempre a través de `services/api.js`, nunca con `fetch` directo. Los errores se capturan en el componente y se muestran con `useDialog` y `DialogAdvice`.
+- **Textos:** siempre con `t()`, añadiendo la clave en `es` y `en`.
+- **Recursos de S3:** declara la clave en `config/assets.js` y usa `assetUrl()`.
+- **Estilos:** Tailwind en línea. Reutiliza `ButtonPrincipal` y `ButtonAlternative` en lugar de crear botones nuevos.
+- **Animaciones:** Motion (`import { motion } from 'motion/react'`). Envuelve los elementos que se desmontan en `<AnimatePresence>`.
+- **Rutas:** en español (`/explorar`, `/sobre-nosotros`). Las privadas se envuelven en `ProtectedRoute`.
+- **Ramas y commits:** ramas `feature/<nombre>` sobre `master`. Mensajes en inglés, en imperativo, describiendo el cambio (por ejemplo "Adapt frontend to backend API v2 breaking changes").
+
+## Añadir cosas habituales
+
+**Una página nueva**
+1. Crea `src/pages/MiPagina.js`.
+2. Añade la `<Route>` en `App.js` (dentro de `ProtectedRoute` si es privada).
+3. Si debe estar en el menú, añádela a `menuItems` de `Navbar.js` y a `Footer.js`.
+4. Añade sus textos en los dos archivos de traducción.
+
+**Una columna nueva en los datos**
+El filtro y la tabla la detectan solos. Añade su nombre visible en `attributes` y, si debe aparecer en el detalle de especie, añádela a `uniqueAttributes` de `DialogSpecies.js` y a `explore.dialogSpecies.attributes`.
+
+**Un endpoint nuevo**
+Usa el método adecuado de `api` (`get`, `postAuth`...). Si necesitas un verbo que no existe (por ejemplo `PUT`), añádelo en `services/api.js` siguiendo el mismo patrón.
+
+## Tests
+
+Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Componente.test.js`). `npm test` los ejecuta todos.
+
+### Convenciones
+
+- `src/setupTests.js` simula `react-i18next`: `t('clave')` devuelve la propia clave, así que los tests buscan textos por clave (`screen.getByText('dialogAdvice.cancelButton')`) y no dependen del idioma.
+- La red se simula con `vi.stubGlobal('fetch', ...)` y se restaura con `vi.unstubAllGlobals()`.
+- Flujo para corregir un fallo: primero un test que falle por el motivo correcto, después el cambio mínimo y por último toda la suite.
+- Al crear archivos con barras invertidas (expresiones regulares), no uses `cat <<EOF` desde el shell: puede comerse las barras. Usa el editor.
+
+### Cobertura actual
+
+| Archivo | Qué verifica |
+|---|---|
+| `utilities/CSVfunctions.test.js` | `downloadXLSX` no modifica los datos y exporta los arrays como texto |
+| `utilities/highlightTerms.test.js` | Términos no latinos en redonda, escape de caracteres especiales y punto literal |
+| `components/TextInput.test.js`, `FilterSearchBar.test.js` | Los campos son controlados y se vacían cuando el padre los vacía |
+| `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false` |
+| `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, y que no haya traducciones vacías |
+
+### Pendiente
+
+1. `Filter`: combinación Y/O de filtros y facetas dependientes.
+2. `FormatFileName` y `SortItemsList`.
+3. E2E con Playwright: portada → explorar → filtrar → abrir especie → descargar Excel.
+
+## Integración continua y dependencias
+
+| Pieza | Qué hace |
+|---|---|
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Con Node 20 ejecuta `npm ci`, `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
+| [.github/pull_request_template.md](../.github/pull_request_template.md) | Plantilla de la PR con la definición de terminado, las guías que aplican y si afecta al backend o a la infraestructura |
+| [.github/dependabot.yml](../.github/dependabot.yml) | Propone cada lunes las actualizaciones de `npm` y de las acciones de GitHub, agrupando las menores. Ignora las versiones mayores de `jsdom` (exige Node 22) y `eslint` (los plugins aún no lo admiten) |
+| [.gitattributes](../.gitattributes) | Fija los finales de línea en LF en todos los sistemas |
+
+**Ajustes de GitHub que no están en el código** (los hace quien administre el repositorio):
+
+1. Proteger `master` y `feature/testing`: exigir que el trabajo **CI** esté en verde y una revisión antes de fusionar. Sin esto, la CI avisa pero no bloquea.
+2. Activar *Dependabot security updates* en Settings > Code security.
+
+**Amplify no ejecuta estos controles:** solo compila. Conviene añadir `npm test` en el `preBuild` del módulo `amplify` de `sigmetum-infra` para no desplegar una versión rota (ver [para-infra.md](integracion/para-infra.md)).
+
+## Herramientas de Claude Code del proyecto
+
+El repositorio incluye `.claude/settings.json` con plugins compartidos, que se activan al confiar en la carpeta:
+
+| Plugin / skill | Para qué |
+|---|---|
+| `superpowers` | Flujo de trabajo: planificación, TDD, depuración sistemática y verificación |
+| `frontend-design`, `ui-ux-pro-max` | Diseño de interfaz, accesibilidad y paletas |
+| `playwright` | Probar la app en un navegador real |
+| `understand-anything` | Mapa del código y guía de incorporación al proyecto |
+| `humanizer` | Revisar textos institucionales para que suenen naturales (no usar sobre contenido científico) |
+| `design-taste-frontend` (skill local en `.claude/skills/`) | Guía de diseño para landing pages. Útil solo para la portada |
+
+El archivo [CLAUDE.md](../CLAUDE.md) de la raíz resume las reglas del proyecto para Claude Code y le indica qué [guía](README.md#guías-de-trabajo) leer según la tarea: buenas prácticas, seguridad, accesibilidad y [mantenimiento](guias/mantenimiento.md) tras cada feature o fix.

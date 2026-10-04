@@ -1,0 +1,29 @@
+# Actualizaciones de dependencias. Dependabot abre PRs y la CI las valida.
+# Las actualizaciones de seguridad se activan aparte en Settings > Code security de GitHub.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      minor-y-parches:
+        update-types: [minor, patch]
+    ignore:
+      # jsdom 27 o posterior exige Node 22 y el proyecto debe funcionar con Node 20 (ver docs/02-tecnologias.md).
+      - dependency-name: jsdom
+        update-types: ['version-update:semver-major']
+      # Los plugins de React y de accesibilidad todavía no admiten ESLint 10.
+      - dependency-name: eslint
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@eslint/js'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday

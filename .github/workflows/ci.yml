@@ -1,0 +1,53 @@
+# Integración continua: ejecuta la definición de terminado de docs/guias/buenas-practicas-frontend.md.
+# Los cinco comandos son los mismos que se ejecutan en local; si cambias uno aquí, cámbialo también en
+# CLAUDE.md y en las guías (npm run docs:check comprueba que coinciden).
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master, feature/testing]
+  schedule:
+    # Cada lunes: detecta vulnerabilidades nuevas en las dependencias aunque no haya cambios de código.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Tests, compilación, calidad y documentación
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 20: el mismo que usan el backend (Elastic Beanstalk) y Amplify.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Compilación
+        run: npm run build
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Calidad y seguridad
+        run: npm run quality
+
+      - name: Documentación al día
+        run: npm run docs:check
