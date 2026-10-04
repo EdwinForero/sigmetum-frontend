@@ -159,11 +159,10 @@ El frontend no incluye secretos; el token de sesión se guarda en `localStorage`
 
 | Elemento | Situación |
 |---|---|
-| Región de `sigmetum-infra` | `eu-west-1` (verificado en `providers.tf`) |
-| Región en el ejemplo del frontend | El `.env.example` mostraba un bucket de `eu-west-3`, que pertenece a la infraestructura antigua (`s3-sigmetumtest`). Sustituirlo por la URL real del entorno |
+| Región de `sigmetum-infra` | `eu-west-3` (verificado en `environments/*/providers.tf`) |
+| Buckets | `sigmetum-app-assets-dev` / `sigmetum-app-assets-prod` (verificado en `environments/*/terraform.tfvars.example`) |
 | `index.html` del frontend | Mantiene un favicon fijo hacia el bucket antiguo; el código lo sustituye al cargar. Se eliminará |
 | DNS | Solo `backend.sigmetum-a.org` (CNAME al endpoint de Beanstalk). Falta el del frontend |
-| Ejemplo de `terraform.tfvars` de dev | Está desactualizado: `AWS_REGION = "eu-west-3"`, `AWS_BUCKET_NAME = "sigmetum-dev"` (el bucket real es `sigmetum-app-dev`) y claves `AWS_ACCESSKEYID` (el backend usa el rol IAM de la instancia y no lee claves) |
 
 ## 8. Comprobación tras desplegar
 
