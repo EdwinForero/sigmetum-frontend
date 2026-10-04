@@ -10,15 +10,15 @@ Documento para quien mantiene `sigmetum-infra`. Explica **qué necesita el front
 
 Ordenado por impacto. Cada punto se explica más abajo.
 
-| Id | Problema | Efecto |
-|---|---|---|
-| **I1** | Amplify define `VITE_API_URL`, pero el frontend lee `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL` | La web compilada llama a `http://localhost:8000` y no funciona |
-| **I2** | El bucket bloquea el acceso público y no hay CloudFront, pero el frontend carga logos, banner y glosario directamente desde la URL del bucket | Las imágenes y el PDF dan 403 |
-| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explorar` da 404 |
-| **I4** | En `dev`, `backend_url` es `http://…`, pero Amplify sirve el frontend por HTTPS | El navegador bloquea las peticiones (contenido mixto) |
-| **I5** | `app_env_vars` no incluye `ALLOWED_ORIGIN`, `ADMIN_USERNAME` ni `ADMIN_PASSWORD`, que el backend exige al arrancar | El backend no arranca; y aunque arrancara, CORS bloquearía al frontend |
-| **I6** | El health check de Beanstalk apunta a `/`, pero el backend solo responde en `/healthcheck` | El entorno puede figurar como no saludable (por confirmar) |
-| **I7** | No existe nada que suba los recursos estáticos (`assets/…`) al bucket ni lo documente | Faltan logos y banner |
+| Id | Problema | Efecto | Estado |
+|---|---|---|---|
+| **I1** | Amplify define `VITE_API_URL`, pero el frontend lee `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL` | La web compilada llama a `http://localhost:8000` y no funciona | **Resuelto** en rama `feature/testing` de infra |
+| **I2** | El bucket bloquea el acceso público y no hay CloudFront, pero el frontend carga logos, banner y glosario directamente desde la URL del bucket | Las imágenes y el PDF dan 403 | Abierto |
+| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explorar` da 404 | **Resuelto** en rama `feature/testing` de infra |
+| **I4** | En `dev`, `backend_url` es `http://…`, pero Amplify sirve el frontend por HTTPS | El navegador bloquea las peticiones (contenido mixto) | **Baja — aplazado hasta tener dominio dev** |
+| **I5** | `app_env_vars` no incluye `ALLOWED_ORIGIN`, `ADMIN_USERNAME` ni `ADMIN_PASSWORD`, que el backend exige al arrancar | El backend no arranca; y aunque arrancara, CORS bloquearía al frontend | **Parcialmente resuelto** — plantillas `.example` actualizadas; `ALLOWED_ORIGIN` se rellena en la segunda vuelta de `apply` tras conocer la URL de Amplify |
+| **I6** | El health check de Beanstalk apunta a `/`, pero el backend solo responde en `/healthcheck` | El entorno puede figurar como no saludable (por confirmar) | **Resuelto** en rama `feature/testing` de infra |
+| **I7** | No existe nada que suba los recursos estáticos (`assets/…`) al bucket ni lo documente | Faltan logos y banner | Abierto |
 
 ## 2. Compilación y despliegue
 
@@ -52,19 +52,18 @@ Vite **incrusta las variables en el JavaScript al compilar**, y solo las que emp
 | `VITE_S3_URL` | Sí | URL pública desde la que se sirven los `assets/…` (ver sección 5) | Igual, para prod |
 | `VITE_CAROUSEL_IMAGE_KEYS` | No | Vacía (el carrusel no se usa) | Vacía |
 
-**Situación actual (verificado):** `modules/amplify/main.tf` define únicamente `VITE_API_URL` (a nivel de app y de rama) y `NODE_ENV`. El código del frontend no lee `VITE_API_URL`. Es la causa de I1.
-
-**Propuesta para el módulo `amplify`:**
+**Situación actual (verificado, rama `feature/testing` de infra):** `modules/amplify/main.tf` define las siguientes variables en app y rama:
 
 ```hcl
 environment_variables = {
-  VITE_BASE_URL   = var.backend_url      # sin barra final y sin /api/v1
+  VITE_BASE_URL   = var.backend_url   # sin barra final y sin /api/v1
   VITE_API_PREFIX = "/api/v1"
-  VITE_S3_URL     = var.assets_url       # variable nueva
+  VITE_S3_URL     = var.s3_url        # vacío hasta resolver I2/C2
+  NODE_ENV        = var.environment
 }
 ```
 
-El mismo bloque debe ir en `aws_amplify_branch`. Conviene actualizar la descripción de `backend_url` en `variables.tf`, que aún habla de `REACT_APP_API_URL`.
+Resuelve I1. La descripción de `backend_url` en `variables.tf` también se corrigió (antes hablaba de `REACT_APP_API_URL`).
 
 ## 4. Lo que el frontend necesita del backend desplegado
 
