@@ -109,6 +109,7 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 | `components/ImageGalleryManager.test.js` | Un caso por carácter prohibido del título sin llamar a la API, y un título válido que sí sube |
 | `components/ImageComponent.test.js`, `ImageCarrousel.test.js` | `imageKey` con `encodeURIComponent`; sin clave no se llama a la API |
 | `components/Table.test.js` | Columnas como unión de claves, orden de primera aparición y sin mutar `data` |
+| `components/DialogSpecies.test.js` | Comparación exacta de la especie (cadena y array; una subcadena, `undefined`, `null`, `""` y diferencias de mayúsculas o espacios no cuentan), sin mutar `data` ni `species`, y enlace a IPNI con `rel="noopener noreferrer"` |
 | `utilities/FormatFileName.test.js` | Formato `AAAA-MM-DD_vN.xlsx` con y sin ruta, `_v10` y nombres que no coinciden |
 | `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, y que no haya traducciones vacías |
 | `languages/es-typos.test.js` | El texto en español de `login.unauthorizedLabel` es exacto y sin el typo «contraeña» (lee el JSON de `es` directamente) |

@@ -163,7 +163,7 @@ Modal de detalle de una especie.
 
 | Cálculo | Descripción |
 |---|---|
-| `filteredSpecies` | Registros de `data` cuyo `Especies Características` incluye esta especie |
+| `filteredSpecies` | Registros de `data` cuyo `Especies Características` coincide exactamente con esta especie: igualdad si el valor es una cadena, pertenencia si es un array (helper local `contieneEspecie`; sin normalizar mayúsculas ni espacios) |
 | `uniqueAttributes` | Por cada atributo (provincia, municipio, altitud media, sector biogeográfico, piso bioclimático, ombrotipo, naturaleza del sustrato, tipo de serie, serie de vegetación y vegetación potencial), los valores únicos ordenados con `SortItemsList` y unidos por comas |
 | `formattedQuery` | Nombre codificado para el enlace `https://www.ipni.org/?q=...` |
 | `highlightTerms` | La misma utilidad compartida que usa `SpeciesCard` |
