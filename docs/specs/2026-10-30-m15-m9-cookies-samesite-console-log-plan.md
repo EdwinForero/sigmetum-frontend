@@ -53,7 +53,7 @@ Crítico: no. Ninguna entrada de `criticidad` coincide: las cookies de consentim
 
 ## A cargo del tester-documentador
 
-- `docs/09-estado-actual-y-deuda-tecnica.md` (único documento con cifras): M15 y M9 pasan de las tablas de media y baja a "Resueltos", con commit `(por confirmar)` hasta el commit real; sustituir `(por confirmar)` por `611dd2d` en las filas M2 y M18 de Resueltos; hoja de ruta, punto 5: quitar M9 y la mención al `console.log` de `Filter`; fecha 30/10/2026; entrada nueva en el historial; cifras (tests, avisos de ESLint y `--max-warnings`) con los valores medidos.
+- `docs/09-estado-actual-y-deuda-tecnica.md` (único documento con cifras): M15 y M9 pasan de las tablas de media y baja a "Resueltos", con commit `(por confirmar)` hasta el commit real; sustituir `(por confirmar)` por `c65fe15` en las filas M2 y M18 de Resueltos; hoja de ruta, punto 5: quitar M9 y la mención al `console.log` de `Filter`; fecha 30/10/2026; entrada nueva en el historial; cifras (tests, avisos de ESLint y `--max-warnings`) con los valores medidos.
 - `docs/05-componentes.md`, sección `CookieBanner`: las cookies se guardan con `path=/`, `max-age` de un año y `SameSite=Lax`, más `Secure` si el protocolo es HTTPS, mediante un helper local `setCookie` no exportado. La sección `Filter` no se toca.
 - `docs/08-guia-desarrollo.md`: añadir `CookieBanner.test.js` a la tabla de cobertura, si existe. Sin recuentos.
 - `docs/guias/seguridad.md`: S9 (línea ~103) y la tabla de estado (línea ~131, "Cookies propias") pasan a estado resuelto; se mantiene la mención de M11.

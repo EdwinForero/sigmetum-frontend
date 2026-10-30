@@ -23,7 +23,7 @@ Fecha: 2026-10-30 · Estado: cerrado
 ### De documentación
 
 1. `docs/09`: M15 y M9 pasan a "Resueltos" con commit `(por confirmar)` hasta el commit real; se quitan de las tablas de prioridad media/baja y de la hoja de ruta (el punto 5 de la hoja de ruta cita el `console.log` de `Filter`); la fecha de "Última actualización" es 30/10/2026; se añade entrada al historial; las cifras (tests, avisos de ESLint, `--max-warnings`) solo se actualizan aquí.
-2. `docs/09`: sustituir `(por confirmar)` por `611dd2d` en las filas M2 y M18 de Resueltos. M12 ya tiene `6d089a6`.
+2. `docs/09`: sustituir `(por confirmar)` por `c65fe15` en las filas M2 y M18 de Resueltos. M12 ya tiene `76d90f1`.
 3. `docs/05`, sección `CookieBanner`: reflejar que `handleAccept` y `handleAcceptAll` guardan las cookies con `SameSite=Lax` y `Secure` en HTTPS mediante un helper local. La sección `Filter` solo cambia si menciona el log (no lo hace hoy).
 4. `docs/08`: si tiene tabla de cobertura de tests, añadir `CookieBanner.test.js`. Sin recuentos fuera de `docs/09`.
 5. `docs/guias/seguridad.md`: S9 (línea 103) y la tabla de estado (línea 131, "Cookies propias: sin `SameSite` ni `Secure` (M15)") dejan de citar M15 como deuda y pasan a describir el estado resuelto. La mención de M11 (nada lee las preferencias) se mantiene.

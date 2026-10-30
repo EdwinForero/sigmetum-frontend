@@ -4,7 +4,7 @@ Fecha: 2026-10-30 · Estado: cerrado
 
 ## Objetivo
 
-Hoy las `<label>` de `LoginForm` y `ContactForm` no están asociadas a su campo (B3) y, en el login, el botón de enviar está fuera del `<form>`, por lo que Enter no envía (B4). Este ciclo corrige solo esos dos hallazgos de `docs/09`, sin cambiar el aspecto visual ni la lógica de sesión, y recoge en `docs/09` el hash `39cd9ae` de los commits de M15 y M9. B1 (botones de solo icono) queda para el ciclo siguiente (ver sección propia). Referencias que mandan: `docs/guias/accesibilidad.md` (reglas A4 y A5); `DESIGN.md` no se contradice con nada de lo que sigue. Criticidad: CRÍTICA (`LoginForm`, sesión y accesibilidad).
+Hoy las `<label>` de `LoginForm` y `ContactForm` no están asociadas a su campo (B3) y, en el login, el botón de enviar está fuera del `<form>`, por lo que Enter no envía (B4). Este ciclo corrige solo esos dos hallazgos de `docs/09`, sin cambiar el aspecto visual ni la lógica de sesión, y recoge en `docs/09` el hash `ca0840d` de los commits de M15 y M9. B1 (botones de solo icono) queda para el ciclo siguiente (ver sección propia). Referencias que mandan: `docs/guias/accesibilidad.md` (reglas A4 y A5); `DESIGN.md` no se contradice con nada de lo que sigue. Criticidad: CRÍTICA (`LoginForm`, sesión y accesibilidad).
 
 ## Situación actual (observada en el código, sin diseño nuevo)
 
@@ -34,7 +34,7 @@ Todas las pruebas se escriben primero y deben fallar por el motivo correcto (la 
 
 ### De documentación
 
-1. `docs/09`: B3 y B4 pasan a "Resueltos" con el commit como **(por confirmar)**; B1 sigue pendiente; nota de que `TextInput` y `FilterSearchBar` (campo sin etiqueta con texto, nombre solo por `placeholder`) quedan como pendiente de B3 (el `tester-documentador` la anota como observación); fila de historial del 30/10/2026; "Última actualización: 30/10/2026"; cifras actualizadas con `npm run docs:check -- --metrics`; el "(por confirmar)" del commit de M15 y de M9 se sustituye por `39cd9ae`. B16 y la hoja de ruta (accesibilidad básica) reflejan lo que queda abierto.
+1. `docs/09`: B3 y B4 pasan a "Resueltos" con el commit como **(por confirmar)**; B1 sigue pendiente; nota de que `TextInput` y `FilterSearchBar` (campo sin etiqueta con texto, nombre solo por `placeholder`) quedan como pendiente de B3 (el `tester-documentador` la anota como observación); fila de historial del 30/10/2026; "Última actualización: 30/10/2026"; cifras actualizadas con `npm run docs:check -- --metrics`; el "(por confirmar)" del commit de M15 y de M9 se sustituye por `ca0840d`. B16 y la hoja de ruta (accesibilidad básica) reflejan lo que queda abierto.
 2. Los recuentos ("N tests", "N claves") viven solo en `docs/09`; el resto de documentos no los repite.
 3. `docs/05-componentes.md`: describe `LoginForm` (envío por `submit` con el botón dentro del `<form>`, etiquetas asociadas) y `ContactForm` (etiquetas asociadas), contrastado con el código.
 4. `docs/08-guia-desarrollo.md`: refleja la cobertura de los tests nuevos (consultas por etiqueta y por rol, envío con Enter y sin doble envío).
