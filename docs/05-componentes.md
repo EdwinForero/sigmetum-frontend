@@ -252,6 +252,7 @@ Gestión de las imágenes de la galería.
 |---|---|
 | `username`, `password`, `showPassword`, `loginErrorKey` | Campos, mostrar u ocultar contraseña y clave del error (o `null`) |
 | `handleLogin()` | `POST /log`. Si va bien, guarda el token y navega a `/cargar-archivos`; con `429` muestra `login.tooManyAttemptsLabel` y con cualquier otro fallo `login.unauthorizedLabel`. El mensaje va en un `<span role="alert">` que solo existe cuando hay error, así que se anuncia como alerta; no está asociado al campo (`aria-describedby`) |
+| Estructura | Cada `<label>` se asocia a su campo con `htmlFor` e `id` derivados de `useId` (únicos entre instancias; el campo de contraseña conserva su `id` al mostrarla u ocultarla). El `<form>` envía con `onSubmit` (`preventDefault` y `handleLogin()`) y el botón "Entrar" está dentro del `<form>` sin `onClick`, así que Enter envía una sola vez |
 
 ---
 
@@ -259,7 +260,7 @@ Gestión de las imágenes de la galería.
 
 ### ContactForm
 Formulario de contacto (nombre, email, asunto y mensaje).
-**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email` y muestra un diálogo de éxito o error: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`.
+**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email` y muestra un diálogo de éxito o error: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias).
 
 ### EmailContactGrid
 Lee `home.emailsData`, una cadena con el formato `Nombre / email / Nombre / email ...`, la divide por `/` en pares `{ name, email }` y los muestra en dos columnas con enlaces `mailto:`.

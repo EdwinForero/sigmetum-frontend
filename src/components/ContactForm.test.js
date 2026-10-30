@@ -43,4 +43,31 @@ describe('ContactForm', () => {
 
     expect(await screen.findByText(key)).toBeInTheDocument();
   });
+  it('asocia cada etiqueta con su campo', () => {
+    render(<ContactForm onLoad={vi.fn()} />);
+
+    expect(screen.getByLabelText('home.contactForm.nameLabel')).toHaveAttribute('type', 'text');
+    expect(screen.getByLabelText('home.contactForm.emailPlaceholder')).toHaveAttribute('type', 'email');
+    expect(screen.getByLabelText('home.contactForm.subjectPlaceholder')).toHaveAttribute('type', 'text');
+    expect(screen.getByLabelText('home.contactForm.messagePlaceholder').tagName).toBe('TEXTAREA');
+  });
+
+  it('dos instancias tienen ids distintos en sus campos', () => {
+    render(
+      <>
+        <ContactForm onLoad={vi.fn()} />
+        <ContactForm onLoad={vi.fn()} />
+      </>
+    );
+
+    const ids = [
+      ...screen.getAllByPlaceholderText('home.contactForm.namePlaceholder'),
+      ...screen.getAllByPlaceholderText('home.contactForm.emailPlaceholder'),
+      ...screen.getAllByPlaceholderText('home.contactForm.subjectPlaceholder'),
+      ...screen.getAllByPlaceholderText('home.contactForm.messagePlaceholder'),
+    ].map((el) => el.id);
+    expect(ids).toHaveLength(8);
+    expect(ids.every(Boolean)).toBe(true);
+    expect(new Set(ids).size).toBe(8);
+  });
 });

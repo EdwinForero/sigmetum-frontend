@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
@@ -12,6 +12,7 @@ const ContactForm = ({ onLoad }) => {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const { t } = useTranslation();
+  const id = useId();
   const { dialog, showDialog, closeDialog } = useDialog();
 
   const handleSubmit = async (e) => {
@@ -37,10 +38,11 @@ const ContactForm = ({ onLoad }) => {
     <div className="bg-[#F9FBFA] max-w-md w-full">
       <form onSubmit={handleSubmit} className="flex flex-col">
         <div className="mb-4 px-4">
-          <label className="block text-[#111418] text-base font-medium mb-2">
+          <label htmlFor={`${id}-name`} className="block text-[#111418] text-base font-medium mb-2">
             {t('home.contactForm.nameLabel')}
           </label>
           <input
+            id={`${id}-name`}
             type="text"
             placeholder={t('home.contactForm.namePlaceholder')}
             maxLength={100}
@@ -51,10 +53,11 @@ const ContactForm = ({ onLoad }) => {
         </div>
 
         <div className="mb-4 px-4">
-          <label className="block text-[#111418] text-base font-medium mb-2">
+          <label htmlFor={`${id}-email`} className="block text-[#111418] text-base font-medium mb-2">
             {t('home.contactForm.emailPlaceholder')}
           </label>
           <input
+            id={`${id}-email`}
             type="email"
             placeholder={t('home.contactForm.emailPlaceholder')}
             maxLength={254}
@@ -65,10 +68,11 @@ const ContactForm = ({ onLoad }) => {
         </div>
 
         <div className="mb-4 px-4">
-          <label className="block text-[#111418] text-base font-medium mb-2">
+          <label htmlFor={`${id}-subject`} className="block text-[#111418] text-base font-medium mb-2">
             {t('home.contactForm.subjectPlaceholder')}
           </label>
           <input
+            id={`${id}-subject`}
             type="text"
             placeholder={t('home.contactForm.subjectPlaceholder')}
             maxLength={150}
@@ -79,10 +83,11 @@ const ContactForm = ({ onLoad }) => {
         </div>
 
         <div className="mb-4 px-4">
-          <label className="block text-[#111418] text-base font-medium mb-2">
+          <label htmlFor={`${id}-message`} className="block text-[#111418] text-base font-medium mb-2">
             {t('home.contactForm.messagePlaceholder')}
           </label>
           <textarea
+            id={`${id}-message`}
             placeholder={t('home.contactForm.messagePlaceholder')}
             maxLength={2000}
             value={message}

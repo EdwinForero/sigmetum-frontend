@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import LoginForm from './LoginForm';
@@ -81,5 +81,95 @@ describe('LoginForm', () => {
 
     expect(await screen.findByText('pagina-carga')).toBeInTheDocument();
     expect(localStorage.getItem('token')).toBe('jwt-123');
+  });
+  it('asocia cada etiqueta con su campo y conserva el mismo campo al mostrar la contraseña', async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    const usuario = screen.getByLabelText('login.userLable');
+    expect(usuario).toHaveAttribute('type', 'text');
+    const clave = screen.getByLabelText('login.passwordLable');
+    expect(clave).toHaveAttribute('type', 'password');
+    const idClave = clave.id;
+
+    await user.click(screen.getByText('login.passwordShowButton'));
+
+    const claveVisible = screen.getByLabelText('login.passwordLable');
+    expect(claveVisible).toBe(clave);
+    expect(claveVisible.id).toBe(idClave);
+    expect(claveVisible).toHaveAttribute('type', 'text');
+  });
+
+  it('envía con Enter desde el campo de usuario, una sola vez', async () => {
+    api.post.mockResolvedValue({ token: 'jwt-123' });
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.type(screen.getByLabelText('login.userLable'), 'ana{Enter}');
+
+    expect(api.post).toHaveBeenCalledTimes(1);
+    expect(api.post).toHaveBeenCalledWith('/log', { username: 'ana', password: '' });
+  });
+
+  it('envía con Enter desde el campo de contraseña, una sola vez', async () => {
+    api.post.mockResolvedValue({ token: 'jwt-123' });
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.type(screen.getByLabelText('login.passwordLable'), 'secreto{Enter}');
+
+    expect(api.post).toHaveBeenCalledTimes(1);
+    expect(api.post).toHaveBeenCalledWith('/log', { username: '', password: 'secreto' });
+  });
+
+  it('el botón por rol es de envío dentro del formulario y envía una sola vez', async () => {
+    api.post.mockResolvedValue({ token: 'jwt-123' });
+    const user = userEvent.setup();
+    renderLogin();
+
+    const boton = screen.getByRole('button', { name: 'login.logInButton' });
+    expect(boton.closest('form')).not.toBeNull();
+    expect(boton).toHaveProperty('type', 'submit');
+
+    await user.click(boton);
+
+    expect(api.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('pulsar el texto interior del botón envía una sola vez', async () => {
+    api.post.mockResolvedValue({ token: 'jwt-123' });
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.click(screen.getByText('login.logInButton'));
+
+    expect(api.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('el envío del formulario cancela la acción por defecto', async () => {
+    api.post.mockRejectedValue(httpError(401));
+    const { container } = renderLogin();
+
+    const notPrevented = fireEvent.submit(container.querySelector('form'));
+    expect(notPrevented).toBe(false);
+
+    await screen.findByRole('alert');
+  });
+
+  it('dos instancias tienen ids distintos en sus cuatro campos', () => {
+    render(
+      <MemoryRouter>
+        <LoginForm />
+        <LoginForm />
+      </MemoryRouter>
+    );
+
+    const ids = [
+      ...screen.getAllByLabelText('login.userLable'),
+      ...screen.getAllByLabelText('login.passwordLable'),
+    ].map((el) => el.id);
+    expect(ids).toHaveLength(4);
+    expect(ids.every(Boolean)).toBe(true);
+    expect(new Set(ids).size).toBe(4);
   });
 });

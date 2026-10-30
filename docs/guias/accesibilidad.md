@@ -53,7 +53,7 @@ Normas para que la web sea utilizable por todas las personas, con el estado real
 ### A5. Formularios
 
 - **Regla:** cada campo tiene su `<label>` asociado (`htmlFor` + `id`, o anidado); el `placeholder` no sustituye a la etiqueta; los errores se anuncian (`role="alert"` o `aria-live`) y se asocian al campo (`aria-describedby`); los campos obligatorios se indican.
-- **Estado: incumple** en `LoginForm`, `ContactForm` y los campos de texto (B3). En `LoginForm` el anuncio del error ya se cumple (`role="alert"`); siguen pendientes la etiqueta asociada al campo (B3) y `aria-describedby`. Además, en el acceso el botón está fuera del `<form>`, así que Enter no envía (B4).
+- **Estado: parcial.** `LoginForm` y `ContactForm` ya asocian cada `<label>` a su campo (`htmlFor` + `id` con `useId`, B3), y en `LoginForm` el botón está dentro del `<form>`, así que Enter envía (B4); el anuncio del error del login también se cumple (`role="alert"`). Siguen pendientes `aria-describedby` en ambos formularios, los campos `TextInput` y `FilterSearchBar` (un `<label>` envolvente sin texto: su nombre sale solo del `placeholder`; B3 sigue abierto para ellos) y los botones de icono (B1). Los avisos de ESLint `jsx-a11y/label-has-for` y `control-has-associated-label` en `LoginForm` y `ContactForm` siguen abiertos: no se anidó el `input` en la `<label>` (cambiaría el marcado).
 
 ### A6. Diálogos
 
