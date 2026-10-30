@@ -89,14 +89,15 @@ Lo usan `SpeciesCard` y `DialogSpecies`.
 ### `FormatFileName(fileName)` (`FormatFileName.js`)
 Convierte el nombre técnico de una versión en un texto legible.
 
-> **Desactualizada:** el backend actual nombra las versiones `AAAA-MM-DD_vN.xlsx` (por ejemplo `2026-09-15_v3.xlsx`), así que esta función nunca coincide y devuelve el nombre sin cambios. Ver D2 en [integración con el backend](integracion/para-backend.md#6-discrepancias-verificadas-hoy).
+Usa el formato real del backend, `AAAA-MM-DD_vN.xlsx`, buscado **al final** del nombre (con o sin ruta delante).
 
 | Entrada | Salida |
 |---|---|
-| `Málaga_V003_15_09_2026.json` | `Málaga V3 (15/09/2026)` |
-| Cualquier nombre que no siga el patrón `Nombre_Vn_dd_mm_aaaa.json` | El mismo nombre sin cambios |
+| `2026-09-15_v3.xlsx`, `2026-09-15_v10.xlsx` | `15/09/2026 · V3`, `15/09/2026 · V10` |
+| `data/Malaga/2026-09-15_v3.xlsx` | `15/09/2026 · V3` |
+| Cualquier nombre que no siga el patrón | El mismo nombre sin cambios |
 
-Expresiones que usa: nombre `^([A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]+)_`, versión `_V(\d+)_` (quita los ceros a la izquierda) y fecha `_(\d{2})_(\d{2})_(\d{4})\.json`.
+Expresión: `(\d{4})-(\d{2})-(\d{2})_v(\d+)\.xlsx$`. Si el `name` real de `GET /list-files` lleva o no ruta **(por confirmar)**; ambos casos están cubiertos por los tests.
 
 ### `SortItemsList(items)` (`SortItemsList.js`)
 Ordena **en el propio array** (usa `sort`, que muta) con estas reglas:

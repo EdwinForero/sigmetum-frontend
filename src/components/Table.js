@@ -17,7 +17,7 @@ const Table = ({
     );
   }
 
-  const columnNames = Object.keys(data[0]);
+  const columnNames = [...new Set(data.flatMap((row) => Object.keys(row)))];
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;

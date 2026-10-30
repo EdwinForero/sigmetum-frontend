@@ -95,10 +95,15 @@ const FileUploadForm = ({
               });
 
               if (!confirmedResponse.ok) {
+                if (confirmedResponse.status === 404) {
+                  allFilesUploadedSuccessfully = false;
+                  showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorDraftNotFound'));
+                  break;
+                }
                 throw new Error('Error al confirmar la subida');
               }
             } else {
-              await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
+              const cancelResponse = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -106,6 +111,12 @@ const FileUploadForm = ({
                 },
                 body: JSON.stringify({ confirmed: false, draftKey }),
               });
+              if (!cancelResponse.ok) {
+                const messageKey = cancelResponse.status === 404
+                  ? 'dialogAdvice.errorDraftNotFound'
+                  : 'dialogAdvice.errorUploadMessage';
+                showDialog(t('dialogAdvice.errorTitle'), t(messageKey));
+              }
               allFilesUploadedSuccessfully = false;
               break;
             }
@@ -143,7 +154,7 @@ const FileUploadForm = ({
         <input
           type="file"
           multiple
-          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           onChange={handleFileSelect}
           className="hidden"
           id="fileInput"

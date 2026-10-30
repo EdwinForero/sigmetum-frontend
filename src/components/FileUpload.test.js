@@ -73,4 +73,56 @@ describe('FileUpload con campos vacíos en el Excel', () => {
     expect(screen.queryByText('dialogAdvice.successUploadMessage')).not.toBeInTheDocument();
     await waitFor(() => expect(onLoad).toHaveBeenLastCalledWith(false));
   });
+
+  it('solo acepta .xlsx en el selector de archivos', () => {
+    const { container } = render(<FileUpload onLoad={onLoad} />);
+    const accept = container.querySelector('#fileInput').getAttribute('accept');
+
+    expect(accept).toContain('.xlsx');
+    expect(accept).not.toContain('.csv');
+    expect(accept).not.toContain('.xls,');
+    expect(accept).not.toContain('vnd.ms-excel');
+  });
+
+  it('al confirmar con 404 muestra que el borrador ya no existe', async () => {
+    fetchMock
+      .mockResolvedValueOnce(draftResponse())
+      .mockResolvedValueOnce(jsonResponse(404, { success: false, error: 'Draft not found' }));
+    const user = userEvent.setup();
+    await uploadOneFile(user);
+
+    await user.click(screen.getByText('dialogAdvice.confirmButton'));
+
+    expect(await screen.findByText('dialogAdvice.errorDraftNotFound')).toBeInTheDocument();
+    expect(screen.queryByText('dialogAdvice.successUploadMessage')).not.toBeInTheDocument();
+    expect(screen.queryByText('dialogAdvice.errorUploadMessage')).not.toBeInTheDocument();
+  });
+
+  it('al cancelar con 404 muestra que el borrador ya no existe y conserva los archivos', async () => {
+    fetchMock
+      .mockResolvedValueOnce(draftResponse())
+      .mockResolvedValueOnce(jsonResponse(404, { success: false, error: 'Draft not found' }));
+    const user = userEvent.setup();
+    await uploadOneFile(user);
+
+    await user.click(screen.getByText('dialogAdvice.cancelButton'));
+
+    expect(await screen.findByText('dialogAdvice.errorDraftNotFound')).toBeInTheDocument();
+    expect(screen.queryByText('dialogAdvice.successUploadMessage')).not.toBeInTheDocument();
+    expect(screen.getByText('Málaga datos.xlsx')).toBeInTheDocument();
+  });
+
+  it('al cancelar con 500 muestra el error de subida y conserva los archivos', async () => {
+    fetchMock
+      .mockResolvedValueOnce(draftResponse())
+      .mockResolvedValueOnce(jsonResponse(500, { success: false, error: 'Internal' }));
+    const user = userEvent.setup();
+    await uploadOneFile(user);
+
+    await user.click(screen.getByText('dialogAdvice.cancelButton'));
+
+    expect(await screen.findByText('dialogAdvice.errorUploadMessage')).toBeInTheDocument();
+    expect(screen.queryByText('dialogAdvice.successUploadMessage')).not.toBeInTheDocument();
+    expect(screen.getByText('Málaga datos.xlsx')).toBeInTheDocument();
+  });
 });

@@ -103,13 +103,19 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 | `utilities/CSVfunctions.test.js` | `downloadXLSX` no modifica los datos y exporta los arrays como texto |
 | `utilities/highlightTerms.test.js` | Términos no latinos en redonda, escape de caracteres especiales y punto literal |
 | `components/TextInput.test.js`, `FilterSearchBar.test.js` | Los campos son controlados y se vacían cuando el padre los vacía |
-| `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false` |
+| `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false`; `accept` solo `.xlsx`; `404` al confirmar y al cancelar; fallo al cancelar |
+| `services/api.test.js` | `401` en métodos `*Auth` borra el token y redirige; `api.get` y `api.post` no; `401` con cuerpo no JSON |
+| `components/LoginForm.test.js`, `ContactForm.test.js` | Mensajes por `429`, `401`, `400` y `500`; `maxLength` del contacto |
+| `components/ImageGalleryManager.test.js` | Un caso por carácter prohibido del título sin llamar a la API, y un título válido que sí sube |
+| `components/ImageComponent.test.js`, `ImageCarrousel.test.js` | `imageKey` con `encodeURIComponent`; sin clave no se llama a la API |
+| `components/Table.test.js` | Columnas como unión de claves, orden de primera aparición y sin mutar `data` |
+| `utilities/FormatFileName.test.js` | Formato `AAAA-MM-DD_vN.xlsx` con y sin ruta, `_v10` y nombres que no coinciden |
 | `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, y que no haya traducciones vacías |
 
 ### Pendiente
 
 1. `Filter`: combinación Y/O de filtros y facetas dependientes.
-2. `FormatFileName` y `SortItemsList`.
+2. `SortItemsList`.
 3. E2E con Playwright: portada → explorar → filtrar → abrir especie → descargar Excel.
 
 ## Integración continua y dependencias

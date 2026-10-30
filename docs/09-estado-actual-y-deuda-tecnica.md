@@ -31,9 +31,9 @@ El contrato con el backend coincide: todas las rutas que llama el frontend exist
 | Archivos de código (sin tests) | 57 |
 | Páginas | 10 |
 | Componentes | 34 |
-| Archivos de test | 6 |
-| Claves de traducción (por idioma) | 197 |
-| Tests | 15 en 6 archivos (Vitest): utilidades, campos de texto, flujo de subida y traducciones. Además, 151 del plugin `ciclo-agentico` (`node:test`, `npm run agentes:test`) |
+| Archivos de test | 14 |
+| Claves de traducción (por idioma) | 202 |
+| Tests | 60 en 14 archivos (Vitest): utilidades, campos de texto, flujo de subida, cliente API, formularios de acceso y contacto, galería, tabla, imágenes y traducciones. Además, 151 del plugin `ciclo-agentico` (`node:test`, `npm run agentes:test`) |
 | Linter | ESLint 9 (`npm run lint`): 0 errores y un tope de avisos que no puede crecer. `npm run quality` añade seguridad |
 | Tipado | Ninguno (JavaScript sin PropTypes ni TypeScript) |
 
@@ -43,6 +43,7 @@ Estas son las **únicas** cifras del repositorio de documentación: el resto de 
 
 | Fecha | Cambio |
 |---|---|
+| 30/10/2026 | Integración con el backend, lotes A, B y C (spec `docs/specs/2026-10-30-integracion-backend-lotes-abc-design.md`). Resueltas en el frontend **D2** (`FormatFileName` con `AAAA-MM-DD_vN.xlsx`), **D3** (`FileUpload` solo `.xlsx`), **D4** (`Table` con la unión de claves), **D6** (un `401` en los métodos `*Auth` de `api.js` borra el token y redirige a `/login`) y **D7** (`429` propio en login; también en contacto, con `400`). **D5** y **D8** quedan resueltas en el backend (`F3` y `F2`, 29/10/2026) y no exigen cambios aquí. Además: `maxLength` en `ContactForm`, validación del título en `ImageGalleryManager` (el backend rechaza `/ \ .. , ' : & # ? %` y comillas), `encodeURIComponent` de `imageKey`, y `FileUpload` interpreta el `404` de `/upload/confirm` (`Draft not found`) y comprueba la cancelación. 5 claves nuevas de i18n. D1 y M12 siguen abiertas. Limitaciones conocidas en M18. Los tests simulan la API: no se ha probado contra el backend real **(por confirmar)** |
 | 30/10/2026 | Se lleva al frontend el flujo agéntico `ciclo-agentico` desde `sigmetum-backend` (solo el núcleo, perfil `base`): `plugins/ciclo-agentico/` sin cambios, marketplace local `locales-front`, `.claude/flujo.json`, scripts `docs:gate`, `agentes:test` y `agentes:bootstrap`, permisos `ask` de git y `docs/specs/`. Ajustes de configuración que exige: `test.include` en `vite.config.js` (Vitest no debe recoger los tests de `node:test` del plugin) y un bloque de ESLint para `plugins/**/*.mjs` (el tope de avisos no cambia). Después se configuran los plugins del repositorio: `superpowers` (de `superpowers-marketplace`), `i-have-adhd` (`estilo` de `flujo.json`) y `ui-ux-pro-max` en `.claude/settings.json`, y la taste skill pasa de `.claude/skills/` al plugin local `dominio-frontend` (perfil `frontend`), sin dejar skills sueltas. `awesome-design-md` no es un plugin: se adapta el `DESIGN.md` de Mintlify como estructura en [DESIGN.md](../DESIGN.md) con los valores del repositorio (colores, fuentes y radios medidos en el código y contraste recalculado; no se ha comprobado visualmente con la web en ejecución). Pendiente de comprobar en un equipo: la instalación del plugin y el prefijo de sus comandos **(por confirmar)**. La CI ejecuta `agentes:test` (en un paso con Node 22, por el glob de `node --test`; no verificado en GitHub hasta la primera PR **(por confirmar)**) y no ejecuta `docs:gate`, que depende de `git status` y de la fecha de hoy |
 
 ## Valoración general
@@ -86,10 +87,10 @@ Al escribir los documentos de [integración](integracion/para-backend.md) se com
 
 | Origen | Hallazgos | Documento |
 |---|---|---|
-| Frontend frente a backend | **D1** abrir una versión en "Administrar datos" falla: pide un Excel a un endpoint que parsea JSON (por confirmar). D2 formato de nombre de versión. D3 acepta `.csv`/`.xls` y el backend solo `.xlsx`. D4 columnas de la tabla del primer registro. D6 y D7 gestión de 401 y 429 | [para-backend.md](integracion/para-backend.md#6-discrepancias-verificadas-hoy) |
+| Frontend frente a backend | **D1** abrir una versión en "Administrar datos" falla: pide un Excel a un endpoint que parsea JSON (por confirmar). D9 caducidad de las URLs prefirmadas (informativo) | [para-backend.md](integracion/para-backend.md#6-discrepancias-verificadas-hoy) |
 | Frontend frente a infraestructura | **I1** variables `VITE_*` no definidas. **I2** recursos estáticos sin acceso público ni CloudFront. **I3** sin regla de reescritura de la SPA. **I4** backend de dev en HTTP. **I5** faltan `ALLOWED_ORIGIN` y `ADMIN_*` en el backend desplegado. I6, I7 | [para-infra.md](integracion/para-infra.md#1-resumen-qué-falta-para-que-el-frontend-funcione) |
 
-D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acordado en el backend); I1 a I7 en `sigmetum-infra`. Esto **sustituye y amplía A5**.
+D1 sigue abierta (necesita un endpoint nuevo del backend); D2, D3, D4, D5, D6, D7 y D8 están resueltas (ver el historial); I1 a I7 en `sigmetum-infra`. Esto **sustituye y amplía A5**.
 
 ### Prioridad media (seguridad, robustez y mantenibilidad)
 
@@ -97,7 +98,8 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 |---|---|---|
 | M1 | El JWT se guarda en `localStorage`, accesible ante cualquier XSS. Lo ideal es una cookie `HttpOnly` emitida por el backend. Tampoco hay botón de cerrar sesión | `LoginForm.js:18`, `services/api.js:4` |
 | M2 | `FileUpload` hace `fetch` directo en tres sitios en lugar de usar `services/api.js`, así que duplica cabeceras y no trata el envoltorio `{ success }` igual que el resto | `FileUpload.js:55, 87, 100` |
-| M6 | La cobertura de tests es parcial: faltan `Filter` (lógica Y/O y facetas dependientes), `FormatFileName` y `SortItemsList`, y no hay pruebas E2E | toda la base |
+| M18 | `FileUpload.js` lee `localStorage['token']` en tres sitios, fuera de las excepciones de CLAUDE.md (`services/api.js`, `LoginForm`, `ProtectedRoute`). Por eso **no redirige a `/login` ante un `401`** (a diferencia de `api.js`) y muestra el error de subida. Su `404` de `/upload/confirm` se interpreta solo por el estado, sin leer el texto `Draft not found`: un `404` con otro significado se mostraría como "el borrador ya no existe". Se resuelve migrando `FileUpload` a `api.js` (M2) | `FileUpload.js:58, 92, 110` |
+| M6 | La cobertura de tests es parcial: faltan `Filter` (lógica Y/O y facetas dependientes) y `SortItemsList`, y no hay pruebas E2E | toda la base |
 | M7 | Comparaciones `JSON.stringify(prev) !== JSON.stringify(filtered)` en cada cambio de filtro. Con miles de filas es costoso | `App.js:81-91` |
 | M8 | Código muerto: `UploadButton.js` (usa `alert` y no sube nada), `ImageCarrousel.js` (comentado en `Explore`, con imágenes de `via.placeholder.com`) y `utilities/TokenExpiration.js` (duplica la lógica de `ProtectedRoute`) | `components/`, `utilities/` |
 | M9 | `console.log(selectedFilters)` olvidado en producción | `Filter.js:70` |
@@ -114,7 +116,7 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 
 | Id | Hallazgo | Ubicación |
 |---|---|---|
-| B1 | Botones de solo icono sin `aria-label` (menú, paginación, papelera, "+"). Un lector de pantalla lee el nombre de la ligadura ("delete", "Menu") | `ButtonPrincipal`, `FileUpload`, `TermsManager` |
+| B1 | Botones de solo icono sin `aria-label` (menú, paginación, papelera, "+"). Un lector de pantalla lee el nombre de la ligadura ("delete", "Menu") | `ButtonPrincipal`, `FileUpload`, `TermsManager`, `ImageGalleryManager.js:97` (papelera de la galería) |
 | B2 | Los diálogos no tienen `role="dialog"`, `aria-modal`, foco atrapado ni cierre con Escape | `DialogAdvice`, `DialogSpecies` |
 | B3 | Las etiquetas `<label>` no están asociadas a sus `<input>` (sin `htmlFor`/`id`) | `LoginForm`, `ContactForm` |
 | B4 | En el login, el botón está fuera del `<form>`, por lo que Enter no envía | `LoginForm.js:70` |
@@ -136,8 +138,8 @@ D1, D2, D3, D4, D6 y D7 se corrigen en el frontend (algunas con un cambio acorda
 
 1. **Ajustar `sigmetum-infra` (A5, I1 a I7):** variables `VITE_*`, regla de reescritura de la SPA, CloudFront para los recursos estáticos, backend de dev en HTTPS y variables del backend (`ALLOWED_ORIGIN`, `ADMIN_*`). Es lo que bloquea publicar.
 2. **Resolver D1 con el backend:** sin un endpoint que entregue una versión como registros, "Administrar datos" no puede abrirla. No cerrar `/get-data` antes.
-3. **Correcciones propias del frontend:** D2, D3, D4, D6, D7 y M12, cada una con su test.
-4. **Tests de caracterización** de `Filter`, `FormatFileName` y `SortItemsList` (M6).
+3. **Correcciones propias del frontend:** M12 (D2, D3, D4, D6 y D7 ya están hechas), con su test.
+4. **Tests de caracterización** de `Filter` y `SortItemsList` (M6).
 5. **Limpiar código muerto** (M8, M9, M10): `UploadButton`, `ImageCarrousel`, `TokenExpiration`, el `console.log` de `Filter` y el favicon del bucket antiguo.
 6. **Añadir ESLint** con las reglas de React y de hooks, ya que Vite no lo incluye.
 7. **Usar `services/api.js` en `FileUpload`** (M2). Requiere que el error del servicio conserve `data` para leer `emptyFields` y `draftKey`.

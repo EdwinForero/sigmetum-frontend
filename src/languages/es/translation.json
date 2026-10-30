@@ -121,7 +121,8 @@
     "passwordShowButton": "Mostrar",
     "passwordHideButton": "Ocultar",
     "logInButton": "Iniciar sesión",
-    "unauthorizedLabel": "Verifica el usuario y/o contraeña"
+    "unauthorizedLabel": "Verifica el usuario y/o contraeña",
+    "tooManyAttemptsLabel": "Demasiados intentos. Inténtalo de nuevo en 15 minutos."
   },
   "uploadFiles": {
     "title" : "Cargar archivos",
@@ -152,6 +153,10 @@
     "errorDeleteMessage": "Error al eliminar datos. Inténtalo de nuevo.",
     "errorUpdateMessage": "Error al actualizar los datos. Inténtalo de nuevo.",
     "errorEmailMessage": "Error al enviar el correo. Inténtalo de nuevo.",
+    "errorEmailRateLimit": "Has enviado demasiados mensajes. Inténtalo de nuevo en 15 minutos.",
+    "errorEmailInvalid": "Revisa los datos del formulario.",
+    "errorDraftNotFound": "El borrador ya no existe. Vuelve a subir el archivo.",
+    "adviceInvalidImageTitle": "El título no puede contener / \\ .. , : & # ? % ni comillas.",
     "adviceEmptyValues": "No se pueden introducir valores vacíos.",
     "adviceDuplicatedTerm": "No se pueden introducir términos duplicados.",
     "adviceNoImageData": "Asegúrese de seleccionar una imagen e introducir un título.",

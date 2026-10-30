@@ -8,7 +8,7 @@ const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showLoginError, setLoginError] = useState(false);
+  const [loginErrorKey, setLoginErrorKey] = useState(null);
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -17,8 +17,8 @@ const LoginForm = () => {
       const data = await api.post('/log', { username, password });
       localStorage.setItem('token', data.token);
       navigate('/cargar-archivos');
-    } catch {
-      setLoginError(true);
+    } catch (error) {
+      setLoginErrorKey(error.status === 429 ? 'login.tooManyAttemptsLabel' : 'login.unauthorizedLabel');
     }
   };
 
@@ -61,9 +61,9 @@ const LoginForm = () => {
             </button>
           </div>
         </div>
-        {showLoginError && (
+        {loginErrorKey && (
           <div className="flex justify-center px-4 mb-4">
-            <span className="text-[#15B659] px-2">{t('login.unauthorizedLabel')}</span>
+            <span className="text-[#15B659] px-2">{t(loginErrorKey)}</span>
           </div>
         )}
       </form>

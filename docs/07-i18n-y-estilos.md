@@ -22,11 +22,11 @@
 | `aboutUs` | 8 | Sobre nosotros |
 | `filter` | 3 | Textos del filtro |
 | `attributes` | 11 | **Nombres visibles de las columnas de datos.** La clave es el nombre exacto de la columna en el Excel (`"Provincia"`, `"Sector Biogeográfico"`...) |
-| `login` | 9 | Formulario de acceso |
+| `login` | 10 | Formulario de acceso |
 | `uploadFiles` | 3 | Carga de archivos |
 | `dataManagement` | 11 | Administrar datos |
 | `contentManagement` | 11 | Administrar contenido |
-| `dialogAdvice` | 31 | Todos los mensajes de éxito, error y aviso; `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
+| `dialogAdvice` | 35 | Todos los mensajes de éxito, error y aviso (incluye `errorEmailRateLimit`, `errorEmailInvalid`, `errorDraftNotFound` y `adviceInvalidImageTitle`); `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
 | `cookies` | 28 | Política, banner y modal (con etiquetas `<a>` y `<strong>` para `<Trans>`) |
 | `tokenExpiration`, `notFound`, `pagination`, `language`, `ee` | 1-2 | Varios |
 

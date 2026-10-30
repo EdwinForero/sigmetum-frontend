@@ -30,6 +30,18 @@ describe('traducciones', () => {
     expect(mismatched).toEqual([]);
   });
 
+  it('incluye las claves de los errores 401, 429, 400 y 404 del backend', () => {
+    const keys = [
+      'login.tooManyAttemptsLabel',
+      'dialogAdvice.errorEmailRateLimit',
+      'dialogAdvice.errorEmailInvalid',
+      'dialogAdvice.errorDraftNotFound',
+      'dialogAdvice.adviceInvalidImageTitle',
+    ];
+
+    expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
+  });
+
   it('ninguna traducción está vacía', () => {
     const empty = [...flatten(es), ...flatten(en)].filter(([, value]) => String(value).trim() === '');
 

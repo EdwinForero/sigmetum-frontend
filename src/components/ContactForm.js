@@ -20,8 +20,14 @@ const ContactForm = ({ onLoad }) => {
     try {
       await api.post('/send-email', { username, email, subject, message });
       showDialog(t('dialogAdvice.successTitle'), t('dialogAdvice.successEmailMessage'));
-    } catch {
-      showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorEmailMessage'));
+    } catch (error) {
+      const messageKey =
+        error.status === 429
+          ? 'dialogAdvice.errorEmailRateLimit'
+          : error.status === 400
+            ? 'dialogAdvice.errorEmailInvalid'
+            : 'dialogAdvice.errorEmailMessage';
+      showDialog(t('dialogAdvice.errorTitle'), t(messageKey));
     } finally {
       onLoad(false);
     }
@@ -37,6 +43,7 @@ const ContactForm = ({ onLoad }) => {
           <input
             type="text"
             placeholder={t('home.contactForm.namePlaceholder')}
+            maxLength={100}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
@@ -50,6 +57,7 @@ const ContactForm = ({ onLoad }) => {
           <input
             type="email"
             placeholder={t('home.contactForm.emailPlaceholder')}
+            maxLength={254}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
@@ -63,6 +71,7 @@ const ContactForm = ({ onLoad }) => {
           <input
             type="text"
             placeholder={t('home.contactForm.subjectPlaceholder')}
+            maxLength={150}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
@@ -75,6 +84,7 @@ const ContactForm = ({ onLoad }) => {
           </label>
           <textarea
             placeholder={t('home.contactForm.messagePlaceholder')}
+            maxLength={2000}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             className="form-input w-full h-24 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"

@@ -1,16 +1,7 @@
 export const FormatFileName = (fileName) => {
-    const nameMatch = fileName.match(/^([A-Za-záéíóúÁÉÍÓÚüÜñÑ\s]+)_/);
-    const name = nameMatch ? nameMatch[1] : '';
+    const match = fileName.match(/(\d{4})-(\d{2})-(\d{2})_v(\d+)\.xlsx$/);
+    if (!match) return fileName;
 
-    const versionMatch = fileName.match(/_V(\d+)_/);
-    const version = versionMatch ? `V${parseInt(versionMatch[1])}` : '';
-
-    const dateMatch = fileName.match(/_(\d{2})_(\d{2})_(\d{4})\.json/);
-    if (dateMatch) {
-        const [_, day, month, year] = dateMatch;
-        const formattedDate = `${day}/${month}/${year}`;
-        return `${name} ${version} (${formattedDate})`;
-    }
-    
-    return fileName;
+    const [, year, month, day, version] = match;
+    return `${day}/${month}/${year} · V${parseInt(version, 10)}`;
 }
