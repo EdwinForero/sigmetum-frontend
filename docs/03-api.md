@@ -26,12 +26,13 @@ El backend responde siempre con este formato:
 | `type` | `'network'` o `'http'` |
 | `status` | Código HTTP (solo en errores `http`) |
 | `serverMessage` | `json.error` |
+| `data` | `json.data`, solo si la respuesta de error lo trae (en el `400` de `/upload` con campos vacíos lleva `emptyFields` y `draftKey`). No se conserva en el `401` |
 
 Si el servidor devuelve algo que no es JSON (por ejemplo, una página 502 de un proxy), `response.json()` lanza un `SyntaxError` sin `type`. Los componentes lo tratan como un error genérico. La excepción es un `401` en un método `*Auth` (ver más abajo): se comprueba el estado antes de leer el cuerpo, así que incluso con cuerpo no JSON se lanza un error con `status: 401`.
 
 ### Ante un 401
 
-Si el método envía token (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) y la respuesta es `401`, `api.js` borra `localStorage['token']`, ejecuta `window.location.assign('/login')` y lanza el error igualmente. `get` y `post` (incluido `POST /log`, cuyo `401` es "credenciales incorrectas") no borran ni redirigen. `FileUpload` usa `fetch` propio y **no** redirige ante `401`.
+Si el método envía token (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) y la respuesta es `401`, `api.js` borra `localStorage['token']`, ejecuta `window.location.assign('/login')` y lanza el error igualmente. `get` y `post` (incluido `POST /log`, cuyo `401` es "credenciales incorrectas") no borran ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que un `401` en `/upload` o en `/upload/confirm` también redirige a `/login`.
 
 ## Métodos del cliente
 
@@ -66,8 +67,8 @@ Rutas verificadas contra `sigmetum-backend/routes/*.js`.
 | `GET /list-files` | No | — | `{ [provincia]: [{ key, name }] }`: versiones de Excel por provincia | `FileDropdown.fetchFiles` |
 | `GET /get-data/:path` | No | `path` = `key` de la versión | `Array<Registro>` | `FileDropdown.handleVersionSelect`. **Con el backend actual no funciona para versiones**: ver [integración con el backend](integracion/para-backend.md#6-discrepancias-verificadas-hoy) (D1) |
 | `GET /get-merged-data` | No | — | `Array<Registro>` de todas las provincias activas | `App.fetchData` |
-| `POST /upload` | Sí | `multipart`, campo `file` | Éxito: `{ message, key }` (el frontend solo lee el estado). Con campos vacíos: **400** con `data: { emptyFields: [{ rowIndex, ... }], draftKey }` (el frontend no lee `processedData`) | `FileUpload.handleSubmit` (con `fetch` directo) |
-| `POST /upload/confirm` | Sí | `{ confirmed: boolean, draftKey }` | Mensaje | `FileUpload.handleSubmit` (con `fetch` directo) |
+| `POST /upload` | Sí | `multipart`, campo `file` | Éxito: `{ message, key }` (el frontend solo lee el estado). Con campos vacíos: **400** con `data: { emptyFields: [{ rowIndex, ... }], draftKey }` (el frontend no lee `processedData`) | `FileUpload.handleSubmit` (`postFormAuth`) |
+| `POST /upload/confirm` | Sí | `{ confirmed: boolean, draftKey }` | Mensaje | `FileUpload.handleSubmit` (`postAuth`) |
 | `POST /update-file` | Sí | `{ fileName }` (la `key` de la versión) | Mensaje. Activa esa versión como vigente | `DataManagement.handleFileUpdate` |
 | `POST /delete-file` | Sí | `{ fileName }` | Mensaje | `DataManagement.handleFileDelete` |
 

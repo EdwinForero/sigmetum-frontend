@@ -22,7 +22,7 @@ Qué hace el frontend según el estado:
 
 | Estado | Dónde | Comportamiento |
 |---|---|---|
-| `401` | Métodos `*Auth` de `api.js` (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) | Borra `localStorage['token']`, ejecuta `window.location.assign('/login')` y lanza el error igualmente (también con cuerpo no JSON). `api.get` y `api.post` (incluido `POST /log`) **no** borran ni redirigen. `FileUpload` (con `fetch` propio) **no** redirige ante `401` |
+| `401` | Métodos `*Auth` de `api.js` (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) | Borra `localStorage['token']`, ejecuta `window.location.assign('/login')` y lanza el error igualmente (también con cuerpo no JSON). `api.get` y `api.post` (incluido `POST /log`) **no** borran ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que un `401` en `/upload` o en `/upload/confirm` (confirmar o cancelar) también redirige |
 | `429` | `POST /log` (`LoginForm`) y `POST /send-email` (`ContactForm`) | Mensaje propio: "demasiados intentos" (login) y "demasiados mensajes" (contacto), ambos con "inténtalo en 15 minutos" |
 | `400` | `POST /send-email` (`ContactForm`) | "Revisa los datos del formulario". En `POST /upload` con `data.emptyFields` y `data.draftKey`, abre el diálogo de campos vacíos (sin cambios); el `draftKey` se reenvía sin interpretarlo |
 | `404` | `POST /upload/confirm` (`FileUpload`), al confirmar o al cancelar | Se interpreta **solo por el estado** (no se lee el texto `Draft not found`): "El borrador ya no existe. Vuelve a subir el archivo." Un `404` con otro significado en esa ruta se mostraría igual **(por confirmar con el backend)** |
@@ -48,8 +48,8 @@ Solo aparecen los campos que el frontend **lee**. Lo demás de la respuesta se i
 | `GET /get-merged-data` | — | `data`: array de registros | `App`, al entrar en `/explorar` |
 | `GET /list-files` | — | `data`: `{ [provincia]: [{ key, name }] }` | `FileDropdown` |
 | `GET /get-data/<key>` | — | `data`: array de registros | `FileDropdown`, al elegir una versión. **Ver discrepancia D1** |
-| `POST /upload` | `multipart`, campo `file` (el selector solo acepta `.xlsx`) | Con `400`: `data.emptyFields[].rowIndex` y `data.draftKey` (opaco: solo se reenvía). Con `200`: solo el estado. **No lee `processedData`** | `FileUpload` |
-| `POST /upload/confirm` | `{ confirmed, draftKey }` | Solo el estado. Con `404` (confirmar o cancelar): aviso "el borrador ya no existe" | `FileUpload` |
+| `POST /upload` | `multipart`, campo `file` (el selector solo acepta `.xlsx`) | Con `400`: `data.emptyFields[].rowIndex` y `data.draftKey` (opaco: solo se reenvía). Con `200`: solo el estado, pero `api.js` exige `success: true` (el backend lo devuelve en `routes/data.js`). **No lee `processedData`** | `FileUpload` (`api.postFormAuth`) |
+| `POST /upload/confirm` | `{ confirmed, draftKey }` | Solo el estado (con `success: true`, como arriba). Con `404` (confirmar o cancelar): aviso "el borrador ya no existe" | `FileUpload` (`api.postAuth`) |
 | `POST /update-file` | `{ fileName }` (la `key` de la versión) | Solo el estado | `DataManagement` |
 | `POST /delete-file` | `{ fileName }` (la `key` de la versión) | Solo el estado | `DataManagement` |
 
@@ -87,7 +87,7 @@ Las columnas del Excel se leen **por posición** (`fixedColumnOrder` en `convert
 - El token se guarda en `localStorage['token']`. No hay cierre de sesión.
 - El frontend **decodifica el JWT en el navegador y lee el campo `exp`** (segundos Unix). Si se cambia el formato de caducidad o se deja de incluir `exp`, el frontend tratará todos los tokens como caducados.
 - `ProtectedRoute` llama a `GET /auth` al entrar en cada ruta privada. Cualquier fallo (401, red, 500) se trata como "sin sesión" y redirige a `/login`.
-- Si el token caduca **durante** una sesión, la primera llamada protegida que devuelva `401` (métodos `*Auth` de `api.js`) borra el token y redirige a `/login`, sin diálogo previo ni conservar la ruta de origen. El `401` de `POST /log` y el de rutas que no envían token (`ContactForm`, `list-images`, `get-image`, `list-terms`) **no** se usan como señal de sesión caducada. `FileUpload` no redirige ante `401` (su `fetch` propio lee el token fuera de `api.js`; mostraría el error de subida).
+- Si el token caduca **durante** una sesión, la primera llamada protegida que devuelva `401` (métodos `*Auth` de `api.js`) borra el token y redirige a `/login`, sin diálogo previo ni conservar la ruta de origen. El `401` de `POST /log` y el de rutas que no envían token (`ContactForm`, `list-images`, `get-image`, `list-terms`) **no** se usan como señal de sesión caducada. `FileUpload` también redirige ante un `401` (usa `api.js`, sin diálogo de error).
 - Un token de `JWT_EXPIRATION` muy largo es cómodo pero deja abierta la sesión. El frontend no impone ningún límite.
 
 ## 5. CORS

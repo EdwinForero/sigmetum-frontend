@@ -31,7 +31,7 @@ const check = (name, problems, notes = []) => results.push({ name, problems, not
 const KNOWN_DEBT = {
   localStorage: {
     allowed: ['src/services/api.js', 'src/components/LoginForm.js', 'src/components/ProtectedRoute.js'],
-    debt: { 'src/components/FileUpload.js': 'M2 (usa fetch directo y lee el token)' },
+    debt: {},
   },
   insecureUrl: {
     allowed: ['src/config/env.js'],

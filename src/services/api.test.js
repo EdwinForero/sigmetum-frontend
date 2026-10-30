@@ -10,6 +10,53 @@ const nonJsonResponse = (status) => ({
   },
 });
 
+describe('api conserva data del error', () => {
+  let fetchMock;
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    localStorage.setItem('token', 'abc');
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  it('un 400 con data la expone en error.data sin alterar status, type ni serverMessage', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(400, {
+        success: false,
+        error: 'Some rows have empty fields.',
+        data: { emptyFields: [{ rowIndex: 3 }], draftKey: 'k' },
+      })
+    );
+
+    await expect(api.postFormAuth('/upload', new FormData())).rejects.toMatchObject({
+      type: 'http',
+      status: 400,
+      serverMessage: 'Some rows have empty fields.',
+      data: { emptyFields: [{ rowIndex: 3 }], draftKey: 'k' },
+    });
+  });
+
+  it('un 400 sin data no añade la propiedad data', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(400, { success: false, error: 'Bad' }));
+
+    const error = await api.postFormAuth('/upload', new FormData()).catch((e) => e);
+
+    expect(error).toMatchObject({ type: 'http', status: 400, serverMessage: 'Bad' });
+    expect(error).not.toHaveProperty('data');
+  });
+
+  it('un 200 con cuerpo no JSON lanza SyntaxError', async () => {
+    fetchMock.mockResolvedValue(nonJsonResponse(200));
+
+    await expect(api.getAuth('/auth')).rejects.toBeInstanceOf(SyntaxError);
+  });
+});
+
 describe('api ante un 401', () => {
   let fetchMock;
   let assign;

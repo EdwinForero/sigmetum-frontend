@@ -32,6 +32,7 @@ async function request(path, options = {}, { authenticated = false } = {}) {
     error.type = 'http';
     error.status = response.status;
     error.serverMessage = json.error;
+    if (json.data !== undefined) error.data = json.data;
     throw error;
   }
 

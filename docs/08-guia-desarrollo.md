@@ -103,8 +103,8 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 | `utilities/CSVfunctions.test.js` | `downloadXLSX` no modifica los datos y exporta los arrays como texto |
 | `utilities/highlightTerms.test.js` | Términos no latinos en redonda, escape de caracteres especiales y punto literal |
 | `components/TextInput.test.js`, `FilterSearchBar.test.js` | Los campos son controlados y se vacían cuando el padre los vacía |
-| `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false`; `accept` solo `.xlsx`; `404` al confirmar y al cancelar; fallo al cancelar |
-| `services/api.test.js` | `401` en métodos `*Auth` borra el token y redirige; `api.get` y `api.post` no; `401` con cuerpo no JSON |
+| `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false`; `accept` solo `.xlsx`; `404` al confirmar y al cancelar; fallo al cancelar; cabecera `Authorization` en `/upload` y en `/upload/confirm`; `401` en `/upload`, al confirmar y al cancelar (borra el token y redirige); `400` sin `emptyFields`; confirmar con `500` vacía la cola. Simula `fetch` y también `location` y el token |
+| `services/api.test.js` | `401` en métodos `*Auth` borra el token y redirige; `api.get` y `api.post` no; `401` con cuerpo no JSON; `error.data` en errores con `data`, ausente si no hay; `200` con cuerpo no JSON lanza `SyntaxError` |
 | `components/LoginForm.test.js`, `ContactForm.test.js` | Mensajes por `429`, `401`, `400` y `500`; el error del login se anuncia como `role="alert"` y no hay alerta antes de fallar; `maxLength` del contacto |
 | `components/ImageGalleryManager.test.js` | Un caso por carácter prohibido del título sin llamar a la API, y un título válido que sí sube |
 | `components/ImageComponent.test.js`, `ImageCarrousel.test.js` | `imageKey` con `encodeURIComponent`; sin clave no se llama a la API |

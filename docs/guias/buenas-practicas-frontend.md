@@ -47,7 +47,7 @@ La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta l
 
 | Regla | Por qué | Se comprueba |
 |---|---|---|
-| Toda llamada a la API pasa por `src/services/api.js`. Nada de `fetch` directo | `FileUpload` duplica cabeceras y la gestión del envoltorio (M2) | Revisión |
+| Toda llamada a la API pasa por `src/services/api.js`. Nada de `fetch` directo | Evita duplicar cabeceras y la gestión del envoltorio (`FileUpload` ya la cumple, M2 resuelta) | Revisión |
 | Un endpoint nuevo añade su método en `api.js` si hace falta, y se documenta en [03](../03-api.md) y en [integracion/para-backend.md](../integracion/para-backend.md) | El backend necesita saber qué campos lee el frontend | `docs:check` (endpoints en 03) |
 | Muestra mensajes **propios y traducidos**, no el texto `error` del servidor | El texto del servidor está en inglés y puede revelar detalles internos | Revisión |
 | Las respuestas de la API no se guardan en `localStorage` ni `sessionStorage` | Es almacenamiento accesible por cualquier script de la página | `npm run quality` |
@@ -153,7 +153,7 @@ No los repitas al escribir código nuevo:
 |---|---|---|
 | Comparar con `JSON.stringify` | `App.js` | M7 |
 | Índice como `key` | `Explore`, `Table` | |
-| `fetch` directo y token leído en el componente | `FileUpload` | M2 |
+| `fetch` directo y token leído en el componente | Corregido en `FileUpload` | M2 |
 | Regex construida con texto sin escapar | Corregido en `highlightTerms` | A3 |
 | Campo no controlado | Corregido en `TextInput` | A4 |
 | `console.log` con datos | `Filter.js` | M9 |
