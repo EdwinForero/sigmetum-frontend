@@ -2,6 +2,8 @@
 
 Análisis realizado el 30/09/2026 sobre la rama `feature/sigmetum_front_v2`, actualizado tras la migración a Vite y la corrección de los hallazgos A1 a A4.
 
+Última actualización: 30/10/2026
+
 ## Estado de git
 
 | Aspecto | Valor |
@@ -31,11 +33,17 @@ El contrato con el backend coincide: todas las rutas que llama el frontend exist
 | Componentes | 34 |
 | Archivos de test | 6 |
 | Claves de traducción (por idioma) | 197 |
-| Tests | 15 en 6 archivos (Vitest): utilidades, campos de texto, flujo de subida y traducciones |
+| Tests | 15 en 6 archivos (Vitest): utilidades, campos de texto, flujo de subida y traducciones. Además, 151 del plugin `ciclo-agentico` (`node:test`, `npm run agentes:test`) |
 | Linter | ESLint 9 (`npm run lint`): 0 errores y un tope de avisos que no puede crecer. `npm run quality` añade seguridad |
 | Tipado | Ninguno (JavaScript sin PropTypes ni TypeScript) |
 
 Estas son las **únicas** cifras del repositorio de documentación: el resto de documentos no deben repetirlas. `npm run docs:check` verifica las cuatro primeras filas con el código, y `npm run docs:check -- --metrics` las imprime para actualizarlas. El número de tests sale de `npm test`. De los 34 componentes, 2 no se usan (`UploadButton`, `ImageCarrousel`).
+
+## Historial de iteraciones
+
+| Fecha | Cambio |
+|---|---|
+| 30/10/2026 | Se lleva al frontend el flujo agéntico `ciclo-agentico` desde `sigmetum-backend` (solo el núcleo, perfil `base`): `plugins/ciclo-agentico/` sin cambios, marketplace local `locales-front`, `.claude/flujo.json`, scripts `docs:gate`, `agentes:test` y `agentes:bootstrap`, permisos `ask` de git y `docs/specs/`. Ajustes de configuración que exige: `test.include` en `vite.config.js` (Vitest no debe recoger los tests de `node:test` del plugin) y un bloque de ESLint para `plugins/**/*.mjs` (el tope de avisos no cambia). Después se configuran los plugins del repositorio: `superpowers` (de `superpowers-marketplace`), `i-have-adhd` (`estilo` de `flujo.json`) y `ui-ux-pro-max` en `.claude/settings.json`, y la taste skill pasa de `.claude/skills/` al plugin local `dominio-frontend` (perfil `frontend`), sin dejar skills sueltas. `awesome-design-md` no es un plugin: se adapta el `DESIGN.md` de Mintlify como estructura en [DESIGN.md](../DESIGN.md) con los valores del repositorio (colores, fuentes y radios medidos en el código y contraste recalculado; no se ha comprobado visualmente con la web en ejecución). Pendiente de comprobar en un equipo: la instalación del plugin y el prefijo de sus comandos **(por confirmar)**. La CI ejecuta `agentes:test` (en un paso con Node 22, por el glob de `node --test`; no verificado en GitHub hasta la primera PR **(por confirmar)**) y no ejecuta `docs:gate`, que depende de `git status` y de la fecha de hoy |
 
 ## Valoración general
 

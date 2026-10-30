@@ -42,6 +42,9 @@ npm run dev                 # http://localhost:3000
 | `npm run lint` | ESLint. Falla si hay errores o si los avisos superan el tope fijado en el script (`--max-warnings`). Al corregir avisos, se baja el tope |
 | `npm run quality` | Puerta de calidad y seguridad: patrones prohibidos, secretos, `npm audit` de producción y ESLint |
 | `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [mantenimiento.md](guias/mantenimiento.md)) |
+| `npm run docs:gate` | Cierre documental del ciclo (plugin `ciclo-agentico`): comprueba, contra `.claude/flujo.json` y `git status`, que se tocaron los documentos de cada área, que `docs/09` tiene la fecha de hoy y que hay aviso para PR si se tocó un área de contrato. Se ejecuta antes del commit; no está en la CI |
+| `npm run agentes:test` | Tests (`node:test`) del plugin `ciclo-agentico` en `plugins/`. Vitest no los recoge (`test.include` en `vite.config.js`) |
+| `npm run agentes:bootstrap` | Comprueba e instala, pidiendo confirmación, las dependencias del plugin y los plugins del marketplace local (`-- --dry-run` solo informa) |
 
 ## Despliegue
 
@@ -113,7 +116,7 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 
 | Pieza | Qué hace |
 |---|---|
-| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Con Node 20 ejecuta `npm ci`, `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Con Node 20 ejecuta `npm ci`, `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`, y después, con Node 22 (el glob de `node --test` exige Node 21 o posterior), `npm run agentes:test`. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
 | [.github/pull_request_template.md](../.github/pull_request_template.md) | Plantilla de la PR con la definición de terminado, las guías que aplican y si afecta al backend o a la infraestructura |
 | [.github/dependabot.yml](../.github/dependabot.yml) | Propone cada lunes las actualizaciones de `npm` y de las acciones de GitHub, agrupando las menores. Ignora las versiones mayores de `jsdom` (exige Node 22) y `eslint` (los plugins aún no lo admiten) |
 | [.gitattributes](../.gitattributes) | Fija los finales de línea en LF en todos los sistemas |
@@ -131,11 +134,16 @@ El repositorio incluye `.claude/settings.json` con plugins compartidos, que se a
 
 | Plugin / skill | Para qué |
 |---|---|
-| `superpowers` | Flujo de trabajo: planificación, TDD, depuración sistemática y verificación |
+| `superpowers` (de `superpowers-marketplace`) | Flujo de trabajo: planificación, TDD, depuración sistemática y verificación |
+| `i-have-adhd` | Estilo de salida del ciclo agéntico (`estilo` de `.claude/flujo.json`) |
 | `frontend-design`, `ui-ux-pro-max` | Diseño de interfaz, accesibilidad y paletas |
 | `playwright` | Probar la app en un navegador real |
 | `understand-anything` | Mapa del código y guía de incorporación al proyecto |
 | `humanizer` | Revisar textos institucionales para que suenen naturales (no usar sobre contenido científico) |
-| `design-taste-frontend` (skill local en `.claude/skills/`) | Guía de diseño para landing pages. Útil solo para la portada |
+| `design-taste-frontend` (skill del plugin local `dominio-frontend`, ver [plugins/README.md](../plugins/README.md)) | Guía de diseño para landing pages. Útil solo para la portada. Ya no hay skills sueltas en `.claude/skills/` |
+
+### Ciclo agéntico (`/ciclo`)
+
+Toda feature o fix puede pasar por `/ciclo <tarea>`, del plugin [ciclo-agentico](../plugins/ciclo-agentico/README.md): requisitos, arquitectura, desarrollo y verificación con documentación, con puerta humana entre fases y sin commits del agente. La configuración está en `.claude/flujo.json`; los traspasos entre roles (specs, planes y avisos para PR) se guardan en `docs/specs/`. Cómo se instala y se activa el marketplace local: [plugins/README.md](../plugins/README.md#cómo-se-activan). En un equipo nuevo: `npm install`, `npm run agentes:bootstrap`, reiniciar la sesión de Claude Code y lanzar `/ciclo-init` (puede que haga falta el prefijo `/ciclo-agentico:ciclo-init` **(por confirmar)**).
 
 El archivo [CLAUDE.md](../CLAUDE.md) de la raíz resume las reglas del proyecto para Claude Code y le indica qué [guía](README.md#guías-de-trabajo) leer según la tarea: buenas prácticas, seguridad, accesibilidad y [mantenimiento](guias/mantenimiento.md) tras cada feature o fix.

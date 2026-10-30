@@ -18,7 +18,7 @@ Un cambio está terminado cuando pasan los cinco comandos y la documentación es
 | `npm run quality` | Patrones prohibidos, secretos, `npm audit` de producción y ESLint |
 | `npm run docs:check` | Que la documentación sigue al código |
 
-La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta los mismos cinco en cada PR y cada lunes (para detectar vulnerabilidades nuevas). Ver [08](../08-guia-desarrollo.md#integración-continua-y-dependencias).
+La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta los mismos cinco en cada PR y cada lunes (para detectar vulnerabilidades nuevas), y además `npm run agentes:test` (tests del plugin del ciclo agéntico). Ver [08](../08-guia-desarrollo.md#integración-continua-y-dependencias).
 
 ## 2. Estructura y nombres
 
@@ -143,6 +143,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 - **Cuando corrijas avisos, baja el tope** al nuevo número. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
 - No uses `// eslint-disable` sin un comentario que explique el motivo.
 - Una regla de ESLint nueva o relajada se anota en [02](../02-tecnologias.md) y en este documento.
+- Los `.mjs` de `plugins/` (scripts y tests de `node:test` del ciclo agéntico) se lintan con las reglas recomendadas de ESLint y los globales de Node; no están sujetos a las reglas de React ni de accesibilidad de `src/`. Esa excepción no relaja nada de `src/`.
 
 ## 15. Anti-patrones que ya están en el código
 

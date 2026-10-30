@@ -39,6 +39,8 @@
 
 ## Estilos
 
+El sistema de diseño para quien crea interfaz (paleta con su contraste, tipografía, formas, componentes, qué hacer y qué no) está en [DESIGN.md](../DESIGN.md), en la raíz. Este documento describe cómo está hecho hoy; si cambias la paleta o las fuentes, actualiza los dos.
+
 ### Enfoque
 
 Tailwind CSS con clases utilitarias directamente en el JSX. No hay componentes de estilo compartidos salvo los botones. `App.css` es residual y `styled-components` solo se usa en `Switch`.
