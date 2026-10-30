@@ -156,7 +156,7 @@ No los repitas al escribir código nuevo:
 | `fetch` directo y token leído en el componente | Corregido en `FileUpload` | M2 |
 | Regex construida con texto sin escapar | Corregido en `highlightTerms` | A3 |
 | Campo no controlado | Corregido en `TextInput` | A4 |
-| `console.log` con datos | `Filter.js` | M9 |
+| `console.log` con datos | Corregido en `Filter.js` | M9 |
 | Código muerto y bloques comentados | `UploadButton`, `ImageCarrousel`, `Explore` | M8 |
 | `import { React, useState } from 'react'` (`React` no es una exportación con nombre) | Varias páginas | B6 |
 | Nombre de archivo que no sigue la convención | `CSVfunctions.js`, `UseAtBottom.js` | |

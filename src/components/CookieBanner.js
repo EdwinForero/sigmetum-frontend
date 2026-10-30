@@ -4,6 +4,13 @@ import ButtonPrincipal from "./ButtonPrincipal";
 import ButtonAlternative from "./ButtonAlternative";
 import Switch from "./Switch";
 
+const COOKIE_MAX_AGE = 31536000;
+
+const setCookie = (name, value) => {
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${name}=${value}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
+};
+
 const CookieBanner = () => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
@@ -26,8 +33,8 @@ const CookieBanner = () => {
   }, []);
 
   const handleAccept = () => {
-    document.cookie = "cookieConsent=accepted; path=/; max-age=31536000";
-    document.cookie = `cookiePreferences=${JSON.stringify(cookiePreferences)}; path=/; max-age=31536000`;
+    setCookie("cookieConsent", "accepted");
+    setCookie("cookiePreferences", JSON.stringify(cookiePreferences));
     setIsVisible(false);
   };
 
@@ -41,8 +48,8 @@ const CookieBanner = () => {
       security: true,
     };
 
-    document.cookie = "cookieConsent=accepted; path=/; max-age=31536000";
-    document.cookie = `cookiePreferences=${JSON.stringify(newPreferences)}; path=/; max-age=31536000`;
+    setCookie("cookieConsent", "accepted");
+    setCookie("cookiePreferences", JSON.stringify(newPreferences));
 
     setIsVisible(false);
   };

@@ -100,7 +100,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 - **Por qué:** la web es de una universidad y trata datos de contacto; le aplican el RGPD y la LSSI (**por confirmar con el servicio jurídico**).
 - **Reglas:**
   - No se añade analítica, publicidad ni recursos de terceros que rastreen **sin** pasar antes por el consentimiento.
-  - Las cookies que cree el frontend llevan `SameSite` y, en HTTPS, `Secure` (M15).
+  - Las cookies que cree el frontend llevan `SameSite` y, en HTTPS, `Secure`; `CookieBanner` lo cumple desde M15 mediante su helper `setCookie`.
   - El banner de cookies guarda preferencias, pero **nada las lee** (M11): si se incorpora un servicio opcional, debe comprobar el consentimiento antes de cargarse.
   - El formulario de contacto, que recoge nombre y correo, debería enlazar a la información sobre el tratamiento de datos. **Hoy no existe ninguna política de privacidad ni aviso (verificado en las rutas y en las traducciones, que solo tienen la política de cookies)** (M17). Si es obligatoria, lo decide el servicio jurídico de la universidad.
 - **Estado:** parcial.
@@ -128,7 +128,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 | `npm audit` de producción (moderada) | 1: `react-router`, arreglo solo en v7, aceptada (M14) |
 | Token de sesión | En `localStorage` (M1); solo lo tocan `api.js`, `LoginForm` y `ProtectedRoute` |
 | Cierre de sesión y gestión del `401` | La gestión del `401` existe (D6, resuelta en `api.js`); el botón de cerrar sesión no (M1) |
-| Cookies propias | Sin `SameSite` ni `Secure` (M15) |
+| Cookies propias | Con `SameSite=Lax` y, en HTTPS, `Secure` (M15 resuelta); el banner sigue sin efecto real (M11) |
 | Fuentes de Google cargadas antes del consentimiento | Sí (M13) |
 | Content-Security-Policy y demás cabeceras | Sin definir |
 | URLs `http://` en el código | 1 enlace externo (B14) y el valor por defecto `localhost` |

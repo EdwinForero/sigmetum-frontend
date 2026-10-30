@@ -88,7 +88,8 @@ Banner de consentimiento y modal de configuración.
 | `isVisible` | Se muestra si `document.cookie` no contiene `cookieConsent=accepted` |
 | `isModalOpen` | Modal de configuración abierto |
 | `cookiePreferences` | `{ all, advertising, advertisingTracking, functionality, personalization, security }` |
-| `handleAccept()` | Guarda `cookieConsent=accepted` y `cookiePreferences=<JSON>` durante un año |
+| `setCookie(name, value)` | Helper local, no exportado. Escribe la cookie con `path=/`, `max-age` de un año y `SameSite=Lax`, más `Secure` si `window.location.protocol` es `https:` (se lee en cada llamada). El valor no se codifica |
+| `handleAccept()` | Guarda `cookieConsent=accepted` y `cookiePreferences=<JSON>` con `setCookie` |
 | `handleAcceptAll()` | Igual, con todas las categorías a `true` |
 | `handlePreferenceChange(key)` | Alterna una categoría. `all` las alterna todas y se recalcula si todas están activas |
 | `handleModalToggle()` | Abre o cierra el modal |
