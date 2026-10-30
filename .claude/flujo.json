@@ -1,0 +1,95 @@
+{
+  "guias": [
+    "docs/guias/buenas-practicas-frontend.md",
+    "docs/guias/seguridad.md",
+    "docs/guias/accesibilidad.md",
+    "docs/guias/mantenimiento.md"
+  ],
+  "integracion": [
+    "docs/integracion/para-backend.md",
+    "docs/integracion/para-infra.md"
+  ],
+  "skillsProyecto": [
+    "plugins/dominio-frontend/skills"
+  ],
+  "marketplaceLocal": "plugins",
+  "estado": "docs/09-estado-actual-y-deuda-tecnica.md",
+  "estadoFecha": "Última actualización: (\\d{2}/\\d{2}/\\d{4})",
+  "verificacion": {
+    "test": "npm test",
+    "build": "npm run build",
+    "lint": "npm run lint",
+    "quality": "npm run quality",
+    "docs:check": "npm run docs:check",
+    "docs:gate": "npm run docs:gate",
+    "agentes:test": "npm run agentes:test"
+  },
+  "docsRegla": "docs/guias/mantenimiento.md",
+  "specsDir": "docs/specs",
+  "maxVueltas": 3,
+  "consultor": "ninguno",
+  "estilo": "i-have-adhd",
+  "perfiles": [
+    "base",
+    "frontend"
+  ],
+  "criticidad": [
+    "sesión y token (services/api.js, LoginForm, ProtectedRoute)",
+    "contrato con el backend",
+    "dependencias",
+    "CI",
+    "accesibilidad",
+    "variables de entorno"
+  ],
+  "docsObligatorios": [
+    "docs/09-estado-actual-y-deuda-tecnica.md"
+  ],
+  "docsPorArea": {
+    "src/index.js": ["docs/01-arquitectura.md"],
+    "src/App.js": ["docs/01-arquitectura.md", "docs/04-paginas.md"],
+    "src/pages/**": ["docs/01-arquitectura.md", "docs/04-paginas.md"],
+    "src/components/**": ["docs/05-componentes.md"],
+    "src/hooks/**": ["docs/06-utilidades-hooks-config.md"],
+    "src/utilities/**": ["docs/06-utilidades-hooks-config.md"],
+    "src/config/**": ["docs/06-utilidades-hooks-config.md"],
+    "src/config/assets.js": ["docs/06-utilidades-hooks-config.md", "docs/integracion/para-infra.md"],
+    "src/config/env.js": ["docs/06-utilidades-hooks-config.md", "docs/08-guia-desarrollo.md"],
+    "src/services/api.js": ["docs/03-api.md", "docs/integracion/para-backend.md"],
+    "src/languages/**": ["docs/07-i18n-y-estilos.md"],
+    "src/i18n.js": ["docs/07-i18n-y-estilos.md"],
+    "src/*.css": ["docs/07-i18n-y-estilos.md"],
+    "tailwind.config.js": ["docs/07-i18n-y-estilos.md"],
+    "src/**/*.test.js": ["docs/08-guia-desarrollo.md"],
+    "src/components/*.test.js": ["docs/08-guia-desarrollo.md"],
+    "src/utilities/*.test.js": ["docs/08-guia-desarrollo.md"],
+    "src/languages/*.test.js": ["docs/08-guia-desarrollo.md"],
+    "src/setupTests.js": ["docs/08-guia-desarrollo.md"],
+    ".env.example": [
+      "docs/06-utilidades-hooks-config.md",
+      "docs/08-guia-desarrollo.md",
+      "docs/integracion/para-infra.md"
+    ],
+    "package.json": ["docs/02-tecnologias.md", "docs/08-guia-desarrollo.md"],
+    "package-lock.json": ["docs/02-tecnologias.md"],
+    "vite.config.js": ["docs/02-tecnologias.md", "docs/08-guia-desarrollo.md"],
+    "eslint.config.js": ["docs/02-tecnologias.md", "docs/guias/buenas-practicas-frontend.md"],
+    ".github/**": ["docs/08-guia-desarrollo.md"],
+    "scripts/**": ["docs/guias/mantenimiento.md", "docs/08-guia-desarrollo.md"],
+    ".claude/**": ["docs/08-guia-desarrollo.md", "docs/README.md"],
+    "plugins/**": ["plugins/README.md", "docs/README.md"]
+  },
+  "areasContrato": [
+    "src/services/api.js",
+    "src/config/env.js",
+    "src/config/assets.js",
+    "src/components/FileUpload.js",
+    "src/components/LoginForm.js",
+    "src/components/ProtectedRoute.js",
+    "src/utilities/TokenExpiration.js",
+    ".env.example",
+    "package.json",
+    "vite.config.js",
+    ".github/**"
+  ],
+  "avisoPR": "docs/specs/*-aviso-pr.md"
+}

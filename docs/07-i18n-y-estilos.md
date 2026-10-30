@@ -10,7 +10,7 @@
 
 ### Archivos
 
-`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía.
+`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía. `src/languages/es-typos.test.js` fija el texto exacto de `login.unauthorizedLabel` en `es` (sin el typo «contraeña»), porque los tests de componentes simulan `t` y no ven el texto real.
 
 | Espacio | Claves | Contenido |
 |---|---|---|
@@ -22,11 +22,11 @@
 | `aboutUs` | 8 | Sobre nosotros |
 | `filter` | 3 | Textos del filtro |
 | `attributes` | 11 | **Nombres visibles de las columnas de datos.** La clave es el nombre exacto de la columna en el Excel (`"Provincia"`, `"Sector Biogeográfico"`...) |
-| `login` | 9 | Formulario de acceso |
+| `login` | 10 | Formulario de acceso |
 | `uploadFiles` | 3 | Carga de archivos |
 | `dataManagement` | 11 | Administrar datos |
 | `contentManagement` | 11 | Administrar contenido |
-| `dialogAdvice` | 31 | Todos los mensajes de éxito, error y aviso; `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
+| `dialogAdvice` | 35 | Todos los mensajes de éxito, error y aviso (incluye `errorEmailRateLimit`, `errorEmailInvalid`, `errorDraftNotFound` y `adviceInvalidImageTitle`); `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
 | `cookies` | 28 | Política, banner y modal (con etiquetas `<a>` y `<strong>` para `<Trans>`) |
 | `tokenExpiration`, `notFound`, `pagination`, `language`, `ee` | 1-2 | Varios |
 
@@ -38,6 +38,8 @@
 - Textos que hoy están fijos en el código y deberían pasar a traducciones: `ErrorBoundary`, nombres de `menuOptions` en `App.js`, colaboradores de `Home.js` y alertas de `UploadButton`.
 
 ## Estilos
+
+El sistema de diseño para quien crea interfaz (paleta con su contraste, tipografía, formas, componentes, qué hacer y qué no) está en [DESIGN.md](../DESIGN.md), en la raíz. Este documento describe cómo está hecho hoy; si cambias la paleta o las fuentes, actualiza los dos.
 
 ### Enfoque
 

@@ -8,6 +8,19 @@ SPA de React + Vite de SIGMETUM-A (web de investigación ambiental de una univer
 - `npm test`: tests (Vitest) · `npm run build`: compilación a `dist/`
 - `npm run lint`: ESLint (errores y tope de avisos) · `npm run quality`: seguridad (patrones, secretos, `npm audit`) y lint
 - `npm run docs:check`: comprueba que la documentación no se ha quedado atrás
+- `npm run docs:gate`: cierre documental del ciclo (documentos tocados, fecha de `docs/09` y aviso para PR); se ejecuta antes del commit
+- `npm run agentes:test`: tests (`node:test`) del plugin `ciclo-agentico`; `npm run agentes:bootstrap` comprueba e instala sus dependencias
+
+## Ciclo de desarrollo (ciclo-agentico)
+
+Las features y los fixes con agentes pasan por `/ciclo <tarea>` (plugin [ciclo-agentico](plugins/ciclo-agentico/README.md); configuración en `.claude/flujo.json`, que se valida con `/ciclo-init`; instalación y activación en [plugins/README.md](plugins/README.md)). Fases: 0 refresh de estado · 1 requisitos → puerta humana · 2 arquitectura → puerta humana · 3 desarrollo · 4 verificación y documentación (vuelve a 3 si falla, hasta `maxVueltas`) · 5 puerta humana final. Roles:
+
+- `requirements`: convierte la tarea en un borrador de spec en `docs/specs/`; no propone solución técnica.
+- `architect`: solo lee; entrega un plan por pasos contrastado con las guías y la integración, o un veto motivado.
+- `developer`: implementa el plan con el cambio mínimo (TDD: aquí hay base de tests); no edita documentos.
+- `tester-documentador`: ejecuta la verificación, pone los documentos al día y propone el mensaje de commit; no edita código.
+
+Ningún rol hace commit, push ni `git add`: el commit lo haces tú tras la puerta final. Principios de trabajo: skill [principios](plugins/ciclo-agentico/skills/principios/SKILL.md). El ciclo **no sustituye** a las guías ni a las reglas de este archivo: las aplica.
 
 ## Antes de empezar: lee la guía que corresponda a la tarea
 
@@ -17,7 +30,7 @@ Las guías están en `docs/guias/`. Léelas **antes** de escribir código, no de
 |---|---|
 | **Cualquier código** | `docs/guias/buenas-practicas-frontend.md` |
 | Sesión y token, formularios, subida de archivos, URLs y enlaces externos, HTML dinámico, dependencias, cookies o variables de entorno | `docs/guias/seguridad.md` |
-| Interfaz: colores, formularios, diálogos, navegación, imágenes, animaciones o textos | `docs/guias/accesibilidad.md` |
+| Interfaz: colores, formularios, diálogos, navegación, imágenes, animaciones o textos | `docs/guias/accesibilidad.md` y `DESIGN.md` (sistema de diseño; si chocan, manda la guía) |
 | **Al terminar** cualquier feature o fix | `docs/guias/mantenimiento.md` |
 
 Si lo que te piden **contradice una guía, avisa y pregunta antes de hacerlo**. Si la guía y el código se contradicen, dilo: no des por buena ninguna de las dos.
@@ -40,7 +53,8 @@ Si lo que te piden **contradice una guía, avisa y pregunta antes de hacerlo**. 
 3. Contrasta lo que escribas con el código; lo que no puedas comprobar, márcalo como **(por confirmar)**.
 4. Si el cambio afecta al backend o a la infraestructura, actualiza `docs/integracion/` y dilo en el resumen final.
 5. Las cifras (archivos, componentes, tests, claves) solo viven en `docs/09-estado-actual-y-deuda-tecnica.md`.
-6. La CI (`.github/workflows/ci.yml`) ejecuta esos mismos cinco comandos en cada PR, y la PR usa la plantilla de `.github/pull_request_template.md`: rellénala.
+6. Cierre documental: `docs/09-estado-actual-y-deuda-tecnica.md` con la fecha de hoy en "Última actualización" y `npm run docs:gate` en verde **antes del commit**. Si se toca `plugins/`, ejecuta también `npm run agentes:test`; si se toca un área de contrato (`areasContrato` de `.claude/flujo.json`), hace falta un aviso `docs/specs/*-aviso-pr.md` y cambiar `docs/integracion/` o escribir en el aviso `Integración: sin impacto — <motivo>`.
+7. La CI (`.github/workflows/ci.yml`) ejecuta esos mismos cinco comandos en cada PR (más `npm run agentes:test`; `docs:gate` es local), y la PR usa la plantilla de `.github/pull_request_template.md`: rellénala.
 
 ## Reglas de trabajo
 

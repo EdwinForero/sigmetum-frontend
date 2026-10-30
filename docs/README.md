@@ -29,6 +29,12 @@ Son **normativas**: dicen cómo se trabaja, no cómo es el sistema. Claude Code 
 | [guias/accesibilidad.md](guias/accesibilidad.md) | Si se toca la interfaz: colores, formularios, diálogos, navegación o animaciones |
 | [guias/mantenimiento.md](guias/mantenimiento.md) | Al terminar cualquier feature o fix: qué documentos actualizar, listas de comprobación y validación |
 
+Además, [DESIGN.md](../DESIGN.md) (en la raíz) es el sistema de diseño que leen los agentes antes de crear o cambiar interfaz: paleta con su contraste, tipografía, formas y componentes. Manda la guía de accesibilidad si chocan.
+
+## Ciclo agéntico
+
+Las features y los fixes con agentes pasan por `/ciclo <tarea>`, del plugin [ciclo-agentico](../plugins/ciclo-agentico/README.md). Su configuración está en `.claude/flujo.json`, los traspasos entre roles (specs, planes y avisos para PR) en `docs/specs/`, y cómo se instala y se activa el marketplace local en [plugins/README.md](../plugins/README.md). Resumen para el equipo: [08](08-guia-desarrollo.md#ciclo-agéntico-ciclo).
+
 ## Por dónde empezar
 
 - **Si te incorporas al proyecto:** 08 (guía) → 01 (arquitectura) → 04 (páginas).

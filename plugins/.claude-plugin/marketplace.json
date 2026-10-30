@@ -1,0 +1,21 @@
+{
+  "name": "locales-front",
+  "description": "Marketplace local del repositorio: el núcleo ciclo-agentico (perfil base) y las skills propias del frontend.",
+  "owner": {
+    "name": "EdwinForero"
+  },
+  "plugins": [
+    {
+      "name": "ciclo-agentico",
+      "source": "./ciclo-agentico",
+      "description": "Ciclo agéntico con roles y puertas de aprobación para desarrollar con agentes de forma controlada.",
+      "tags": ["perfil:base"]
+    },
+    {
+      "name": "dominio-frontend",
+      "source": "./dominio-frontend",
+      "description": "Skills propias del frontend: guía de diseño para portadas y rediseños (taste skill).",
+      "tags": ["perfil:frontend"]
+    }
+  ]
+}

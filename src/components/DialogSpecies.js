@@ -6,7 +6,10 @@ import { SortItemsList } from '../utilities/SortItemsList.js';
 import { highlightTerms } from '../utilities/highlightTerms.js';
 import { useTranslation } from 'react-i18next';
 
-const Dialog = ({ 
+const contieneEspecie = (valor, nombre) =>
+  Array.isArray(valor) ? valor.includes(nombre) : valor === nombre;
+
+const Dialog = ({
   isOpen, 
   onClose, 
   data, 
@@ -20,9 +23,8 @@ const Dialog = ({
   
   const formattedQuery = encodeURIComponent(species["Especies Características"]);
 
-  const filteredSpecies = data.filter(
-    (item) =>
-      item["Especies Características"]?.includes(species["Especies Características"])
+  const filteredSpecies = data.filter((item) =>
+    contieneEspecie(item["Especies Características"], species["Especies Características"])
   );
 
   const textParts = highlightTerms(species["Especies Características"], noItalicTerms);

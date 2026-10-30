@@ -9,6 +9,8 @@ export default defineConfig({
   server: { port: 3000 },
   test: {
     environment: 'jsdom',
+    // Solo los tests de src/: los de plugins/ son de node:test (npm run agentes:test).
+    include: ['src/**/*.test.js'],
     globals: true,
     setupFiles: './src/setupTests.js',
     passWithNoTests: true,

@@ -42,7 +42,7 @@ Notas:
 | `postcss.config.js` | Tailwind y Autoprefixer |
 | `tailwind.config.js` | Rutas de contenido (`index.html` y `src/`) y las fuentes `primary` (Amaranth) y `secondary` (Sen) |
 | `src/setupTests.js` | `jest-dom` para Vitest y simulación de `react-i18next` (`t()` devuelve la clave) |
-| `eslint.config.js` | Reglas de ESLint (React, hooks, accesibilidad y seguridad) |
+| `eslint.config.js` | Reglas de ESLint (React, hooks, accesibilidad y seguridad) y un bloque aparte para los `.mjs` de `plugins/` (globales de Node) |
 | `package.json` | `"type": "module"` y los scripts (ver [08](08-guia-desarrollo.md#scripts)) |
 
 `eslint.config.js` (configuración plana de ESLint 9): los errores bloquean, y las reglas de accesibilidad y de calidad son avisos con un **tope que no puede crecer** (`--max-warnings` en el script `lint`). `scripts/quality-check.mjs` añade patrones prohibidos, búsqueda de secretos y `npm audit`. Ver [08](08-guia-desarrollo.md#scripts).

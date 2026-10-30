@@ -42,6 +42,9 @@ npm run dev                 # http://localhost:3000
 | `npm run lint` | ESLint. Falla si hay errores o si los avisos superan el tope fijado en el script (`--max-warnings`). Al corregir avisos, se baja el tope |
 | `npm run quality` | Puerta de calidad y seguridad: patrones prohibidos, secretos, `npm audit` de producción y ESLint |
 | `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [mantenimiento.md](guias/mantenimiento.md)) |
+| `npm run docs:gate` | Cierre documental del ciclo (plugin `ciclo-agentico`): comprueba, contra `.claude/flujo.json` y `git status`, que se tocaron los documentos de cada área, que `docs/09` tiene la fecha de hoy y que hay aviso para PR si se tocó un área de contrato. Se ejecuta antes del commit; no está en la CI |
+| `npm run agentes:test` | Tests (`node:test`) del plugin `ciclo-agentico` en `plugins/`. Vitest no los recoge (`test.include` en `vite.config.js`) |
+| `npm run agentes:bootstrap` | Comprueba e instala, pidiendo confirmación, las dependencias del plugin y los plugins del marketplace local (`-- --dry-run` solo informa) |
 
 ## Despliegue
 
@@ -100,20 +103,29 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 | `utilities/CSVfunctions.test.js` | `downloadXLSX` no modifica los datos y exporta los arrays como texto |
 | `utilities/highlightTerms.test.js` | Términos no latinos en redonda, escape de caracteres especiales y punto literal |
 | `components/TextInput.test.js`, `FilterSearchBar.test.js` | Los campos son controlados y se vacían cuando el padre los vacía |
-| `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false` |
+| `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false`; `accept` solo `.xlsx`; `404` al confirmar y al cancelar; fallo al cancelar; cabecera `Authorization` en `/upload` y en `/upload/confirm`; `401` en `/upload`, al confirmar y al cancelar (borra el token y redirige); `400` sin `emptyFields`; confirmar con `500` vacía la cola. Simula `fetch` y también `location` y el token |
+| `services/api.test.js` | `401` en métodos `*Auth` borra el token y redirige; `api.get` y `api.post` no; `401` con cuerpo no JSON; `error.data` en errores con `data`, ausente si no hay; `200` con cuerpo no JSON lanza `SyntaxError` |
+| `components/LoginForm.test.js`, `ContactForm.test.js` | Mensajes por `429`, `401`, `400` y `500`; el error del login se anuncia como `role="alert"` y no hay alerta antes de fallar; `maxLength` del contacto; campos localizables por su etiqueta (también al mostrar la contraseña), botón localizable por rol dentro del `<form>`, envío con Enter y con clic sin doble envío, `preventDefault` del envío e ids únicos entre instancias |
+| `components/CookieBanner.test.js` | Las dos cookies se escriben con `path=/`, `max-age` de un año y `SameSite=Lax`; `Secure` solo en HTTPS, tanto con «aceptar todo» como desde el modal; `cookiePreferences` sin codificar; con el consentimiento ya dado no se muestra el banner ni se escribe nada. Simula `document.cookie` y `location` |
+| `components/ImageGalleryManager.test.js` | Un caso por carácter prohibido del título sin llamar a la API, y un título válido que sí sube |
+| `components/ImageComponent.test.js`, `ImageCarrousel.test.js` | `imageKey` con `encodeURIComponent`; sin clave no se llama a la API |
+| `components/Table.test.js` | Columnas como unión de claves, orden de primera aparición y sin mutar `data` |
+| `components/DialogSpecies.test.js` | Comparación exacta de la especie (cadena y array; una subcadena, `undefined`, `null`, `""` y diferencias de mayúsculas o espacios no cuentan), sin mutar `data` ni `species`, y enlace a IPNI con `rel="noopener noreferrer"` |
+| `utilities/FormatFileName.test.js` | Formato `AAAA-MM-DD_vN.xlsx` con y sin ruta, `_v10` y nombres que no coinciden |
 | `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, y que no haya traducciones vacías |
+| `languages/es-typos.test.js` | El texto en español de `login.unauthorizedLabel` es exacto y sin el typo «contraeña» (lee el JSON de `es` directamente) |
 
 ### Pendiente
 
 1. `Filter`: combinación Y/O de filtros y facetas dependientes.
-2. `FormatFileName` y `SortItemsList`.
+2. `SortItemsList`.
 3. E2E con Playwright: portada → explorar → filtrar → abrir especie → descargar Excel.
 
 ## Integración continua y dependencias
 
 | Pieza | Qué hace |
 |---|---|
-| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Con Node 20 ejecuta `npm ci`, `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Con Node 20 ejecuta `npm ci`, `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`, y después, con Node 22 (el glob de `node --test` exige Node 21 o posterior), `npm run agentes:test`. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
 | [.github/pull_request_template.md](../.github/pull_request_template.md) | Plantilla de la PR con la definición de terminado, las guías que aplican y si afecta al backend o a la infraestructura |
 | [.github/dependabot.yml](../.github/dependabot.yml) | Propone cada lunes las actualizaciones de `npm` y de las acciones de GitHub, agrupando las menores. Ignora las versiones mayores de `jsdom` (exige Node 22) y `eslint` (los plugins aún no lo admiten) |
 | [.gitattributes](../.gitattributes) | Fija los finales de línea en LF en todos los sistemas |
@@ -131,11 +143,16 @@ El repositorio incluye `.claude/settings.json` con plugins compartidos, que se a
 
 | Plugin / skill | Para qué |
 |---|---|
-| `superpowers` | Flujo de trabajo: planificación, TDD, depuración sistemática y verificación |
+| `superpowers` (de `superpowers-marketplace`) | Flujo de trabajo: planificación, TDD, depuración sistemática y verificación |
+| `i-have-adhd` | Estilo de salida del ciclo agéntico (`estilo` de `.claude/flujo.json`) |
 | `frontend-design`, `ui-ux-pro-max` | Diseño de interfaz, accesibilidad y paletas |
 | `playwright` | Probar la app en un navegador real |
 | `understand-anything` | Mapa del código y guía de incorporación al proyecto |
 | `humanizer` | Revisar textos institucionales para que suenen naturales (no usar sobre contenido científico) |
-| `design-taste-frontend` (skill local en `.claude/skills/`) | Guía de diseño para landing pages. Útil solo para la portada |
+| `design-taste-frontend` (skill del plugin local `dominio-frontend`, ver [plugins/README.md](../plugins/README.md)) | Guía de diseño para landing pages. Útil solo para la portada. Ya no hay skills sueltas en `.claude/skills/` |
+
+### Ciclo agéntico (`/ciclo`)
+
+Toda feature o fix puede pasar por `/ciclo <tarea>`, del plugin [ciclo-agentico](../plugins/ciclo-agentico/README.md): requisitos, arquitectura, desarrollo y verificación con documentación, con puerta humana entre fases y sin commits del agente. La configuración está en `.claude/flujo.json`; los traspasos entre roles (specs, planes y avisos para PR) se guardan en `docs/specs/`. Cómo se instala y se activa el marketplace local: [plugins/README.md](../plugins/README.md#cómo-se-activan). En un equipo nuevo: `npm install`, `npm run agentes:bootstrap`, reiniciar la sesión de Claude Code y lanzar `/ciclo-init` (puede que haga falta el prefijo `/ciclo-agentico:ciclo-init` **(por confirmar)**).
 
 El archivo [CLAUDE.md](../CLAUDE.md) de la raíz resume las reglas del proyecto para Claude Code y le indica qué [guía](README.md#guías-de-trabajo) leer según la tarea: buenas prácticas, seguridad, accesibilidad y [mantenimiento](guias/mantenimiento.md) tras cada feature o fix.

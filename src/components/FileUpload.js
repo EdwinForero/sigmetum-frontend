@@ -5,7 +5,7 @@ import DialogAdvice from './DialogAdvice';
 import InfoButton from './InfoButton';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'motion/react';
-import env from '../config/env';
+import api from '../services/api';
 import useDialog from '../hooks/useDialog';
 
 const FileUploadForm = ({
@@ -52,68 +52,78 @@ const FileUploadForm = ({
       formData.append('file', new File([file], normalizedFileName));
   
       try {
-        const response = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: formData,
-        });
-
-        const responseData = await response.json();
-
-        if (!response.ok) {
-          if (responseData.data?.emptyFields) {
-            onLoad(false);
-            const { draftKey } = responseData.data;
-            const emptyFieldSummary = responseData.data.emptyFields
-              .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
-              .join(', ');
-
-            const confirmed = await new Promise((resolve) => {
-              showDialog(
-                t('dialogAdvice.adviceTitle'),
-                t('dialogAdvice.fieldsMissingMessage', { filename: file.name }),
-                {
-                  details: { title: t('dialogAdvice.emptyFieldsSummary'), content: emptyFieldSummary },
-                  onConfirm: () => resolve(true),
-                  onCancel: () => resolve(false),
-                }
-              );
-            });
-            closeDialog();
-
-            if (confirmed) {
-              onLoad(true);
-              const confirmedResponse = await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: JSON.stringify({ confirmed: true, draftKey }),
-              });
-
-              if (!confirmedResponse.ok) {
-                throw new Error('Error al confirmar la subida');
-              }
-            } else {
-              await fetch(`${env.BASE_URL}${env.API_PREFIX}/upload/confirm`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: JSON.stringify({ confirmed: false, draftKey }),
-              });
-              allFilesUploadedSuccessfully = false;
-              break;
-            }
-          } else {
+        let draft;
+        try {
+          await api.postFormAuth('/upload', formData);
+        } catch (error) {
+          if (error.status === 401) {
+            allFilesUploadedSuccessfully = false;
+            break;
+          }
+          if (error.status === 400 && Array.isArray(error.data?.emptyFields)) {
+            draft = error.data;
+          } else if (error.type === 'http') {
             allFilesUploadedSuccessfully = false;
             showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorUploadMessage'));
             break;
+          } else {
+            throw error;
           }
+        }
+
+        if (!draft) continue;
+
+        onLoad(false);
+        const { draftKey } = draft;
+        const emptyFieldSummary = draft.emptyFields
+          .map((field) => t('dialogAdvice.rowEmpty', { rowIndex: field.rowIndex }))
+          .join(', ');
+
+        const confirmed = await new Promise((resolve) => {
+          showDialog(
+            t('dialogAdvice.adviceTitle'),
+            t('dialogAdvice.fieldsMissingMessage', { filename: file.name }),
+            {
+              details: { title: t('dialogAdvice.emptyFieldsSummary'), content: emptyFieldSummary },
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            }
+          );
+        });
+        closeDialog();
+
+        if (confirmed) {
+          onLoad(true);
+          try {
+            await api.postAuth('/upload/confirm', { confirmed: true, draftKey });
+          } catch (error) {
+            if (error.status === 401) {
+              allFilesUploadedSuccessfully = false;
+              break;
+            }
+            if (error.status === 404) {
+              allFilesUploadedSuccessfully = false;
+              showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorDraftNotFound'));
+              break;
+            }
+            throw error;
+          }
+        } else {
+          try {
+            await api.postAuth('/upload/confirm', { confirmed: false, draftKey });
+          } catch (error) {
+            if (error.status === 401) {
+              allFilesUploadedSuccessfully = false;
+              break;
+            }
+            if (error.type === 'network') throw error;
+            const messageKey = error.status === 404
+              ? 'dialogAdvice.errorDraftNotFound'
+              : 'dialogAdvice.errorUploadMessage';
+            showDialog(t('dialogAdvice.errorTitle'), t(messageKey));
+          }
+          allFilesUploadedSuccessfully = false;
+          break;
         }
       } catch (error) {
         allFilesUploadedSuccessfully = false;
@@ -143,7 +153,7 @@ const FileUploadForm = ({
         <input
           type="file"
           multiple
-          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           onChange={handleFileSelect}
           className="hidden"
           id="fileInput"

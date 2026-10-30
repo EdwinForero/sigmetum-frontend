@@ -88,7 +88,8 @@ Banner de consentimiento y modal de configuración.
 | `isVisible` | Se muestra si `document.cookie` no contiene `cookieConsent=accepted` |
 | `isModalOpen` | Modal de configuración abierto |
 | `cookiePreferences` | `{ all, advertising, advertisingTracking, functionality, personalization, security }` |
-| `handleAccept()` | Guarda `cookieConsent=accepted` y `cookiePreferences=<JSON>` durante un año |
+| `setCookie(name, value)` | Helper local, no exportado. Escribe la cookie con `path=/`, `max-age` de un año y `SameSite=Lax`, más `Secure` si `window.location.protocol` es `https:` (se lee en cada llamada). El valor no se codifica |
+| `handleAccept()` | Guarda `cookieConsent=accepted` y `cookiePreferences=<JSON>` con `setCookie` |
 | `handleAcceptAll()` | Igual, con todas las categorías a `true` |
 | `handlePreferenceChange(key)` | Alterna una categoría. `all` las alterna todas y se recalcula si todas están activas |
 | `handleModalToggle()` | Abre o cierra el modal |
@@ -163,7 +164,7 @@ Modal de detalle de una especie.
 
 | Cálculo | Descripción |
 |---|---|
-| `filteredSpecies` | Registros de `data` cuyo `Especies Características` incluye esta especie |
+| `filteredSpecies` | Registros de `data` cuyo `Especies Características` coincide exactamente con esta especie: igualdad si el valor es una cadena, pertenencia si es un array (helper local `contieneEspecie`; sin normalizar mayúsculas ni espacios) |
 | `uniqueAttributes` | Por cada atributo (provincia, municipio, altitud media, sector biogeográfico, piso bioclimático, ombrotipo, naturaleza del sustrato, tipo de serie, serie de vegetación y vegetación potencial), los valores únicos ordenados con `SortItemsList` y unidos por comas |
 | `formattedQuery` | Nombre codificado para el enlace `https://www.ipni.org/?q=...` |
 | `highlightTerms` | La misma utilidad compartida que usa `SpeciesCard` |
@@ -176,7 +177,7 @@ Bloque `<details>` abierto con título y lista. Si `description` es una cadena, 
 ### Table
 Tabla paginada genérica.
 Props: `data` (`Array<Registro>`) y `rowsPerPage` (5 por defecto).
-Las columnas salen de las claves del primer registro y se traducen con `attributes.<col>`. Los valores array se muestran uno por línea. **Estado:** `currentPage`.
+Las columnas son la unión de las claves de todos los registros, en orden de primera aparición (no muta `data`), y se traducen con `attributes.<col>`. Los valores array se muestran uno por línea. **Estado:** `currentPage`.
 
 ### Pagination
 Botones anterior/siguiente con el texto "Página X de Y".
@@ -208,7 +209,7 @@ Selector de dos columnas (provincia → versión) para "Administrar datos". Se c
 ## Administración
 
 ### FileUpload
-Formulario de carga múltiple de Excel o CSV.
+Formulario de carga múltiple de Excel (el selector acepta solo `.xlsx`).
 
 | Prop | Descripción |
 |---|---|
@@ -220,9 +221,9 @@ Formulario de carga múltiple de Excel o CSV.
 | `normalizeFileName(name)` | Quita acentos (NFD) y cualquier carácter que no sea `[a-zA-Z0-9-_]` del nombre, conservando la extensión |
 | `handleFileSelect(e)` | Añade archivos evitando duplicados (mismo nombre y tamaño) y vacía el `<input>` para poder volver a elegir el mismo |
 | `handleRemoveFile(i)` | Quita un archivo de la cola |
-| `handleSubmit()` | Sube los archivos **uno a uno** con `POST /upload`. Si hay campos vacíos (400 con `emptyFields`), pregunta al usuario y confirma con `POST /upload/confirm`. Cualquier otro error detiene el bucle y muestra un aviso. Si todos suben bien, muestra el éxito y vacía la cola |
+| `handleSubmit()` | Sube los archivos **uno a uno** con `POST /upload`. Si hay campos vacíos (400 con `emptyFields`), pregunta al usuario y confirma con `POST /upload/confirm`. Un `404` al confirmar muestra `dialogAdvice.errorDraftNotFound` y detiene el bucle (se interpreta solo por el estado, sin leer el texto). Cualquier otro error detiene el bucle y muestra un aviso. Si todos suben bien, muestra el éxito y vacía la cola |
 
-Si el usuario cancela o cierra el diálogo de confirmación, se envía `confirmed: false`, se detiene la cola y no se muestra el éxito. Ver el diagrama en [01-arquitectura.md](01-arquitectura.md#flujo-de-subida-de-datos-api-v2).
+Si el usuario cancela o cierra el diálogo de confirmación, se envía `confirmed: false`, se detiene la cola y no se muestra el éxito. Se comprueba la respuesta de cancelar: `404` muestra `errorDraftNotFound` y otro fallo `errorUploadMessage`; en ambos no se vacía `files` (se puede reintentar). Usa `api.postFormAuth` y `api.postAuth`: no lee el token y un `401` (en `/upload`, al confirmar o al cancelar) redirige a `/login`, cosa que hace `api.js`; el componente solo lo reconoce para no abrir el diálogo de error ni vaciar la cola. El `404` de `/upload/confirm` se interpreta por estado: cualquier `404` en esa ruta se muestra como "el borrador ya no existe". Ver el diagrama en [01-arquitectura.md](01-arquitectura.md#flujo-de-subida-de-datos-api-v2).
 
 ### TermsManager
 Gestión de términos que no se escriben en cursiva.
@@ -243,14 +244,15 @@ Gestión de las imágenes de la galería.
 | `imageTitle`, `imageFile`, `images` | Título, archivo elegido y lista actual |
 | `fetchImageUrls()` | `GET /list-images` |
 | `handleFileChange(e)` | Guarda el archivo elegido (JPEG, PNG, GIF o WebP) |
-| `handleImageUpload()` | Exige título y archivo, envía `POST /upload-image` (multipart `file` + `title`) y recarga. No limpia el formulario al terminar |
+| `handleImageUpload()` | Exige título y archivo, rechaza un título con `/`, `\`, `..`, caracteres de control o `, ' : & # ? % "` (aviso `dialogAdvice.adviceInvalidImageTitle`, sin petición; sin tope de longitud), envía `POST /upload-image` (multipart `file` + `title`) y recarga. No limpia el formulario al terminar |
 | `deleteImage(fileName)` | `DELETE /delete-image { imageKey: fileName }` y recarga |
 
 ### LoginForm
 | Estado / función | Descripción |
 |---|---|
-| `username`, `password`, `showPassword`, `showLoginError` | Campos, mostrar u ocultar contraseña y error |
-| `handleLogin()` | `POST /log`. Si va bien, guarda el token y navega a `/cargar-archivos`; si no, muestra el error |
+| `username`, `password`, `showPassword`, `loginErrorKey` | Campos, mostrar u ocultar contraseña y clave del error (o `null`) |
+| `handleLogin()` | `POST /log`. Si va bien, guarda el token y navega a `/cargar-archivos`; con `429` muestra `login.tooManyAttemptsLabel` y con cualquier otro fallo `login.unauthorizedLabel`. El mensaje va en un `<span role="alert">` que solo existe cuando hay error, así que se anuncia como alerta; no está asociado al campo (`aria-describedby`) |
+| Estructura | Cada `<label>` se asocia a su campo con `htmlFor` e `id` derivados de `useId` (únicos entre instancias; el campo de contraseña conserva su `id` al mostrarla u ocultarla). El `<form>` envía con `onSubmit` (`preventDefault` y `handleLogin()`) y el botón "Entrar" está dentro del `<form>` sin `onClick`, así que Enter envía una sola vez |
 
 ---
 
@@ -258,7 +260,7 @@ Gestión de las imágenes de la galería.
 
 ### ContactForm
 Formulario de contacto (nombre, email, asunto y mensaje).
-**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email` y muestra un diálogo de éxito o error. El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`.
+**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email` y muestra un diálogo de éxito o error: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias).
 
 ### EmailContactGrid
 Lee `home.emailsData`, una cadena con el formato `Nombre / email / Nombre / email ...`, la divide por `/` en pares `{ name, email }` y los muestra en dos columnas con enlaces `mailto:`.
@@ -314,7 +316,7 @@ Imagen o fondo a partir de una URL directa o de una clave de S3.
 | Prop | Descripción |
 |---|---|
 | `directUrl` | URL que se usa tal cual (lo habitual, con `assetUrl`) |
-| `imageKey` | Si no hay `directUrl`, pide `GET /get-image?imageKey=` y usa `imageUrl` |
+| `imageKey` | Si no hay `directUrl`, pide `GET /get-image?imageKey=` (con `encodeURIComponent`) y usa `imageUrl`. Sin `imageKey` no llama a la API |
 | `isBackground` | Pinta un `div` con fondo, capa oscura al 70 %, `background-attachment: fixed` y `min-height: 95vh` |
 | `className`, `children` | Estilo y contenido (solo en modo fondo) |
 
@@ -323,7 +325,7 @@ Imagen o fondo a partir de una URL directa o de una clave de S3.
 ## Sin uso
 
 ### ImageCarrousel
-Carrusel infinito con imágenes de `VITE_CAROUSEL_IMAGE_KEYS` (vía `GET /get-image`) o, si no hay, de `via.placeholder.com`. Solo aparece comentado en `Explore`.
+Carrusel infinito con imágenes de `VITE_CAROUSEL_IMAGE_KEYS` (vía `GET /get-image`, con la clave codificada con `encodeURIComponent`) o, si no hay, de `via.placeholder.com`. Solo aparece comentado en `Explore`.
 
 ### UploadButton
 Prototipo antiguo de subida con `alert()` que no envía nada. Se puede borrar.

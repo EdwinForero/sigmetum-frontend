@@ -10,6 +10,8 @@ import ButtonAlternative from './ButtonAlternative';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
 
+const INVALID_TITLE = /[/\\,':&#?%"]|\.\.|\p{Cc}/u;
+
 const ImageGalleryManager = () => {
   const { t } = useTranslation();
   const [imageTitle, setImageTitle] = useState('');
@@ -41,6 +43,10 @@ const ImageGalleryManager = () => {
   const handleImageUpload = async () => {
     if (!imageFile || !imageTitle) {
       showDialog(t('dialogAdvice.adviceTitle'), t('dialogAdvice.adviceNoImageData'));
+      return;
+    }
+    if (INVALID_TITLE.test(imageTitle)) {
+      showDialog(t('dialogAdvice.adviceTitle'), t('dialogAdvice.adviceInvalidImageTitle'));
       return;
     }
     setIsLoading(true);

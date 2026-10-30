@@ -18,7 +18,7 @@ const ImageCarrousel = () => {
 
     Promise.all(
       env.CAROUSEL_IMAGE_KEYS.map((key) =>
-        api.get(`/get-image?imageKey=${key}`).then((data) => ({
+        api.get(`/get-image?imageKey=${encodeURIComponent(key)}`).then((data) => ({
           src: data.imageUrl,
           description: key.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
         }))

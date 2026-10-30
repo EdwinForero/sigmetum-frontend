@@ -51,3 +51,13 @@ jobs:
 
       - name: Documentación al día
         run: npm run docs:check
+
+      # Tests del plugin ciclo-agentico (node:test). Su script usa un glob de `node --test`, que exige
+      # Node 21 o posterior, así que este paso cambia a Node 22; el resto del job sigue en Node 20.
+      # No forma parte de la definición de terminado: la comprobación de docs:check solo exige los cinco.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tests del plugin ciclo-agentico
+        run: npm run agentes:test

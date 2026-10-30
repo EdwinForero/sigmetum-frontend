@@ -35,6 +35,7 @@ Este documento dice **qué hay que revisar y actualizar en `docs/` después de c
 | Algo que **cambia el contrato con el backend** (forma de una respuesta, columnas del Excel, autenticación) | [integracion/para-backend.md](../integracion/para-backend.md) y avisar al backend (sección 6 de este documento) | |
 | Algo que **cambia lo que necesita la infraestructura** (build, variables, dominios, recursos estáticos) | [integracion/para-infra.md](../integracion/para-infra.md) y avisar a infra (sección 6) | |
 | Los **plugins o skills de Claude** | `.claude/` y la tabla de herramientas de [08](../08-guia-desarrollo.md) | |
+| **`.claude/`** (`flujo.json`, `settings.json`) o **`plugins/`** (el ciclo agéntico y su marketplace local) | [plugins/README.md](../../plugins/README.md), [README.md](../README.md) y la sección del ciclo de [08](../08-guia-desarrollo.md#ciclo-agéntico-ciclo) | `npm run agentes:test` y `node plugins/ciclo-agentico/scripts/docs-gate.mjs --solo-validar`; si cambia un plugin ya instalado, sigue [Tras cambiar un plugin local](../../plugins/README.md#tras-cambiar-un-plugin-local) |
 | Los **documentos** o **guías** (nuevos, renombrados o movidos) | Índice de [README.md](../README.md), el README de la raíz y [CLAUDE.md](../../CLAUDE.md) | `npm run docs:check` valida los enlaces y que cada guía figure en el índice |
 
 ## 3. Listas de comprobación por tipo de cambio
@@ -107,6 +108,8 @@ El script ([scripts/docs-check.mjs](../../scripts/docs-check.mjs)) compara el c�
 `npm run docs:check -- --metrics` imprime los valores reales para actualizar 09.
 
 Por su parte, `npm run quality` ([scripts/quality-check.mjs](../../scripts/quality-check.mjs)) es la puerta de seguridad y calidad: patrones prohibidos, secretos, `npm audit` de producción y ESLint. Además exige que el tope `--max-warnings` de `package.json` coincida con los avisos reales, para que la deuda que se paga no se vuelva a acumular.
+
+Con el ciclo agéntico, `npm run docs:gate` ([plugins/ciclo-agentico/scripts/docs-gate.mjs](../../plugins/ciclo-agentico/scripts/docs-gate.mjs)) comprueba **antes del commit**, contra `.claude/flujo.json` (`docsPorArea`, `areasContrato`) y `git status`, que cada archivo cambiado tiene tocado alguno de sus documentos, que [09](../09-estado-actual-y-deuda-tecnica.md) tiene la fecha de hoy en "Última actualización" y que, si se tocó un área de contrato, hay aviso para PR (`docs/specs/*-aviso-pr.md`) y cambió `integracion/` o el aviso lleva la línea `Integración: sin impacto — <motivo>`. No sustituye a `docs:check`: se complementan. Los mapas de `flujo.json` se derivan de la tabla de la sección 2; si cambias una, cambia la otra.
 
 Además, `npm test` incluye `translations.test.js`: comprueba que español e inglés tienen las mismas claves y marcadores de interpolación.
 

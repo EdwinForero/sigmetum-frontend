@@ -10,7 +10,7 @@ const ImageComponent = ({ imageKey, directUrl, isBackground = false, className =
       return;
     }
     if (!imageKey) return;
-    api.get(`/get-image?imageKey=${imageKey}`)
+    api.get(`/get-image?imageKey=${encodeURIComponent(imageKey)}`)
       .then((data) => setImageUrl(data.imageUrl))
       .catch((error) => console.error('Error fetching image:', error));
   }, [imageKey, directUrl]);

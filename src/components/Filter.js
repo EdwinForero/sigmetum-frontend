@@ -66,8 +66,6 @@ const Filter = ({
 
       return updatedFilters;
     });
-
-    console.log(selectedFilters);
   };
 
   useEffect(() => {

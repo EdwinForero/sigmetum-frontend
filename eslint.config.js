@@ -43,6 +43,12 @@ export default [
     rules: { 'no-console': 'off' },
   },
   {
+    // Scripts y tests de Node del plugin ciclo-agentico (copia del núcleo portable).
+    files: ['plugins/**/*.mjs'],
+    languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { ...globals.node } },
+    rules: { 'no-console': 'off' },
+  },
+  {
     files: ['src/**/*.test.js', 'src/setupTests.js'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },

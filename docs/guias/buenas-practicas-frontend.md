@@ -18,7 +18,7 @@ Un cambio está terminado cuando pasan los cinco comandos y la documentación es
 | `npm run quality` | Patrones prohibidos, secretos, `npm audit` de producción y ESLint |
 | `npm run docs:check` | Que la documentación sigue al código |
 
-La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta los mismos cinco en cada PR y cada lunes (para detectar vulnerabilidades nuevas). Ver [08](../08-guia-desarrollo.md#integración-continua-y-dependencias).
+La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta los mismos cinco en cada PR y cada lunes (para detectar vulnerabilidades nuevas), y además `npm run agentes:test` (tests del plugin del ciclo agéntico). Ver [08](../08-guia-desarrollo.md#integración-continua-y-dependencias).
 
 ## 2. Estructura y nombres
 
@@ -47,7 +47,7 @@ La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta l
 
 | Regla | Por qué | Se comprueba |
 |---|---|---|
-| Toda llamada a la API pasa por `src/services/api.js`. Nada de `fetch` directo | `FileUpload` duplica cabeceras y la gestión del envoltorio (M2) | Revisión |
+| Toda llamada a la API pasa por `src/services/api.js`. Nada de `fetch` directo | Evita duplicar cabeceras y la gestión del envoltorio (`FileUpload` ya la cumple, M2 resuelta) | Revisión |
 | Un endpoint nuevo añade su método en `api.js` si hace falta, y se documenta en [03](../03-api.md) y en [integracion/para-backend.md](../integracion/para-backend.md) | El backend necesita saber qué campos lee el frontend | `docs:check` (endpoints en 03) |
 | Muestra mensajes **propios y traducidos**, no el texto `error` del servidor | El texto del servidor está en inglés y puede revelar detalles internos | Revisión |
 | Las respuestas de la API no se guardan en `localStorage` ni `sessionStorage` | Es almacenamiento accesible por cualquier script de la página | `npm run quality` |
@@ -143,6 +143,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 - **Cuando corrijas avisos, baja el tope** al nuevo número. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
 - No uses `// eslint-disable` sin un comentario que explique el motivo.
 - Una regla de ESLint nueva o relajada se anota en [02](../02-tecnologias.md) y en este documento.
+- Los `.mjs` de `plugins/` (scripts y tests de `node:test` del ciclo agéntico) se lintan con las reglas recomendadas de ESLint y los globales de Node; no están sujetos a las reglas de React ni de accesibilidad de `src/`. Esa excepción no relaja nada de `src/`.
 
 ## 15. Anti-patrones que ya están en el código
 
@@ -152,10 +153,10 @@ No los repitas al escribir código nuevo:
 |---|---|---|
 | Comparar con `JSON.stringify` | `App.js` | M7 |
 | Índice como `key` | `Explore`, `Table` | |
-| `fetch` directo y token leído en el componente | `FileUpload` | M2 |
+| `fetch` directo y token leído en el componente | Corregido en `FileUpload` | M2 |
 | Regex construida con texto sin escapar | Corregido en `highlightTerms` | A3 |
 | Campo no controlado | Corregido en `TextInput` | A4 |
-| `console.log` con datos | `Filter.js` | M9 |
+| `console.log` con datos | Corregido en `Filter.js` | M9 |
 | Código muerto y bloques comentados | `UploadButton`, `ImageCarrousel`, `Explore` | M8 |
 | `import { React, useState } from 'react'` (`React` no es una exportación con nombre) | Varias páginas | B6 |
 | Nombre de archivo que no sigue la convención | `CSVfunctions.js`, `UseAtBottom.js` | |
