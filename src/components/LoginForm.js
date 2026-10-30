@@ -63,7 +63,7 @@ const LoginForm = () => {
         </div>
         {loginErrorKey && (
           <div className="flex justify-center px-4 mb-4">
-            <span className="text-[#15B659] px-2">{t(loginErrorKey)}</span>
+            <span role="alert" className="text-[#15B659] px-2">{t(loginErrorKey)}</span>
           </div>
         )}
       </form>

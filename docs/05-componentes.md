@@ -250,7 +250,7 @@ Gestión de las imágenes de la galería.
 | Estado / función | Descripción |
 |---|---|
 | `username`, `password`, `showPassword`, `loginErrorKey` | Campos, mostrar u ocultar contraseña y clave del error (o `null`) |
-| `handleLogin()` | `POST /log`. Si va bien, guarda el token y navega a `/cargar-archivos`; con `429` muestra `login.tooManyAttemptsLabel` y con cualquier otro fallo `login.unauthorizedLabel` |
+| `handleLogin()` | `POST /log`. Si va bien, guarda el token y navega a `/cargar-archivos`; con `429` muestra `login.tooManyAttemptsLabel` y con cualquier otro fallo `login.unauthorizedLabel`. El mensaje va en un `<span role="alert">` que solo existe cuando hay error, así que se anuncia como alerta; no está asociado al campo (`aria-describedby`) |
 
 ---
 

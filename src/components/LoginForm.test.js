@@ -50,6 +50,28 @@ describe('LoginForm', () => {
     expect(screen.queryByText('login.tooManyAttemptsLabel')).not.toBeInTheDocument();
   });
 
+  it('con 401 anuncia el error como alerta', async () => {
+    api.post.mockRejectedValue(httpError(401));
+    const user = userEvent.setup();
+    renderLogin();
+
+    expect(screen.queryByRole('alert')).toBeNull();
+    await user.click(screen.getByText('login.logInButton'));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('login.unauthorizedLabel');
+  });
+
+  it('con 429 anuncia el error como alerta', async () => {
+    api.post.mockRejectedValue(httpError(429));
+    const user = userEvent.setup();
+    renderLogin();
+
+    expect(screen.queryByRole('alert')).toBeNull();
+    await user.click(screen.getByText('login.logInButton'));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('login.tooManyAttemptsLabel');
+  });
+
   it('con éxito guarda el token y navega a /cargar-archivos', async () => {
     api.post.mockResolvedValue({ token: 'jwt-123' });
     const user = userEvent.setup();

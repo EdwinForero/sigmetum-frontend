@@ -53,7 +53,7 @@ Normas para que la web sea utilizable por todas las personas, con el estado real
 ### A5. Formularios
 
 - **Regla:** cada campo tiene su `<label>` asociado (`htmlFor` + `id`, o anidado); el `placeholder` no sustituye a la etiqueta; los errores se anuncian (`role="alert"` o `aria-live`) y se asocian al campo (`aria-describedby`); los campos obligatorios se indican.
-- **Estado: incumple** en `LoginForm`, `ContactForm` y los campos de texto (B3). Además, en el acceso el botón está fuera del `<form>`, así que Enter no envía (B4).
+- **Estado: incumple** en `LoginForm`, `ContactForm` y los campos de texto (B3). En `LoginForm` el anuncio del error ya se cumple (`role="alert"`); siguen pendientes la etiqueta asociada al campo (B3) y `aria-describedby`. Además, en el acceso el botón está fuera del `<form>`, así que Enter no envía (B4).
 
 ### A6. Diálogos
 

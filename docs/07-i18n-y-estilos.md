@@ -10,7 +10,7 @@
 
 ### Archivos
 
-`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía.
+`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía. `src/languages/es-typos.test.js` fija el texto exacto de `login.unauthorizedLabel` en `es` (sin el typo «contraeña»), porque los tests de componentes simulan `t` y no ven el texto real.
 
 | Espacio | Claves | Contenido |
 |---|---|---|

@@ -121,7 +121,7 @@
     "passwordShowButton": "Mostrar",
     "passwordHideButton": "Ocultar",
     "logInButton": "Iniciar sesión",
-    "unauthorizedLabel": "Verifica el usuario y/o contraeña",
+    "unauthorizedLabel": "Verifica el usuario y/o contraseña",
     "tooManyAttemptsLabel": "Demasiados intentos. Inténtalo de nuevo en 15 minutos."
   },
   "uploadFiles": {
