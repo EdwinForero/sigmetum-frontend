@@ -26,6 +26,7 @@ npm run dev                 # http://localhost:3000
 | `VITE_CAROUSEL_IMAGE_KEYS` | No | `gallery/a.jpg,gallery/b.jpg` | Solo para el carrusel, que no se usa |
 
 - `.env` está en `.gitignore`: nunca lo subas al repositorio.
+- **`VITE_S3_URL` también se lee al compilar `index.html`:** el plugin `sigmetum-favicon` de `vite.config.js` la usa para inyectar el favicon (`VITE_S3_URL` + `/` + `ASSETS.LOGO`). Debe empezar por `https://`: un valor que no lo haga se trata como ausente y el build lo avisa en la consola (`[sigmetum-favicon] ...`). Si falta, está vacía o no empieza por `https://`, el build no falla pero `dist/index.html` queda **sin favicon** (sin icono de respaldo); lo mismo en `npm run dev` si tu `.env` no la define. Detalle en [06](06-utilidades-hooks-config.md#favicon-viteconfigjs-y-faviconhtml). Para probar el build sin ella sin tocar tu `.env`, una variable de proceso vacía lo pisa: `VITE_S3_URL= npx vite build --outDir <carpeta-temporal> --emptyOutDir`.
 - Vite incrusta estas variables en el JavaScript al compilar y solo expone las que empiezan por `VITE_`. **Todo lo que pongas aquí es público**: no guardes secretos.
 - Si vienes de la versión anterior (Create React App), renombra las claves de tu `.env` de `REACT_APP_*` a `VITE_*`.
 - El backend debe tener `ALLOWED_ORIGIN` apuntando al origen del frontend (por ejemplo `http://localhost:3000`) o el navegador bloqueará las peticiones por CORS.
@@ -55,7 +56,7 @@ Checklist para que un despliegue funcione:
 1. Directorio de artefactos: `dist` (coincide con el `build_spec` de `sigmetum-infra`).
 2. Variables de entorno de Amplify con los nombres que lee el código: `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL`. **`sigmetum-infra` solo define `VITE_API_URL`**, que este código no lee: hay que ajustar el módulo de Amplify.
 3. Regla de reescritura de la SPA: origen `</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp|pdf)$)([^.]+$)/>`, destino `/index.html`, tipo `200`.
-4. Recursos estáticos accesibles: CloudFront con OAC delante del bucket y `VITE_S3_URL` apuntando a esa distribución.
+4. Recursos estáticos accesibles: CloudFront con OAC delante del bucket y `VITE_S3_URL` apuntando a esa distribución. `VITE_S3_URL` debe estar definida **en el build** de Amplify: de ella sale también el favicon (sin ella no hay favicon). Debe empezar por `https://` (si no, se trata como ausente y el build avisa) y cambiarla exige un nuevo despliegue.
 5. `ALLOWED_ORIGIN` del backend igual al dominio final.
 
 ## Convenciones del código
@@ -112,7 +113,12 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 | `components/Table.test.js` | Columnas como unión de claves, orden de primera aparición y sin mutar `data` |
 | `components/DialogSpecies.test.js` | Comparación exacta de la especie (cadena y array; una subcadena, `undefined`, `null`, `""` y diferencias de mayúsculas o espacios no cuentan), sin mutar `data` ni `species`, y enlace a IPNI con `rel="noopener noreferrer"` |
 | `utilities/FormatFileName.test.js` | Formato `AAAA-MM-DD_vN.xlsx` con y sin ruta, `_v10` y nombres que no coinciden |
-| `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, y que no haya traducciones vacías |
+| `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, que no haya traducciones vacías y el texto exacto de `gallery.noDataFoundPlaceholder` y `notFound.title` en ambos idiomas |
+| `utilities/faviconHtml.test.js` | `faviconTags` devuelve `<link rel="icon">` con `href` `<URL>/<clave>` y sin `type`, o nada si no hay URL o no empieza por `https://` (`http://`, `//cdn...`, sin esquema, espacios iniciales o `HTTPS://`); la barra final no se normaliza; `logoKeyFromSource` da la misma clave que `ASSETS.LOGO` real, acepta comillas dobles, no confunde `LOGOS` y lanza error sin `LOGO`; `index.html` no fija ningún favicon, bucket ni marcador `%VITE_` |
+| `components/Header.test.js` | `Header` no reescribe el `href` de un `<link rel="icon">` existente |
+| `i18n.test.js` | `lang` de `<html>` sigue al idioma (`en`, `es`, `en-US` da `en`, `es-ES` da `es`, `fr` da `es`), también el idioma inicial detectado. Usa `i18next` real (la mock global solo afecta a `react-i18next`) |
+| `hooks/useDocumentTitle.test.js` | Título `<Página> · SIGMETUM-A` por ruta con el texto real de `es`, 404 con `notFound.title`, mayúsculas y barra final, cambio de idioma sin remontar, ruta protegida que redirige a `/login`, y guarda de deriva: toda ruta de `App.js` tiene título y `App.js` llama al hook. Usa i18n real (`vi.mock('react-i18next', importOriginal)`) en lugar de la mock global |
+| `index.test.js` | `index.js` monta `BrowserRouter` con `v7_startTransition` y `v7_relativeSplatPath` (simula `react-dom/client`, `App` y `i18n`) |
 | `languages/es-typos.test.js` | El texto en español de `login.unauthorizedLabel` es exacto y sin el typo «contraeña» (lee el JSON de `es` directamente) |
 
 ### Pendiente

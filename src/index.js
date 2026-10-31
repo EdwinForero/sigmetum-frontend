@@ -9,7 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <ErrorBoundary>
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <App />
     </Router>
   </ErrorBoundary>

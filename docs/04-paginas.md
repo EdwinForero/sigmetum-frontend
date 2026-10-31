@@ -23,6 +23,27 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 
 ---
 
+## Título de página por ruta
+
+`App` llama una vez a `useDocumentTitle()` (ver [06](06-utilidades-hooks-config.md#usedocumenttitle-srchooksusedocumenttitlejs)), que pone `document.title` con el formato `<Página> · SIGMETUM-A` según la ruta mostrada (WCAG 2.4.2). El nombre del proyecto no se traduce; la página sí (`t()`), y el título cambia al navegar y al cambiar de idioma sin recargar.
+
+| Ruta | Clave del título |
+|---|---|
+| `/` | `navbar.homeOption` |
+| `/explorar` | `navbar.exploreOption` |
+| `/galeria` | `gallery.title` |
+| `/sobre-nosotros` | `aboutUs.title` |
+| `/cookies` | `cookies.title` |
+| `/login` | `login.title` |
+| `/cargar-archivos` | `uploadFiles.title` |
+| `/administrar-datos` | `dataManagement.title` |
+| `/administrar-contenido` | `contentManagement.title` |
+| Cualquier otra (404) | `notFound.title` |
+
+El título sigue al `pathname`, no a lo que pinta `ProtectedRoute`: si una ruta protegida redirige a `/login`, el título pasa a ser el de `/login`. La comparación de rutas ignora mayúsculas y la barra final, como el enrutador.
+
+---
+
 ## Home (`/`)
 
 Portada del proyecto.
@@ -132,4 +153,4 @@ Contenedor de `TermsManager` (términos que no van en cursiva) e `ImageGalleryMa
 
 ## NotFound (`*`)
 
-Página 404 con botón de vuelta al inicio.
+Página 404 con botón de vuelta al inicio. Su título de pestaña es `notFound.title` ("Página no encontrada" / "Page not found"). Además, `VegetationGallery` sin datos muestra `gallery.noDataFoundPlaceholder` (sin texto por defecto en el código).

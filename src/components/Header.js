@@ -1,15 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import LanguageSwitcher from './LanguageSwitcher';
 import ASSETS, { assetUrl } from '../config/assets';
 
 const Header = () => {
-  useEffect(() => {
-    const linkTag = document.querySelector("link[rel='icon']");
-    if (linkTag) linkTag.href = assetUrl(ASSETS.LOGO);
-  }, []);
-
   return (
     <header className="fixed top-0 left-0 w-full bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16 z-50">
       <Link to="/">

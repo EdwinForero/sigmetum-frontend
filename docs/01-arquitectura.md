@@ -17,7 +17,8 @@ sigmetum-frontend/
 │   ├── services/
 │   │   └── api.js           # Cliente HTTP único (fetch + envoltorio { success, data })
 │   ├── hooks/
-│   │   └── useDialog.js     # Estado de los diálogos de aviso/confirmación
+│   │   ├── useDialog.js     # Estado de los diálogos de aviso/confirmación
+│   │   └── useDocumentTitle.js  # Título de la pestaña según la ruta y el idioma
 │   ├── utilities/           # Funciones puras y hooks auxiliares
 │   ├── languages/{es,en}/translation.json
 │   ├── pages/               # Una por ruta (10)
@@ -37,7 +38,7 @@ sigmetum-frontend/
     <App />
 ```
 
-Antes del render se importa `./i18n`, que inicializa i18next con detección automática del idioma del navegador.
+Antes del render se importa `./i18n`, que inicializa i18next con detección automática del idioma del navegador y mantiene el `lang` de `<html>` igual al idioma mostrado. `BrowserRouter` activa las opciones `future` `v7_startTransition` y `v7_relativeSplatPath` de React Router 6 (así desaparecen sus avisos de consola); las rutas son planas y los enlaces absolutos, así que no cambia ninguna resolución. `App` llama una vez a `useDocumentTitle()` para el `<title>` por ruta (ver [04](04-paginas.md#título-de-página-por-ruta)).
 
 ## Layout
 

@@ -31,7 +31,7 @@ const VegetationGallery = () => {
     if (imageUrls.length === 0) {
       return (
         <p className="text-center text-[#0C1811] text-lg font-semibold mt-8">
-          {t('gallery.noDataFoundPlaceholder', 'No hay datos disponibles.')}
+          {t('gallery.noDataFoundPlaceholder')}
         </p>
       );
     }

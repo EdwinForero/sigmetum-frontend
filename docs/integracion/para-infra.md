@@ -14,7 +14,7 @@ Ordenado por impacto. Cada punto se explica más abajo.
 |---|---|---|---|
 | **I1** | Amplify define `VITE_API_URL`, pero el frontend lee `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL` | La web compilada llama a `http://localhost:8000` y no funciona | **Resuelto** en rama `feature/testing` de infra |
 | **I2** | El bucket bloquea el acceso público y no hay CloudFront, pero el frontend carga logos, banner y glosario directamente desde la URL del bucket | Las imágenes y el PDF dan 403 | Abierto |
-| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explorar` da 404 | **Resuelto** en rama `feature/testing` de infra |
+| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explorar` da 404 | **Resuelto en el código** de la rama `feature/testing` de infra (`custom_rule` en `modules/amplify/main.tf`, verificado el 30/10/2026). **Falta aplicarlo** en el Amplify de preproducción, que sigue devolviendo `301` y luego `404` (F16 de `sigmetum-backend/docs/integracion/para-frontend.md`, por confirmar) |
 | **I4** | En `dev`, `backend_url` es `http://…`, pero Amplify sirve el frontend por HTTPS | El navegador bloquea las peticiones (contenido mixto) | **Baja — aplazado hasta tener dominio dev** |
 | **I5** | `app_env_vars` no incluye `ALLOWED_ORIGIN`, `ADMIN_USERNAME` ni `ADMIN_PASSWORD`, que el backend exige al arrancar | El backend no arranca; y aunque arrancara, CORS bloquearía al frontend | **Parcialmente resuelto** — plantillas `.example` actualizadas; `ALLOWED_ORIGIN` se rellena en la segunda vuelta de `apply` tras conocer la URL de Amplify |
 | **I6** | El health check de Beanstalk apunta a `/`, pero el backend solo responde en `/healthcheck` | El entorno puede figurar como no saludable (por confirmar) | **Resuelto** en rama `feature/testing` de infra |
@@ -49,7 +49,7 @@ Vite **incrusta las variables en el JavaScript al compilar**, y solo las que emp
 |---|---|---|---|
 | `VITE_BASE_URL` | Sí | URL **HTTPS** del backend de dev (ver I4) | `https://backend.sigmetum-a.org` |
 | `VITE_API_PREFIX` | Sí | `/api/v1` | `/api/v1` |
-| `VITE_S3_URL` | Sí | URL pública desde la que se sirven los `assets/…` (ver sección 5) | Igual, para prod |
+| `VITE_S3_URL` | Sí, **también al compilar** (favicon) | URL pública desde la que se sirven los `assets/…` (ver sección 5) | Igual, para prod. Hoy `s3_url` va vacía en prod: sin favicon. Además debe empezar por `https://` |
 | `VITE_CAROUSEL_IMAGE_KEYS` | No | Vacía (el carrusel no se usa) | Vacía |
 
 **Situación actual (verificado, rama `feature/testing` de infra):** `modules/amplify/main.tf` define las siguientes variables en app y rama:
@@ -63,6 +63,14 @@ environment_variables = {
   NODE_ENV                 = var.environment
 }
 ```
+
+**`VITE_S3_URL` también se usa en el build.** El plugin `sigmetum-favicon` de `vite.config.js` la lee al compilar `index.html` para inyectar `<link rel="icon" href="<VITE_S3_URL>/assets/logos/app-logo.jpg">`. Por eso tiene que existir en el entorno del build de Amplify (ya la define en app y rama, ver arriba). El favicon **exige `https://`**: si `s3_url` no empieza por `https://` (por ejemplo `http://`, `//cdn...` o sin esquema), se trata como ausente, no se emite el `<link rel="icon">` y el build lo avisa en su consola (`[sigmetum-favicon] VITE_S3_URL no empieza por https://: no se emite el favicon.`) sin fallar. La barra final no se normaliza (igual que `assetUrl`). **El valor de `s3_url` debe ser `https://` para todo, no solo para el favicon:** `assetUrl` no valida el esquema, así que con `http://` el favicon no sale y el resto de recursos se pediría igualmente, pero sería contenido mixto en una web servida por `https://` y el navegador lo bloquearía **(por confirmar: razonamiento, no comprobado en navegador)**. Ni `seguridad.md` ni `npm run quality` lo detectan: solo buscan `http://` literales en el código, no el valor de una variable de entorno (B20 en `docs/09`). Qué ocurre según el valor de `s3_url`:
+
+- Vacía (hoy en `prod`, `environments/prod/main.tf`): el build no falla y la web se publica **sin favicon** (el navegador usa el suyo). No hay icono de respaldo.
+- Con la URL de CloudFront en `https://` (hoy en `dev`: `module.storage.cdn_url`): el favicon sale de ahí. Para que aparezca en prod hay que rellenar `s3_url` con CloudFront cuando I2 se resuelva.
+- Cambiar el valor exige un **nuevo despliegue**, porque queda incrustado en `index.html` y en el JavaScript.
+
+El resto de pendientes del despliegue de preproducción (reescritura de la SPA aplicada, cabeceras C11, entorno sin datos) están en F16 de `docs/09`; no se repiten aquí.
 
 Resuelve I1. La descripción de `backend_url` en `variables.tf` también se corrigió (antes hablaba de `REACT_APP_API_URL`).
 
@@ -94,7 +102,7 @@ El frontend arma las URLs como `VITE_S3_URL` + `/` + clave (`assetUrl` en [src/c
 
 | Clave (ruta en el bucket) | Uso |
 |---|---|
-| `assets/logos/app-logo.jpg` | Logo de la cabecera y favicon |
+| `assets/logos/app-logo.jpg` | Logo de la cabecera y favicon (el favicon se compone al compilar con `VITE_S3_URL`) |
 | `assets/banners/home-banner.jpg` | Imagen de fondo de la portada |
 | `assets/about/about-us.jpg` | Imagen de "Sobre nosotros" |
 | `assets/documents/glossary.pdf` | Glosario descargable en el explorador |
@@ -161,12 +169,12 @@ El frontend no incluye secretos; el token de sesión se guarda en `localStorage`
 |---|---|
 | Región de `sigmetum-infra` | `eu-west-3` (verificado en `environments/*/providers.tf`) |
 | Buckets | `sigmetum-app-assets-dev` / `sigmetum-app-assets-prod` (verificado en `environments/*/terraform.tfvars.example`) |
-| `index.html` del frontend | Mantiene un favicon fijo hacia el bucket antiguo; el código lo sustituye al cargar. Se eliminará |
+| `index.html` del frontend | Ya no fija ningún favicon (se quitó la URL del bucket antiguo): se inyecta al compilar desde `VITE_S3_URL` |
 | DNS | Solo `backend.sigmetum-a.org` (CNAME al endpoint de Beanstalk). Falta el del frontend |
 
 ## 8. Comprobación tras desplegar
 
-1. `https://<dominio>/` carga la portada con logos y banner, sin errores en la consola del navegador.
+1. `https://<dominio>/` carga la portada con logos y banner, sin errores en la consola del navegador. La pestaña muestra el favicon (solo si `VITE_S3_URL` estaba definida al compilar y CloudFront lo sirve) y un título distinto en cada página.
 2. Abrir directamente `https://<dominio>/explorar` y recargar: no da 404.
 3. En la pestaña Red, las llamadas van a `VITE_BASE_URL` (no a `localhost`), por HTTPS y sin errores de CORS.
 4. `/explorar` muestra especies (la API y los datos de `data/active/` funcionan).

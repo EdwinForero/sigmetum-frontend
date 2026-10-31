@@ -17,7 +17,7 @@ Todos están en `src/components/`. Son componentes funcionales (salvo `ErrorBoun
 
 ### Header
 Barra superior fija (`h-16`, `z-50`). Contiene el logo de S3 con enlace a `/`, el texto "SIGMETUM-A" con letras de colores, `LanguageSwitcher` y `Navbar`.
-**Efecto:** al montar sustituye el `href` del `<link rel="icon">` por el logo de S3.
+Sin efectos: no toca el favicon. Este sale ya correcto del HTML compilado (plugin de `vite.config.js`, ver [06](06-utilidades-hooks-config.md#favicon-viteconfigjs-y-faviconhtml)); `ASSETS.LOGO` y `assetUrl` solo se usan aquí para el `<img>` del logo.
 
 ### Navbar
 Menú principal. `menuItems`: Inicio (`/`), Explorar (`/explorar`), Galería (`/galeria`) y Sobre nosotros (`/sobre-nosotros`).

@@ -19,6 +19,7 @@ import CookieBanner from './components/CookieBanner';
 import VegetationGallery from './pages/VegetationGallery';
 import { useTranslation } from 'react-i18next';
 import api from './services/api';
+import useDocumentTitle from './hooks/useDocumentTitle';
 
 function App() {
   const [eeVisible, setEEVisible] = useState(false);
@@ -31,6 +32,7 @@ function App() {
   const [filteredData, setFilteredData] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
   const location = useLocation();
+  useDocumentTitle();
   const { t } = useTranslation();
   const showSideMenu = ['/cargar-archivos', '/administrar-datos', '/administrar-contenido', '/explorar'].includes(location.pathname);
 

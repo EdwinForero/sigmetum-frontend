@@ -38,7 +38,7 @@ Notas:
 
 | Archivo | Qué define |
 |---|---|
-| `vite.config.js` | Plugin de React, puerto 3000 y la configuración de Vitest. Como el código usa JSX en archivos `.js`, le indica a esbuild que los trate como JSX |
+| `vite.config.js` | Plugin de React, el plugin inline `sigmetum-favicon` (inyecta el favicon en `index.html`), puerto 3000 y la configuración de Vitest. Como el código usa JSX en archivos `.js`, le indica a esbuild que los trate como JSX |
 | `postcss.config.js` | Tailwind y Autoprefixer |
 | `tailwind.config.js` | Rutas de contenido (`index.html` y `src/`) y las fuentes `primary` (Amaranth) y `secondary` (Sen) |
 | `src/setupTests.js` | `jest-dom` para Vitest y simulación de `react-i18next` (`t()` devuelve la clave) |
@@ -53,7 +53,7 @@ Notas:
 |---|---|
 | Google Fonts: Amaranth, Sen (y Mukta Malar, que no se usa) | Tipografías `font-primary` y `font-secondary` |
 | Google Fonts: Material Symbols Outlined | Iconos por ligadura (`<span class="material-symbols-outlined">delete</span>`) |
-| Favicon en `s3-sigmetumtest` | Obsoleto; `Header` lo sustituye en tiempo de ejecución por `assets/logos/app-logo.jpg` |
+| Favicon | Ya no está fijo en `index.html`: el plugin `sigmetum-favicon` de `vite.config.js` lo inyecta al compilar (y en `npm run dev`) desde `VITE_S3_URL` y `ASSETS.LOGO`; sin la variable no hay favicon (ver [06](06-utilidades-hooks-config.md#favicon-viteconfigjs-y-faviconhtml)) |
 
 ## Servicios externos
 

@@ -9,12 +9,22 @@ const resources = {
   en: { translation: translationEN }
 };
 
+const FALLBACK_LANGUAGE = 'es';
+
+// El lang del documento sigue al idioma realmente mostrado (en-US da en, fr da es por el respaldo).
+const setDocumentLang = () => {
+  document.documentElement.lang = i18n.resolvedLanguage || FALLBACK_LANGUAGE;
+};
+
+// Antes de init: con recursos en línea, init emite languageChanged de forma síncrona.
+i18n.on('languageChanged', setDocumentLang);
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'es',
+    fallbackLng: FALLBACK_LANGUAGE,
     interpolation: {
       escapeValue: false,
     },
