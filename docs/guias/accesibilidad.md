@@ -68,7 +68,12 @@ Normas para que la web sea utilizable por todas las personas, con el estado real
 ### A8. Idioma
 
 - **Regla:** el atributo `lang` del documento coincide con el idioma mostrado.
-- **Estado: incumple.** `index.html` fija `lang="es-ES"` y nada lo cambia cuando `LanguageSwitcher` pasa a inglés (B15). Con un efecto que actualice `document.documentElement.lang` al cambiar de idioma se resuelve.
+- **Estado: cumple** (WCAG 3.1.1). `src/i18n.js` actualiza `document.documentElement.lang` al arrancar y en cada cambio de idioma (`es` o `en`, el del texto realmente mostrado: un idioma no soportado como `fr` da `es`). `index.html` conserva `lang="es-ES"` solo hasta que arranca React. Lo cubre `src/i18n.test.js`; no se ha probado con un lector de pantalla **(por confirmar)**.
+
+### A8b. Título de página
+
+- **Regla:** cada página tiene un `<title>` descriptivo y distinto (WCAG 2.4.2), que sigue al idioma.
+- **Estado: cumple.** `useDocumentTitle` (llamado en `App`) pone `<Página> · SIGMETUM-A` por ruta, también para el 404 (`notFound.title`) y para las rutas protegidas que redirigen a `/login`, y lo recalcula al cambiar de idioma. Al añadir una ruta hay que darle título: un test lo exige. Lo cubre `src/hooks/useDocumentTitle.test.js`.
 
 ### A9. Imágenes
 
@@ -133,7 +138,7 @@ ESLint solo detecta una parte de los problemas: no puede juzgar el contraste, el
 
 ## 5. Declaración de accesibilidad
 
-Por el Real Decreto 1112/2018 hay que publicar una declaración de accesibilidad (estado de conformidad, contenidos no accesibles y su motivo, fecha, y un canal de contacto). **Falta.** Hasta que los hallazgos B2 a B5 y B15 a B19 y el contraste se resuelvan, su estado sería de conformidad parcial. Decidir con la universidad quién la redacta y dónde se publica (por ejemplo en el pie, junto a "Cookies").
+Por el Real Decreto 1112/2018 hay que publicar una declaración de accesibilidad (estado de conformidad, contenidos no accesibles y su motivo, fecha, y un canal de contacto). **Falta.** Hasta que los hallazgos B2 a B5 y B16 a B19 y el contraste se resuelvan, su estado sería de conformidad parcial. Decidir con la universidad quién la redacta y dónde se publica (por ejemplo en el pie, junto a "Cookies").
 
 ## 6. Mantener esta guía
 

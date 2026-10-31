@@ -42,6 +42,16 @@ describe('traducciones', () => {
     expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
   });
 
+  it('incluye los textos de la galería vacía y del título del 404', () => {
+    expect({
+      es: [spanish['gallery.noDataFoundPlaceholder'], spanish['notFound.title']],
+      en: [english['gallery.noDataFoundPlaceholder'], english['notFound.title']],
+    }).toEqual({
+      es: ['No hay datos disponibles.', 'Página no encontrada'],
+      en: ['No data available.', 'Page not found'],
+    });
+  });
+
   it('ninguna traducción está vacía', () => {
     const empty = [...flatten(es), ...flatten(en)].filter(([, value]) => String(value).trim() === '');
 

@@ -13,7 +13,8 @@
       "cookies" : "Cookies"
     },
     "gallery": {
-      "title": "Galería"
+      "title": "Galería",
+      "noDataFoundPlaceholder": "No hay datos disponibles."
     },
     "home": {
       "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
@@ -43,6 +44,7 @@
       }
     },
     "notFound":{
+      "title" : "Página no encontrada",
       "content" : "No pudimos encontrar la página que buscas",
       "returnButton" : "Volver al inicio"
     },

@@ -13,7 +13,8 @@
     "cookies" : "Cookies"
   },
   "gallery": {
-      "title": "Gallery"
+      "title": "Gallery",
+      "noDataFoundPlaceholder": "No data available."
   },
   "home": {
     "title": "SIGMETUM-A: EXPLORING ANDALUSIAN VEGETATION",
@@ -43,6 +44,7 @@
     }
   },
   "notFound":{
+    "title" : "Page not found",
     "content" : "We couldn't find the page you were looking for",
     "returnButton" : "Return home"
   },

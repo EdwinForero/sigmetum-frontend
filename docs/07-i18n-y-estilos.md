@@ -6,6 +6,8 @@
 
 - Idiomas: español (`es`, por defecto y de reserva) e inglés (`en`).
 - Detección: `i18next-browser-languagedetector` (cadena de consulta, cookie, `localStorage`, navegador...). El idioma elegido queda en `localStorage['i18nextLng']`.
+- **`lang` de `<html>`:** `i18n.js` registra `languageChanged` (antes de `init`) y asigna `document.documentElement.lang = i18n.resolvedLanguage`, o `es` si no hay. Siempre vale `es` o `en`, el idioma del texto realmente mostrado: `en-US` da `en`, `es-ES` da `es` y un idioma no soportado como `fr` cae al texto de reserva y da `es`. `index.html` conserva `lang="es-ES"` solo para el instante previo al arranque de React.
+- **Título de la pestaña:** `useDocumentTitle` (ver [06](06-utilidades-hooks-config.md#usedocumenttitle-srchooksusedocumenttitlejs)) lo traduce con el idioma activo y lo recalcula al cambiarlo, sin recargar; "SIGMETUM-A" no se traduce.
 - `escapeValue: false`: React ya escapa el contenido. Por eso **no** se debe usar `dangerouslySetInnerHTML` con traducciones.
 
 ### Archivos
@@ -18,7 +20,7 @@
 | `footer` | 5 | Enlaces y copyright (`{{currentYear}}`) |
 | `home` | 15 | Portada, contacto, correos (`emailsData` con formato `Nombre / email / ...`) y ubicación |
 | `explore` | 10 | Explorador, `resultsInfo` (`{{currentResults}}`, `{{totalResults}}`), `dialogSpecies.attributes.*` |
-| `gallery` | 1 | Título de la galería |
+| `gallery` | 2 | Título de la galería y `noDataFoundPlaceholder` (texto cuando no hay datos; la galería ya no lleva texto por defecto en el código) |
 | `aboutUs` | 8 | Sobre nosotros |
 | `filter` | 3 | Textos del filtro |
 | `attributes` | 11 | **Nombres visibles de las columnas de datos.** La clave es el nombre exacto de la columna en el Excel (`"Provincia"`, `"Sector Biogeográfico"`...) |
@@ -28,7 +30,7 @@
 | `contentManagement` | 11 | Administrar contenido |
 | `dialogAdvice` | 35 | Todos los mensajes de éxito, error y aviso (incluye `errorEmailRateLimit`, `errorEmailInvalid`, `errorDraftNotFound` y `adviceInvalidImageTitle`); `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
 | `cookies` | 28 | Política, banner y modal (con etiquetas `<a>` y `<strong>` para `<Trans>`) |
-| `tokenExpiration`, `notFound`, `pagination`, `language`, `ee` | 1-2 | Varios |
+| `tokenExpiration`, `notFound`, `pagination`, `language`, `ee` | 1-3 | Varios. `notFound.title` ("Página no encontrada" / "Page not found") es el título de pestaña del 404 |
 
 ### Convenciones
 
