@@ -122,7 +122,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 | Regla | Por qué |
 |---|---|
 | No añadas una librería para algo que se resuelve en unas pocas líneas | Cada dependencia añade superficie de ataque y peso |
-| Antes de añadir una: mantenimiento, licencia, tamaño, y que funcione con **Node 20** | `jsdom` 27 y posteriores exigen Node 22 y habrían roto los tests en Amplify |
+| Antes de añadir una: mantenimiento, licencia, tamaño, y que funcione con **Node 22** | Amplify construye con Node 22 y la CI prueba también Node 24; `jsdom` 26 se mantiene por cambio mínimo (subirlo se valora en M19 de `docs/09`) |
 | `npm install` actualiza `package-lock.json`: se confirma siempre. En integración continua, `npm ci` | Instalaciones reproducibles |
 | Nunca `npm audit fix --force` | Puede subir versiones mayores sin avisar |
 | Toda dependencia nueva se documenta en [02](../02-tecnologias.md) | `docs:check` lo exige |

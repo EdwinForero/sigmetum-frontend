@@ -26,7 +26,7 @@ Notas:
 | `vite` | ^6.4 | Servidor de desarrollo (puerto 3000) y build de producción en `dist/` |
 | `@vitejs/plugin-react` | ^4.7 | Transformación de JSX y recarga en caliente |
 | `vitest` | ^3.2 | Ejecutor de tests, integrado con la configuración de Vite |
-| `jsdom` | ^26 | Entorno de navegador simulado para los tests. Se fija en la 26 porque las versiones 27 y posteriores exigen Node 22 o superior y el proyecto debe funcionar con Node 20 |
+| `jsdom` | ^26 | Entorno de navegador simulado para los tests. Se mantiene en la 26 por cambio mínimo; subirla a la 27 o posterior se valora en M19 de [09](09-estado-actual-y-deuda-tecnica.md) con Node 22 como base (los `engines` exactos de jsdom 27 no se han comprobado **(por confirmar)**) |
 | `@testing-library/react`, `dom`, `user-event`, `jest-dom` | ^16, ^10, ^14, ^6 | Pruebas de componentes y aserciones sobre el DOM |
 | `tailwindcss` | ^3.4.14 | Estilos utilitarios. Configuración en `tailwind.config.js` (fuentes) |
 | `postcss`, `autoprefixer` | ^8.5, ^10.6 | Procesado de Tailwind (`postcss.config.js`) |
@@ -43,7 +43,8 @@ Notas:
 | `tailwind.config.js` | Rutas de contenido (`index.html` y `src/`) y las fuentes `primary` (Amaranth) y `secondary` (Sen) |
 | `src/setupTests.js` | `jest-dom` para Vitest y simulación de `react-i18next` (`t()` devuelve la clave) |
 | `eslint.config.js` | Reglas de ESLint (React, hooks, accesibilidad y seguridad) y un bloque aparte para los `.mjs` de `plugins/` (globales de Node) |
-| `package.json` | `"type": "module"` y los scripts (ver [08](08-guia-desarrollo.md#scripts)) |
+| `package.json` | `"type": "module"`, `engines.node` (`>=22`, la versión del build de Amplify) y los scripts (ver [08](08-guia-desarrollo.md#scripts)). `package-lock.json` refleja `engines` en su entrada raíz |
+| `.nvmrc` | `22`: `nvm use` elige la versión de Node de desarrollo. Amplify no lo lee (su `build_spec` ejecuta `nvm install 22 && nvm use 22`) |
 
 `eslint.config.js` (configuración plana de ESLint 9): los errores bloquean, y las reglas de accesibilidad y de calidad son avisos con un **tope que no puede crecer** (`--max-warnings` en el script `lint`). `scripts/quality-check.mjs` añade patrones prohibidos, búsqueda de secretos y `npm audit`. Ver [08](08-guia-desarrollo.md#scripts).
 

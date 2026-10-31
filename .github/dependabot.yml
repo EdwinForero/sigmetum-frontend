@@ -13,7 +13,7 @@ updates:
       minor-y-parches:
         update-types: [minor, patch]
     ignore:
-      # jsdom 27 o posterior exige Node 22 y el proyecto debe funcionar con Node 20 (ver docs/02-tecnologias.md).
+      # jsdom 27 o posterior: se mantiene el pin por cambio mínimo, no por Node 20. Con Node 22 como base podría valorarse subirlo (M19 en docs/09).
       - dependency-name: jsdom
         update-types: ['version-update:semver-major']
       # Los plugins de React y de accesibilidad todavía no admiten ESLint 10.

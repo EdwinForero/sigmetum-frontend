@@ -2,6 +2,9 @@
   "name": "sigmetum",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "i18next": "^23.16.8",
     "i18next-browser-languagedetector": "^8.0.0",
