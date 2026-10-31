@@ -2,7 +2,7 @@
 
 ## Requisitos
 
-- Node.js 20 o superior (la misma versión que el backend en Elastic Beanstalk y que Amplify) y npm. No subas `jsdom` a la 27 o posterior sin subir antes Node: exigen Node 22.
+- Node.js 22 o superior (`engines.node` de `package.json` es `>=22`; es la versión que fija el build de Amplify) y npm. Con nvm, `nvm use` lee `.nvmrc` (contiene `22`). La CI prueba también Node 24. `jsdom` se mantiene en la 26 por cambio mínimo; valorar subirlo está en M19 de [09](09-estado-actual-y-deuda-tecnica.md).
 - El backend `sigmetum-backend` arrancado en local o una URL de un entorno desplegado.
 - Acceso de lectura al bucket de S3 o a su CloudFront para ver logos, banner y glosario.
 
@@ -131,17 +131,17 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 
 | Pieza | Qué hace |
 |---|---|
-| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Con Node 20 ejecuta `npm ci`, `npm test`, `npm run build`, `npm run lint`, `npm run quality` y `npm run docs:check`, y después, con Node 22 (el glob de `node --test` exige Node 21 o posterior), `npm run agentes:test`. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Matriz de Node 22 y 24 con `fail-fast: false` (se ve el resultado de cada versión). En ambas ejecuta `npm ci`, `npm test`, `npm run build` y `npm run agentes:test` (el glob de `node --test` exige Node 21 o posterior). Solo en Node 22, la principal, ejecuta `npm run lint`, `npm run quality` (incluye `npm audit`) y `npm run docs:check`, que no dependen de la versión. Los dos checks se llaman `Tests, compilación, calidad y documentación (Node 22)` y `Tests, compilación, calidad y documentación (Node 24)` (en la PR llevan el prefijo `CI / `); el check antiguo, sin versión, ya no existe. Se lanza en cada PR, en cada push a `master` y `feature/testing`, cada lunes (porque `npm audit` puede dar un aviso nuevo sin que cambie el código) y a mano |
 | [.github/pull_request_template.md](../.github/pull_request_template.md) | Plantilla de la PR con la definición de terminado, las guías que aplican y si afecta al backend o a la infraestructura |
-| [.github/dependabot.yml](../.github/dependabot.yml) | Propone cada lunes las actualizaciones de `npm` y de las acciones de GitHub, agrupando las menores. Ignora las versiones mayores de `jsdom` (exige Node 22) y `eslint` (los plugins aún no lo admiten) |
+| [.github/dependabot.yml](../.github/dependabot.yml) | Propone cada lunes las actualizaciones de `npm` y de las acciones de GitHub, agrupando las menores. Ignora las versiones mayores de `jsdom` (el pin se mantiene por cambio mínimo, no por la versión de Node; ver M19 en [09](09-estado-actual-y-deuda-tecnica.md)) y `eslint` (los plugins aún no lo admiten) |
 | [.gitattributes](../.gitattributes) | Fija los finales de línea en LF en todos los sistemas |
 
 **Ajustes de GitHub que no están en el código** (los hace quien administre el repositorio):
 
-1. Proteger `master` y `feature/testing`: exigir que el trabajo **CI** esté en verde y una revisión antes de fusionar. Sin esto, la CI avisa pero no bloquea.
+1. Proteger `master` y `feature/testing`: exigir los **dos** checks (`Tests, compilación, calidad y documentación (Node 22)` y `Tests, compilación, calidad y documentación (Node 24)`) en verde y una revisión antes de fusionar. Sin esto, la CI avisa pero no bloquea. Si ya existe una regla que exige el nombre antiguo (sin versión), hay que cambiarla a los dos nombres nuevos: mientras tanto bloquearía todas las PR. Con la matriz ambos checks corren siempre, así que no se quedan en espera. Que exista esa regla es **(por confirmar)** en los ajustes de GitHub.
 2. Activar *Dependabot security updates* en Settings > Code security.
 
-**Amplify no ejecuta estos controles:** solo compila. Conviene añadir `npm test` en el `preBuild` del módulo `amplify` de `sigmetum-infra` para no desplegar una versión rota (ver [para-infra.md](integracion/para-infra.md)).
+**Amplify no ejecuta lint, calidad ni `docs:check`:** su `build_spec` hace `npm ci`, `npm test` (ya está en `preBuild`, en `modules/amplify/main.tf` de `sigmetum-infra`, autorizado por el usuario) y `npm run build`, para no desplegar una versión rota (ver [para-infra.md](integracion/para-infra.md)).
 
 ## Herramientas de Claude Code del proyecto
 

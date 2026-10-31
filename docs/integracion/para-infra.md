@@ -27,19 +27,19 @@ Ordenado por impacto. Cada punto se explica más abajo.
 | Entorno | Rama | Comentario |
 |---|---|---|
 | `dev` (preproducción) | `feature/testing` | La rama tiene que contener el código migrado a Vite; si no, el build falla |
-| `prod` | `master` | Igual |
+| `prod` | `master` | Igual. **Ojo:** `master` sigue siendo Create React App (`react-scripts` 5.0.1, sin Vite ni Vitest; verificado con git el 30/10/2026, 39 commits por detrás de `feature/testing`), así que es incompatible con el `build_spec` actual (Node 22, `npm test`, `dist`). Antes del primer build de `prod`, fusiona `feature/testing` en `master` o aplica solo en `dev`. Que `terraform apply` no lance un build por sí solo es **(por confirmar)** |
 
 **Qué necesita la compilación del frontend:**
 
 | Aspecto | Valor |
 |---|---|
 | Herramienta | Vite 6 (ya no es Create React App) |
-| Node | **20 o superior** (Vite 6 y las pruebas funcionan con Node 20). La imagen de Amplify puede traer otra versión por defecto: fíjala en `preBuild` (por ejemplo con `nvm use 20`) **(por confirmar)** |
+| Node | **22**: el `build_spec` de `modules/amplify/main.tf` ya hace `nvm install 22 && nvm use 22` (verificado en el código y con el build #7 de infra en `dev`). El frontend lo declara con `engines.node` `>=22` en `package.json` y `.nvmrc` con `22`. Intención de pasar a Node 24: la CI del frontend ya prueba 22 y 24 en matriz; infra avisará al frontend al cambiar el `build_spec` |
 | Instalación | `npm ci` |
 | Compilación | `npm run build` |
 | Carpeta de artefactos | `dist` (el `build_spec` actual ya lo dice: coincide) |
 | Caché | `node_modules/**/*` (ya definida) |
-| Tests | `npm test` (Vitest, unos segundos). Conviene ejecutarlos en `preBuild` para no desplegar una versión rota |
+| Tests | `npm test` (`vitest run`: termina solo, sin modo watch). No necesita red ni secretos (verificado con grep: `fetch` solo aparece mockeado y ningún test lee variables de entorno). Ya está en `preBuild` (`modules/amplify/main.tf`) para no desplegar una versión rota |
 
 ## 3. Variables de entorno del frontend
 
@@ -119,6 +119,8 @@ El frontend arma las URLs como `VITE_S3_URL` + `/` + clave (`assetUrl` en [src/c
 | **A. CloudFront con OAC delante del bucket, solo para `assets/*`** (recomendada) | El bucket sigue privado; caché global; `VITE_S3_URL` apunta a la distribución | Añade un módulo nuevo |
 | B. Meter los recursos en la carpeta `public/` del frontend | Sin bucket ni CloudFront para esto; se versionan con el código | Los PDF e imágenes pesados engordan el repositorio |
 | C. Política de bucket que permita lectura pública solo de `assets/*` | La más simple | Hay que relajar el bloqueo de acceso público, que hoy es una garantía de seguridad |
+
+**C13 (cerrado):** por `VITE_S3_URL` solo se piden claves de `assets/`: todas las de `src/config/assets.js` empiezan por `assets/` y `assetUrl` solo se usa en `Header`, `Home`, `About` y `Explore`. La galería (`VegetationGallery`, vía `/list-images`) y el carrusel (`ImageCarrousel`, vía `/get-image`) usan las URLs que devuelve el backend y no pasan por `assetUrl`.
 
 Los datos (`data/…`) y las imágenes de la galería (`gallery/…`) **no** se sirven por esta vía: el backend los entrega (JSON directo o URLs prefirmadas de 1 hora). Así que el acceso público solo hace falta para `assets/*`.
 

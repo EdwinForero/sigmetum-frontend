@@ -8,7 +8,7 @@ React 18 · Vite · Tailwind CSS · i18next (ES/EN). Consume la API de `sigmetum
 
 ## Instalación
 
-Requisitos: Node.js 20 y el backend en marcha (en local o desplegado).
+Requisitos: Node.js 22 o superior (con nvm, `nvm use` lee `.nvmrc`) y el backend en marcha (en local o desplegado).
 
 ```bash
 npm ci

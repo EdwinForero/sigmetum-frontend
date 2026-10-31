@@ -22,16 +22,23 @@ concurrency:
 
 jobs:
   verify:
-    name: Tests, compilación, calidad y documentación
+    # El nombre incluye la versión de Node: son dos checks distintos, y esos son los que hay
+    # que exigir en la protección de rama (ver docs/08-guia-desarrollo.md).
+    name: Tests, compilación, calidad y documentación (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22 es la principal (la que fija el build de Amplify, ver docs/integracion/para-infra.md);
+        # 24 anticipa la migración de infra. fail-fast desactivado para ver el resultado de cada una.
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
 
-      # Node 20: el mismo que usan el backend (Elastic Beanstalk) y Amplify.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
           cache: npm
 
       - name: Instalar dependencias
@@ -43,21 +50,22 @@ jobs:
       - name: Compilación
         run: npm run build
 
+      # Solo en Node 22: lint, calidad (incluye npm audit) y docs:check no dependen de la
+      # versión de Node; ejecutarlos dos veces duplicaría coste y ruido en el cron semanal.
       - name: ESLint
+        if: matrix.node == 22
         run: npm run lint
 
       - name: Calidad y seguridad
+        if: matrix.node == 22
         run: npm run quality
 
       - name: Documentación al día
+        if: matrix.node == 22
         run: npm run docs:check
 
-      # Tests del plugin ciclo-agentico (node:test). Su script usa un glob de `node --test`, que exige
-      # Node 21 o posterior, así que este paso cambia a Node 22; el resto del job sigue en Node 20.
-      # No forma parte de la definición de terminado: la comprobación de docs:check solo exige los cinco.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
+      # Tests del plugin ciclo-agentico (node:test), en ambas versiones. Su script usa un glob de
+      # `node --test`, que exige Node 21 o posterior: valen las dos. No forma parte de la
+      # definición de terminado: la comprobación de docs:check solo exige los cinco.
       - name: Tests del plugin ciclo-agentico
         run: npm run agentes:test
