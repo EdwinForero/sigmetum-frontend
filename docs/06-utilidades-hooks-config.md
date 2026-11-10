@@ -10,8 +10,8 @@
 | `BASE_URL` | `VITE_BASE_URL` | `http://localhost:8000` | Origen del backend |
 | `API_PREFIX` | `VITE_API_PREFIX` | `/api/v1` | Prefijo de versión (debe coincidir con el backend) |
 | `S3_URL` | `VITE_S3_URL` | `''` | Base pública de S3 o CloudFront para los recursos estáticos. También se lee **al compilar** (`vite.config.js`) para el favicon: ver [Favicon](#favicon-viteconfigjs-y-faviconhtml) |
-| `COGNITO_DOMAIN` | `VITE_COGNITO_DOMAIN` | `''` | Dominio del Hosted UI de Cognito (con `https://`, sin barra final). Pública. Sin valor por defecto: en local el login no se puede probar, por diseño. Vacía: `startLogin` y el canje del código lanzan un error y no redirigen ni llaman |
-| `COGNITO_CLIENT_ID` | `VITE_COGNITO_CLIENT_ID` | `''` | Id del cliente público de la app en el pool de Cognito. Pública, sin secreto |
+| `COGNITO_USER_POOL_ID` | `VITE_COGNITO_USER_POOL_ID` | `''` | Id del pool de Cognito, `<región>_<id>`: su prefijo es la región con la que `api.js` construye el endpoint `cognito-idp`, y la parte posterior al guion bajo entra en el cálculo SRP. Pública. Sin valor por defecto: en local el login no se puede probar, por diseño. Vacía o sin `_`: las llamadas a Cognito lanzan `{ type: 'config' }` sin hacer `fetch` |
+| `COGNITO_CLIENT_ID` | `VITE_COGNITO_CLIENT_ID` | `''` | Id del cliente público de la app en el pool de Cognito (`ClientId` de las peticiones). Pública, sin secreto. Vacía: igual que la anterior |
 | `CAROUSEL_IMAGE_KEYS` | `VITE_CAROUSEL_IMAGE_KEYS` | `[]` | Claves separadas por comas para `ImageCarrousel` (sin uso) |
 
 ### `assets.js`
@@ -50,25 +50,34 @@ Documentado en [03-api.md](03-api.md#métodos-del-cliente). Resumen:
 | Función interna | Descripción |
 |---|---|
 | `request(path, options, { authenticated })` | `fetch` a `BASE_URL + API_PREFIX + path`. Con `authenticated` añade `Bearer ${getAccessToken()}` en cada intento (nada si no hay token). Convierte los fallos de red en `Error('network_error')`, parsea el JSON y lanza un error si `!response.ok \|\| !json.success`. Devuelve `json.data`. Con token: reintenta el `503` de autenticación (`RETRY_DELAYS_MS = [1000, 3000]`) y ante `401` renueva la sesión una vez y repite |
-| `cognitoToken(params)` | `POST <COGNITO_DOMAIN>/oauth2/token` (formulario, `client_id`, sin secreto ni `Authorization`; respuesta sin el envoltorio `{ success, data }`). Sin variables de Cognito lanza `cognito_not_configured` |
-| `renewSession()` / `refreshSession()` | Renovación con `grant_type=refresh_token`. `refreshSession` comparte una única promesa (`refreshing`) entre las llamadas con `401` simultáneas; solo ella borra la sesión y va a `/login` si falla. Un fallo de red no cierra la sesión; un 5xx de Cognito sí **(por confirmar si es lo deseado)** |
-| `api.exchangeCode(code, verifier)` | Canje del código de autorización (`grant_type=authorization_code`, `code_verifier`, `redirect_uri`) y `saveTokens` |
+| `cognitoEndpoint()` / `cognito(action, payload)` | La región (prefijo del id de pool) debe cumplir `/^[a-z]{2}(-[a-z]+)+-\d$/`; si no, o sin `_` o sin cliente, es un error de configuración sin `fetch`. `POST https://cognito-idp.<región>.amazonaws.com/` con `Content-Type: application/x-amz-json-1.1` y `X-Amz-Target: AWSCognitoIdentityProviderService.<acción>`, sin secreto ni `Authorization` y sin el envoltorio `{ success, data }`. Errores: `{ type: 'cognito', status, code }` (el `__type` normalizado; nunca el `message`), `{ type: 'config' }` o `network` |
+| `isRetryableAuthError(error)` (exportada) | Lista blanca de fallos que no significan «credencial rechazada» (red, configuración vacía, `5xx`, `429`, `TooManyRequestsException`, `LimitExceededException`, `InternalErrorException`, `4xx` sin `__type`). La usan `renewSession` y `useCognitoLogin` |
+| `renewSession()` / `refreshSession()` | Renovación con `InitiateAuth` (`REFRESH_TOKEN_AUTH`). Si `getRefreshToken()` cambió mientras esperaba la respuesta (carrera con `logout`), no guarda los tokens: devuelve `false` sin redirigir (decisión **(por confirmar)**, B31 en [09](09-estado-actual-y-deuda-tecnica.md)). `refreshSession` comparte una única promesa (`refreshing`) entre las llamadas con `401` simultáneas; solo ella borra la sesión y va a `/login` si falla. Solo los fallos de la lista blanca la conservan; cualquier otro `__type` de un `4xx` la cierra |
+| `api.signIn`, `respondToChallenge`, `associateSoftwareToken`, `verifySoftwareToken` | Acceso por SRP y retos (ver [03](03-api.md#métodos-del-cliente)); `settle` guarda el `AuthenticationResult` con `saveTokens` |
+| `api.logout()` | Lee el refresco, `clearSession()`, `RevokeToken` con `Promise.race` de 3 s (`REVOKE_TIMEOUT_MS`; un fallo no impide cerrar) y `window.location.assign('/')`. El temporizador de 3 s queda pendiente aunque la revocación acabe antes (inocuo) |
 
 ### Sesión (`src/services/session.js`)
 
-Único archivo que escribe `localStorage` (`token` = acceso y `refreshToken`) y `sessionStorage` (`pkce_verifier`, `pkce_state`); `api.js` y `ProtectedRoute` lo usan, nunca al revés (`api.js` importa `session.js`). Exportaciones con nombre:
+Único archivo que escribe `localStorage` (`token` = acceso y `refreshToken`); `api.js` y `ProtectedRoute` lo usan, nunca al revés (`api.js` importa `session.js`). Ya no hay `sessionStorage` ni PKCE. Exportaciones con nombre:
 
 | Exporta | Descripción |
 |---|---|
 | `getAccessToken()`, `getRefreshToken()` | Lectura de `localStorage` |
-| `saveTokens({ access_token, refresh_token })` | Guarda el de acceso; el de refresco solo si viene en la respuesta (si no, conserva el anterior). Nunca guarda el `id_token` |
+| `saveTokens({ AccessToken, RefreshToken })` | Claves en PascalCase, como las devuelve Cognito. Guarda el de acceso; el de refresco solo si viene (si no, conserva el anterior). Nunca guarda el `IdToken` |
 | `clearSession()` | Borra los dos tokens |
-| `redirectUri()` | `window.location.origin + '/auth/callback'` |
-| `buildAuthorizeUrl({ state, codeChallenge })` | `<COGNITO_DOMAIN>/oauth2/authorize` con `response_type=code`, `client_id`, `redirect_uri`, `scope=openid email`, `state`, `code_challenge` y `code_challenge_method=S256` (con `URLSearchParams`) |
-| `codeChallengeFor(verifier)` | SHA-256 en base64url sin `=` (`crypto.subtle`; asíncrona) |
-| `takePkce()` | Devuelve `{ verifier, state }` y borra los dos de `sessionStorage` |
-| `startLogin()` | Genera un verificador de 32 bytes y un `state` de 16 (`crypto.getRandomValues`), los guarda y redirige a la URL de autorización. Sin `COGNITO_DOMAIN` o `COGNITO_CLIENT_ID` lanza `cognito_not_configured` (sin redirigir); el llamador lo muestra con `t()` |
-| `logout()` | `clearSession()` y redirige a `<COGNITO_DOMAIN>/logout?client_id=…&logout_uri=<origen>/` (con `URLSearchParams`). Sin `COGNITO_DOMAIN` solo borra la sesión y va a `/` |
+
+### Cálculo SRP (`src/services/srp.js`)
+
+Sin red ni almacenamiento. Usa solo `AuthenticationHelper` de `amazon-cognito-identity-js` (importado de la raíz); la firma y la fecha las calcula el proyecto con Web Crypto. `poolName` es la parte del id de pool posterior al guion bajo (igual que `CognitoUserPool.getUserPoolName` del paquete); el mismo valor entra en el cálculo de x y en la firma.
+
+| Exporta | Descripción |
+|---|---|
+| `srpTimestamp(date)` | `'Mon Nov 9 07:05:03 UTC 2026'`: UTC, día sin cero delante, hora, minutos y segundos con dos dígitos |
+| `passwordClaimSignature({ hkdf, poolName, userId, secretBlock, timestamp })` | HMAC-SHA256 (Web Crypto) sobre `poolName + userId + secretBlock (base64 decodificado) + timestamp`, en base64 |
+| `srpStart(poolName)` | `{ helper, srpA }` (A en hexadecimal) |
+| `srpPasswordVerifier(helper, poolName, password, challengeParameters, date)` | `{ USERNAME: USER_ID_FOR_SRP, PASSWORD_CLAIM_SECRET_BLOCK, PASSWORD_CLAIM_SIGNATURE, TIMESTAMP }`. Ya no cede turno: lo hace `api.signIn` con `await sleep(0)` (un turno real, antes de `srpStart`) para que «Comprobando…» pueda pintarse antes del cálculo; que se pinte **(por confirmar en un navegador)**. B y la sal se crean con `helper.N.constructor` (el `BigInteger` del paquete, que no se exporta). No devuelve ni conserva la contraseña |
+
+El test de `srp.js` usa como oráculo `CognitoUser.authenticateUser` del propio paquete **solo en el test** (`SRP_A`, `TIMESTAMP` y firma idénticos byte a byte). Que el SRP sea correcto contra el pool real **(por confirmar en `dev`)**.
 
 ## Hooks
 
@@ -93,6 +102,19 @@ const { dialog, showDialog, closeDialog } = useDialog();
 </AnimatePresence>
 ```
 
+### Acceso con Cognito (`src/hooks/useCognitoLogin.js`)
+`useCognitoLogin({ onAuthenticated })` devuelve `{ step, busy, error: { key, seq } | null, secret, otpUri, mfaSetupAgain, retry, signIn, submitNewPassword, confirmMfaSetup, submitTotp }`. Pasos: `credentials`, `newPassword`, `mfaSetup` y `totp`. No toca tokens (los guarda `api`) ni guarda la contraseña en un `ref` del hook, pero esta sí pasa por el estado de React del formulario durante el SRP y la petición (visible en React DevTools, B29 en [09](09-estado-actual-y-deuda-tecnica.md)); la `Session` y el `USER_ID_FOR_SRP` en los `ref` tampoco son secretos frente a las herramientas del navegador.
+
+| Aspecto | Descripción |
+|---|---|
+| Estado interno | La `Session` del reto y el `USER_ID_FOR_SRP` van en `useRef`; el secreto TOTP, en estado porque se muestra. `busyRef` impide el doble envío en el mismo tick; `mountedRef` evita actualizar el estado tras desmontar (compatible con `StrictMode`). `AssociateSoftwareToken` se llama desde el manejador del reto, no desde un efecto |
+| Validación sin petición | Campos vacíos: `login.requiredFields`; contraseña que no cumple `meetsPasswordPolicy`: `passwordPolicyError`; no coinciden: `passwordMismatch`; código que (tras quitar los espacios, `cleanCode`) no son seis dígitos: `codeFormatError`. El código enviado es el ya limpio |
+| `retry` | `null`, `'associate'` o `'respond'` (ref y estado). `'associate'`: `AssociateSoftwareToken` falló de forma reintentable (red, `5xx` o `429`, también cuando `MFA_SETUP` llega directo de `signIn`); el hook pasa a `mfaSetup` sin secreto, con `serviceUnavailable`, y `confirmMfaSetup` repite **solo** `AssociateSoftwareToken` con la `Session` del `MFA_SETUP` (nunca reenvía `NEW_PASSWORD`). Un `NotAuthorizedException` en esa llamada da `sessionExpired`. `'respond'`: `VerifySoftwareToken` ya fue bien y el `RespondToAuthChallenge('MFA_SETUP')` final falló de forma reintentable; el reintento repite solo la respuesta, sin otro código. Un `CodeMismatch`/`Expired` en el reintento limpia `retry` y vuelve el campo del código. Un `SecretCode` ausente en la respuesta es `startError` |
+| Errores de `signIn` | Reintentable: `serviceUnavailable`; `NotAuthorizedException`, `UserNotFoundException`, `PasswordResetRequiredException` o `UserNotConfirmedException`: `credentialsError` (mismo texto, sin revelar si el usuario existe); el resto, incluida la configuración vacía y un `200` sin tokens ni reto: `startError` |
+| Errores en los retos | Reintentable: `serviceUnavailable` y se queda; `CodeMismatchException`, `ExpiredCodeException`, `EnableSoftwareTokenMFAException` o `ok: false`: `codeError`; `InvalidPasswordException`: `passwordRejected`; `NotAuthorizedException`: vuelve a `credentials` con `sessionExpired` (o `codeSessionLost` si hubo un código erróneo antes, porque Cognito puede invalidar la `Session` tras un `CodeMismatchException`, **(por confirmar en `dev`)**); el resto: vuelve con `startError` |
+| Retos | `NEW_PASSWORD_REQUIRED` responde `{ USERNAME, NEW_PASSWORD }`; `MFA_SETUP`: `associateSoftwareToken`, `verifySoftwareToken` y `respondToChallenge('MFA_SETUP')`; `SOFTWARE_TOKEN_MFA` responde con el código. Cualquier otro reto: `startError`. Un `MFA_SETUP` repetido genera otro secreto (`mfaSetupAgain`). Se asume que no hay `requiredAttributes` en `NEW_PASSWORD_REQUIRED` (**por confirmar en `dev`**) |
+| `otpUri` | `otpauth://totp/SIGMETUM-A:<correo>?secret=…&issuer=SIGMETUM-A` (con `encodeURIComponent`); solo se muestra como texto, nunca en `href` ni en `navigate` |
+
 ### `useDialogFocus(isOpen, onClose)` (`src/hooks/useDialogFocus.js`)
 Gestiona el foco de un diálogo modal (A6) y devuelve la `ref` de su caja, que debe llevar `tabIndex={-1}`. Lo usan `DialogAdvice` y `DialogSpecies`; un diálogo nuevo debe reutilizarlo.
 
@@ -113,13 +135,16 @@ Pone `document.title` con el formato `` `${t(clave)} · SIGMETUM-A` `` según la
 | `titleKeyFor(pathname)` | Resuelve la clave con `matchPath` (sin distinguir mayúsculas y con o sin barra final); si ninguna ruta coincide, `notFound.title` |
 | `useDocumentTitle()` (por defecto) | Efecto con dependencias `[t, key]`: se recalcula al navegar y al cambiar de idioma (en react-i18next `t` cambia de identidad con el idioma) |
 
-`/auth/callback` usa la clave `login.title`, la misma que `/login`. Al añadir una ruta en `App.js` hay que añadirla a `PAGE_TITLE_KEYS`: un test lee `App.js` y falla si falta alguna.
+Al añadir una ruta en `App.js` hay que añadirla a `PAGE_TITLE_KEYS`: un test lee `App.js` y falla si falta alguna.
 
 ### `UseAtBottom()` (`src/utilities/UseAtBottom.js`)
 Devuelve `true` cuando la ventana está a 5 px o menos del final del documento. Escucha `scroll` en `window` sin limitar la frecuencia. El nombre empieza en mayúscula, lo que se sale de la convención `useXxx`, aunque funciona.
 
 
 ## Utilidades
+
+### `meetsPasswordPolicy(password)` (`passwordPolicy.js`)
+Ayuda en cliente que replica la política del pool: devuelve `true` con 14 caracteres o más y con minúsculas, mayúsculas, números y símbolos. Cognito es la autoridad: solo evita una petición que se sabe que será rechazada (sus rechazos se tratan como `passwordRejected`).
 
 ### `convertToXLSX(data)` (`CSVfunctions.js`)
 Crea un libro de SheetJS con una hoja `Sigmetum-A` a partir de un array de objetos (`json_to_sheet`).

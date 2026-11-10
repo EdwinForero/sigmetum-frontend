@@ -4,13 +4,19 @@ import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
 import LoadSpinner from './LoadSpinner';
 import api from '../services/api';
-import { getAccessToken, logout } from '../services/session';
+import { getAccessToken } from '../services/session';
 
 // 'checking' | 'ok' | 'denied' | 'unavailable'
 const ProtectedRoute = ({ element }) => {
   const { t } = useTranslation();
   const [status, setStatus] = useState('checking');
   const [attempt, setAttempt] = useState(0);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const logOut = () => {
+    setLoggingOut(true);
+    api.logout();
+  };
 
   useEffect(() => {
     let active = true;
@@ -39,7 +45,7 @@ const ProtectedRoute = ({ element }) => {
           text={t('login.retryButton')}
           onClick={() => { setStatus('checking'); setAttempt((n) => n + 1); }}
         />
-        <ButtonPrincipal text={t('login.logOutButton')} onClick={logout} />
+        <ButtonPrincipal text={t('login.logOutButton')} onClick={logOut} disabled={loggingOut} />
       </div>
     );
   }
@@ -49,7 +55,7 @@ const ProtectedRoute = ({ element }) => {
   return (
     <>
       <div className="flex justify-end p-4">
-        <ButtonPrincipal text={t('login.logOutButton')} onClick={logout} />
+        <ButtonPrincipal text={t('login.logOutButton')} onClick={logOut} disabled={loggingOut} />
       </div>
       {element}
     </>

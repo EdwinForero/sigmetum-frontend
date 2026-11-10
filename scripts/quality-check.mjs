@@ -39,6 +39,15 @@ const KNOWN_DEBT = {
   },
 };
 
+// Archivos del acceso con Cognito: ahí pasan la contraseña, el código TOTP, el secreto y los tokens, así que no se admite console.*.
+const NO_CONSOLE_FILES = [
+  'src/services/api.js',
+  'src/services/session.js',
+  'src/services/srp.js',
+  'src/hooks/useCognitoLogin.js',
+  'src/components/LoginForm.js',
+];
+
 // Vulnerabilidades altas aceptadas de forma explícita, con su justificación.
 const ACCEPTED_ADVISORIES = {
   xlsx: 'Sin arreglo disponible. Solo se usa para escribir ficheros (CSVfunctions.js); los avisos afectan a la lectura de ficheros no confiables.',
@@ -58,6 +67,9 @@ const ACCEPTED_ADVISORIES = {
         if (pattern.test(line)) problems.push(`${file}:${index + 1} ${name}`);
       }
       const where = `${file}:${index + 1}`;
+      if (NO_CONSOLE_FILES.includes(file) && /\bconsole\./.test(line)) {
+        problems.push(`${where} usa console.* en un archivo que maneja contraseñas, códigos o tokens (ver docs/guias/seguridad.md)`);
+      }
       if (/\b(localStorage|sessionStorage)\b/.test(line) && !KNOWN_DEBT.localStorage.allowed.includes(file)) {
         const debt = KNOWN_DEBT.localStorage.debt[file];
         if (debt) notes.push(`${where} usa el almacenamiento del navegador: deuda conocida ${debt}`);

@@ -10,12 +10,15 @@
 | `i18next` | ^23.16.8 | Motor de traducciones | `i18n.js` |
 | `react-i18next` | ^15.1.1 | `useTranslation`, `Trans` | Casi todos los componentes |
 | `i18next-browser-languagedetector` | ^8.0.0 | Detecta el idioma del navegador y lo guarda en `localStorage['i18nextLng']` | `i18n.js` |
+| `amazon-cognito-identity-js` | ^6.3.22 (instalada la 6.3.22) | Cálculo SRP del login con Cognito: solo se usa `AuthenticationHelper` | `services/srp.js` |
 | `xlsx` (SheetJS) | ^0.18.5 | Generar el Excel descargable | `utilities/CSVfunctions.js` |
 | `styled-components` | ^6.1.13 | CSS del interruptor de cookies | `Switch.js` |
 
 Notas:
 
-- El login con Cognito no añade ninguna dependencia: usa `fetch`, `URLSearchParams` y la Web Crypto API del navegador (`crypto.subtle` y `crypto.getRandomValues`, que exigen un contexto seguro: HTTPS o `localhost`). Se retiró `jwt-decode` (09/11/2026): el cliente ya no decodifica el token.
+- `amazon-cognito-identity-js` es la única dependencia del login y solo se usa su `AuthenticationHelper` (importado de la raíz del paquete, nunca por ruta profunda: en dev Vite duplicaría la clase y fallaría `instanceof`). **Justificación:** el SRP se calcula con aritmética de enteros grandes (`BigInteger`) y el contrato de infra dice «no se implementa SRP a mano»; el resto (peticiones a `cognito-idp`, firma HMAC con Web Crypto, fecha) lo hace el proyecto. `AuthenticationHelper` se exporta, `BigInteger` no (se usa `helper.N.constructor`). **Peso medido:** el paquete no declara `sideEffects`, así que importar desde la raíz lo arrastra entero: el JavaScript de producción pasó de 772.41 kB (gzip 250.65 kB) a 839.29 kB (gzip 274.92 kB), +66.9 kB y +24.3 kB comprimido (ver M16 en [09](09-estado-actual-y-deuda-tecnica.md)). **Auditoría:** `npm audit --omit=dev` da las mismas 3 de antes (`react-router`, `react-router-dom` y `xlsx`, aceptadas en M14) y ninguna nueva; `npm audit` completo marca 13 (la cifra anterior no se midió). `jwt-decode` se retiró el 09/11/2026: el cliente no decodifica el token.
+- El paquete importa `buffer` 4.9.2, que lee `global.TYPED_ARRAY_SUPPORT`. En el build Rollup reescribe `global`; en dev el pre-empaquetado de esbuild no, por eso `vite.config.js` define `optimizeDeps.esbuildOptions.define: { global: 'globalThis' }` (solo afecta al pre-empaquetado de dev). Vitest usa el `buffer` nativo de Node y no detecta el problema. Comprobado: `dist/` no contiene `global.TYPED_ARRAY_SUPPORT` y en dev el paquete pre-empaquetado usa `globalThis`; que el `define` evite el fallo en un navegador en dev **(por confirmar)**.
+- La Web Crypto API (`crypto.subtle`, para la firma HMAC) solo existe en un contexto seguro (HTTPS o `localhost`): en desarrollo por la IP de la red local el acceso daría `login.startError` **(por confirmar)**.
 - `xlsx` 0.18.5 (la última de npm) tiene avisos de seguridad (prototype pollution y ReDoS al *leer* ficheros). Aquí solo se escriben, así que el riesgo es bajo, pero SheetJS publica las versiones nuevas en su propio CDN.
 - `styled-components` se usa solo en un componente y se podría sustituir por Tailwind.
 
@@ -38,7 +41,7 @@ Notas:
 
 | Archivo | Qué define |
 |---|---|
-| `vite.config.js` | Plugin de React, el plugin inline `sigmetum-favicon` (inyecta el favicon en `index.html`), puerto 3000 y la configuración de Vitest. Como el código usa JSX en archivos `.js`, le indica a esbuild que los trate como JSX |
+| `vite.config.js` | Plugin de React, el plugin inline `sigmetum-favicon` (inyecta el favicon en `index.html`), puerto 3000 y la configuración de Vitest. Como el código usa JSX en archivos `.js`, le indica a esbuild que los trate como JSX (también en el pre-empaquetado de dev, donde además define `global: 'globalThis'` por el paquete `buffer`, ver las notas de dependencias) |
 | `postcss.config.js` | Tailwind y Autoprefixer |
 | `tailwind.config.js` | Rutas de contenido (`index.html` y `src/`) y las fuentes `primary` (Amaranth) y `secondary` (Sen) |
 | `src/setupTests.js` | `jest-dom` para Vitest y simulación de `react-i18next` (`t()` devuelve la clave) |
@@ -61,7 +64,7 @@ Notas:
 | Servicio | Uso |
 |---|---|
 | `sigmetum-backend` (Express, Node) | API REST bajo `/api/v1` |
-| Amazon S3 (`eu-west-1` en `sigmetum-infra`; el bucket antiguo estaba en `eu-west-3`) | Datos por provincia, Excel versionados, imágenes y recursos estáticos |
+| Amazon S3 (región de `sigmetum-infra`; el bucket antiguo estaba en otra región) | Datos por provincia, Excel versionados, imágenes y recursos estáticos |
 | AWS Amplify | Despliegue del frontend, definido en `sigmetum-infra` |
 | IPNI (`ipni.org`) | Enlace "Leer más" de cada especie |
 

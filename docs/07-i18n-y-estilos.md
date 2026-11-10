@@ -24,7 +24,7 @@
 | `aboutUs` | 8 | Sobre nosotros |
 | `filter` | 3 | Textos del filtro |
 | `attributes` | 11 | **Nombres visibles de las columnas de datos.** La clave es el nombre exacto de la columna en el Excel (`"Provincia"`, `"Sector Biogeográfico"`...) |
-| `login` | 8 | Acceso con Cognito: `title`, `logInButton`, `startError`, `callbackLoading`, `callbackError`, `retryButton`, `logOutButton` y `serviceUnavailable`. Se retiraron los textos de usuario y contraseña, `unauthorizedLabel` y `tooManyAttemptsLabel` |
+| `login` | 35 | Acceso con Cognito: título, botones (`logInButton`, `continueButton`, `verifyButton`, `copyButton`, `retryButton`, `logOutButton`), etiquetas (`emailLabel`, `passwordLabel`, `newPasswordLabel`, `confirmPasswordLabel`, `codeLabel`, `secretLabel`, `otpUriLabel`), títulos de los retos (`newPasswordTitle`, `mfaSetupTitle`, `totpTitle`), ayudas (`allRequired`, `passwordPolicy`, `mfaSetupHelp`, `mfaSetupAgain`, `loading`, `copied`, `copyFailed`) y errores (`requiredFields`, `credentialsError`, `sessionExpired`, `codeSessionLost`, `passwordPolicyError`, `passwordMismatch`, `passwordRejected`, `codeFormatError`, `codeError`, `startError`, `serviceUnavailable`). Se retiraron `callbackLoading` y `callbackError` (el Hosted UI ya no existe), los textos del acceso anterior, `unauthorizedLabel` y `tooManyAttemptsLabel`. `credentialsError` es el mismo texto para contraseña incorrecta, usuario inexistente y reinicio de contraseña (no revela si el usuario existe) |
 | `uploadFiles` | 3 | Carga de archivos |
 | `dataManagement` | 11 | Administrar datos |
 | `contentManagement` | 11 | Administrar contenido |

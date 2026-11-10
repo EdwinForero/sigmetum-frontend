@@ -15,14 +15,16 @@ sigmetum-frontend/
 │   │   ├── env.js           # Lectura centralizada de variables VITE_*
 │   │   └── assets.js        # Claves de S3 de los recursos estáticos y assetUrl()
 │   ├── services/
-│   │   ├── api.js           # Cliente HTTP único (fetch + envoltorio { success, data }), 401 con refresco y 503 con reintentos
-│   │   └── session.js       # Sesión de Cognito: tokens (localStorage), PKCE (sessionStorage), login y logout
+│   │   ├── api.js           # Cliente HTTP único (fetch + envoltorio { success, data }), 401 con refresco, 503 con reintentos y todas las llamadas a cognito-idp (login SRP, retos, renovación, cierre de sesión)
+│   │   ├── srp.js           # Cálculo SRP de Cognito (sin red ni almacenamiento)
+│   │   └── session.js       # Almacén de la sesión: tokens de acceso y de refresco (localStorage)
 │   ├── hooks/
+│   │   ├── useCognitoLogin.js   # Máquina de estados del acceso (credenciales, contraseña nueva, TOTP)
 │   │   ├── useDialog.js     # Estado de los diálogos de aviso/confirmación
 │   │   └── useDocumentTitle.js  # Título de la pestaña según la ruta y el idioma
 │   ├── utilities/           # Funciones puras y hooks auxiliares
 │   ├── languages/{es,en}/translation.json
-│   ├── pages/               # Una por ruta (11)
+│   ├── pages/               # Una por ruta (10)
 │   └── components/          # Componentes reutilizables (34)
 ├── tailwind.config.js       # Fuentes Amaranth (primary) y Sen (secondary)
 ├── .env.example             # Plantilla de variables de entorno
@@ -70,8 +72,7 @@ La barra lateral aparece solo en `/explorar`, `/cargar-archivos`, `/administrar-
 | `/galeria` | `VegetationGallery` | Pública | Galería de fotos de vegetación |
 | `/sobre-nosotros` | `About` | Pública | Propósito, misión y valores del proyecto |
 | `/cookies` | `Cookies` | Pública | Política de cookies |
-| `/login` | `Login` | Pública | Acceso de administradores: botón que lleva al Hosted UI de Cognito |
-| `/auth/callback` | `AuthCallback` | Pública | Vuelta del Hosted UI: canjea el código y lleva a `/cargar-archivos` |
+| `/login` | `Login` | Pública | Acceso de administradores: formulario propio (correo y contraseña, con los retos de Cognito) |
 | `/cargar-archivos` | `FilesUpload` | **Protegida** | Subida de Excel de datos por provincia |
 | `/administrar-datos` | `DataManagement` | **Protegida** | Consulta, descarga, activación y borrado de versiones |
 | `/administrar-contenido` | `ContentManagement` | **Protegida** | Términos no latinos e imágenes de la galería |
@@ -157,16 +158,16 @@ Al cancelar (botón "Cancelar" o clic fuera del diálogo), el frontend envía `c
 
 ## Autenticación
 
-Login con el Hosted UI de Cognito (código de autorización con PKCE S256). Todo el almacenamiento de la sesión está en `services/session.js`.
+Login con formulario propio y SRP (`USER_SRP_AUTH`) contra `cognito-idp` (cliente público, sin secreto). La contraseña solo se usa para el cálculo local y nunca viaja. El almacén de la sesión está en `services/session.js`; todas las peticiones a Cognito, en `services/api.js`.
 
-1. `/login`: `LoginForm` muestra un botón que llama a `startLogin()`: genera `code_verifier` y `state` (en `sessionStorage`) y redirige a `<VITE_COGNITO_DOMAIN>/oauth2/authorize`.
-2. Cognito vuelve a `/auth/callback`. `AuthCallback` comprueba `state`, canjea el código con `api.exchangeCode` (`POST /oauth2/token`), guarda el token de acceso y el de refresco en `localStorage` (`token` y `refreshToken`) y navega a `/cargar-archivos`. Con `error`, `state` distinto o canje fallido muestra un error con botón de reintento.
+1. `/login`: `LoginForm` pinta el formulario y `useCognitoLogin` lleva los pasos `credentials`, `newPassword`, `mfaSetup` y `totp`. `api.signIn` hace `InitiateAuth` (`USER_SRP_AUTH`), calcula la prueba con `services/srp.js` y responde `PASSWORD_VERIFIER`.
+2. Retos posibles: `NEW_PASSWORD_REQUIRED` (primer acceso: contraseña nueva), `MFA_SETUP` (registro de la aplicación de autenticación: `AssociateSoftwareToken`, `VerifySoftwareToken`) y `SOFTWARE_TOKEN_MFA` (código de seis dígitos). Con el resultado final `api` guarda el token de acceso y el de refresco en `localStorage` (`token` y `refreshToken`; el de identidad nunca) y `LoginForm` navega a `/cargar-archivos`.
 3. Las llamadas protegidas añaden `Authorization: Bearer <token de acceso>` (`api.getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`).
-4. `401`: una renovación con el token de refresco y un reintento; si falla, se borra la sesión y se va a `/login`. `503` de autenticación: dos reintentos (1 s y 3 s) sin borrar nada (ver [03-api.md](03-api.md#ante-un-401)).
-5. `ProtectedRoute` llama a `GET /auth` al montar cada ruta protegida: sin token o con `401` va a `/login`; con cualquier otro error (red, `403`, `5xx`) muestra un aviso de servicio no disponible con botón «Reintentar», sin borrar la sesión.
-6. Cierre de sesión: botón de `ProtectedRoute` → `logout()` borra los tokens y redirige a `<VITE_COGNITO_DOMAIN>/logout`.
+4. `401`: una renovación con el token de refresco (`InitiateAuth`, `REFRESH_TOKEN_AUTH`) y un reintento; si Cognito rechaza el refresco, se borra la sesión y se va a `/login`; si no está disponible, se conserva. `503` de autenticación: dos reintentos (1 s y 3 s) sin borrar nada (ver [03-api.md](03-api.md#ante-un-401)).
+5. `ProtectedRoute` llama a `GET /auth` al montar cada ruta protegida: sin token o con `401` va a `/login`; con cualquier otro error (red, `403`, `5xx`) muestra un aviso de servicio no disponible con botón «Reintentar» y «Cerrar sesión», sin borrar la sesión.
+6. Cierre de sesión: botón de `ProtectedRoute` → `api.logout()` borra los tokens, revoca el de refresco (`RevokeToken`, hasta 3 s) y va a `/`.
 
-El flujo completo contra Cognito no se puede probar en local: **(por confirmar en `dev`)**.
+El flujo completo contra Cognito (SRP, orden de los retos, bloqueo por intentos) no se puede probar en local: **(por confirmar en `dev`)**.
 
 ## Recursos estáticos
 

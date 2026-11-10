@@ -54,7 +54,7 @@ Normas para que la web sea utilizable por todas las personas, con el estado real
 ### A5. Formularios
 
 - **Regla:** cada campo tiene su `<label>` asociado (`htmlFor` + `id`, o anidado); el `placeholder` no sustituye a la etiqueta; los errores se anuncian (`role="alert"` o `aria-live`) y se asocian al campo (`aria-describedby`); los campos obligatorios se indican.
-- **Estado: parcial.** `LoginForm` ya no tiene campos (es un botón nativo que lleva al Hosted UI de Cognito, con su error en `role="alert"`), así que A5 ya no le aplica. `ContactForm` asocia cada `<label>` a su campo (`htmlFor` + `id` con `useId`, B3). Siguen pendientes `aria-describedby` en `ContactForm`, los campos `TextInput` y `FilterSearchBar` (un `<label>` envolvente sin texto: su nombre sale solo del `placeholder`; B3 sigue abierto para ellos). Los botones de icono (B1) ya están resueltos (ver A4). Los avisos de ESLint `jsx-a11y/label-has-for` y `control-has-associated-label` en `ContactForm` siguen abiertos: no se anidó el `input` en la `<label>` (cambiaría el marcado).
+- **Estado: parcial.** `LoginForm` (formulario propio de acceso con SRP) cumple: cada campo con `<label htmlFor>` y un `span` con `id` referenciado por `aria-labelledby`, obligatorios indicados (`required` y el texto `login.allRequired`), sin `placeholder`, `autoComplete` correcto (`username`, `current-password`, `new-password`, `one-time-code`), el error en `<p role="alert">` con `key` (se anuncia otra vez aunque sea el mismo) referenciado por `aria-describedby` de los campos del paso, y la política de contraseña en `aria-describedby` de los campos de contraseña nueva. `aria-invalid` solo en errores de validación (con «campos obligatorios», solo en los campos vacíos), y en `mfaSetup` la clave y el botón de copiar van antes del `<form>`, de modo que el aviso de error queda debajo de la clave. Los avisos de ESLint nuevos: ninguno (el tope de avisos no cambia). `ContactForm` asocia cada `<label>` a su campo (`htmlFor` + `id` con `useId`, B3). Siguen pendientes `aria-describedby` en `ContactForm`, los campos `TextInput` y `FilterSearchBar` (un `<label>` envolvente sin texto: su nombre sale solo del `placeholder`; B3 sigue abierto para ellos). Los botones de icono (B1) ya están resueltos (ver A4). Los avisos de ESLint `jsx-a11y/label-has-for` y `control-has-associated-label` en `ContactForm` siguen abiertos: no se anidó el `input` en la `<label>` (cambiaría el marcado).
 
 ### A6. Diálogos
 
@@ -65,7 +65,7 @@ Normas para que la web sea utilizable por todas las personas, con el estado real
 ### A7. Estructura y navegación
 
 - **Regla:** una sola `<h1>` por página, y los niveles de encabezado no se saltan; existen `<header>`, `<nav>`, `<main>` y `<footer>`; hay un enlace "Saltar al contenido".
-- **Estado:** los puntos de referencia existen. Solo `Home`, `Cookies` y `NotFound` tienen `<h1>`; el resto abre con `<h2>` (B18). No hay enlace para saltar al contenido.
+- **Estado:** los puntos de referencia existen. Solo `Home`, `Cookies`, `NotFound` y `Login` (el `<h1>` es `login.title`, con un `<h2>` por reto del acceso) tienen `<h1>`; el resto abre con `<h2>` (B18). No hay enlace para saltar al contenido.
 
 ### A8. Idioma
 
@@ -96,7 +96,7 @@ Normas para que la web sea utilizable por todas las personas, con el estado real
 ### A12. Contenido dinámico
 
 - **Regla:** los estados de carga y los mensajes que aparecen sin acción del usuario se anuncian (`role="status"` o `aria-live="polite"`; los errores, `role="alert"`).
-- **Estado: incumple.** `LoadSpinner` no anuncia nada.
+- **Estado: parcial.** `LoadSpinner` no anuncia nada (incumple). `LoginForm` cumple: un `<p role="status">` siempre presente anuncia `login.loading` («Comprobando…») mientras dura la petición y el resultado de copiar la clave (`copied` o `copyFailed`); el foco va al `<h2>` al entrar en cada reto, al correo al volver al primer paso y, tras un error, al primer campo vacío (en credenciales) o al campo del paso; tras un reintento repetido en `mfaSetup` el foco no va a ningún campo (B30). No se ha probado con un lector de pantalla **(por confirmar)**; tampoco si «Comprobando…» llega a pintarse antes del cálculo SRP (`signIn` cede un turno real con `await sleep(0)`; **por confirmar en un navegador**).
 
 ### A13. Tooltips
 
