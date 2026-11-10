@@ -14,6 +14,7 @@ const Pagination = ({
     <div className="flex justify-center items-center m-2">
       <ButtonPrincipal
         icon="arrow_back_ios_new"
+        ariaLabel={t("iconButton.previousPage")}
         onClick={() => onPageChange("prev")}
         disabled={currentPage === 1}
       />
@@ -22,6 +23,7 @@ const Pagination = ({
       </span>
       <ButtonPrincipal
         icon="arrow_forward_ios"
+        ariaLabel={t("iconButton.nextPage")}
         onClick={() => onPageChange("next")}
         disabled={currentPage === totalPages}
       />

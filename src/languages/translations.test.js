@@ -52,6 +52,38 @@ describe('traducciones', () => {
     });
   });
 
+  it('incluye los nombres accesibles de los botones de icono', () => {
+    const pick = (dictionary) =>
+      Object.fromEntries(
+        Object.entries(dictionary)
+          .filter(([key]) => key.startsWith('iconButton.'))
+          .map(([key, value]) => [key.replace('iconButton.', ''), value])
+      );
+
+    expect({ es: pick(spanish), en: pick(english) }).toEqual({
+      es: {
+        delete: 'Eliminar',
+        add: 'Añadir',
+        menu: 'Menú',
+        close: 'Cerrar',
+        previousPage: 'Página anterior',
+        nextPage: 'Página siguiente',
+        info: 'Información',
+        scrollDown: 'Bajar',
+      },
+      en: {
+        delete: 'Delete',
+        add: 'Add',
+        menu: 'Menu',
+        close: 'Close',
+        previousPage: 'Previous page',
+        nextPage: 'Next page',
+        info: 'Information',
+        scrollDown: 'Scroll down',
+      },
+    });
+  });
+
   it('ninguna traducción está vacía', () => {
     const empty = [...flatten(es), ...flatten(en)].filter(([, value]) => String(value).trim() === '');
 

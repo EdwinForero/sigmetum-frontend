@@ -233,4 +233,48 @@ describe('FileUpload con campos vacíos en el Excel', () => {
     expect(await screen.findByText('dialogAdvice.errorUploadMessage')).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByText('Málaga datos.xlsx')).not.toBeInTheDocument());
   });
+
+  it('la papelera de cada archivo tiene nombre accesible y anillo de foco', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<FileUpload onLoad={onLoad} />);
+    const archivos = ['uno.xlsx', 'dos.xlsx'].map((nombre) => new File([nombre], nombre));
+    await user.upload(container.querySelector('#fileInput'), archivos);
+
+    const papeleras = await screen.findAllByRole('button', { name: 'iconButton.delete' });
+
+    expect(papeleras).toHaveLength(2);
+    papeleras.forEach((papelera) => expect(papelera).toHaveClass('focus-ring'));
+  });
+
+  it('Escape sobre la confirmación equivale a cancelar: envía confirmed false una sola vez y no muestra éxito', async () => {
+    fetchMock
+      .mockResolvedValueOnce(draftResponse())
+      .mockResolvedValueOnce(jsonResponse(200, { success: true, data: 'cancelled' }));
+    const user = userEvent.setup();
+    await uploadOneFile(user);
+
+    await user.keyboard('{Escape}');
+    await user.keyboard('{Escape}');
+
+    await waitFor(() =>
+      expect(confirmCalls(fetchMock)).toEqual([
+        { confirmed: false, draftKey: 'Malaga/Malaga_V1_01_01_2026.xlsx' },
+      ])
+    );
+    expect(screen.queryByText('dialogAdvice.successUploadMessage')).not.toBeInTheDocument();
+  });
+
+  it('un segundo Escape cierra el diálogo de error', async () => {
+    fetchMock
+      .mockResolvedValueOnce(draftResponse())
+      .mockResolvedValueOnce(jsonResponse(500, { success: false, error: 'Internal' }));
+    const user = userEvent.setup();
+    await uploadOneFile(user);
+
+    await user.keyboard('{Escape}');
+    expect(await screen.findByText('dialogAdvice.errorUploadMessage')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByText('dialogAdvice.errorUploadMessage')).not.toBeInTheDocument());
+  });
 });

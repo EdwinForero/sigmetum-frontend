@@ -18,7 +18,7 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 | `handleFilterDataChange(filtered)` | Actualiza `filteredData` solo si cambia (comparación por `JSON.stringify`) |
 | `handleFilterChange(filtered)` | Igual, para `filteredSpecies` en el explorador |
 | `handleOnSpeciesSelect(set)` | Guarda las especies elegidas en el filtro |
-| `menuOptions` | Opciones de la barra lateral: `filter` y `dataManagementFilter` abren un `Filter` en un panel deslizante; `dataManagement`, `contentManagement` y `uploadFiles` son enlaces |
+| `menuOptions` | Opciones de la barra lateral: `filter` y `dataManagementFilter` abren un `Filter` en un panel deslizante; `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con claves de título ya existentes (`filter.title`, `dataManagement.title`, `contentManagement.title`, `uploadFiles.title`) y `Sidebar` lo usa como `aria-label` del botón de icono |
 | `showSideMenu` | `true` en las cuatro rutas de datos |
 
 ---

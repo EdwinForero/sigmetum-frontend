@@ -87,8 +87,12 @@ const TermsManager = () => {
       .map((item, index) => (
         <div key={index} className="flex items-center justify-between text-[#0C1811] mb-2">
           <p>{item.term}</p>
-          <button className="text-[#15B659] cursor-pointer" onClick={() => handleDeleteTerm(item.term)}>
-            <span className="material-symbols-outlined text-3xl mx-auto">delete</span>
+          <button
+            className="focus-ring text-[#15B659] cursor-pointer"
+            aria-label={t('iconButton.delete')}
+            onClick={() => handleDeleteTerm(item.term)}
+          >
+            <span className="material-symbols-outlined text-3xl mx-auto" aria-hidden="true">delete</span>
           </button>
         </div>
       ));
@@ -109,7 +113,7 @@ const TermsManager = () => {
           value={term}
           onChange={(e) => setTerm(e.target.value)}
         />
-        <ButtonPrincipal className="mx-2" icon="add" onClick={handleAddTerm} />
+        <ButtonPrincipal className="mx-2" icon="add" ariaLabel={t('iconButton.add')} onClick={handleAddTerm} />
       </div>
 
       <div className="mt-4">

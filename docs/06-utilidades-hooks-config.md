@@ -93,6 +93,17 @@ const { dialog, showDialog, closeDialog } = useDialog();
 </AnimatePresence>
 ```
 
+### `useDialogFocus(isOpen, onClose)` (`src/hooks/useDialogFocus.js`)
+Gestiona el foco de un diálogo modal (A6) y devuelve la `ref` de su caja, que debe llevar `tabIndex={-1}`. Lo usan `DialogAdvice` y `DialogSpecies`; un diálogo nuevo debe reutilizarlo.
+
+| Comportamiento | Descripción |
+|---|---|
+| Al abrir (`isOpen` pasa a `true`) | Guarda `document.activeElement` como origen y enfoca la caja con `preventScroll` (empieza fuera de pantalla). El foco va a la caja y no al primer botón, para que Enter no confirme sin querer |
+| `keydown` en `document` | `Escape` llama a `onClose` (la última versión, vía `ref`, porque `onClose` cambia en cada render de `FileUpload`). `Tab` y `Shift+Tab` se atrapan entre el primer y el último elemento enfocable (`a[href]`, botones, campos, `summary` y `[tabindex]` distinto de `-1`); si el foco está fuera de la caja, entra por el primero o el último. `Shift+Tab` desde la propia caja o desde un elemento del diálogo que no es de esa lista (por ejemplo, un contenedor con scroll enfocable) va al último control. Ignora el evento si `defaultPrevented` |
+| Diálogos anidados | Una pila a nivel de módulo registra los diálogos abiertos: solo atiende el teclado el último abierto, así que Escape y Tab actúan solo sobre el de encima |
+| Al cerrar o desmontar | Quita el listener, saca el diálogo de la pila y devuelve el foco al origen si sigue en el documento y no es `body`; si no (el origen se desmontó, o fue un clic en algo no enfocable, como la ficha de `SpeciesCard`), pone `tabindex="-1"` al `main` si no lo tiene y le da el foco. Si no hay `main`, el foco se pierde. El `tabindex="-1"` del `main` queda permanente (ver B26 en [09](09-estado-actual-y-deuda-tecnica.md)) |
+
+Con `AnimatePresence`, el llamador pasa `isOpen && useIsPresent()` (Framer Motion) para que el listener y la trampa se desactiven mientras el diálogo sale.
 ### `useDocumentTitle()` (`src/hooks/useDocumentTitle.js`)
 Pone `document.title` con el formato `` `${t(clave)} · SIGMETUM-A` `` según la ruta mostrada. `App` lo llama **una vez**; no se llama en cada página porque `ProtectedRoute` puede mostrar el spinner o redirigir y el título quedaría desfasado.
 

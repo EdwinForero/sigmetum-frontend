@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const InfoButton = ({ tooltipText }) => {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState("center");
   const tooltipRef = useRef(null);
@@ -43,12 +45,13 @@ const InfoButton = ({ tooltipText }) => {
   return (
     <div className="relative inline-block">
       <button
-        className="material-symbols-outlined text-[#99BBA8] px-3 py-1 rounded focus:outline-none"
+        className="material-symbols-outlined focus-ring text-[#99BBA8] px-3 py-1 rounded"
+        aria-label={t("iconButton.info")}
         onMouseEnter={showTooltip}
         onMouseLeave={hideTooltip}
         onClick={showTooltip}
       >
-        info
+        <span className="material-symbols-outlined" aria-hidden="true">info</span>
       </button>
 
       {isVisible && (

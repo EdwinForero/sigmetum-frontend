@@ -42,23 +42,25 @@ Normas para que la web sea utilizable por todas las personas, con el estado real
 ### A3. El foco siempre es visible
 
 - **Regla:** nunca quites el contorno de foco sin poner uno alternativo visible (`focus-visible:ring-2`, por ejemplo).
-- **Estado: incumple.** `outline-none` aparece en 12 sitios sin alternativa (B17).
+- **Cómo:** la clase `.focus-ring` (contorno `ink` más halo `surface`) o `.focus-ring-inset` (para campos recortados por un `overflow-hidden`), ambas en `src/index.css`; ver `DESIGN.md` («Foco»).
+- **Estado: cumple en el código, por confirmar a mano.** B17 está resuelto: ya no quedan `outline-none`, `outline-0` ni `ring-0` en `src/` (el recuento de sitios que había está en `docs/09`). Los campos de `ContactForm`, `FilterSearchBar` y `TextInput`, `ButtonPrincipal`, `ButtonAlternative`, las papeleras, `InfoButton` y `ScrollIndicator` llevan el anillo. **(Por confirmar)** en un navegador: pintado y contraste del anillo (sobre todo en `CookieBanner` y en el inicio) y el recorte del anillo interior en `FilterSearchBar` y `TextInput`. Quedan sin anillo los `label` y `FileDropdown`, que no reciben foco (ver A2).
 
 ### A4. Nombre accesible en controles sin texto
 
 - **Regla:** un botón con solo icono lleva `aria-label` traducido, y el icono, `aria-hidden="true"`.
 - **Por qué:** los iconos son **texto** (Material Symbols por ligadura): un lector de pantalla leería "delete", "keyboard_arrow_down" o "arrow_circle_down". Es el aviso más repetido de ESLint (`jsx-a11y/control-has-associated-label`).
-- **Estado: incumple.** No hay ningún atributo `aria-*` ni `role` en el código (B16).
+- **Estado: cumple en los botones de solo icono (B1 resuelto).** Las claves son `iconButton.*` (`delete`, `add`, `menu`, `close`, `previousPage`, `nextPage`, `info`, `scrollDown`); `ButtonPrincipal` recibe `ariaLabel` en su rama de icono, y las ligaduras decorativas (chevrons de `ButtonAlternative` y `CategoryFilter`, `open_in_new`) llevan `aria-hidden="true"` sin añadir `aria-label` a botones que ya tienen texto. Los nombres del panel lateral reutilizan claves de título existentes. Falta el resto de `aria-*` de la interfaz (B16: spinner, tooltips) y probarlo con un lector de pantalla **(por confirmar)**.
 
 ### A5. Formularios
 
 - **Regla:** cada campo tiene su `<label>` asociado (`htmlFor` + `id`, o anidado); el `placeholder` no sustituye a la etiqueta; los errores se anuncian (`role="alert"` o `aria-live`) y se asocian al campo (`aria-describedby`); los campos obligatorios se indican.
-- **Estado: parcial.** `LoginForm` ya no tiene campos (es un botón nativo que lleva al Hosted UI de Cognito, con su error en `role="alert"`), así que A5 ya no le aplica. `ContactForm` asocia cada `<label>` a su campo (`htmlFor` + `id` con `useId`, B3). Siguen pendientes `aria-describedby` en `ContactForm`, los campos `TextInput` y `FilterSearchBar` (un `<label>` envolvente sin texto: su nombre sale solo del `placeholder`; B3 sigue abierto para ellos) y los botones de icono (B1). Los avisos de ESLint `jsx-a11y/label-has-for` y `control-has-associated-label` en `ContactForm` siguen abiertos: no se anidó el `input` en la `<label>` (cambiaría el marcado).
+- **Estado: parcial.** `LoginForm` ya no tiene campos (es un botón nativo que lleva al Hosted UI de Cognito, con su error en `role="alert"`), así que A5 ya no le aplica. `ContactForm` asocia cada `<label>` a su campo (`htmlFor` + `id` con `useId`, B3). Siguen pendientes `aria-describedby` en `ContactForm`, los campos `TextInput` y `FilterSearchBar` (un `<label>` envolvente sin texto: su nombre sale solo del `placeholder`; B3 sigue abierto para ellos). Los botones de icono (B1) ya están resueltos (ver A4). Los avisos de ESLint `jsx-a11y/label-has-for` y `control-has-associated-label` en `ContactForm` siguen abiertos: no se anidó el `input` en la `<label>` (cambiaría el marcado).
 
 ### A6. Diálogos
 
 - **Regla:** `role="dialog"` (o `alertdialog`), `aria-modal="true"`, `aria-labelledby` con el título, foco que entra al abrir y vuelve al elemento de origen al cerrar, foco atrapado dentro y cierre con **Escape**.
-- **Estado: incumple** en `DialogAdvice` y `DialogSpecies` (B2).
+- **Cómo:** el hook `useDialogFocus` (`src/hooks/useDialogFocus.js`, ver `docs/06`); la caja del diálogo lleva `role="dialog"`, `aria-modal="true"`, `aria-labelledby` y `tabIndex={-1}`, y el foco inicial va a esa caja (no al primer botón, para que Enter no confirme sin querer).
+- **Estado: parcial.** `DialogAdvice` y `DialogSpecies` cumplen (B2 resuelto). **Siguen sin cumplir:** el panel de `Sidebar` y `CookieBanner`. **(Por confirmar)** a mano: el orden real de Tab en el navegador, el efecto de `aria-modal` con NVDA o VoiceOver, que el foco vuelva tras la animación de salida, el contorno por defecto del navegador en la caja del diálogo y que `<summary>` entre en la trampa. Si el elemento que abrió el diálogo ya no existe al cerrar, el foco va al `main` (el hook le pone `tabindex="-1"`); la ficha de `SpeciesCard` no se puede enfocar, así que ahí el foco acaba en `main` o en `body`.
 
 ### A7. Estructura y navegación
 
@@ -138,7 +140,7 @@ ESLint solo detecta una parte de los problemas: no puede juzgar el contraste, el
 
 ## 5. Declaración de accesibilidad
 
-Por el Real Decreto 1112/2018 hay que publicar una declaración de accesibilidad (estado de conformidad, contenidos no accesibles y su motivo, fecha, y un canal de contacto). **Falta.** Hasta que los hallazgos B2 a B5 y B16 a B19 y el contraste se resuelvan, su estado sería de conformidad parcial. Decidir con la universidad quién la redacta y dónde se publica (por ejemplo en el pie, junto a "Cookies").
+Por el Real Decreto 1112/2018 hay que publicar una declaración de accesibilidad (estado de conformidad, contenidos no accesibles y su motivo, fecha, y un canal de contacto). **Falta.** Hasta que los hallazgos B3, B5 y B16 a B19 y el contraste se resuelvan, su estado sería de conformidad parcial. Decidir con la universidad quién la redacta y dónde se publica (por ejemplo en el pie, junto a "Cookies").
 
 ## 6. Mantener esta guía
 

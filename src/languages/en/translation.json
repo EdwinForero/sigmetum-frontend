@@ -248,6 +248,16 @@
       }
     }
   },
+  "iconButton": {
+    "delete": "Delete",
+    "add": "Add",
+    "menu": "Menu",
+    "close": "Close",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "info": "Information",
+    "scrollDown": "Scroll down"
+  },
   "language":{
     "spanish" : "Español - ES",
     "english" : "English - EN"

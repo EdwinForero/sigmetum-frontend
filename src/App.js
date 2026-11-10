@@ -99,11 +99,11 @@ function App() {
   };
 
   const menuOptions = [
-    { id: 'filter', name: 'Filtro', component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} />, icon: 'filter_alt' },
-    { id: 'dataManagementFilter', name: 'Filtro', component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange} />, icon: 'filter_alt' },
-    { id: 'dataManagement', name: 'Administrar datos', icon: 'database', link: '/administrar-datos' },
-    { id: 'contentManagement', name: 'Administrar contenido', icon: 'settings', link: '/administrar-contenido' },
-    { id: 'uploadFiles', name: 'Cargar archivos', icon: 'upload', link: '/cargar-archivos' },
+    { id: 'filter', name: t('filter.title'), component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} />, icon: 'filter_alt' },
+    { id: 'dataManagementFilter', name: t('filter.title'), component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange} />, icon: 'filter_alt' },
+    { id: 'dataManagement', name: t('dataManagement.title'), icon: 'database', link: '/administrar-datos' },
+    { id: 'contentManagement', name: t('contentManagement.title'), icon: 'settings', link: '/administrar-contenido' },
+    { id: 'uploadFiles', name: t('uploadFiles.title'), icon: 'upload', link: '/cargar-archivos' },
   ];
 
   return (

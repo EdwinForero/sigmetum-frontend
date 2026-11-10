@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AnimatePresence } from 'motion/react';
 import DialogSpecies from './DialogSpecies';
 
 const ESPECIE = 'Quercus ilex';
@@ -122,5 +125,145 @@ describe('DialogSpecies', () => {
     const enlace = screen.getByRole('link');
     expect(enlace).toHaveAttribute('rel', 'noopener noreferrer');
     expect(screen.getByText('explore.dialogSpecies.closeButton')).toBeInTheDocument();
+  });
+
+  it('el enlace a IPNI se nombra solo por su texto, sin la ligadura del icono', () => {
+    renderDialog([fila('Provincia exacta', ESPECIE)]);
+
+    expect(screen.getByRole('link', { name: 'explore.dialogSpecies.readMoreLabel' })).toBeInTheDocument();
+  });
+
+  it('es un diálogo modal nombrado por el título completo de la especie', () => {
+    render(
+      <DialogSpecies
+        isOpen
+        onClose={vi.fn()}
+        data={[fila('Provincia exacta', 'Quercus ilex subsp. ballota')]}
+        species={{ 'Especies Características': 'Quercus ilex subsp. ballota' }}
+        noItalicTerms={['subsp.']}
+      />
+    );
+
+    const dialogo = screen.getByRole('dialog', { name: /Quercus ilex\s+subsp\.\s+ballota/ });
+    expect(dialogo).toHaveAttribute('aria-modal', 'true');
+    expect(dialogo).toHaveFocus();
+  });
+
+  it('Escape llama a onClose', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    render(
+      <DialogSpecies isOpen onClose={onClose} data={[fila('P', ESPECIE)]} species={{ 'Especies Características': ESPECIE }} noItalicTerms={[]} />
+    );
+
+    await user.keyboard('{Escape}');
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('Tab y Shift+Tab quedan atrapados entre el primer atributo y el enlace de IPNI', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <button>fuera</button>
+        <DialogSpecies isOpen onClose={vi.fn()} data={[fila('P', ESPECIE)]} species={{ 'Especies Características': ESPECIE }} noItalicTerms={[]} />
+        <button>fuera después</button>
+      </>
+    );
+    const primero = document.querySelector('summary');
+    const enlace = screen.getByRole('link', { name: 'explore.dialogSpecies.readMoreLabel' });
+
+    enlace.focus();
+    await user.tab();
+    expect(primero).toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(enlace).toHaveFocus();
+  });
+
+  it('al cerrar, el foco vuelve al botón que abrió el diálogo', async () => {
+    const user = userEvent.setup();
+    const Harness = () => {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>abrir</button>
+          <DialogSpecies
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            data={[fila('P', ESPECIE)]}
+            species={{ 'Especies Características': ESPECIE }}
+            noItalicTerms={[]}
+          />
+        </>
+      );
+    };
+    render(<Harness />);
+    const abrir = screen.getByRole('button', { name: 'abrir' });
+
+    await user.click(abrir);
+    expect(screen.getByRole('dialog')).toHaveFocus();
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(abrir).toHaveFocus();
+  });
+
+  it('al desmontarse dentro de AnimatePresence, el foco vuelve al botón que lo abrió', async () => {
+    const user = userEvent.setup();
+    const Harness = () => {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>abrir</button>
+          <AnimatePresence>
+            {open && (
+              <DialogSpecies
+                isOpen
+                onClose={() => setOpen(false)}
+                data={[fila('P', ESPECIE)]}
+                species={{ 'Especies Características': ESPECIE }}
+                noItalicTerms={[]}
+              />
+            )}
+          </AnimatePresence>
+        </>
+      );
+    };
+    render(<Harness />);
+    const abrir = screen.getByRole('button', { name: 'abrir' });
+
+    await user.click(abrir);
+    expect(screen.getByRole('dialog')).toHaveFocus();
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(abrir).toHaveFocus();
+  });
+
+  it('abierto desde una tarjeta no enfocable (foco en body), al cerrar el foco va al main', async () => {
+    const user = userEvent.setup();
+    const Harness = () => {
+      const [open, setOpen] = useState(false);
+      return (
+        <main>
+          <div role="presentation" onClick={() => setOpen(true)}>tarjeta</div>
+          <DialogSpecies
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            data={[fila('P', ESPECIE)]}
+            species={{ 'Especies Características': ESPECIE }}
+            noItalicTerms={[]}
+          />
+        </main>
+      );
+    };
+    render(<Harness />);
+
+    await user.click(screen.getByText('tarjeta'));
+    expect(screen.getByRole('dialog')).toHaveFocus();
+    await user.keyboard('{Escape}');
+
+    expect(screen.getByRole('main')).toHaveFocus();
   });
 });

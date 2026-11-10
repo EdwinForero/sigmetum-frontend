@@ -22,7 +22,7 @@ Sin efectos: no toca el favicon. Este sale ya correcto del HTML compilado (plugi
 ### Navbar
 Menú principal. `menuItems`: Inicio (`/`), Explorar (`/explorar`), Galería (`/galeria`) y Sobre nosotros (`/sobre-nosotros`).
 - Escritorio (`md+`): lista horizontal; la ruta activa aparece con fondo verde.
-- Móvil: botón con icono `Menu` que abre un desplegable.
+- Móvil: botón con icono `Menu` (`ButtonPrincipal` con `ariaLabel` `iconButton.menu`) que abre un desplegable.
 
 | Estado / función | Descripción |
 |---|---|
@@ -60,7 +60,7 @@ Barra lateral de iconos con un panel deslizante.
 | `handleButtonClick(id)` | Abre el panel con el componente de esa opción |
 | `handleOverlayClick()` | Cierra el panel (clic en el fondo o en el botón `Close`) |
 
-Las opciones con `link` se pintan como `<Link>` y las que tienen `component` abren el panel (`motion.div` que entra desde `x: -100%`).
+Las opciones con `link` se pintan como `<Link>` y las que tienen `component` abren el panel (`motion.div` que entra desde `x: -100%`). Los botones de icono llevan `ariaLabel` con el `name` de la opción y el de cerrar con `iconButton.close`. El panel **no** cumple A6 (sin `role="dialog"`, foco atrapado ni Escape): deuda anotada en `docs/09`.
 
 ### ErrorBoundary
 Componente de clase. `getDerivedStateFromError` activa `hasError`, `componentDidCatch` escribe el error en consola y el render muestra "Algo salió mal" con un botón para recargar. Envuelve toda la aplicación en `index.js`.
@@ -141,11 +141,11 @@ Una categoría del filtro: cabecera plegable, botón "Limpiar", buscador y lista
 | `selected` | `Set` de valores marcados |
 | `isExpanded`, `onExpand` | Control del despliegue |
 
-**Estado:** `searchText`. **Cálculo:** `filteredItems = SortItemsList(items que contienen searchText)`.
+Las ligaduras de los chevrons llevan `aria-hidden="true"` (no entran en el nombre del botón). **Estado:** `searchText`. **Cálculo:** `filteredItems = SortItemsList(items que contienen searchText)`.
 
 ### FilterSearchBar
 Campo de búsqueda con icono de lupa.
-Props: `placeholderText`, `value`, `onChange`. Es un campo controlado: muestra siempre `value`.
+Props: `placeholderText`, `value`, `onChange`. Es un campo controlado: muestra siempre `value`. El `input` lleva `focus-ring-inset` (anillo hacia dentro: el `label` envolvente tiene `overflow-hidden` y recortaría el exterior); el `label` ya no lleva clases de foco, porque no recibe foco.
 
 ### SpeciesCard
 Tarjeta de una especie en la cuadrícula del explorador.
@@ -171,7 +171,9 @@ Modal de detalle de una especie.
 | `formattedQuery` | Nombre codificado para el enlace `https://www.ipni.org/?q=...` |
 | `highlightTerms` | La misma utilidad compartida que usa `SpeciesCard` |
 
-Muestra el título con cursivas, un `SpeciesAttribute` por atributo, el botón "Cerrar" y el enlace "Leer más" a IPNI. Se cierra al pulsar fuera.
+Muestra el título con cursivas, un `SpeciesAttribute` por atributo, el botón "Cerrar" y el enlace "Leer más" a IPNI (con `open_in_new` en `aria-hidden`, de modo que el nombre del enlace es solo el texto). Se cierra al pulsar fuera.
+
+**Accesibilidad (A6):** la caja interior es `role="dialog"`, `aria-modal="true"`, `aria-labelledby` (el `div` que contiene los `h2` del título compuesto) y `tabIndex={-1}`. Llama a `useDialogFocus(isOpen && useIsPresent(), onClose)` antes del `if (!isOpen) return null`: el foco entra en la caja al abrir, Tab queda atrapado, Escape llama a `onClose` y el foco vuelve a quien abrió. Con la caja ya enfocada, el primer elemento enfocable es el primer `summary` de atributos, no «Cerrar».
 
 ### SpeciesAttribute
 Bloque `<details>` abierto con título y lista. Si `description` es una cadena, la divide por comas y pinta un párrafo en cursiva por valor.
@@ -183,7 +185,7 @@ Las columnas son la unión de las claves de todos los registros, en orden de pri
 
 ### Pagination
 Botones anterior/siguiente con el texto "Página X de Y".
-Props: `currentPage`, `totalPages` y `onPageChange('prev' | 'next')`. Desactiva los extremos.
+Props: `currentPage`, `totalPages` y `onPageChange('prev' | 'next')`. Desactiva los extremos. Los dos botones de icono llevan `ariaLabel` (`iconButton.previousPage` y `iconButton.nextPage`).
 
 ### FileDropdown
 Selector de dos columnas (provincia → versión) para "Administrar datos". Se crea con `forwardRef`.
@@ -236,7 +238,7 @@ Gestión de términos que no se escriben en cursiva.
 | `fetchTerms()` | `GET /list-terms` |
 | `handleAddTerm()` | Comprueba que no esté vacío ni repetido (sin distinguir mayúsculas), hace `POST /upload-term` y recarga |
 | `handleDeleteTerm(term)` | `DELETE /delete-term` y recarga |
-| `renderList()` | Spinner, error, vacío o lista ordenada con papelera |
+| `renderList()` | Spinner, error, vacío o lista ordenada con papelera (`aria-label` `iconButton.delete`, `focus-ring`, ligadura en `aria-hidden`). El botón de añadir usa `ariaLabel` `iconButton.add`. **Deuda:** la línea que ordena `terms` no copia el array y muta el estado (anotado en `docs/09`) |
 
 ### ImageGalleryManager
 Gestión de las imágenes de la galería.
@@ -262,13 +264,13 @@ Gestión de las imágenes de la galería.
 
 ### ContactForm
 Formulario de contacto (nombre, email, asunto y mensaje).
-**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email` y muestra un diálogo de éxito o error: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias).
+**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email` y muestra un diálogo de éxito o error: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias). Los cuatro campos llevan `focus-ring`. El botón de enviar es `type="submit"`; el «Cerrar» de su `DialogAdvice` (dentro del `<form>`) ya no reenvía el correo porque `ButtonPrincipal` es `type="button"` por defecto.
 
 ### EmailContactGrid
 Lee `home.emailsData`, una cadena con el formato `Nombre / email / Nombre / email ...`, la divide por `/` en pares `{ name, email }` y los muestra en dos columnas con enlaces `mailto:`.
 
 ### TextInput
-Campo de texto con el estilo del proyecto. Props: `placeholderText`, `value` y `onChange`. Es un campo controlado: muestra siempre `value`.
+Campo de texto con el estilo del proyecto. Props: `placeholderText`, `value` y `onChange`. Es un campo controlado: muestra siempre `value`. El `input` lleva `focus-ring-inset` (ver `FilterSearchBar`).
 
 ---
 
@@ -284,9 +286,13 @@ Botón primario (fondo verde).
 | `icon` | Si está presente, pinta un botón cuadrado con el icono de Material Symbols y sin texto |
 | `dropdownOptions`, `onOptionSelect` | Modo desplegable (no se usa en esta variante) |
 | `className`, `disabled` | Estilo extra y estado desactivado |
+| `ariaLabel` | Nombre accesible del botón; solo se aplica en la rama `icon` (sin él, el botón de icono se anunciaría con la ligadura). La ligadura lleva `aria-hidden="true"` |
+| `type` | `type` del `<button>`, `"button"` por defecto (antes era `submit` implícito); quien envíe un formulario debe pasar `type="submit"` |
+
+Las dos ramas llevan `focus-ring`.
 
 ### ButtonAlternative
-Botón secundario (borde verde). Tiene las mismas props que `ButtonPrincipal` (sin `disabled`), más `getButtonText(option)` para personalizar el texto en modo desplegable. `LanguageSwitcher` lo usa así.
+Botón secundario (borde verde). Tiene las mismas props que `ButtonPrincipal` (sin `disabled`), más `getButtonText(option)` para personalizar el texto en modo desplegable. `LanguageSwitcher` lo usa así. Lleva `focus-ring` y las ligaduras de sus chevrons con `aria-hidden="true"`.
 
 ### DialogAdvice
 Modal de aviso o confirmación, animado.
@@ -300,8 +306,10 @@ Modal de aviso o confirmación, animado.
 
 Se usa junto con el hook `useDialog` dentro de `<AnimatePresence>`.
 
+**Accesibilidad (A6):** la caja interior es `role="dialog"`, `aria-modal="true"`, `aria-labelledby` (el `h3` del título, con `useId`) y `tabIndex={-1}`. Llama a `useDialogFocus(useIsPresent(), onClose)`: mientras el diálogo sale de pantalla se desactivan el listener y la trampa y el foco vuelve a quien abrió. Escape equivale a cancelar: llama a `onClose`, nunca a `onConfirm`.
+
 ### InfoButton
-Icono `info` que muestra un tooltip al pasar el ratón o al pulsar. `adjustTooltipPosition()` lo alinea a la izquierda, al centro o a la derecha para que no se salga de la pantalla. Prop: `tooltipText`.
+Icono `info` que muestra un tooltip al pasar el ratón o al pulsar. `adjustTooltipPosition()` lo alinea a la izquierda, al centro o a la derecha para que no se salga de la pantalla. Prop: `tooltipText`. El botón lleva `aria-label` `iconButton.info` y `focus-ring`; el icono `info` va en un `<span aria-hidden="true">` (el botón conserva también `material-symbols-outlined`).
 
 ### LoadSpinner
 Capa a pantalla completa semitransparente con un círculo girando (`animate-spin`).
@@ -310,7 +318,7 @@ Capa a pantalla completa semitransparente con un círculo girando (`animate-spin
 Interruptor sobre un checkbox con estilos de `styled-components`. Props: `checked` y `onChange`.
 
 ### ScrollIndicator
-Flecha fija que rebota en la parte inferior. Al pulsarla baja una pantalla (`scrollBy`) y se oculta al llegar al final (hook `UseAtBottom`).
+Flecha fija que rebota en la parte inferior. Al pulsarla baja una pantalla (`scrollBy`) y se oculta al llegar al final (hook `UseAtBottom`). Lleva `aria-label` `iconButton.scrollDown`, la ligadura en `aria-hidden` y `focus-ring`.
 
 ### ImageComponent
 Imagen o fondo a partir de una URL directa o de una clave de S3.

@@ -61,6 +61,7 @@ const Navbar = () => {
 
       <ButtonPrincipal
         icon="Menu"
+        ariaLabel={t('iconButton.menu')}
         onClick={toggleDropdown}
         className="block md:hidden"
       />

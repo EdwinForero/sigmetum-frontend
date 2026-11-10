@@ -30,6 +30,7 @@
 | `contentManagement` | 11 | Administrar contenido |
 | `dialogAdvice` | 35 | Todos los mensajes de éxito, error y aviso (incluye `errorEmailRateLimit`, `errorEmailInvalid`, `errorDraftNotFound` y `adviceInvalidImageTitle`); `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
 | `cookies` | 28 | Política, banner y modal (con etiquetas `<a>` y `<strong>` para `<Trans>`) |
+| `iconButton` | 8 | Nombres accesibles de los botones de solo icono: `delete`, `add`, `menu`, `close`, `previousPage`, `nextPage`, `info` y `scrollDown` (un test comprueba el texto exacto en ambos idiomas) |
 | `notFound`, `pagination`, `language`, `ee` | 1-3 | Varios. `notFound.title` ("Página no encontrada" / "Page not found") es el título de pestaña del 404 |
 
 ### Convenciones
@@ -46,6 +47,17 @@ El sistema de diseño para quien crea interfaz (paleta con su contraste, tipogra
 ### Enfoque
 
 Tailwind CSS con clases utilitarias directamente en el JSX. No hay componentes de estilo compartidos salvo los botones. `App.css` es residual y `styled-components` solo se usa en `Switch`.
+
+### Foco (`index.css`)
+
+Dos clases en `@layer components` de `src/index.css`, sobre `:focus-visible` y con los colores de la paleta (`ink` `#0C1811`, `surface` `#F9FBFA`):
+
+| Clase | Efecto | Se usa en |
+|---|---|---|
+| `.focus-ring` | `outline` de 2 px `ink` con `outline-offset: 2px` y `box-shadow: 0 0 0 2px` `surface` (halo interior, para que el anillo se vea sobre fondos oscuros como el `CookieBanner`) | Campos de `ContactForm`, `ButtonPrincipal`, `ButtonAlternative`, papeleras, `InfoButton` y `ScrollIndicator` |
+| `.focus-ring-inset` | `outline` de 2 px `ink` con `outline-offset: -2px`, sin halo | `input` de `FilterSearchBar` (con `rounded-r-xl`) y `TextInput` (con `rounded-xl`), cuyo `label` con `overflow-hidden` recortaría el anillo exterior; el radio propio del `input` hace que el anillo interior conserve las esquinas |
+
+Se usa `outline` y no `ring` porque el contorno se mantiene en el modo de alto contraste de Windows. `.focus-ring` fija `box-shadow` con la misma especificidad que las utilidades de Tailwind y en una capa posterior: una utilidad `shadow-*` o `ring-*` futura en el mismo elemento ganaría sobre el halo. Pintado, contraste y recorte sin comprobar en un navegador **(por confirmar)**. Ver [DESIGN.md](../DESIGN.md) y A3 en [accesibilidad](guias/accesibilidad.md).
 
 ### Tipografía (`tailwind.config.js` + `index.css`)
 

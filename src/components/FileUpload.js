@@ -172,9 +172,10 @@ const FileUploadForm = ({
               <p>{file.name}</p>
               <button
                 onClick={() => handleRemoveFile(index)}
-                className="text-[#15B659] cursor-pointer"
+                className="focus-ring text-[#15B659] cursor-pointer"
+                aria-label={t('iconButton.delete')}
               >
-              <span className="material-symbols-outlined text-3xl mx-auto">
+              <span className="material-symbols-outlined text-3xl mx-auto" aria-hidden="true">
                 delete
               </span>
             </button>
