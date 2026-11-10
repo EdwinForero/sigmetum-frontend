@@ -35,6 +35,8 @@ Además, [DESIGN.md](../DESIGN.md) (en la raíz) es el sistema de diseño que le
 
 Las features y los fixes con agentes pasan por `/ciclo <tarea>`, del plugin [ciclo-agentico](../plugins/ciclo-agentico/README.md). Su configuración está en `.claude/flujo.json`, los traspasos entre roles (specs, planes y avisos para PR) en `docs/specs/`, y cómo se instala y se activa el marketplace local en [plugins/README.md](../plugins/README.md). Resumen para el equipo: [08](08-guia-desarrollo.md#ciclo-agéntico-ciclo).
 
+Cada rol del ciclo tiene su modelo y esfuerzo fijados en el frontmatter; `CLAUDE_CODE_SUBAGENT_MODEL` y `CLAUDE_CODE_EFFORT_LEVEL` los anulan y `/ciclo` lo avisa en el paso 0. Tras cambiar el plugin hace falta `/reload-plugins` o una sesión nueva, y la comprobación manual la hace el usuario: ver [Modelos y esfuerzo por rol](../plugins/ciclo-agentico/README.md#modelos-y-esfuerzo-por-rol).
+
 ## Por dónde empezar
 
 - **Si te incorporas al proyecto:** 08 (guía) → 01 (arquitectura) → 04 (páginas).
