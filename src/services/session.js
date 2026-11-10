@@ -66,6 +66,10 @@ export const startLogin = async () => {
 
 export const logout = () => {
   clearSession();
+  if (!env.COGNITO_DOMAIN) {
+    window.location.assign('/');
+    return;
+  }
   const params = new URLSearchParams({
     client_id: env.COGNITO_CLIENT_ID,
     logout_uri: `${window.location.origin}/`,

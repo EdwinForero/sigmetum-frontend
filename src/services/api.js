@@ -14,6 +14,15 @@ const httpError = (status, message, serverMessage) => {
   return error;
 };
 
+// Fallo reintentable de Cognito al renovar (5xx, 429, 4xx sin código OAuth): se expone con un tipo y un status propios
+// para que ningún consumidor lo confunda con un 401 del backend (sesión caducada).
+const authUnavailableError = () => {
+  const error = new Error(AUTH_UNAVAILABLE);
+  error.type = 'auth_unavailable';
+  error.status = 503;
+  return error;
+};
+
 const networkError = () => {
   const error = new Error('network_error');
   error.type = 'network';
@@ -39,8 +48,17 @@ async function cognitoToken(params) {
   return json;
 }
 
+// Se activa al redirigir a /login: otra llamada de esta pestaña ya lo hizo y no hay que repetirlo.
+let redirecting = false;
+const redirectToLogin = () => {
+  redirecting = true;
+  clearSession();
+  window.location.assign('/login');
+};
+
 // Devuelve true si renovó la sesión y false si no se pudo (y entonces ya la ha cerrado).
-// Un fallo de red es indeterminado: se propaga como error reintentable y no cierra la sesión.
+// Es indeterminado, y se propaga como error reintentable sin cerrar la sesión, un fallo de red, un 5xx, un 429
+// o un 4xx sin código OAuth en el cuerpo (p. ej. el HTML de CloudFront). Cualquier otro 4xx con `error` cierra.
 async function renewSession() {
   const refreshToken = getRefreshToken();
   if (refreshToken) {
@@ -48,11 +66,13 @@ async function renewSession() {
       saveTokens(await cognitoToken({ grant_type: 'refresh_token', refresh_token: refreshToken }));
       return true;
     } catch (error) {
-      if (error.type === 'network') throw error;
+      const retryable =
+        error.type === 'network' ||
+        (error.type === 'http' && (error.status === 429 || error.status >= 500 || (error.status >= 400 && !error.serverMessage)));
+      if (retryable) throw error.type === 'network' ? error : authUnavailableError();
     }
   }
-  clearSession();
-  window.location.assign('/login');
+  redirectToLogin();
   return false;
 }
 
@@ -77,7 +97,7 @@ async function request(path, options = {}, { authenticated = false } = {}) {
     // En llamadas con token un cuerpo no JSON (p. ej. el HTML de un 503 del ALB) no debe romper el flujo.
     const tolerant = authenticated && (response.status === 401 || response.status === 503);
     const json = tolerant ? await response.json().catch(() => ({})) : await response.json();
-    return { response, json };
+    return { response, json, token };
   };
 
   // Solo el 503 de autenticación (sale antes de que la ruta haga nada) es seguro de reintentar.
@@ -95,13 +115,15 @@ async function request(path, options = {}, { authenticated = false } = {}) {
   let result = await sendWithRetry();
 
   if (authenticated && result.response.status === 401) {
-    const renewed = await refreshSession();
+    // Si el token ya no es el que se envió, otra llamada renovó la sesión: se reintenta sin otro refresco.
+    // Sin token no hay nada que renovar: si esta pestaña ya redirigió no se repite; si no (la sesión se cerró en otra pestaña), se redirige.
+    const current = getAccessToken();
+    let renewed = false;
+    if (current) renewed = current !== result.token ? true : await refreshSession();
+    else if (!redirecting) redirectToLogin();
     if (renewed) {
       result = await sendWithRetry();
-      if (result.response.status === 401) {
-        clearSession();
-        window.location.assign('/login');
-      }
+      if (result.response.status === 401 && !redirecting) redirectToLogin();
     }
     if (result.response.status === 401) throw httpError(401, result.json.error, result.json.error);
   }

@@ -18,8 +18,13 @@ const AuthCallback = () => {
     started.current = true;
 
     const code = searchParams.get('code');
+    const returnedState = searchParams.get('state');
+    const returnedError = searchParams.get('error');
+    // El código y el state no deben quedarse en la barra de direcciones ni en el historial: se quitan ya,
+    // antes de validar o canjear (así no se navega al callback si el usuario sale mientras el canje está en vuelo).
+    navigate('/auth/callback', { replace: true });
     const { verifier, state } = takePkce();
-    if (searchParams.get('error') || !code || !verifier || !state || searchParams.get('state') !== state) {
+    if (returnedError || !code || !verifier || !state || returnedState !== state) {
       setHasError(true);
       return;
     }

@@ -137,4 +137,17 @@ describe('session', () => {
     expect(url.searchParams.get('client_id')).toBe(CLIENT);
     expect(url.searchParams.get('logout_uri')).toBe(`${ORIGIN}/`);
   });
+
+  it('logout sin dominio borra los tokens y va a /', async () => {
+    vi.stubEnv('VITE_COGNITO_DOMAIN', '');
+    await load();
+    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+
+    session.logout();
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith('/');
+    expect(session.getAccessToken()).toBeNull();
+    expect(session.getRefreshToken()).toBeNull();
+  });
 });

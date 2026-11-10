@@ -2,10 +2,18 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, Link, useLocation, useNavigationType } from 'react-router-dom';
 import { webcrypto } from 'node:crypto';
 
 const jsonResponse = (status, body) => ({ ok: status < 400, status, json: async () => body });
+
+// Muestra cómo se llegó a la ubicación actual (POP, PUSH o REPLACE) y cuál es, query incluida.
+const LocationProbe = () => {
+  const { pathname, search } = useLocation();
+  const type = useNavigationType();
+  return <span data-testid="location">{`${type} ${pathname}${search}`}</span>;
+};
+const CLEAN_URL = 'REPLACE /auth/callback';
 
 describe('AuthCallback', () => {
   let AuthCallback;
@@ -16,9 +24,12 @@ describe('AuthCallback', () => {
     render(
       <React.StrictMode>
         <MemoryRouter initialEntries={[`/auth/callback${search}`]}>
+          <LocationProbe />
+          <Link to="/otra">salir</Link>
           <Routes>
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/cargar-archivos" element={<p>pagina-carga</p>} />
+            <Route path="/otra" element={<p>otra-pagina</p>} />
           </Routes>
         </MemoryRouter>
       </React.StrictMode>
@@ -50,11 +61,18 @@ describe('AuthCallback', () => {
 
   it('con éxito canjea el código una sola vez (también en StrictMode), guarda los tokens y navega', async () => {
     seedPkce();
-    fetchMock.mockResolvedValue(jsonResponse(200, { access_token: 'A', id_token: 'I', refresh_token: 'R' }));
+    let resolveFetch;
+    fetchMock.mockReturnValue(new Promise((resolve) => { resolveFetch = resolve; }));
 
     renderAt('?code=abc&state=st-1');
 
+    // Sin la guarda, el segundo efecto de StrictMode ya habría fallado la validación (takePkce vació el almacenamiento).
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    resolveFetch(jsonResponse(200, { access_token: 'A', id_token: 'I', refresh_token: 'R' }));
+
     expect(await screen.findByText('pagina-carga')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const body = new URLSearchParams(fetchMock.mock.calls[0][1].body);
     expect(body.get('code')).toBe('abc');
@@ -80,6 +98,7 @@ describe('AuthCallback', () => {
     renderAt('?code=abc&state=otro');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('login.callbackError');
+    expect(await screen.findByText(CLEAN_URL)).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
     expect(localStorage.getItem('token')).toBeNull();
   });
@@ -88,6 +107,7 @@ describe('AuthCallback', () => {
     renderAt('?code=abc');
 
     expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(await screen.findByText(CLEAN_URL)).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -97,6 +117,7 @@ describe('AuthCallback', () => {
     renderAt('?error=access_denied&error_description=secreto-de-cognito&state=st-1');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('login.callbackError');
+    expect(await screen.findByText(CLEAN_URL)).toBeInTheDocument();
     expect(screen.queryByText(/secreto-de-cognito/)).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
     expect(localStorage.getItem('token')).toBeNull();
@@ -109,7 +130,35 @@ describe('AuthCallback', () => {
     renderAt('?code=abc&state=st-1');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('login.callbackError');
+    expect(await screen.findByText(CLEAN_URL)).toBeInTheDocument();
     expect(localStorage.getItem('token')).toBeNull();
+  });
+
+  it('con fallo de red en el canje muestra un alert y quita code y state de la URL', async () => {
+    seedPkce();
+    fetchMock.mockRejectedValue(new TypeError('failed'));
+
+    renderAt('?code=abc&state=st-1');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('login.callbackError');
+    expect(await screen.findByText(CLEAN_URL)).toBeInTheDocument();
+    expect(localStorage.getItem('token')).toBeNull();
+  });
+
+  it('tras salir de la pantalla, un fallo tardío del canje no navega de nuevo al callback', async () => {
+    const user = userEvent.setup();
+    seedPkce();
+    let rejectFetch;
+    fetchMock.mockReturnValue(new Promise((_, reject) => { rejectFetch = reject; }));
+
+    renderAt('?code=abc&state=st-1');
+    expect(await screen.findByText(CLEAN_URL)).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: 'salir' }));
+    expect(await screen.findByText('otra-pagina')).toBeInTheDocument();
+    rejectFetch(new TypeError('failed'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(screen.getByTestId('location')).toHaveTextContent('PUSH /otra');
   });
 
   it('sin configuración de Cognito muestra un alert y no hace POST', async () => {
@@ -121,6 +170,7 @@ describe('AuthCallback', () => {
     renderAt('?code=abc&state=st-1');
 
     expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(await screen.findByText(CLEAN_URL)).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

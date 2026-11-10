@@ -126,7 +126,7 @@ Ruta pública a la que vuelve el Hosted UI de Cognito (`redirect_uri` = `<origen
 
 | Función | Descripción |
 |---|---|
-| Efecto de entrada | Lee `code`, `state` y `error` (`useSearchParams`) y llama a `takePkce()`. Si hay `error`, falta `code`, el verificador o el `state` guardado, o el `state` no coincide, no llama a `fetch` y muestra el error. Si no, `api.exchangeCode(code, verifier)` y `navigate('/cargar-archivos', { replace: true })` |
+| Efecto de entrada | Lee `code`, `state` y `error` (`useSearchParams`), navega a `/auth/callback` con `replace` (así `code`, `state` y `error` desaparecen de la URL y del historial, también con éxito; es síncrono y va antes de validar o canjear, para no navegar tras desmontarse) y llama a `takePkce()`. Si hay `error`, falta `code`, el verificador o el `state` guardado, o el `state` no coincide, no llama a `fetch` y muestra el error. Si no, `api.exchangeCode(code, verifier)` y `navigate('/cargar-archivos', { replace: true })` |
 | Canje único | Un `useRef` evita el segundo canje que haría `React.StrictMode` (el código solo se puede canjear una vez) |
 | Estados | Cargando: `<p role="status">` con `login.callbackLoading`. Error: `<p role="alert">` con `login.callbackError` y botón `login.retryButton` que vuelve a llamar a `startLogin()`. Nunca muestra `error_description` de Cognito |
 

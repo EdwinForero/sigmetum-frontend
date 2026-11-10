@@ -124,6 +124,32 @@ describe('ProtectedRoute', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('con el aviso de servicio no disponible hay un botón de cerrar sesión que borra los tokens', async () => {
+    const user = userEvent.setup();
+    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    fetchMock.mockResolvedValue(jsonResponse(500, { success: false, error: 'boom' }));
+    renderRoute();
+
+    await user.click(await screen.findByRole('button', { name: 'login.logOutButton' }));
+
+    expect(session.getAccessToken()).toBeNull();
+    expect(session.getRefreshToken()).toBeNull();
+    expect(new URL(assign.mock.calls[0][0]).pathname).toBe('/logout');
+  });
+
+  it('con el refresco de Cognito no disponible muestra el aviso y no lleva a /login', async () => {
+    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { success: false, error: 'Unauthorized' }))
+      .mockResolvedValueOnce({ ok: false, status: 403, json: async () => { throw new SyntaxError('x'); } });
+
+    renderRoute();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('login.serviceUnavailable');
+    expect(screen.queryByText('pagina-login')).toBeNull();
+    expect(session.getAccessToken()).toBe('A');
+  });
+
   it('el botón de cierre borra los tokens y redirige al logout de Cognito', async () => {
     const user = userEvent.setup();
     session.saveTokens({ access_token: 'A', refresh_token: 'R' });

@@ -39,6 +39,7 @@ const ProtectedRoute = ({ element }) => {
           text={t('login.retryButton')}
           onClick={() => { setStatus('checking'); setAttempt((n) => n + 1); }}
         />
+        <ButtonPrincipal text={t('login.logOutButton')} onClick={logout} />
       </div>
     );
   }

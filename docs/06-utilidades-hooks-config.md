@@ -68,7 +68,7 @@ Documentado en [03-api.md](03-api.md#métodos-del-cliente). Resumen:
 | `codeChallengeFor(verifier)` | SHA-256 en base64url sin `=` (`crypto.subtle`; asíncrona) |
 | `takePkce()` | Devuelve `{ verifier, state }` y borra los dos de `sessionStorage` |
 | `startLogin()` | Genera un verificador de 32 bytes y un `state` de 16 (`crypto.getRandomValues`), los guarda y redirige a la URL de autorización. Sin `COGNITO_DOMAIN` o `COGNITO_CLIENT_ID` lanza `cognito_not_configured` (sin redirigir); el llamador lo muestra con `t()` |
-| `logout()` | `clearSession()` y redirige a `<COGNITO_DOMAIN>/logout?client_id=…&logout_uri=<origen>/` (con `URLSearchParams`) |
+| `logout()` | `clearSession()` y redirige a `<COGNITO_DOMAIN>/logout?client_id=…&logout_uri=<origen>/` (con `URLSearchParams`). Sin `COGNITO_DOMAIN` solo borra la sesión y va a `/` |
 
 ## Hooks
 

@@ -299,6 +299,51 @@ describe('api con Cognito', () => {
       expect(assign).not.toHaveBeenCalled();
     });
 
+    it.each([
+      [500, { error: 'server_error' }],
+      [503, { error: 'unavailable' }],
+      [429, { error: 'too_many_requests' }],
+      [403, undefined],
+      [401, undefined],
+    ])('con un %i de Cognito al refrescar conserva la sesión, no redirige y lanza auth_unavailable (no un 401 del backend)', async (status, body) => {
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(401, { success: false, error: 'Unauthorized' }))
+        .mockResolvedValueOnce(body ? jsonResponse(status, body) : nonJsonResponse(status));
+
+      await expect(api.getAuth('/auth')).rejects.toMatchObject({ type: 'auth_unavailable', status: 503 });
+
+      expect(session.getAccessToken()).toBe('old');
+      expect(session.getRefreshToken()).toBe('R');
+      expect(assign).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+      [400, 'invalid_client'],
+      [401, 'unauthorized'],
+    ])('con un %i %s de Cognito al refrescar cierra la sesión y va a /login', async (status, error) => {
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(401, { success: false, error: 'Unauthorized' }))
+        .mockResolvedValueOnce(jsonResponse(status, { error }));
+
+      await expect(api.getAuth('/auth')).rejects.toMatchObject({ type: 'http', status: 401 });
+
+      expect(session.getAccessToken()).toBeNull();
+      expect(session.getRefreshToken()).toBeNull();
+      expect(assign).toHaveBeenCalledWith('/login');
+    });
+
+    it('con un 200 de Cognito sin access_token cierra la sesión y va a /login', async () => {
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(401, { success: false, error: 'Unauthorized' }))
+        .mockResolvedValueOnce(jsonResponse(200, {}));
+
+      await expect(api.getAuth('/auth')).rejects.toMatchObject({ status: 401 });
+
+      expect(session.getAccessToken()).toBeNull();
+      expect(assign).toHaveBeenCalledWith('/login');
+    });
+
     it('dos llamadas con 401 a la vez producen un único refresco', async () => {
       fetchMock.mockImplementation(async (url, options) => {
         if (url === tokenUrl) return jsonResponse(200, { access_token: 'new' });
@@ -311,6 +356,98 @@ describe('api con Cognito', () => {
 
       expect(results).toEqual(['ok', 'ok']);
       expect(tokenCalls(fetchMock)).toHaveLength(1);
+    });
+
+    // La primera petición a /b queda pendiente hasta que el test la libera con el estado que indique.
+    const deferFirstB = (respond) => {
+      let release;
+      const pending = new Promise((resolve) => { release = resolve; });
+      let deferred = false;
+      fetchMock.mockImplementation(async (url, options) => {
+        if (url === tokenUrl) return jsonResponse(200, { access_token: 'new' });
+        if (options.headers.Authorization === 'Bearer new') return respond(url);
+        if (url.endsWith('/b') && !deferred) {
+          deferred = true;
+          return pending;
+        }
+        return jsonResponse(401, { success: false, error: 'Unauthorized' });
+      });
+      return () => release(jsonResponse(401, { success: false, error: 'Unauthorized' }));
+    };
+
+    it('un 401 tardío con el token ya renovado reintenta sin otro refresco', async () => {
+      const releaseB = deferFirstB(() => jsonResponse(200, { success: true, data: 'ok' }));
+
+      const b = api.getAuth('/b');
+      await expect(api.getAuth('/a')).resolves.toBe('ok');
+      releaseB();
+
+      await expect(b).resolves.toBe('ok');
+      expect(tokenCalls(fetchMock)).toHaveLength(1);
+      expect(session.getAccessToken()).toBe('new');
+      expect(assign).not.toHaveBeenCalled();
+    });
+
+    it('el reintento de un 401 tardío vuelve a dar 401: borra la sesión sin otro refresco', async () => {
+      const releaseB = deferFirstB(() => jsonResponse(401, { success: false, error: 'Unauthorized' }));
+
+      const b = api.getAuth('/b');
+      session.saveTokens({ access_token: 'new' });
+      releaseB();
+
+      await expect(b).rejects.toMatchObject({ status: 401, type: 'http' });
+      expect(tokenCalls(fetchMock)).toHaveLength(0);
+      expect(session.getAccessToken()).toBeNull();
+      expect(assign).toHaveBeenCalledWith('/login');
+    });
+
+    it('un 401 tardío con la sesión ya borrada no redirige otra vez', async () => {
+      let releaseB;
+      let deferred = false;
+      fetchMock.mockImplementation(async (url) => {
+        if (url === tokenUrl) return jsonResponse(400, { error: 'invalid_grant' });
+        if (url.endsWith('/b') && !deferred) {
+          deferred = true;
+          return new Promise((resolve) => {
+            releaseB = () => resolve(jsonResponse(401, { success: false, error: 'Unauthorized' }));
+          });
+        }
+        return jsonResponse(401, { success: false, error: 'Unauthorized' });
+      });
+
+      const b = api.getAuth('/b');
+      await expect(api.getAuth('/a')).rejects.toMatchObject({ status: 401 });
+      releaseB();
+
+      await expect(b).rejects.toMatchObject({ status: 401 });
+      expect(assign).toHaveBeenCalledTimes(1);
+      expect(assign).toHaveBeenCalledWith('/login');
+    });
+
+    it('un 401 con la sesión borrada en otra pestaña redirige a /login una vez y lanza el 401', async () => {
+      const releaseB = deferFirstB(() => jsonResponse(200, { success: true, data: 'ok' }));
+
+      const b = api.getAuth('/b');
+      session.clearSession();
+      releaseB();
+
+      await expect(b).rejects.toMatchObject({ status: 401, type: 'http' });
+      expect(assign).toHaveBeenCalledTimes(1);
+      expect(assign).toHaveBeenCalledWith('/login');
+      expect(tokenCalls(fetchMock)).toHaveLength(0);
+    });
+
+    it('dos 401 simultáneos cuyo reintento vuelve a dar 401 redirigen una sola vez', async () => {
+      fetchMock.mockImplementation(async (url) => {
+        if (url === tokenUrl) return jsonResponse(200, { access_token: 'new' });
+        return jsonResponse(401, { success: false, error: 'Unauthorized' });
+      });
+
+      const results = await Promise.allSettled([api.getAuth('/a'), api.getAuth('/b')]);
+
+      expect(results.map((r) => r.status)).toEqual(['rejected', 'rejected']);
+      expect(assign).toHaveBeenCalledTimes(1);
+      expect(assign).toHaveBeenCalledWith('/login');
     });
 
     it('un 503 tras el refresco se reintenta y no borra la sesión', async () => {
