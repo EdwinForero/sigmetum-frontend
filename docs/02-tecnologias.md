@@ -10,12 +10,12 @@
 | `i18next` | ^23.16.8 | Motor de traducciones | `i18n.js` |
 | `react-i18next` | ^15.1.1 | `useTranslation`, `Trans` | Casi todos los componentes |
 | `i18next-browser-languagedetector` | ^8.0.0 | Detecta el idioma del navegador y lo guarda en `localStorage['i18nextLng']` | `i18n.js` |
-| `jwt-decode` | ^4.0.0 | Leer `exp` del token para detectar caducidad | `ProtectedRoute.js`, `TokenExpiration.js` |
 | `xlsx` (SheetJS) | ^0.18.5 | Generar el Excel descargable | `utilities/CSVfunctions.js` |
 | `styled-components` | ^6.1.13 | CSS del interruptor de cookies | `Switch.js` |
 
 Notas:
 
+- El login con Cognito no añade ninguna dependencia: usa `fetch`, `URLSearchParams` y la Web Crypto API del navegador (`crypto.subtle` y `crypto.getRandomValues`, que exigen un contexto seguro: HTTPS o `localhost`). Se retiró `jwt-decode` (09/11/2026): el cliente ya no decodifica el token.
 - `xlsx` 0.18.5 (la última de npm) tiene avisos de seguridad (prototype pollution y ReDoS al *leer* ficheros). Aquí solo se escriben, así que el riesgo es bajo, pero SheetJS publica las versiones nuevas en su propio CDN.
 - `styled-components` se usa solo en un componente y se podría sustituir por Tailwind.
 
@@ -46,7 +46,7 @@ Notas:
 | `package.json` | `"type": "module"`, `engines.node` (`>=22`, la versión del build de Amplify) y los scripts (ver [08](08-guia-desarrollo.md#scripts)). `package-lock.json` refleja `engines` en su entrada raíz |
 | `.nvmrc` | `22`: `nvm use` elige la versión de Node de desarrollo. Amplify no lo lee (su `build_spec` ejecuta `nvm install 22 && nvm use 22`) |
 
-`eslint.config.js` (configuración plana de ESLint 9): los errores bloquean, y las reglas de accesibilidad y de calidad son avisos con un **tope que no puede crecer** (`--max-warnings` en el script `lint`). `scripts/quality-check.mjs` añade patrones prohibidos, búsqueda de secretos y `npm audit`. Ver [08](08-guia-desarrollo.md#scripts).
+`eslint.config.js` (configuración plana de ESLint 9): los errores bloquean, y las reglas de accesibilidad y de calidad son avisos con un **tope que no puede crecer** (`--max-warnings` en el script `lint`). `index.html` carga las dos hojas de Google Fonts con `<link rel="stylesheet">` (sin `preload` ni `onload` en línea). `scripts/quality-check.mjs` añade patrones prohibidos, búsqueda de secretos y `npm audit`. Ver [08](08-guia-desarrollo.md#scripts).
 
 ## Recursos externos cargados en `index.html`
 

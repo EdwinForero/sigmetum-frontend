@@ -1,63 +1,58 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import { useTranslation } from 'react-i18next';
-import DialogAdvice from '../components/DialogAdvice';
-import LoadSpinner from '../components/LoadSpinner';
+import ButtonPrincipal from './ButtonPrincipal';
+import LoadSpinner from './LoadSpinner';
 import api from '../services/api';
+import { getAccessToken, logout } from '../services/session';
 
-const isTokenExpired = (token) => {
-  try {
-    const decoded = jwtDecode(token);
-    return decoded.exp < Date.now() / 1000;
-  } catch {
-    return true;
-  }
-};
-
+// 'checking' | 'ok' | 'denied' | 'unavailable'
 const ProtectedRoute = ({ element }) => {
   const { t } = useTranslation();
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const [showDialog, setShowDialog] = useState(false);
+  const [status, setStatus] = useState('checking');
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    let active = true;
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) { setIsAuthenticated(false); return; }
+      if (!getAccessToken()) { setStatus('denied'); return; }
 
       try {
         await api.getAuth('/auth');
-        if (isTokenExpired(token)) {
-          setShowDialog(true);
-        } else {
-          setIsAuthenticated(true);
-        }
-      } catch {
-        setIsAuthenticated(false);
+        if (active) setStatus('ok');
+      } catch (error) {
+        if (active) setStatus(error.type === 'http' && error.status === 401 ? 'denied' : 'unavailable');
       }
     };
     checkAuth();
-  }, []);
+    return () => { active = false; };
+  }, [attempt]);
 
-  const handleCloseDialog = () => {
-    setShowDialog(false);
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-  };
+  if (status === 'checking') return <LoadSpinner />;
 
-  if (isAuthenticated === null) return <LoadSpinner />;
-
-  if (showDialog) {
+  if (status === 'unavailable') {
     return (
-      <DialogAdvice
-        onClose={handleCloseDialog}
-        dialogTitle={t('tokenExpiration.title')}
-        dialogMessage={t('tokenExpiration.content')}
-      />
+      <div role="alert" className="p-6 text-[#0C1811]">
+        <h1 className="text-2xl font-bold">{t('login.title')}</h1>
+        <p>{t('login.serviceUnavailable')}</p>
+        <ButtonPrincipal
+          text={t('login.retryButton')}
+          onClick={() => { setStatus('checking'); setAttempt((n) => n + 1); }}
+        />
+      </div>
     );
   }
 
-  return isAuthenticated ? element : <Navigate to="/login" />;
+  if (status === 'denied') return <Navigate to="/login" replace />;
+
+  return (
+    <>
+      <div className="flex justify-end p-4">
+        <ButtonPrincipal text={t('login.logOutButton')} onClick={logout} />
+      </div>
+      {element}
+    </>
+  );
 };
 
 export default ProtectedRoute;

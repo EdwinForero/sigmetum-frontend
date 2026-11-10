@@ -5,6 +5,7 @@ import About from './pages/About';
 import Explore from './pages/Explore';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
+import AuthCallback from './pages/AuthCallback';
 import Cookies from './pages/Cookies';
 import DataManagement from './pages/DataManagement';
 import ContentManagement from './pages/ContentManagement';
@@ -131,6 +132,7 @@ function App() {
             />
             <Route path="/sobre-nosotros" element={<About />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/galeria" element={<VegetationGallery />} />
             <Route path="/cookies" element={<Cookies />} />
             <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload />} />} />

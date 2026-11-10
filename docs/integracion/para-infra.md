@@ -3,7 +3,7 @@
 Documento para quien mantiene `sigmetum-infra`. Explica **qué necesita el frontend para compilar, desplegarse y funcionar** en cada entorno.
 
 - Lo verificado contra el código de Terraform está marcado como **(verificado)**. Lo que depende de la cuenta real de AWS, como **(por confirmar)**.
-- Fecha de la verificación: 30/09/2026. Frontend: rama `feature/sigmetum_front_v2`. Infraestructura: commit `19bdde3`.
+- Fecha de la verificación: 30/09/2026 (las variables, direcciones y comprobación de Cognito se añadieron el 09/11/2026 desde el código del frontend; no se han contrastado con el Terraform de infra **(por confirmar)**). Frontend: rama `feature/sigmetum_front_v2`. Infraestructura: commit `19bdde3`.
 - Los secretos de `terraform.tfvars` no se han leído; solo se comprobaron los nombres de las variables.
 
 ## 1. Resumen: qué falta para que el frontend funcione
@@ -50,7 +50,20 @@ Vite **incrusta las variables en el JavaScript al compilar**, y solo las que emp
 | `VITE_BASE_URL` | Sí | URL **HTTPS** del backend de dev (ver I4) | `https://backend.sigmetum-a.org` |
 | `VITE_API_PREFIX` | Sí | `/api/v1` | `/api/v1` |
 | `VITE_S3_URL` | Sí, **también al compilar** (favicon) | URL pública desde la que se sirven los `assets/…` (ver sección 5) | Igual, para prod. Hoy `s3_url` va vacía en prod: sin favicon. Además debe empezar por `https://` |
+| `VITE_COGNITO_DOMAIN` | Sí, **solo en la rama de Amplify** (sin ella el login no funciona; en local no se define y el login no se puede probar, por diseño) | Dominio del Hosted UI de Cognito del pool de `dev`, con `https://` y **sin barra final** (descripción, sin valor real) | Igual, para el pool de prod |
+| `VITE_COGNITO_CLIENT_ID` | Sí, **solo en la rama de Amplify** | Id del cliente **público** (sin secreto) de la app en el pool de `dev` | Igual, para prod |
 | `VITE_CAROUSEL_IMAGE_KEYS` | No | Vacía (el carrusel no se usa) | Vacía |
+
+**Variables de Cognito (infra:C17, 09/11/2026).** `VITE_COGNITO_DOMAIN` y `VITE_COGNITO_CLIENT_ID` son públicas (se incrustan en el JavaScript), no llevan valor por defecto en `src/config/env.js` y no están en el bloque de abajo, que describe el estado verificado el 30/10/2026: infra debe añadirlas **solo a la rama** (y no a la app) con el dominio y el cliente de su pool **(por confirmar contra el pool real tras el `apply`)**. Si faltan, `startLogin` y el canje del código no redirigen ni llaman: la pantalla muestra un error traducido.
+
+**Direcciones que usa el frontend (deben registrarse en el cliente del pool, con coincidencia exacta):**
+
+| Dirección | Valor | Uso |
+|---|---|---|
+| `redirect_uri` | `<origen>/auth/callback` (sin barra final añadida) | Vuelta del Hosted UI; se manda en `/oauth2/authorize` y en el canje de `/oauth2/token` |
+| `logout_uri` | `<origen>/` | Vuelta tras `<VITE_COGNITO_DOMAIN>/logout?client_id=…&logout_uri=…` |
+
+El frontend pide `response_type=code`, `scope=openid email` y `code_challenge_method=S256`, y no usa `/oauth2/revoke` ni `/oauth2/userInfo`. Localhost no se registra: no se puede probar el login en local. Flujo completo, CORS del endpoint `/oauth2/token` (el navegador hace un POST de formulario desde el origen del frontend) y endpoints del pool real: **(por confirmar en `dev`)**.
 
 **Situación actual (verificado, rama `feature/testing` de infra):** `modules/amplify/main.tf` define las siguientes variables en app y rama:
 
@@ -85,7 +98,7 @@ El frontend y el backend se despliegan por separado. Para que se entiendan:
 | `ADMIN_USERNAME`, `ADMIN_PASSWORD` | `ADMIN_PASSWORD` es un **hash bcrypt**. El backend aborta el arranque si faltan (`config/validateEnv.js`) | **No están en `app_env_vars`** (I5) |
 | Variables ya definidas | `PORT`, `AWS_REGION`, `AWS_BUCKET_NAME`, `JWT_SECRET`, `JWT_EXPIRATION`, `EMAIL`, `EMAIL_PASSWORD` | Correcto |
 | Health check | El backend responde `200 ok` en `/healthcheck`. En `/` devuelve 404 | `modules/beanstalk` usa `HealthCheckPath = "/"` (I6) |
-| Rate limit del login | 10 intentos cada 15 min **por IP**. Detrás del balanceador, sin `trust proxy`, todos los usuarios pueden compartir la misma IP | Por confirmar; revisar con el backend |
+| Rate limit del login (`POST /log`) | **Ya no lo usa el frontend** (el login es de Cognito); sigue siendo informativo para el backend. Era 10 intentos cada 15 min **por IP**. Detrás del balanceador, sin `trust proxy`, todos los usuarios pueden compartir la misma IP | Por confirmar; revisar con el backend |
 
 **Orígenes para `ALLOWED_ORIGIN`:**
 
@@ -160,10 +173,13 @@ El frontend carga recursos de estos orígenes; si se añade una política `Conte
 | `fonts.googleapis.com`, `fonts.gstatic.com` | Tipografías (Amaranth, Sen) |
 | La URL de `VITE_S3_URL` | Logos, banner y glosario |
 | La URL de `VITE_BASE_URL` | Llamadas a la API (`connect-src`) |
+| La URL de `VITE_COGNITO_DOMAIN` | `connect-src` (POST a `/oauth2/token`: canje del código y renovación). La redirección a `/oauth2/authorize` y `/logout` es una navegación, no una petición `fetch`, así que no necesita `connect-src` **(por confirmar en `dev`: avisos de la CSP Report-Only)** |
 | URLs prefirmadas de S3 (`*.s3.<región>.amazonaws.com`) | Fotos de la galería (`img-src`) |
 | `ipni.org`, enlaces de la política de cookies | Solo enlaces externos, no cargan recursos |
 
-El frontend no incluye secretos; el token de sesión se guarda en `localStorage`.
+El frontend no incluye secretos. Los tokens de sesión (acceso y refresco de Cognito) se guardan en `localStorage` (hoy no se decodifican en el navegador), y el verificador PKCE y el `state` en `sessionStorage`; un XSS podría leerlos, de ahí la importancia de la CSP (M1 en `docs/09`).
+
+`index.html` ya no usa `onload` en línea: las dos hojas de estilo de Google Fonts son `<link rel="stylesheet">` normales (antes `preload` con `onload`). Por eso la CSP ya no necesita `'unsafe-inline'` en `script-src` por ese motivo; `style-src` con `fonts.googleapis.com` sigue haciendo falta. El efecto real en la CSP Report-Only **(por confirmar en `dev`)**.
 
 ## 7. Dominios y región
 
@@ -180,7 +196,7 @@ El frontend no incluye secretos; el token de sesión se guarda en `localStorage`
 2. Abrir directamente `https://<dominio>/explorar` y recargar: no da 404.
 3. En la pestaña Red, las llamadas van a `VITE_BASE_URL` (no a `localhost`), por HTTPS y sin errores de CORS.
 4. `/explorar` muestra especies (la API y los datos de `data/active/` funcionan).
-5. `/login` con el usuario administrador entra en "Cargar archivos".
+5. `/login` muestra el botón de iniciar sesión; al pulsarlo lleva al Hosted UI de Cognito (`<VITE_COGNITO_DOMAIN>/oauth2/authorize?…code_challenge_method=S256…`) y, tras identificarse con un usuario del pool, vuelve a `/auth/callback` y entra en "Cargar archivos". En la pestaña Red, el `POST …/oauth2/token` responde 200 sin errores de CORS y las llamadas protegidas llevan `Authorization: Bearer` con el token de acceso. El botón "Cerrar sesión" lleva a `/logout` de Cognito y de vuelta a `/`. **(por confirmar en `dev`)**
 6. El botón "Descargar glosario" abre el PDF.
 7. El backend responde `200 ok` en `https://<backend>/healthcheck`, y el estado del entorno de Beanstalk es saludable.
 
@@ -192,5 +208,5 @@ El frontend no incluye secretos; el token de sesión se guarda en `localStorage`
 
 ## 10. Cómo mantener este documento
 
-- Se actualiza cuando cambien las variables `VITE_*`, el `build_spec`, la lista de recursos de `assets.js` o los dominios.
+- Se actualiza cuando cambien las variables `VITE_*` (incluidas las de Cognito), el `build_spec`, la lista de recursos de `assets.js` o los dominios.
 - Las discrepancias I1 a I7 se quitan de la sección 1 a medida que se resuelvan en `sigmetum-infra`.

@@ -30,9 +30,9 @@ describe('traducciones', () => {
     expect(mismatched).toEqual([]);
   });
 
-  it('incluye las claves de los errores 401, 429, 400 y 404 del backend', () => {
+  it('incluye las claves de los errores 503, 429, 400 y 404 del backend', () => {
     const keys = [
-      'login.tooManyAttemptsLabel',
+      'login.serviceUnavailable',
       'dialogAdvice.errorEmailRateLimit',
       'dialogAdvice.errorEmailInvalid',
       'dialogAdvice.errorDraftNotFound',

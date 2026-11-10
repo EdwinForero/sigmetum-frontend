@@ -32,6 +32,7 @@ const EXPECTED = [
   ['/explorar', 'navbar.exploreOption'],
   ['/sobre-nosotros', 'aboutUs.title'],
   ['/login', 'login.title'],
+  ['/auth/callback', 'login.title'],
   ['/galeria', 'gallery.title'],
   ['/cookies', 'cookies.title'],
   ['/cargar-archivos', 'uploadFiles.title'],

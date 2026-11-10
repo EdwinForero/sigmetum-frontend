@@ -23,6 +23,8 @@ npm run dev                 # http://localhost:3000
 | `VITE_BASE_URL` | Sí | `http://localhost:8000` | Origen del backend, sin barra final |
 | `VITE_API_PREFIX` | Sí | `/api/v1` | Debe coincidir con `API_PREFIX` del backend |
 | `VITE_S3_URL` | Sí | URL pública desde la que se sirven los `assets/…` (CloudFront, ver [integración con infraestructura](integracion/para-infra.md)) | Base pública de los recursos estáticos |
+| `VITE_COGNITO_DOMAIN` | Sí para el login (solo en la rama de Amplify; en local no se define) | `https://<dominio-del-hosted-ui>` | Dominio del Hosted UI de Cognito, sin barra final. Pública. En local el login **no se puede probar**: `localhost` no es una `redirect_uri` registrada |
+| `VITE_COGNITO_CLIENT_ID` | Igual | `<id-del-cliente-publico>` | Id del cliente público de Cognito (sin secreto). Pública |
 | `VITE_CAROUSEL_IMAGE_KEYS` | No | `gallery/a.jpg,gallery/b.jpg` | Solo para el carrusel, que no se usa |
 
 - `.env` está en `.gitignore`: nunca lo subas al repositorio.
@@ -38,10 +40,10 @@ npm run dev                 # http://localhost:3000
 | `npm run dev` (o `npm start`) | Servidor de desarrollo con recarga en caliente en el puerto 3000 |
 | `npm run build` | Build de producción optimizado en `dist/` |
 | `npm run preview` | Sirve `dist/` en local para probar el build |
-| `npm test` | Ejecuta todos los tests una vez (Vitest) |
+| `npm test` | Ejecuta todos los tests una vez (Vitest). En un equipo con poca memoria virtual libre y muchos núcleos puede morir con `heap out of memory` y `Channel closed` (un worker por núcleo): usa `npm test -- --maxWorkers=4` (observado el 09/11/2026 en un equipo de 16 núcleos; con 8 falló y con 4 pasó) |
 | `npm run test:watch` | Tests en modo observación |
 | `npm run lint` | ESLint. Falla si hay errores o si los avisos superan el tope fijado en el script (`--max-warnings`). Al corregir avisos, se baja el tope |
-| `npm run quality` | Puerta de calidad y seguridad: patrones prohibidos, secretos, `npm audit` de producción y ESLint |
+| `npm run quality` | Puerta de calidad y seguridad: patrones prohibidos, secretos, `npm audit` de producción y ESLint. El almacenamiento del navegador (`localStorage`, `sessionStorage`) y las funciones de token (`getAccessToken`, `getRefreshToken`, `saveTokens`, `clearSession`) solo se permiten en `services/api.js`, `services/session.js` y `ProtectedRoute` |
 | `npm run docs:check` | Comprueba que la documentación no se ha quedado atrás respecto al código (ver [mantenimiento.md](guias/mantenimiento.md)) |
 | `npm run docs:gate` | Cierre documental del ciclo (plugin `ciclo-agentico`): comprueba, contra `.claude/flujo.json` y `git status`, que se tocaron los documentos de cada área, que `docs/09` tiene la fecha de hoy y que hay aviso para PR si se tocó un área de contrato. Se ejecuta antes del commit; no está en la CI |
 | `npm run agentes:test` | Tests (`node:test`) del plugin `ciclo-agentico` en `plugins/`. Vitest no los recoge (`test.include` en `vite.config.js`) |
@@ -54,7 +56,7 @@ Según `sigmetum-infra`, el frontend se despliega con **AWS Amplify** (región `
 Checklist para que un despliegue funcione:
 
 1. Directorio de artefactos: `dist` (coincide con el `build_spec` de `sigmetum-infra`).
-2. Variables de entorno de Amplify con los nombres que lee el código: `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL`. **`sigmetum-infra` solo define `VITE_API_URL`**, que este código no lee: hay que ajustar el módulo de Amplify.
+2. Variables de entorno de Amplify con los nombres que lee el código: `VITE_BASE_URL`, `VITE_API_PREFIX`, `VITE_S3_URL` y, para el login, `VITE_COGNITO_DOMAIN` y `VITE_COGNITO_CLIENT_ID` (solo en la rama). **`sigmetum-infra` solo define `VITE_API_URL`**, que este código no lee: hay que ajustar el módulo de Amplify.
 3. Regla de reescritura de la SPA: origen `</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp|pdf)$)([^.]+$)/>`, destino `/index.html`, tipo `200`.
 4. Recursos estáticos accesibles: CloudFront con OAC delante del bucket y `VITE_S3_URL` apuntando a esa distribución. `VITE_S3_URL` debe estar definida **en el build** de Amplify: de ella sale también el favicon (sin ella no hay favicon). Debe empezar por `https://` (si no, se trata como ausente y el build avisa) y cambiarla exige un nuevo despliegue.
 5. `ALLOWED_ORIGIN` del backend igual al dominio final.
@@ -105,21 +107,24 @@ Vitest con Testing Library, en modo `jsdom`. Los tests van junto al código (`Co
 | `utilities/highlightTerms.test.js` | Términos no latinos en redonda, escape de caracteres especiales y punto literal |
 | `components/TextInput.test.js`, `FilterSearchBar.test.js` | Los campos son controlados y se vacían cuando el padre los vacía |
 | `components/FileUpload.test.js` | Con campos vacíos, confirmar activa el borrador y cancelar envía `confirmed: false`; `accept` solo `.xlsx`; `404` al confirmar y al cancelar; fallo al cancelar; cabecera `Authorization` en `/upload` y en `/upload/confirm`; `401` en `/upload`, al confirmar y al cancelar (borra el token y redirige); `400` sin `emptyFields`; confirmar con `500` vacía la cola. Simula `fetch` y también `location` y el token |
-| `services/api.test.js` | `401` en métodos `*Auth` borra el token y redirige; `api.get` y `api.post` no; `401` con cuerpo no JSON; `error.data` en errores con `data`, ausente si no hay; `200` con cuerpo no JSON lanza `SyntaxError` |
-| `components/LoginForm.test.js`, `ContactForm.test.js` | Mensajes por `429`, `401`, `400` y `500`; el error del login se anuncia como `role="alert"` y no hay alerta antes de fallar; `maxLength` del contacto; campos localizables por su etiqueta (también al mostrar la contraseña), botón localizable por rol dentro del `<form>`, envío con Enter y con clic sin doble envío, `preventDefault` del envío e ids únicos entre instancias |
+| `services/api.test.js` | `exchangeCode` (cuerpo sin secreto, tokens guardados sin `id_token`, `400`, fallo de red, sin variables de Cognito); `Bearer` con el token de acceso y sin cabecera si no hay token; `401` con refresco (cuerpo `grant_type=refresh_token`, reintento con el token nuevo), sin `refreshToken`, con refresco rechazado o con segundo `401`: borra la sesión y va a `/login`; fallo de red en el refresco no la borra; dos `401` simultáneos hacen un único refresco; `503` de autenticación con reintentos (temporizadores falsos), tras el refresco, con otro cuerpo o con HTML no se reintenta; `api.get` y `api.post` no renuevan; `error.data` en errores con `data`; `200` con cuerpo no JSON lanza `SyntaxError` |
+| `components/LoginForm.test.js` | Título y botón accesible sin campos de texto; al pulsar, redirige al Hosted UI con `code_challenge_method=S256`; sin configuración de Cognito o sin `crypto.subtle` no redirige y muestra un `alert` (sin promesa sin capturar) |
+| `components/ContactForm.test.js` | Mensajes por `429`, `400` y `500`; `maxLength`; campos localizables por su etiqueta, botón localizable por rol dentro del `<form>`, envío con Enter y con clic sin doble envío, `preventDefault` del envío e ids únicos entre instancias |
+| `services/session.test.js` | Vector del RFC 7636; `redirectUri`; URL de autorización con sus parámetros y sin verificador; `startLogin` (guarda PKCE, verificadores distintos, sin variables de Cognito lanza error); `takePkce`; `saveTokens` (sin `id_token`, conserva el refresco); `clearSession`; `logout` |
+| `pages/AuthCallback.test.js` | Canje único también en `StrictMode`, tokens guardados y navegación; estado de carga con `role="status"`; `state` distinto, sin `state` guardado, `error=access_denied` (sin `error_description`), canje `400` o sin configuración: `alert` y sin tokens; el reintento redirige a una URL nueva |
+| `components/ProtectedRoute.test.js` | Sin token a `/login`; con `200` el contenido y el botón de cierre; tres `503`, un fallo de red, `403` y `500` muestran `alert` con `<h1>` sin borrar el token ni redirigir; `401` sin refresco a `/login`; «Reintentar» repite `GET /auth`; el botón de cierre borra los tokens y va al `/logout` de Cognito. Usa el `api` y el `session` reales con `fetch` simulado |
 | `components/CookieBanner.test.js` | Las dos cookies se escriben con `path=/`, `max-age` de un año y `SameSite=Lax`; `Secure` solo en HTTPS, tanto con «aceptar todo» como desde el modal; `cookiePreferences` sin codificar; con el consentimiento ya dado no se muestra el banner ni se escribe nada. Simula `document.cookie` y `location` |
 | `components/ImageGalleryManager.test.js` | Un caso por carácter prohibido del título sin llamar a la API, y un título válido que sí sube |
 | `components/ImageComponent.test.js`, `ImageCarrousel.test.js` | `imageKey` con `encodeURIComponent`; sin clave no se llama a la API |
 | `components/Table.test.js` | Columnas como unión de claves, orden de primera aparición y sin mutar `data` |
 | `components/DialogSpecies.test.js` | Comparación exacta de la especie (cadena y array; una subcadena, `undefined`, `null`, `""` y diferencias de mayúsculas o espacios no cuentan), sin mutar `data` ni `species`, y enlace a IPNI con `rel="noopener noreferrer"` |
 | `utilities/FormatFileName.test.js` | Formato `AAAA-MM-DD_vN.xlsx` con y sin ruta, `_v10` y nombres que no coinciden |
-| `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, que no haya traducciones vacías y el texto exacto de `gallery.noDataFoundPlaceholder` y `notFound.title` en ambos idiomas |
-| `utilities/faviconHtml.test.js` | `faviconTags` devuelve `<link rel="icon">` con `href` `<URL>/<clave>` y sin `type`, o nada si no hay URL o no empieza por `https://` (`http://`, `//cdn...`, sin esquema, espacios iniciales o `HTTPS://`); la barra final no se normaliza; `logoKeyFromSource` da la misma clave que `ASSETS.LOGO` real, acepta comillas dobles, no confunde `LOGOS` y lanza error sin `LOGO`; `index.html` no fija ningún favicon, bucket ni marcador `%VITE_` |
+| `languages/translations.test.js` | Paridad de claves y de marcadores de interpolación entre español e inglés, que no haya traducciones vacías, que existan `login.serviceUnavailable` y las claves de los errores `429`, `400` y `404`, y el texto exacto de `gallery.noDataFoundPlaceholder` y `notFound.title` en ambos idiomas |
+| `utilities/faviconHtml.test.js` | `faviconTags` devuelve `<link rel="icon">` con `href` `<URL>/<clave>` y sin `type`, o nada si no hay URL o no empieza por `https://` (`http://`, `//cdn...`, sin esquema, espacios iniciales o `HTTPS://`); la barra final no se normaliza; `logoKeyFromSource` da la misma clave que `ASSETS.LOGO` real, acepta comillas dobles, no confunde `LOGOS` y lanza error sin `LOGO`; `index.html` no fija ningún favicon, bucket ni marcador `%VITE_`, no usa `onload` en línea y sus dos hojas de Google Fonts son `rel="stylesheet"` |
 | `components/Header.test.js` | `Header` no reescribe el `href` de un `<link rel="icon">` existente |
 | `i18n.test.js` | `lang` de `<html>` sigue al idioma (`en`, `es`, `en-US` da `en`, `es-ES` da `es`, `fr` da `es`), también el idioma inicial detectado. Usa `i18next` real (la mock global solo afecta a `react-i18next`) |
-| `hooks/useDocumentTitle.test.js` | Título `<Página> · SIGMETUM-A` por ruta con el texto real de `es`, 404 con `notFound.title`, mayúsculas y barra final, cambio de idioma sin remontar, ruta protegida que redirige a `/login`, y guarda de deriva: toda ruta de `App.js` tiene título y `App.js` llama al hook. Usa i18n real (`vi.mock('react-i18next', importOriginal)`) en lugar de la mock global |
+| `hooks/useDocumentTitle.test.js` | Título `<Página> · SIGMETUM-A` por ruta con el texto real de `es`, 404 con `notFound.title`, mayúsculas y barra final, cambio de idioma sin remontar, ruta protegida que redirige a `/login`, `/auth/callback` con `login.title`, y guarda de deriva: toda ruta de `App.js` tiene título y `App.js` llama al hook. Usa i18n real (`vi.mock('react-i18next', importOriginal)`) en lugar de la mock global |
 | `index.test.js` | `index.js` monta `BrowserRouter` con `v7_startTransition` y `v7_relativeSplatPath` (simula `react-dom/client`, `App` y `i18n`) |
-| `languages/es-typos.test.js` | El texto en español de `login.unauthorizedLabel` es exacto y sin el typo «contraeña» (lee el JSON de `es` directamente) |
 
 ### Pendiente
 

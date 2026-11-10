@@ -74,11 +74,13 @@ Guardia de las rutas privadas.
 
 | Estado / función | Descripción |
 |---|---|
-| `isAuthenticated` | `null` (comprobando, muestra el spinner), `true` o `false` |
-| `showDialog` | Aviso de sesión caducada |
-| `isTokenExpired(token)` | Decodifica el JWT con `jwt-decode` y compara `exp` con la hora actual. Si no se puede decodificar, devuelve `true` |
-| `checkAuth()` | Sin token → `false`. Con token → `GET /auth`; si responde y el token ha caducado muestra el aviso, si no `true`. Si la llamada falla → `false` |
-| `handleCloseDialog()` | Borra el token y marca como no autenticado, lo que redirige a `/login` |
+| `status` | `'checking'` (spinner), `'ok'`, `'denied'` (redirige a `/login`) o `'unavailable'` |
+| `checkAuth()` | Sin `getAccessToken()` → `denied`. Con token → `api.getAuth('/auth')` (con los reintentos del `503` de `api.js`): si responde, `ok`; solo un `401` (`error.type === 'http'`, tras la renovación de `api.js`) da `denied`; cualquier otro error (red, `403`, `5xx`, `503` agotado) da `unavailable` sin borrar tokens ni redirigir. Ignora la respuesta si el componente se desmonta. Bajo `React.StrictMode` (desarrollo) el efecto corre dos veces y hace dos `GET /auth` |
+| `unavailable` | `<div role="alert">` con un `<h1>` (`login.title`, reutilizado **(por confirmar)** si es el título deseado), el texto `login.serviceUnavailable` y un botón `login.retryButton` que vuelve al spinner y repite `GET /auth` |
+| `denied` | `<Navigate to="/login" replace />`: no deja la ruta protegida en el historial |
+| `ok` | Un botón `login.logOutButton` (`ButtonPrincipal`, con texto, sin necesidad de `aria-label`) que llama a `logout()` de `session.js`, encima del `element`. Es el único control de cierre de sesión, en todas las rutas privadas |
+
+Ya no decodifica el JWT ni comprueba `exp` (se retiraron `jwt-decode`, `isTokenExpired` y el diálogo `tokenExpiration.*`). No toca el almacenamiento directamente: usa `getAccessToken` y `logout`, aunque `npm run quality` sigue permitiéndole `localStorage`.
 
 ### CookieBanner
 Banner de consentimiento y modal de configuración.
@@ -250,9 +252,9 @@ Gestión de las imágenes de la galería.
 ### LoginForm
 | Estado / función | Descripción |
 |---|---|
-| `username`, `password`, `showPassword`, `loginErrorKey` | Campos, mostrar u ocultar contraseña y clave del error (o `null`) |
-| `handleLogin()` | `POST /log`. Si va bien, guarda el token y navega a `/cargar-archivos`; con `429` muestra `login.tooManyAttemptsLabel` y con cualquier otro fallo `login.unauthorizedLabel`. El mensaje va en un `<span role="alert">` que solo existe cuando hay error, así que se anuncia como alerta; no está asociado al campo (`aria-describedby`) |
-| Estructura | Cada `<label>` se asocia a su campo con `htmlFor` e `id` derivados de `useId` (únicos entre instancias; el campo de contraseña conserva su `id` al mostrarla u ocultarla). El `<form>` envía con `onSubmit` (`preventDefault` y `handleLogin()`) y el botón "Entrar" está dentro del `<form>` sin `onClick`, así que Enter envía una sola vez |
+| `hasError` | `true` si `startLogin()` rechaza (falta `VITE_COGNITO_*`, no hay `crypto.subtle`...) |
+| `handleLogin()` | Llama a `startLogin()` de `session.js`; un rechazo acaba en un `<span role="alert">` con `login.startError` (no hay promesa sin capturar) |
+| Estructura | Sin campos, sin `api`, sin `useNavigate` y sin almacenamiento: `<h2>` con `login.title` y un `ButtonPrincipal` (botón nativo) con `login.logInButton`. Se mantiene el nombre `LoginForm` aunque ya no es un formulario |
 
 ---
 

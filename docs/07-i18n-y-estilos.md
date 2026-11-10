@@ -12,7 +12,7 @@
 
 ### Archivos
 
-`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía. `src/languages/es-typos.test.js` fija el texto exacto de `login.unauthorizedLabel` en `es` (sin el typo «contraeña»), porque los tests de componentes simulan `t` y no ven el texto real.
+`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía. Se retiró `src/languages/es-typos.test.js`: fijaba el texto de `login.unauthorizedLabel`, que ya no existe (el login lo hace Cognito).
 
 | Espacio | Claves | Contenido |
 |---|---|---|
@@ -24,13 +24,13 @@
 | `aboutUs` | 8 | Sobre nosotros |
 | `filter` | 3 | Textos del filtro |
 | `attributes` | 11 | **Nombres visibles de las columnas de datos.** La clave es el nombre exacto de la columna en el Excel (`"Provincia"`, `"Sector Biogeográfico"`...) |
-| `login` | 10 | Formulario de acceso |
+| `login` | 8 | Acceso con Cognito: `title`, `logInButton`, `startError`, `callbackLoading`, `callbackError`, `retryButton`, `logOutButton` y `serviceUnavailable`. Se retiraron los textos de usuario y contraseña, `unauthorizedLabel` y `tooManyAttemptsLabel` |
 | `uploadFiles` | 3 | Carga de archivos |
 | `dataManagement` | 11 | Administrar datos |
 | `contentManagement` | 11 | Administrar contenido |
 | `dialogAdvice` | 35 | Todos los mensajes de éxito, error y aviso (incluye `errorEmailRateLimit`, `errorEmailInvalid`, `errorDraftNotFound` y `adviceInvalidImageTitle`); `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
 | `cookies` | 28 | Política, banner y modal (con etiquetas `<a>` y `<strong>` para `<Trans>`) |
-| `tokenExpiration`, `notFound`, `pagination`, `language`, `ee` | 1-3 | Varios. `notFound.title` ("Página no encontrada" / "Page not found") es el título de pestaña del 404 |
+| `notFound`, `pagination`, `language`, `ee` | 1-3 | Varios. `notFound.title` ("Página no encontrada" / "Page not found") es el título de pestaña del 404 |
 
 ### Convenciones
 
@@ -54,7 +54,7 @@ Tailwind CSS con clases utilitarias directamente en el JSX. No hay componentes d
 | `font-primary` | Amaranth | `body`, `h1`-`h3`, `th`, `summary` |
 | `font-secondary` | Sen | `p`, `button`, `a`, `label`, `span`, `input`, `td`, `li` |
 
-Las fuentes se cargan desde Google Fonts en `public/index.html`, junto con Material Symbols Outlined para los iconos.
+Las fuentes se cargan desde Google Fonts en `index.html` (raíz del proyecto, no `public/`), junto con Material Symbols Outlined para los iconos, con dos `<link rel="stylesheet">` normales: ya no hay `preload` con `onload` en línea (M13 parcial: siguen viniendo de Google Fonts).
 
 ### Paleta
 

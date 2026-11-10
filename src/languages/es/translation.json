@@ -48,11 +48,6 @@
       "content" : "No pudimos encontrar la página que buscas",
       "returnButton" : "Volver al inicio"
     },
-    "tokenExpiration" :{
-      "title":"Sesión expirada",
-      "content" : "Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
-    }
-    ,
     "explore": {
       "title": "Registro de especies",
       "noDataFoundPlaceholder": "No hay datos disponibles.",
@@ -116,15 +111,13 @@
     },
     "login": {
     "title" : "Iniciar sesión",
-    "userLable": "Usuario",
-    "userPlaceholder": "Usuario",
-    "passwordLable": "Contraseña",
-    "passwordPlaceholder": "Contraseña",
-    "passwordShowButton": "Mostrar",
-    "passwordHideButton": "Ocultar",
     "logInButton": "Iniciar sesión",
-    "unauthorizedLabel": "Verifica el usuario y/o contraseña",
-    "tooManyAttemptsLabel": "Demasiados intentos. Inténtalo de nuevo en 15 minutos."
+    "startError": "No se pudo iniciar sesión. Inténtalo de nuevo más tarde.",
+    "callbackLoading": "Completando el inicio de sesión…",
+    "callbackError": "No se pudo completar el inicio de sesión. Inténtalo de nuevo.",
+    "retryButton": "Reintentar",
+    "logOutButton": "Cerrar sesión",
+    "serviceUnavailable": "El servicio no está disponible en este momento. Inténtalo de nuevo en unos minutos."
   },
   "uploadFiles": {
     "title" : "Cargar archivos",

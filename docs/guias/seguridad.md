@@ -11,7 +11,7 @@ Normas para no introducir vulnerabilidades en este repositorio, con el estado re
 
 | Activo | Riesgo principal |
 |---|---|
-| **Sesión del administrador** (JWT en el navegador) | Que un script ajeno la robe (XSS) o que se use en otro sitio |
+| **Sesión del administrador** (tokens de acceso y de refresco de Cognito en el navegador) | Que un script ajeno la robe (XSS) o que se use en otro sitio |
 | **Datos de investigación** (públicos, pero su integridad importa) | Que una carga incorrecta o maliciosa los corrompa |
 | **Datos personales** del formulario de contacto (nombre y correo) y cookies | Tratamiento sin consentimiento o sin información |
 | **La propia web** | Que se inyecte contenido (XSS) o se cargue código de terceros |
@@ -34,15 +34,17 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 
 ### S3. La sesión: dónde vive y cómo se usa
 
-- **Por qué:** el JWT está en `localStorage`, que cualquier script de la página puede leer. Una sola vulnerabilidad XSS bastaría para robarlo (M1).
+- **Por qué:** el token de acceso y el de refresco de Cognito están en `localStorage`, que cualquier script de la página puede leer. Una sola vulnerabilidad XSS bastaría para robarlos, y el de refresco dura más (M1).
 - **Reglas:**
-  - El token se toca **solo** en `services/api.js`, `LoginForm` y `ProtectedRoute`. `npm run quality` falla si aparece en otro archivo. `FileUpload` ya no lo toca: usa `api.js` (M2 resuelta).
-  - Nunca se escribe el token en consola, en mensajes de error ni en la documentación.
-  - Que el cliente compruebe `exp` es solo comodidad: quien **decide** es el backend.
-  - Al recibir un `401`, se borra la sesión y se redirige al acceso (D6, resuelta: lo hace `services/api.js`).
-  - Debe existir cierre de sesión. No existe hoy.
+  - El almacenamiento de la sesión (`localStorage`: `token` y `refreshToken`; `sessionStorage`: `pkce_verifier` y `pkce_state`) y las funciones de token (`getAccessToken`, `getRefreshToken`, `saveTokens`, `clearSession`) se usan **solo** en `services/session.js`, `services/api.js` y `ProtectedRoute`. `npm run quality` falla si aparecen en otro archivo. Hoy `api.js` y `ProtectedRoute` no escriben el almacenamiento directamente (lo hace `session.js`), pero siguen en la lista por decisión del usuario. `LoginForm` y `AuthCallback` no tienen permiso: usan `startLogin`, `takePkce` y `api.exchangeCode`.
+  - Se guarda el token de **acceso**; el `id_token` nunca. Es un cliente público con PKCE S256: sin secreto, y `code_verifier` y `state` solo en `sessionStorage`, borrados al leerlos. El `state` guardado debe existir y coincidir antes de canjear el código.
+  - Nunca se escribe el token en consola, en mensajes de error ni en la documentación, ni se muestra `error_description` de Cognito.
+  - El cliente ya no decodifica el JWT: quien **decide** es el backend.
+  - `401`: una renovación con el token de refresco (compartida entre llamadas simultáneas) y un reintento; si falla, se borra la sesión y se redirige al acceso (lo hace `services/api.js`). Un fallo de red durante la renovación no cierra la sesión.
+  - `503` de autenticación: dos reintentos (1 s y 3 s) sin borrar la sesión; no se reintenta ningún otro `503`.
+  - Cierre de sesión: botón en `ProtectedRoute` que borra los tokens y va al `/logout` de Cognito. No se llama a `/oauth2/revoke`: el token de refresco sigue válido en Cognito hasta que caduque **(por confirmar con infra)**.
 - **Objetivo:** pasar a una cookie `HttpOnly`, `Secure` y `SameSite`, emitida por el backend. Exige coordinar protección CSRF y CORS con credenciales con el backend.
-- **Estado:** M1 pendiente.
+- **Estado:** M1 parcial: ya hay cierre de sesión y renovación, pero los tokens siguen en `localStorage`.
 
 ### S4. Enlaces y navegación
 
@@ -92,7 +94,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 
 - **Por qué:** limitan el daño si algo falla (XSS, clickjacking, rastreo).
 - **Recomendación para Amplify** (responsabilidad de infra, ver [para-infra.md](../integracion/para-infra.md)): `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` y `frame-ancestors 'none'` (o `X-Frame-Options`).
-- **Obstáculo en el frontend (M13):** los `<link>` de fuentes de `index.html` usan el atributo `onload` inline, que obliga a permitir scripts en línea en la CSP. Conviene alojar las fuentes en el propio sitio: elimina el `onload`, la dependencia de Google y la petición a un tercero antes del consentimiento.
+- **Obstáculo en el frontend (M13, parcial):** `index.html` ya no usa `onload` en línea (las dos hojas de Google Fonts son `<link rel="stylesheet">`; el efecto en la CSP Report-Only es **(por confirmar en `dev`)**). Sigue pendiente alojar las fuentes en el propio sitio: elimina la dependencia de Google y la petición a un tercero antes del consentimiento. La CSP debe permitir en `connect-src` el dominio de Cognito (`POST /oauth2/token`).
 - **Estado:** sin política definida.
 
 ### S9. Privacidad y cookies
@@ -126,10 +128,10 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 | `.env` versionado | **No** |
 | `npm audit` de producción (gravedad alta o crítica) | 1 vulnerabilidad: `xlsx`, sin arreglo, aceptada (M14) |
 | `npm audit` de producción (moderada) | 1: `react-router`, arreglo solo en v7, aceptada (M14) |
-| Token de sesión | En `localStorage` (M1); solo lo tocan `api.js`, `LoginForm` y `ProtectedRoute` |
-| Cierre de sesión y gestión del `401` | La gestión del `401` existe (D6, resuelta en `api.js`); el botón de cerrar sesión no (M1) |
+| Token de sesión | Acceso y refresco de Cognito en `localStorage` (M1); solo los tocan `session.js`, `api.js` y `ProtectedRoute` |
+| Cierre de sesión y gestión del `401` | Renovación del `401` y `503` con reintentos en `api.js`; botón de cerrar sesión en `ProtectedRoute` (M1 parcial). Probado solo con tests: el flujo contra Cognito es **(por confirmar en `dev`)** |
 | Cookies propias | Con `SameSite=Lax` y, en HTTPS, `Secure` (M15 resuelta); el banner sigue sin efecto real (M11) |
-| Fuentes de Google cargadas antes del consentimiento | Sí (M13) |
+| Fuentes de Google cargadas antes del consentimiento | Sí (M13 parcial: ya sin `onload` en línea) |
 | Content-Security-Policy y demás cabeceras | Sin definir |
 | URLs `http://` en el código | 1 enlace externo (B14) y el valor por defecto `localhost` |
 | Política de privacidad y aviso de tratamiento de datos en el formulario de contacto | No existen (M17) |

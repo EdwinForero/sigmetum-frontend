@@ -140,7 +140,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 `npm run lint` falla si hay **errores** o si los **avisos superan el tope** de `--max-warnings` en `package.json`.
 
 - Los avisos (accesibilidad, variables sin usar, `console.log`) son deuda visible: no bloquean, pero **no pueden crecer**.
-- **Cuando corrijas avisos, baja el tope** al nuevo número. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
+- **Cuando corrijas avisos, baja el tope** al nuevo número (el valor actual está en [09](../09-estado-actual-y-deuda-tecnica.md); al retirar los campos de `LoginForm` bajó de 62 a 58). `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
 - No uses `// eslint-disable` sin un comentario que explique el motivo.
 - Una regla de ESLint nueva o relajada se anota en [02](../02-tecnologias.md) y en este documento.
 - Los `.mjs` de `plugins/` (scripts y tests de `node:test` del ciclo agéntico) se lintan con las reglas recomendadas de ESLint y los globales de Node; no están sujetos a las reglas de React ni de accesibilidad de `src/`. Esa excepción no relaja nada de `src/`.

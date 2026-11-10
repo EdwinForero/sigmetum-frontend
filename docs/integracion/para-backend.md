@@ -4,7 +4,7 @@ Documento para quien mantiene `sigmetum-backend`. Explica **qué consume el fron
 
 - La referencia completa de la API es la del propio backend: `sigmetum-backend/docs/04-api.md`. Aquí no se repite.
 - Lo verificado contra el código está marcado así: **(verificado)**. Lo deducido pero no probado contra un S3 real, como **(por confirmar)**.
-- Fecha de la verificación: 30/10/2026. Frontend: rama `feature/sigmetum_front_v2`, sobre el commit `a895e41` (cambios sin confirmar de los lotes A, B y C). Backend: rama `feature/sigmetum_v2`, commit `2864327` (cambios `F2` a `F12` de su `para-frontend.md`; los tests del frontend simulan la API, no se ha probado contra un backend real **(por confirmar)**).
+- Fecha de la verificación: 30/10/2026 (la autenticación con Cognito, secciones 1, 2 y 4, se actualizó el 09/11/2026 contra el código del frontend; el backend, `para-frontend.md` «Autenticación con Cognito (F18)», no se ha contrastado de nuevo **(por confirmar)**). Frontend: rama `feature/sigmetum_front_v2`, sobre el commit `a895e41` (cambios sin confirmar de los lotes A, B y C). Backend: rama `feature/sigmetum_v2`, commit `2864327` (cambios `F2` a `F12` de su `para-frontend.md`; los tests del frontend simulan la API, no se ha probado contra un backend real **(por confirmar)**).
 
 ## 1. Cómo llama el frontend a la API
 
@@ -15,15 +15,16 @@ Todo pasa por [src/services/api.js](../../src/services/api.js).
 | URL | `VITE_BASE_URL` + `VITE_API_PREFIX` + ruta. El prefijo debe coincidir con `API_PREFIX` del backend (`/api/v1`) |
 | Éxito | Solo se considera éxito si `response.ok` **y** `json.success === true`. Devuelve `json.data` |
 | Error | Cualquier otro caso lanza un error con `status` y `type: 'http'`. El cuerpo debe ser JSON con `{ success: false, error }`. Una respuesta no JSON (un 502 de un proxy) también acaba en error genérico |
-| Autenticación | `Authorization: Bearer <token>`, con el token de `localStorage['token']` |
+| Autenticación | `Authorization: Bearer <token de acceso de Cognito>` (nunca el de identidad), con el token de `localStorage['token']`, leído en cada intento. El login ya no pasa por el backend: lo hace el Hosted UI de Cognito (ver sección 4) |
 | Mensajes de error | El frontend **no muestra** el texto de `error` del servidor: usa sus propios mensajes traducidos, elegidos por el **estado HTTP** (nunca por el texto). Distingue los de la tabla de abajo; el resto de estados cae en el mensaje genérico del componente |
 
 Qué hace el frontend según el estado:
 
 | Estado | Dónde | Comportamiento |
 |---|---|---|
-| `401` | Métodos `*Auth` de `api.js` (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) | Borra `localStorage['token']`, ejecuta `window.location.assign('/login')` y lanza el error igualmente (también con cuerpo no JSON). `api.get` y `api.post` (incluido `POST /log`) **no** borran ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que un `401` en `/upload` o en `/upload/confirm` (confirmar o cancelar) también redirige |
-| `429` | `POST /log` (`LoginForm`) y `POST /send-email` (`ContactForm`) | Mensaje propio: "demasiados intentos" (login) y "demasiados mensajes" (contacto), ambos con "inténtalo en 15 minutos" |
+| `401` | Métodos `*Auth` de `api.js` (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) | Intenta **una** renovación en silencio (`POST <dominio de Cognito>/oauth2/token`, `grant_type=refresh_token`; una sola renovación compartida por las llamadas simultáneas) y, si va bien, repite la petición una vez con el token nuevo. Si no hay `refreshToken`, si la renovación falla (también con un 5xx de Cognito) o si la repetición vuelve a dar `401`, borra la sesión, ejecuta `window.location.assign('/login')` y lanza el error 401 (también con cuerpo no JSON). Un fallo de **red** durante la renovación es indeterminado: no borra la sesión y sube como error de red. `api.get` y `api.post` **no** renuevan ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que un `401` en `/upload` o en `/upload/confirm` sigue el mismo camino |
+| `503` con `error: 'Authentication service unavailable'` | Métodos `*Auth` de `api.js` | Reintenta dos veces, tras 1 s y 3 s. Agotados, lanza el error con `status: 503` **sin** borrar la sesión ni redirigir. Solo se reintenta ese cuerpo exacto (el 503 de autenticación sale antes de que la ruta haga nada, así que es seguro repetir también un `POST`); un `503` con otro cuerpo (p. ej. el HTML de un ALB) no se reintenta ni borra nada. `ProtectedRoute` muestra su propio aviso de servicio no disponible; el resto de pantallas, su error genérico. Riesgo aceptado: tras un `kid` nuevo el backend puede dar hasta 10 s de 503 y los reintentos terminan antes **(por confirmar en `dev`)** |
+| `429` | `POST /send-email` (`ContactForm`) | Mensaje propio: "demasiados mensajes", con "inténtalo en 15 minutos". El login ya no usa `429` (lo gestiona Cognito) |
 | `400` | `POST /send-email` (`ContactForm`) | "Revisa los datos del formulario". En `POST /upload` con `data.emptyFields` y `data.draftKey`, abre el diálogo de campos vacíos (sin cambios); el `draftKey` se reenvía sin interpretarlo |
 | `404` | `POST /upload/confirm` (`FileUpload`), al confirmar o al cancelar | Se interpreta **solo por el estado** (no se lee el texto `Draft not found`): "El borrador ya no existe. Vuelve a subir el archivo." Un `404` con otro significado en esa ruta se mostraría igual **(por confirmar con el backend)** |
 | Resto (`500`, red...) | Todos | Mensaje genérico del componente. Cancelar un borrador con un fallo distinto de `404` muestra el error de subida |
@@ -36,10 +37,11 @@ Solo aparecen los campos que el frontend **lee**. Lo demás de la respuesta se i
 
 ### Autenticación
 
+`POST /log` **ya no existe en el frontend**: no hay campos de usuario y contraseña ni `data.token`. El login es el flujo de código de autorización con PKCE S256 contra el Hosted UI de Cognito (`/oauth2/authorize`, `/oauth2/token` y `/logout` del dominio `VITE_COGNITO_DOMAIN`), que no es el backend.
+
 | Endpoint | El frontend envía | El frontend lee | Quién lo llama |
 |---|---|---|---|
-| `POST /log` | `{ username, password }` | `data.token` | `LoginForm` |
-| `GET /auth` | — | Solo el código de estado | `ProtectedRoute` (al entrar en cada ruta privada) |
+| `GET /auth` | `Authorization: Bearer <token de acceso>` | Solo el código de estado (con reintentos ante el `503` de autenticación) | `ProtectedRoute` (al entrar en cada ruta privada) |
 
 ### Datos
 
@@ -84,11 +86,12 @@ Las columnas del Excel se leen **por posición** (`fixedColumnOrder` en `convert
 
 ## 4. Sesión y autenticación
 
-- El token se guarda en `localStorage['token']`. No hay cierre de sesión.
-- El frontend **decodifica el JWT en el navegador y lee el campo `exp`** (segundos Unix). Si se cambia el formato de caducidad o se deja de incluir `exp`, el frontend tratará todos los tokens como caducados.
-- `ProtectedRoute` llama a `GET /auth` al entrar en cada ruta privada. Cualquier fallo (401, red, 500) se trata como "sin sesión" y redirige a `/login`.
-- Si el token caduca **durante** una sesión, la primera llamada protegida que devuelva `401` (métodos `*Auth` de `api.js`) borra el token y redirige a `/login`, sin diálogo previo ni conservar la ruta de origen. El `401` de `POST /log` y el de rutas que no envían token (`ContactForm`, `list-images`, `get-image`, `list-terms`) **no** se usan como señal de sesión caducada. `FileUpload` también redirige ante un `401` (usa `api.js`, sin diálogo de error).
-- Un token de `JWT_EXPIRATION` muy largo es cómodo pero deja abierta la sesión. El frontend no impone ningún límite.
+- Login: botón en `/login` que redirige al Hosted UI de Cognito (código de autorización con PKCE S256, `scope=openid email`, `redirect_uri` = `<origen>/auth/callback`). `/auth/callback` canjea el código en `/oauth2/token` (cliente público, sin secreto) y guarda los tokens. **(El flujo completo contra Cognito no se ha probado: por confirmar en `dev`.)**
+- Los tokens van en `localStorage`: el de acceso en `token` y el de refresco en `refreshToken`. El `id_token` nunca se guarda. `code_verifier` y `state` van en `sessionStorage`. Solo lo tocan `services/session.js`, `services/api.js` y `ProtectedRoute` (este último hoy solo a través de `session.js`).
+- El frontend **ya no decodifica el JWT ni lee `exp`**: la caducidad se detecta por el `401` del backend y se renueva con el token de refresco.
+- `ProtectedRoute` llama a `GET /auth` al entrar en cada ruta privada (y bajo `React.StrictMode` en desarrollo lo hace dos veces). Sin token de acceso o con `401` (tras intentar renovar) redirige a `/login`; con cualquier otro error (`503` agotado, `500`, `403`, red) muestra un aviso de servicio no disponible con botón «Reintentar» y conserva la sesión.
+- Cierre de sesión: botón en las rutas privadas (lo pinta `ProtectedRoute`). Borra los dos tokens y redirige a `<dominio de Cognito>/logout?client_id=…&logout_uri=<origen>/`. No llama a `/oauth2/revoke`.
+- Un token de `JWT_EXPIRATION` muy largo ya no aplica al login: la caducidad la fija Cognito.
 
 ## 5. CORS
 
@@ -125,7 +128,8 @@ Son casos en los que lo que hace el frontend y lo que hace el backend **no encaj
 | El formato de nombres de versión (`AAAA-MM-DD_vN.xlsx`) | `utilities/FormatFileName.js` (busca `AAAA-MM-DD_vN.xlsx` al final del nombre) y `FileDropdown` |
 | La forma de `emptyFields` o `draftKey` en el `400` de `/upload` | `components/FileUpload.js` |
 | Los campos de `/list-files` (`key`, `name`) | `components/FileDropdown.js` |
-| Las claves del JWT o cómo caduca | `components/ProtectedRoute.js` (lee `exp`) |
+| Las claves o la validación del token de acceso de Cognito (`kid`, `iss`, `client_id`) | Nada en el código (no lo decodifica); un cambio de pool o de cliente es de variables `VITE_COGNITO_*` y de infra |
+| El texto o el estado del `503` de autenticación (`Authentication service unavailable`) | `services/api.js` (`AUTH_UNAVAILABLE` y `RETRY_DELAYS_MS`) |
 | El origen permitido por CORS | Nada en el código, pero hay que asegurar que `ALLOWED_ORIGIN` coincide con el dominio del frontend de cada entorno |
 | Añades un endpoint protegido | Un método nuevo en `services/api.js` si necesita un verbo distinto |
 | Cierras o restringes `/get-data` | `FileDropdown` (ver D1) |
