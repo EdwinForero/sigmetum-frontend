@@ -26,3 +26,6 @@ yarn-error.log*
 # Understand-Anything (grafo derivado y regenerable)
 .understand-anything/
 .ua/
+
+# Playwright MCP output (screenshots, console logs)
+.playwright-mcp/
