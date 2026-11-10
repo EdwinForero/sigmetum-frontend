@@ -48,10 +48,6 @@
     "content" : "We couldn't find the page you were looking for",
     "returnButton" : "Return home"
   },
-  "tokenExpiration" :{
-    "title":"Session expired",
-    "content" : "Your session has expired. Please log in again."
-  },
   "explore": {
     "title": "Species record",
     "noDataFoundPlaceholder": "No data available.",
@@ -115,15 +111,13 @@
   },
   "login": {
     "title" : "Log in",
-    "userLable": "User",
-    "userPlaceholder": "User",
-    "passwordLable": "Password",
-    "passwordPlaceholder": "Password",
-    "passwordShowButton": "Show",
-    "passwordHideButton": "Hide",
     "logInButton": "Log in",
-    "unauthorizedLabel": "Verify the user and/or password",
-    "tooManyAttemptsLabel": "Too many attempts. Please try again in 15 minutes."
+    "startError": "Could not start the login. Please try again later.",
+    "callbackLoading": "Completing the login…",
+    "callbackError": "The login could not be completed. Please try again.",
+    "retryButton": "Try again",
+    "logOutButton": "Log out",
+    "serviceUnavailable": "The service is unavailable at the moment. Please try again in a few minutes."
   },
   "uploadFiles": {
     "title" : "Upload files",
@@ -253,6 +247,16 @@
         "security": "Security cookies"
       }
     }
+  },
+  "iconButton": {
+    "delete": "Delete",
+    "add": "Add",
+    "menu": "Menu",
+    "close": "Close",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "info": "Information",
+    "scrollDown": "Scroll down"
   },
   "language":{
     "spanish" : "Español - ES",

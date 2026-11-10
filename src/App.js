@@ -5,6 +5,7 @@ import About from './pages/About';
 import Explore from './pages/Explore';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
+import AuthCallback from './pages/AuthCallback';
 import Cookies from './pages/Cookies';
 import DataManagement from './pages/DataManagement';
 import ContentManagement from './pages/ContentManagement';
@@ -98,11 +99,11 @@ function App() {
   };
 
   const menuOptions = [
-    { id: 'filter', name: 'Filtro', component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} />, icon: 'filter_alt' },
-    { id: 'dataManagementFilter', name: 'Filtro', component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange} />, icon: 'filter_alt' },
-    { id: 'dataManagement', name: 'Administrar datos', icon: 'database', link: '/administrar-datos' },
-    { id: 'contentManagement', name: 'Administrar contenido', icon: 'settings', link: '/administrar-contenido' },
-    { id: 'uploadFiles', name: 'Cargar archivos', icon: 'upload', link: '/cargar-archivos' },
+    { id: 'filter', name: t('filter.title'), component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} />, icon: 'filter_alt' },
+    { id: 'dataManagementFilter', name: t('filter.title'), component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange} />, icon: 'filter_alt' },
+    { id: 'dataManagement', name: t('dataManagement.title'), icon: 'database', link: '/administrar-datos' },
+    { id: 'contentManagement', name: t('contentManagement.title'), icon: 'settings', link: '/administrar-contenido' },
+    { id: 'uploadFiles', name: t('uploadFiles.title'), icon: 'upload', link: '/cargar-archivos' },
   ];
 
   return (
@@ -131,6 +132,7 @@ function App() {
             />
             <Route path="/sobre-nosotros" element={<About />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/galeria" element={<VegetationGallery />} />
             <Route path="/cookies" element={<Cookies />} />
             <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload />} />} />

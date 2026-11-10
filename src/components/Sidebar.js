@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
 
 const Sidebar = ({ 
   exploreData, 
   menuOptions 
 }) => {
+  const { t } = useTranslation();
   const [activeComponent, setActiveComponent] = useState(null);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const location = useLocation();
@@ -57,6 +59,7 @@ const Sidebar = ({
                 <ButtonPrincipal
                   className={`${location.pathname === option.link ? 'bg-[#15B659] text-[#F9FBFA]' : ''}`}
                   icon={option.icon}
+                  ariaLabel={option.name}
                 />
               </Link>
             ) : (
@@ -64,6 +67,7 @@ const Sidebar = ({
                 key={option.id}
                 onClick={() => handleButtonClick(option.id)}
                 icon={option.icon}
+                ariaLabel={option.name}
               />
             )
           ))}
@@ -80,7 +84,7 @@ const Sidebar = ({
           <div className="px-4 py-6 min-h-full overflow-y-auto">
             {menuOptions.find((option) => option.id === activeComponent)?.component}
           </div>
-          <ButtonPrincipal icon="Close" onClick={handleOverlayClick} className="m-2"/>
+          <ButtonPrincipal icon="Close" ariaLabel={t('iconButton.close')} onClick={handleOverlayClick} className="m-2"/>
         </div>
       </motion.div>
     </div>

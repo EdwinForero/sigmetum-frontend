@@ -30,9 +30,9 @@ describe('traducciones', () => {
     expect(mismatched).toEqual([]);
   });
 
-  it('incluye las claves de los errores 401, 429, 400 y 404 del backend', () => {
+  it('incluye las claves de los errores 503, 429, 400 y 404 del backend', () => {
     const keys = [
-      'login.tooManyAttemptsLabel',
+      'login.serviceUnavailable',
       'dialogAdvice.errorEmailRateLimit',
       'dialogAdvice.errorEmailInvalid',
       'dialogAdvice.errorDraftNotFound',
@@ -49,6 +49,38 @@ describe('traducciones', () => {
     }).toEqual({
       es: ['No hay datos disponibles.', 'Página no encontrada'],
       en: ['No data available.', 'Page not found'],
+    });
+  });
+
+  it('incluye los nombres accesibles de los botones de icono', () => {
+    const pick = (dictionary) =>
+      Object.fromEntries(
+        Object.entries(dictionary)
+          .filter(([key]) => key.startsWith('iconButton.'))
+          .map(([key, value]) => [key.replace('iconButton.', ''), value])
+      );
+
+    expect({ es: pick(spanish), en: pick(english) }).toEqual({
+      es: {
+        delete: 'Eliminar',
+        add: 'Añadir',
+        menu: 'Menú',
+        close: 'Cerrar',
+        previousPage: 'Página anterior',
+        nextPage: 'Página siguiente',
+        info: 'Información',
+        scrollDown: 'Bajar',
+      },
+      en: {
+        delete: 'Delete',
+        add: 'Add',
+        menu: 'Menu',
+        close: 'Close',
+        previousPage: 'Previous page',
+        nextPage: 'Next page',
+        info: 'Information',
+        scrollDown: 'Scroll down',
+      },
     });
   });
 

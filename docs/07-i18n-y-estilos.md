@@ -12,7 +12,7 @@
 
 ### Archivos
 
-`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía. `src/languages/es-typos.test.js` fija el texto exacto de `login.unauthorizedLabel` en `es` (sin el typo «contraeña»), porque los tests de componentes simulan `t` y no ven el texto real.
+`src/languages/es/translation.json` y `src/languages/en/translation.json`, con las mismas claves. La prueba `src/languages/translations.test.js` falla si una clave falta en un idioma, si difieren los marcadores de interpolación (`{{x}}`) o si una traducción está vacía. Se retiró `src/languages/es-typos.test.js`: fijaba el texto de `login.unauthorizedLabel`, que ya no existe (el login lo hace Cognito).
 
 | Espacio | Claves | Contenido |
 |---|---|---|
@@ -24,13 +24,14 @@
 | `aboutUs` | 8 | Sobre nosotros |
 | `filter` | 3 | Textos del filtro |
 | `attributes` | 11 | **Nombres visibles de las columnas de datos.** La clave es el nombre exacto de la columna en el Excel (`"Provincia"`, `"Sector Biogeográfico"`...) |
-| `login` | 10 | Formulario de acceso |
+| `login` | 8 | Acceso con Cognito: `title`, `logInButton`, `startError`, `callbackLoading`, `callbackError`, `retryButton`, `logOutButton` y `serviceUnavailable`. Se retiraron los textos de usuario y contraseña, `unauthorizedLabel` y `tooManyAttemptsLabel` |
 | `uploadFiles` | 3 | Carga de archivos |
 | `dataManagement` | 11 | Administrar datos |
 | `contentManagement` | 11 | Administrar contenido |
 | `dialogAdvice` | 35 | Todos los mensajes de éxito, error y aviso (incluye `errorEmailRateLimit`, `errorEmailInvalid`, `errorDraftNotFound` y `adviceInvalidImageTitle`); `rowEmpty` (`{{rowIndex}}`) y `fieldsMissingMessage` (`{{filename}}`) |
 | `cookies` | 28 | Política, banner y modal (con etiquetas `<a>` y `<strong>` para `<Trans>`) |
-| `tokenExpiration`, `notFound`, `pagination`, `language`, `ee` | 1-3 | Varios. `notFound.title` ("Página no encontrada" / "Page not found") es el título de pestaña del 404 |
+| `iconButton` | 8 | Nombres accesibles de los botones de solo icono: `delete`, `add`, `menu`, `close`, `previousPage`, `nextPage`, `info` y `scrollDown` (un test comprueba el texto exacto en ambos idiomas) |
+| `notFound`, `pagination`, `language`, `ee` | 1-3 | Varios. `notFound.title` ("Página no encontrada" / "Page not found") es el título de pestaña del 404 |
 
 ### Convenciones
 
@@ -47,6 +48,17 @@ El sistema de diseño para quien crea interfaz (paleta con su contraste, tipogra
 
 Tailwind CSS con clases utilitarias directamente en el JSX. No hay componentes de estilo compartidos salvo los botones. `App.css` es residual y `styled-components` solo se usa en `Switch`.
 
+### Foco (`index.css`)
+
+Dos clases en `@layer components` de `src/index.css`, sobre `:focus-visible` y con los colores de la paleta (`ink` `#0C1811`, `surface` `#F9FBFA`):
+
+| Clase | Efecto | Se usa en |
+|---|---|---|
+| `.focus-ring` | `outline` de 2 px `ink` con `outline-offset: 2px` y `box-shadow: 0 0 0 2px` `surface` (halo interior, para que el anillo se vea sobre fondos oscuros como el `CookieBanner`) | Campos de `ContactForm`, `ButtonPrincipal`, `ButtonAlternative`, papeleras, `InfoButton` y `ScrollIndicator` |
+| `.focus-ring-inset` | `outline` de 2 px `ink` con `outline-offset: -2px`, sin halo | `input` de `FilterSearchBar` (con `rounded-r-xl`) y `TextInput` (con `rounded-xl`), cuyo `label` con `overflow-hidden` recortaría el anillo exterior; el radio propio del `input` hace que el anillo interior conserve las esquinas |
+
+Se usa `outline` y no `ring` porque el contorno se mantiene en el modo de alto contraste de Windows. `.focus-ring` fija `box-shadow` con la misma especificidad que las utilidades de Tailwind y en una capa posterior: una utilidad `shadow-*` o `ring-*` futura en el mismo elemento ganaría sobre el halo. Pintado, contraste y recorte sin comprobar en un navegador **(por confirmar)**. Ver [DESIGN.md](../DESIGN.md) y A3 en [accesibilidad](guias/accesibilidad.md).
+
 ### Tipografía (`tailwind.config.js` + `index.css`)
 
 | Token | Fuente | Se aplica a |
@@ -54,7 +66,7 @@ Tailwind CSS con clases utilitarias directamente en el JSX. No hay componentes d
 | `font-primary` | Amaranth | `body`, `h1`-`h3`, `th`, `summary` |
 | `font-secondary` | Sen | `p`, `button`, `a`, `label`, `span`, `input`, `td`, `li` |
 
-Las fuentes se cargan desde Google Fonts en `public/index.html`, junto con Material Symbols Outlined para los iconos.
+Las fuentes se cargan desde Google Fonts en `index.html` (raíz del proyecto, no `public/`), junto con Material Symbols Outlined para los iconos, con dos `<link rel="stylesheet">` normales: ya no hay `preload` con `onload` en línea (M13 parcial: siguen viniendo de Google Fonts).
 
 ### Paleta
 

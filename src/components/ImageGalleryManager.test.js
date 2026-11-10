@@ -17,7 +17,7 @@ const setup = async (title) => {
   });
   const file = new File(['x'], 'foto.png', { type: 'image/png' });
   await user.upload(container.querySelector('#imageFileInput'), file);
-  await user.click(screen.getByText('add'));
+  await user.click(screen.getByRole('button', { name: 'iconButton.add' }));
 };
 
 describe('ImageGalleryManager: validación del título', () => {
@@ -51,5 +51,15 @@ describe('ImageGalleryManager: validación del título', () => {
 
     await waitFor(() => expect(api.postFormAuth).toHaveBeenCalledTimes(1));
     expect(screen.queryByText('dialogAdvice.adviceInvalidImageTitle')).not.toBeInTheDocument();
+  });
+
+  it('las papeleras de la galería tienen nombre accesible y anillo de foco', async () => {
+    api.get.mockReset().mockResolvedValue([{ fileName: 'a.png' }, { fileName: 'b.png' }]);
+    render(<ImageGalleryManager />);
+
+    const papeleras = await screen.findAllByRole('button', { name: 'iconButton.delete' });
+
+    expect(papeleras).toHaveLength(2);
+    papeleras.forEach((papelera) => expect(papelera).toHaveClass('focus-ring'));
   });
 });

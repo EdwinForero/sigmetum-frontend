@@ -1,10 +1,11 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useId } from 'react';
+import { motion, useIsPresent } from 'motion/react';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import SpeciesAttribute from '../components/SpeciesAttribute.js';
 import { SortItemsList } from '../utilities/SortItemsList.js';
 import { highlightTerms } from '../utilities/highlightTerms.js';
 import { useTranslation } from 'react-i18next';
+import useDialogFocus from '../hooks/useDialogFocus.js';
 
 const contieneEspecie = (valor, nombre) =>
   Array.isArray(valor) ? valor.includes(nombre) : valor === nombre;
@@ -18,6 +19,9 @@ const Dialog = ({
 }) => {
   
   const { t } = useTranslation();
+  const titleId = useId();
+  const isPresent = useIsPresent();
+  const dialogRef = useDialogFocus(isOpen && isPresent, onClose);
 
   if (!isOpen) return null;
   
@@ -68,9 +72,14 @@ const Dialog = ({
         exit={{ y: 1000 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         onClick={(event) => event.stopPropagation()}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
       >
         <div className="flex justify-center px-4 py-2 mx-auto w-full">
-          <div className="text-[#4B644A] text-4xl mb-4 font-bold text-center break-words whitespace-normal">
+          <div id={titleId} className="text-[#4B644A] text-4xl mb-4 font-bold text-center break-words whitespace-normal">
             {textParts.map((part, index) => (
                 <h2
                   key={index}
@@ -106,7 +115,7 @@ const Dialog = ({
               className="flex items-center text-sm text-gray-600"
             >
               <span className="hover:underline">{t('explore.dialogSpecies.readMoreLabel')}</span>
-              <span className="material-symbols-outlined items-center mx-auto">open_in_new</span>
+              <span className="material-symbols-outlined items-center mx-auto" aria-hidden="true">open_in_new</span>
             </a>
           </div>
         </div>

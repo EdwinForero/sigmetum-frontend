@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useId } from "react";
 import ButtonPrincipal from "./ButtonPrincipal";
 import { useTranslation } from "react-i18next";
-import { motion } from "motion/react";
+import { motion, useIsPresent } from "motion/react";
+import useDialogFocus from "../hooks/useDialogFocus";
 
 const DialogAdvice = ({ 
   onClose, 
@@ -12,6 +13,9 @@ const DialogAdvice = ({
   dialogDetails = null
 }) => {
   const { t } = useTranslation();
+  const titleId = useId();
+  const isPresent = useIsPresent();
+  const dialogRef = useDialogFocus(isPresent, onClose);
 
   const renderDialogDetails = () => {
     if (dialogDetails) {
@@ -41,9 +45,14 @@ const DialogAdvice = ({
         exit={{ y: 1000 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
         onClick={(event) => event.stopPropagation()}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
       >
         <div className="flex justify-center px-4 py-2 mx-auto">
-          <h3 className="text-[#15B659] text-4xl mb-4 font-bold">
+          <h3 id={titleId} className="text-[#15B659] text-4xl mb-4 font-bold">
             {dialogTitle}
           </h3>
         </div>

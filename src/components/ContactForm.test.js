@@ -70,4 +70,33 @@ describe('ContactForm', () => {
     expect(ids.every(Boolean)).toBe(true);
     expect(new Set(ids).size).toBe(8);
   });
+
+  it('pulsar Cerrar en el diálogo no reenvía el formulario, y enviar sigue enviando', async () => {
+    api.post.mockResolvedValue({});
+    const user = userEvent.setup();
+    render(<ContactForm onLoad={vi.fn()} />);
+
+    await fillAndSend(user);
+    await screen.findByText('dialogAdvice.successEmailMessage');
+    expect(api.post).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole('button', { name: 'dialogAdvice.closeButton' }));
+
+    expect(api.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('los cuatro campos llevan el anillo de foco', () => {
+    render(<ContactForm onLoad={vi.fn()} />);
+
+    [
+      'home.contactForm.nameLabel',
+      'home.contactForm.emailPlaceholder',
+      'home.contactForm.subjectPlaceholder',
+      'home.contactForm.messagePlaceholder',
+    ].forEach((label) => {
+      const campo = screen.getByLabelText(label);
+      expect(campo).toHaveClass('focus-ring');
+      expect(campo.className).not.toMatch(/focus:outline/);
+    });
+  });
 });

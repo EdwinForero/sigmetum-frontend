@@ -5,6 +5,8 @@ const ButtonPrincipal = ({
   text, 
   dropdownOptions, 
   icon, 
+  ariaLabel,
+  type = 'button',
   className, 
   onOptionSelect, 
   disabled=false 
@@ -50,17 +52,20 @@ const ButtonPrincipal = ({
     <div className="relative inline-block" ref={dropdownRef}>
       {icon ? (
         <button
+          type={type}
+          aria-label={ariaLabel}
           onClick={toggleDropdown}
           disabled={disabled}
-          className={`align-middle flex min-w-[70px] max-w-[84px] min-h-[70px] max-h-[84px] text-[#15B659] hover:text-[#F9FBFA] hover:bg-[#15B659] cursor-pointer items-center justify-center overflow-hidden rounded-xl px-4 sm:h-12 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`focus-ring align-middle flex min-w-[70px] max-w-[84px] min-h-[70px] max-h-[84px] text-[#15B659] hover:text-[#F9FBFA] hover:bg-[#15B659] cursor-pointer items-center justify-center overflow-hidden rounded-xl px-4 sm:h-12 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <span className="material-symbols-outlined text-3xl mx-auto">{icon}</span>
+          <span className="material-symbols-outlined text-3xl mx-auto" aria-hidden="true">{icon}</span>
         </button>
       ) : (
         <button
+          type={type}
           onClick={toggleDropdown}
           disabled={disabled}
-          className={`bg-[#15B659] align-middle flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 sm:h-12 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`focus-ring bg-[#15B659] align-middle flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 sm:h-12 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <span className="text-[#F9FBFA] sm:text-sm md:text-base lg:text-xl truncate">
             {selectedOption}

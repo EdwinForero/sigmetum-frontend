@@ -10,6 +10,8 @@
 | `BASE_URL` | `VITE_BASE_URL` | `http://localhost:8000` | Origen del backend |
 | `API_PREFIX` | `VITE_API_PREFIX` | `/api/v1` | Prefijo de versión (debe coincidir con el backend) |
 | `S3_URL` | `VITE_S3_URL` | `''` | Base pública de S3 o CloudFront para los recursos estáticos. También se lee **al compilar** (`vite.config.js`) para el favicon: ver [Favicon](#favicon-viteconfigjs-y-faviconhtml) |
+| `COGNITO_DOMAIN` | `VITE_COGNITO_DOMAIN` | `''` | Dominio del Hosted UI de Cognito (con `https://`, sin barra final). Pública. Sin valor por defecto: en local el login no se puede probar, por diseño. Vacía: `startLogin` y el canje del código lanzan un error y no redirigen ni llaman |
+| `COGNITO_CLIENT_ID` | `VITE_COGNITO_CLIENT_ID` | `''` | Id del cliente público de la app en el pool de Cognito. Pública, sin secreto |
 | `CAROUSEL_IMAGE_KEYS` | `VITE_CAROUSEL_IMAGE_KEYS` | `[]` | Claves separadas por comas para `ImageCarrousel` (sin uso) |
 
 ### `assets.js`
@@ -47,8 +49,26 @@ Documentado en [03-api.md](03-api.md#métodos-del-cliente). Resumen:
 
 | Función interna | Descripción |
 |---|---|
-| `authHeader()` | `{ Authorization: 'Bearer ' + localStorage.token }` |
-| `request(path, options)` | `fetch` a `BASE_URL + API_PREFIX + path`. Convierte los fallos de red en `Error('network_error')`, parsea el JSON y lanza un error si `!response.ok \|\| !json.success`. Devuelve `json.data` |
+| `request(path, options, { authenticated })` | `fetch` a `BASE_URL + API_PREFIX + path`. Con `authenticated` añade `Bearer ${getAccessToken()}` en cada intento (nada si no hay token). Convierte los fallos de red en `Error('network_error')`, parsea el JSON y lanza un error si `!response.ok \|\| !json.success`. Devuelve `json.data`. Con token: reintenta el `503` de autenticación (`RETRY_DELAYS_MS = [1000, 3000]`) y ante `401` renueva la sesión una vez y repite |
+| `cognitoToken(params)` | `POST <COGNITO_DOMAIN>/oauth2/token` (formulario, `client_id`, sin secreto ni `Authorization`; respuesta sin el envoltorio `{ success, data }`). Sin variables de Cognito lanza `cognito_not_configured` |
+| `renewSession()` / `refreshSession()` | Renovación con `grant_type=refresh_token`. `refreshSession` comparte una única promesa (`refreshing`) entre las llamadas con `401` simultáneas; solo ella borra la sesión y va a `/login` si falla. Un fallo de red no cierra la sesión; un 5xx de Cognito sí **(por confirmar si es lo deseado)** |
+| `api.exchangeCode(code, verifier)` | Canje del código de autorización (`grant_type=authorization_code`, `code_verifier`, `redirect_uri`) y `saveTokens` |
+
+### Sesión (`src/services/session.js`)
+
+Único archivo que escribe `localStorage` (`token` = acceso y `refreshToken`) y `sessionStorage` (`pkce_verifier`, `pkce_state`); `api.js` y `ProtectedRoute` lo usan, nunca al revés (`api.js` importa `session.js`). Exportaciones con nombre:
+
+| Exporta | Descripción |
+|---|---|
+| `getAccessToken()`, `getRefreshToken()` | Lectura de `localStorage` |
+| `saveTokens({ access_token, refresh_token })` | Guarda el de acceso; el de refresco solo si viene en la respuesta (si no, conserva el anterior). Nunca guarda el `id_token` |
+| `clearSession()` | Borra los dos tokens |
+| `redirectUri()` | `window.location.origin + '/auth/callback'` |
+| `buildAuthorizeUrl({ state, codeChallenge })` | `<COGNITO_DOMAIN>/oauth2/authorize` con `response_type=code`, `client_id`, `redirect_uri`, `scope=openid email`, `state`, `code_challenge` y `code_challenge_method=S256` (con `URLSearchParams`) |
+| `codeChallengeFor(verifier)` | SHA-256 en base64url sin `=` (`crypto.subtle`; asíncrona) |
+| `takePkce()` | Devuelve `{ verifier, state }` y borra los dos de `sessionStorage` |
+| `startLogin()` | Genera un verificador de 32 bytes y un `state` de 16 (`crypto.getRandomValues`), los guarda y redirige a la URL de autorización. Sin `COGNITO_DOMAIN` o `COGNITO_CLIENT_ID` lanza `cognito_not_configured` (sin redirigir); el llamador lo muestra con `t()` |
+| `logout()` | `clearSession()` y redirige a `<COGNITO_DOMAIN>/logout?client_id=…&logout_uri=<origen>/` (con `URLSearchParams`). Sin `COGNITO_DOMAIN` solo borra la sesión y va a `/` |
 
 ## Hooks
 
@@ -73,6 +93,17 @@ const { dialog, showDialog, closeDialog } = useDialog();
 </AnimatePresence>
 ```
 
+### `useDialogFocus(isOpen, onClose)` (`src/hooks/useDialogFocus.js`)
+Gestiona el foco de un diálogo modal (A6) y devuelve la `ref` de su caja, que debe llevar `tabIndex={-1}`. Lo usan `DialogAdvice` y `DialogSpecies`; un diálogo nuevo debe reutilizarlo.
+
+| Comportamiento | Descripción |
+|---|---|
+| Al abrir (`isOpen` pasa a `true`) | Guarda `document.activeElement` como origen y enfoca la caja con `preventScroll` (empieza fuera de pantalla). El foco va a la caja y no al primer botón, para que Enter no confirme sin querer |
+| `keydown` en `document` | `Escape` llama a `onClose` (la última versión, vía `ref`, porque `onClose` cambia en cada render de `FileUpload`). `Tab` y `Shift+Tab` se atrapan entre el primer y el último elemento enfocable (`a[href]`, botones, campos, `summary` y `[tabindex]` distinto de `-1`); si el foco está fuera de la caja, entra por el primero o el último. `Shift+Tab` desde la propia caja o desde un elemento del diálogo que no es de esa lista (por ejemplo, un contenedor con scroll enfocable) va al último control. Ignora el evento si `defaultPrevented` |
+| Diálogos anidados | Una pila a nivel de módulo registra los diálogos abiertos: solo atiende el teclado el último abierto, así que Escape y Tab actúan solo sobre el de encima |
+| Al cerrar o desmontar | Quita el listener, saca el diálogo de la pila y devuelve el foco al origen si sigue en el documento y no es `body`; si no (el origen se desmontó, o fue un clic en algo no enfocable, como la ficha de `SpeciesCard`), pone `tabindex="-1"` al `main` si no lo tiene y le da el foco. Si no hay `main`, el foco se pierde. El `tabindex="-1"` del `main` queda permanente (ver B26 en [09](09-estado-actual-y-deuda-tecnica.md)) |
+
+Con `AnimatePresence`, el llamador pasa `isOpen && useIsPresent()` (Framer Motion) para que el listener y la trampa se desactiven mientras el diálogo sale.
 ### `useDocumentTitle()` (`src/hooks/useDocumentTitle.js`)
 Pone `document.title` con el formato `` `${t(clave)} · SIGMETUM-A` `` según la ruta mostrada. `App` lo llama **una vez**; no se llama en cada página porque `ProtectedRoute` puede mostrar el spinner o redirigir y el título quedaría desfasado.
 
@@ -82,13 +113,11 @@ Pone `document.title` con el formato `` `${t(clave)} · SIGMETUM-A` `` según la
 | `titleKeyFor(pathname)` | Resuelve la clave con `matchPath` (sin distinguir mayúsculas y con o sin barra final); si ninguna ruta coincide, `notFound.title` |
 | `useDocumentTitle()` (por defecto) | Efecto con dependencias `[t, key]`: se recalcula al navegar y al cambiar de idioma (en react-i18next `t` cambia de identidad con el idioma) |
 
-Al añadir una ruta en `App.js` hay que añadirla a `PAGE_TITLE_KEYS`: un test lee `App.js` y falla si falta alguna.
+`/auth/callback` usa la clave `login.title`, la misma que `/login`. Al añadir una ruta en `App.js` hay que añadirla a `PAGE_TITLE_KEYS`: un test lee `App.js` y falla si falta alguna.
 
 ### `UseAtBottom()` (`src/utilities/UseAtBottom.js`)
 Devuelve `true` cuando la ventana está a 5 px o menos del final del documento. Escucha `scroll` en `window` sin limitar la frecuencia. El nombre empieza en mayúscula, lo que se sale de la convención `useXxx`, aunque funciona.
 
-### `useTokenExpirationHandler(token)` (`src/utilities/TokenExpiration.js`)
-**Sin uso.** Muestra un aviso si el token ha caducado y redirige a `/login`. Duplica la lógica de `ProtectedRoute` y se puede eliminar.
 
 ## Utilidades
 

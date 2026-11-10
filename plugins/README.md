@@ -50,11 +50,12 @@ Claude Code ejecuta los comandos, agentes y skills de un plugin instalado desde 
 
 1. Si el cambio altera el comportamiento, sube `version` en el `.claude-plugin/plugin.json` del plugin y añade la entrada en `ciclo-agentico/CHANGELOG.md` (y ajusta la versión que fija `ciclo-agentico/tests/manifiestos.test.mjs`).
 2. Actualiza o reinstala el plugin: `claude plugin marketplace update locales-front` y después `claude plugin update ciclo-agentico@locales-front`, o `claude plugin uninstall ciclo-agentico@locales-front` y `claude plugin install ciclo-agentico@locales-front` **(por confirmar: que `update` recoja los cambios de un marketplace local sin subir la versión)**.
-3. Reinicia la sesión de Claude Code para que cargue la copia nueva.
+3. Reinicia la sesión de Claude Code (o ejecuta `/reload-plugins`) para que cargue la copia nueva.
+4. Comprueba el plugin con la [verificación manual](ciclo-agentico/README.md#modelos-y-esfuerzo-por-rol) (`claude plugin validate plugins/ciclo-agentico --strict` y `claude --debug`).
 
 Los scripts que se ejecutan como entradas de `verificacion` de `.claude/flujo.json` (por ejemplo, `npm run docs:gate`, que llama a `plugins/ciclo-agentico/scripts/docs-gate.mjs`) usan la copia del repositorio, así que ven el cambio sin reinstalar nada.
 
-Como `ciclo-agentico` es una copia del backend, un cambio en el núcleo debe hacerse en los dos repositorios para que no diverjan **(por confirmar: no hay mecanismo que lo vigile)**.
+Como `ciclo-agentico` es una copia del backend, un cambio en el núcleo debe hacerse en los dos repositorios para que no diverjan **(por confirmar: no hay mecanismo que lo vigile)**. El núcleo está en 0.1.1 desde el enrutado de modelos por rol (copiado del backend el 09/11/2026); la versión que carga cada equipo es la de su caché (`ciclo-agentico@locales-front`), que se actualiza como se explica arriba.
 
 ## Añadir una categoría nueva
 

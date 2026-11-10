@@ -30,7 +30,7 @@ const check = (name, problems, notes = []) => results.push({ name, problems, not
 // Se listan para que el incumplimiento no pueda extenderse a ningún archivo nuevo.
 const KNOWN_DEBT = {
   localStorage: {
-    allowed: ['src/services/api.js', 'src/components/LoginForm.js', 'src/components/ProtectedRoute.js'],
+    allowed: ['src/services/api.js', 'src/services/session.js', 'src/components/ProtectedRoute.js'],
     debt: {},
   },
   insecureUrl: {
@@ -62,6 +62,9 @@ const ACCEPTED_ADVISORIES = {
         const debt = KNOWN_DEBT.localStorage.debt[file];
         if (debt) notes.push(`${where} usa el almacenamiento del navegador: deuda conocida ${debt}`);
         else problems.push(`${where} usa localStorage/sessionStorage fuera del módulo de sesión (ver docs/guias/seguridad.md)`);
+      }
+      if (/\b(getAccessToken|getRefreshToken|saveTokens|clearSession)\b/.test(line) && !KNOWN_DEBT.localStorage.allowed.includes(file)) {
+        problems.push(`${where} usa funciones de token de sesión fuera de api.js, session.js y ProtectedRoute (ver docs/guias/seguridad.md)`);
       }
       const insecure = line.match(/['"`]http:\/\/(?!www\.w3\.org\/2000\/svg)(?!localhost)[^'"`]*/);
       if (insecure && !KNOWN_DEBT.insecureUrl.allowed.includes(file)) {

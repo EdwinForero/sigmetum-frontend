@@ -18,7 +18,7 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 | `handleFilterDataChange(filtered)` | Actualiza `filteredData` solo si cambia (comparación por `JSON.stringify`) |
 | `handleFilterChange(filtered)` | Igual, para `filteredSpecies` en el explorador |
 | `handleOnSpeciesSelect(set)` | Guarda las especies elegidas en el filtro |
-| `menuOptions` | Opciones de la barra lateral: `filter` y `dataManagementFilter` abren un `Filter` en un panel deslizante; `dataManagement`, `contentManagement` y `uploadFiles` son enlaces |
+| `menuOptions` | Opciones de la barra lateral: `filter` y `dataManagementFilter` abren un `Filter` en un panel deslizante; `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con claves de título ya existentes (`filter.title`, `dataManagement.title`, `contentManagement.title`, `uploadFiles.title`) y `Sidebar` lo usa como `aria-label` del botón de icono |
 | `showSideMenu` | `true` en las cuatro rutas de datos |
 
 ---
@@ -35,6 +35,7 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 | `/sobre-nosotros` | `aboutUs.title` |
 | `/cookies` | `cookies.title` |
 | `/login` | `login.title` |
+| `/auth/callback` | `login.title` |
 | `/cargar-archivos` | `uploadFiles.title` |
 | `/administrar-datos` | `dataManagement.title` |
 | `/administrar-contenido` | `contentManagement.title` |
@@ -115,7 +116,19 @@ Política de cookies estática. Todos los textos vienen de `cookies.*` en las tr
 
 ## Login (`/login`)
 
-Contenedor centrado que renderiza `LoginForm`.
+Contenedor centrado que renderiza `LoginForm` (un botón que lleva al Hosted UI de Cognito).
+
+---
+
+## AuthCallback (`/auth/callback`)
+
+Ruta pública a la que vuelve el Hosted UI de Cognito (`redirect_uri` = `<origen>/auth/callback`). Siempre pinta `<h1>` con `login.title`.
+
+| Función | Descripción |
+|---|---|
+| Efecto de entrada | Lee `code`, `state` y `error` (`useSearchParams`), navega a `/auth/callback` con `replace` (así `code`, `state` y `error` desaparecen de la URL y del historial, también con éxito; es síncrono y va antes de validar o canjear, para no navegar tras desmontarse) y llama a `takePkce()`. Si hay `error`, falta `code`, el verificador o el `state` guardado, o el `state` no coincide, no llama a `fetch` y muestra el error. Si no, `api.exchangeCode(code, verifier)` y `navigate('/cargar-archivos', { replace: true })` |
+| Canje único | Un `useRef` evita el segundo canje que haría `React.StrictMode` (el código solo se puede canjear una vez) |
+| Estados | Cargando: `<p role="status">` con `login.callbackLoading`. Error: `<p role="alert">` con `login.callbackError` y botón `login.retryButton` que vuelve a llamar a `startLogin()`. Nunca muestra `error_description` de Cognito |
 
 ---
 

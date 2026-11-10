@@ -48,7 +48,7 @@ const ContactForm = ({ onLoad }) => {
             maxLength={100}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus-ring"
           />
         </div>
 
@@ -63,7 +63,7 @@ const ContactForm = ({ onLoad }) => {
             maxLength={254}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus-ring"
           />
         </div>
 
@@ -78,7 +78,7 @@ const ContactForm = ({ onLoad }) => {
             maxLength={150}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-12 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus-ring"
           />
         </div>
 
@@ -92,12 +92,13 @@ const ContactForm = ({ onLoad }) => {
             maxLength={2000}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="form-input w-full h-24 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus:outline-none"
+            className="form-input w-full h-24 px-3 bg-[#F9FBFA] border border-[#15B659] rounded-lg placeholder:text-[#99BBA8] text-[#0C1811] focus-ring"
           />
         </div>
 
         <div className="flex justify-center px-4">
           <ButtonPrincipal
+            type="submit"
             text={t('home.contactForm.sendButton')}
             disabled={!username || !email || !subject || !message}
           />

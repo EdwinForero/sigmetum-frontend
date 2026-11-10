@@ -28,11 +28,15 @@ El backend responde siempre con este formato:
 | `serverMessage` | `json.error` |
 | `data` | `json.data`, solo si la respuesta de error lo trae (en el `400` de `/upload` con campos vacíos lleva `emptyFields` y `draftKey`). No se conserva en el `401` |
 
-Si el servidor devuelve algo que no es JSON (por ejemplo, una página 502 de un proxy), `response.json()` lanza un `SyntaxError` sin `type`. Los componentes lo tratan como un error genérico. La excepción es un `401` en un método `*Auth` (ver más abajo): se comprueba el estado antes de leer el cuerpo, así que incluso con cuerpo no JSON se lanza un error con `status: 401`.
+Si el servidor devuelve algo que no es JSON (por ejemplo, una página 502 de un proxy), `response.json()` lanza un `SyntaxError` sin `type`. Los componentes lo tratan como un error genérico. La excepción son el `401` y el `503` en un método `*Auth` (ver más abajo): el cuerpo se lee con tolerancia, así que incluso con cuerpo no JSON (el HTML de un ALB) se lanza un error con `status: 401` o `503`.
 
 ### Ante un 401
 
-Si el método envía token (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) y la respuesta es `401`, `api.js` borra `localStorage['token']`, ejecuta `window.location.assign('/login')` y lanza el error igualmente. `get` y `post` (incluido `POST /log`, cuyo `401` es "credenciales incorrectas") no borran ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que un `401` en `/upload` o en `/upload/confirm` también redirige a `/login`.
+Si el método envía token (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) y la respuesta es `401`, `api.js` intenta **una** renovación (`POST <VITE_COGNITO_DOMAIN>/oauth2/token`, `grant_type=refresh_token`, `client_id`, sin secreto). Si va bien, guarda los tokens y repite la petición una vez con el token nuevo. Si en el `401` el token guardado ya no es el que se envió (otra llamada renovó la sesión), repite la petición una vez con el token actual **sin** otra renovación. Si no queda ningún token (la sesión se borró, p. ej., en otra pestaña) no hay nada que renovar: si esta pestaña aún no ha redirigido (bandera de módulo `redirecting`), borra la sesión y ejecuta `window.location.assign('/login')`, y en todo caso lanza el `401`. Con dos llamadas simultáneas cuyo reintento vuelve a dar `401`, `assign('/login')` se llama una sola vez. Si no hay `refreshToken`, si Cognito rechaza la renovación con un `4xx` distinto de `429` que trae `error` en el cuerpo (p. ej. `400 invalid_grant`, **(por confirmar contra el pool real)**), si falta configuración, si responde un `200` sin `access_token` o si la repetición vuelve a dar `401`, borra la sesión (`clearSession`), ejecuta `window.location.assign('/login')` y lanza el error 401. Las llamadas con `401` simultáneas comparten una única renovación. Un fallo de red, un `5xx`, un `429` o un `4xx` sin `error` en el cuerpo (p. ej. el HTML de CloudFront, también un `401` o `403` no JSON) durante la renovación no borran la sesión ni redirigen (son indeterminados). El fallo de red se lanza como `type: 'network'`; los demás, como un error `type: 'auth_unavailable'`, `status: 503`, `message: 'Authentication service unavailable'` (no el `type` ni el `status` reales de Cognito, para que ningún consumidor lo confunda con un `401` del backend). Los componentes que solo miran `status === 401` lo tratan como un error genérico; `ProtectedRoute` lo muestra como servicio no disponible. `get` y `post` no renuevan ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que sigue el mismo camino.
+
+### Ante un 503
+
+En un método con token, si la respuesta es `503` **con `error: 'Authentication service unavailable'`**, `api.js` espera 1 s y reintenta, y otra vez tras 3 s (`RETRY_DELAYS_MS`). Agotados los reintentos lanza el error con `status: 503`, sin borrar la sesión ni redirigir. Un `503` con otro cuerpo no se reintenta. Solo `ProtectedRoute` muestra un mensaje propio (`login.serviceUnavailable`); el resto de pantallas, su error genérico. Que los reintentos cubran el tiempo real de recuperación del backend tras un `kid` nuevo (hasta 10 s) es **(por confirmar)**.
 
 ## Métodos del cliente
 
@@ -44,8 +48,9 @@ Si el método envía token (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`)
 | `api.postAuth` | `(path, body)` | JSON + `Authorization` | JSON |
 | `api.postFormAuth` | `(path, formData)` | `Authorization` (el navegador pone el `boundary`) | `FormData` |
 | `api.deleteAuth` | `(path, body)` | JSON + `Authorization` | JSON |
+| `api.exchangeCode` | `(code, verifier)` | `application/x-www-form-urlencoded` (a Cognito, no al backend) | `grant_type=authorization_code`, `code`, `code_verifier`, `redirect_uri`, `client_id` |
 
-`Authorization` vale `Bearer ${localStorage.getItem('token')}`.
+`Authorization` vale `Bearer ${getAccessToken()}` (el token de **acceso** de Cognito, de `localStorage['token']`, leído en cada intento; nunca se envía `Bearer null`). El `id_token` no se guarda ni se envía.
 
 ## Endpoints consumidos
 
@@ -53,12 +58,21 @@ La referencia completa de la API está en `sigmetum-backend/docs/04-api.md`. Qu�
 
 Rutas verificadas contra `sigmetum-backend/routes/*.js`.
 
+### Cognito (Hosted UI, fuera del prefijo de la API)
+
+El login ya no usa `POST /log`. Estas URLs son del dominio `VITE_COGNITO_DOMAIN` (no del backend), cliente público con PKCE S256. Los endpoints son los estándar de Cognito **(por confirmar contra el pool real)**.
+
+| Endpoint | Cómo | Quién lo llama |
+|---|---|---|
+| `GET /oauth2/authorize` | Navegación (`window.location.assign`) con `response_type=code`, `client_id`, `redirect_uri`, `scope=openid email`, `state`, `code_challenge` y `code_challenge_method=S256` | `session.startLogin` (`LoginForm`, botón de reintento de `AuthCallback`) |
+| `POST /oauth2/token` | `fetch` de formulario: canje del código (`api.exchangeCode`, desde `AuthCallback`) y renovación (`grant_type=refresh_token`, desde `api.js`). CORS del endpoint **(por confirmar en `dev`)** | `api.js` |
+| `GET /logout` | Navegación con `client_id` y `logout_uri=<origen>/` | `session.logout` (botón de `ProtectedRoute`) |
+
 ### Autenticación (`routes/auth.js`)
 
 | Método y ruta | Auth | Petición | `data` de respuesta | Quién lo llama |
 |---|---|---|---|---|
-| `POST /log` | No (con límite de intentos) | `{ username, password }` | `{ token }` | `LoginForm.handleLogin` |
-| `GET /auth` | Sí | — | Confirmación | `ProtectedRoute.checkAuth` |
+| `GET /auth` | Sí (token de acceso) | — | Confirmación | `ProtectedRoute.checkAuth` (con los reintentos del `503`) |
 
 ### Datos (`routes/data.js`)
 

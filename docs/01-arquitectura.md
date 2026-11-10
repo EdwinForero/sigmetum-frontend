@@ -15,13 +15,14 @@ sigmetum-frontend/
 │   │   ├── env.js           # Lectura centralizada de variables VITE_*
 │   │   └── assets.js        # Claves de S3 de los recursos estáticos y assetUrl()
 │   ├── services/
-│   │   └── api.js           # Cliente HTTP único (fetch + envoltorio { success, data })
+│   │   ├── api.js           # Cliente HTTP único (fetch + envoltorio { success, data }), 401 con refresco y 503 con reintentos
+│   │   └── session.js       # Sesión de Cognito: tokens (localStorage), PKCE (sessionStorage), login y logout
 │   ├── hooks/
 │   │   ├── useDialog.js     # Estado de los diálogos de aviso/confirmación
 │   │   └── useDocumentTitle.js  # Título de la pestaña según la ruta y el idioma
 │   ├── utilities/           # Funciones puras y hooks auxiliares
 │   ├── languages/{es,en}/translation.json
-│   ├── pages/               # Una por ruta (10)
+│   ├── pages/               # Una por ruta (11)
 │   └── components/          # Componentes reutilizables (34)
 ├── tailwind.config.js       # Fuentes Amaranth (primary) y Sen (secondary)
 ├── .env.example             # Plantilla de variables de entorno
@@ -69,13 +70,14 @@ La barra lateral aparece solo en `/explorar`, `/cargar-archivos`, `/administrar-
 | `/galeria` | `VegetationGallery` | Pública | Galería de fotos de vegetación |
 | `/sobre-nosotros` | `About` | Pública | Propósito, misión y valores del proyecto |
 | `/cookies` | `Cookies` | Pública | Política de cookies |
-| `/login` | `Login` | Pública | Acceso de administradores |
+| `/login` | `Login` | Pública | Acceso de administradores: botón que lleva al Hosted UI de Cognito |
+| `/auth/callback` | `AuthCallback` | Pública | Vuelta del Hosted UI: canjea el código y lleva a `/cargar-archivos` |
 | `/cargar-archivos` | `FilesUpload` | **Protegida** | Subida de Excel de datos por provincia |
 | `/administrar-datos` | `DataManagement` | **Protegida** | Consulta, descarga, activación y borrado de versiones |
 | `/administrar-contenido` | `ContentManagement` | **Protegida** | Términos no latinos e imágenes de la galería |
 | `*` | `NotFound` | Pública | Página 404 |
 
-Las rutas protegidas se envuelven en `<ProtectedRoute element={...} />`, que valida el token contra `GET /auth` y comprueba su caducidad (ver [05-componentes.md](05-componentes.md#protectedroute)).
+Las rutas protegidas se envuelven en `<ProtectedRoute element={...} />`, que valida la sesión contra `GET /auth` en cada entrada y pinta el botón de cierre de sesión (ver [05-componentes.md](05-componentes.md#protectedroute)).
 
 ## Estado global y flujo de datos
 
@@ -155,10 +157,16 @@ Al cancelar (botón "Cancelar" o clic fuera del diálogo), el frontend envía `c
 
 ## Autenticación
 
-1. `LoginForm` envía `POST /log { username, password }` y guarda `data.token` en `localStorage['token']`.
-2. Las llamadas protegidas añaden `Authorization: Bearer <token>` (`api.getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`).
-3. `ProtectedRoute` valida el token con `GET /auth` al montar cada ruta protegida. Si ha caducado, muestra un aviso, borra el token y redirige a `/login`.
-4. No hay cierre de sesión explícito: el token dura lo que decida el backend.
+Login con el Hosted UI de Cognito (código de autorización con PKCE S256). Todo el almacenamiento de la sesión está en `services/session.js`.
+
+1. `/login`: `LoginForm` muestra un botón que llama a `startLogin()`: genera `code_verifier` y `state` (en `sessionStorage`) y redirige a `<VITE_COGNITO_DOMAIN>/oauth2/authorize`.
+2. Cognito vuelve a `/auth/callback`. `AuthCallback` comprueba `state`, canjea el código con `api.exchangeCode` (`POST /oauth2/token`), guarda el token de acceso y el de refresco en `localStorage` (`token` y `refreshToken`) y navega a `/cargar-archivos`. Con `error`, `state` distinto o canje fallido muestra un error con botón de reintento.
+3. Las llamadas protegidas añaden `Authorization: Bearer <token de acceso>` (`api.getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`).
+4. `401`: una renovación con el token de refresco y un reintento; si falla, se borra la sesión y se va a `/login`. `503` de autenticación: dos reintentos (1 s y 3 s) sin borrar nada (ver [03-api.md](03-api.md#ante-un-401)).
+5. `ProtectedRoute` llama a `GET /auth` al montar cada ruta protegida: sin token o con `401` va a `/login`; con cualquier otro error (red, `403`, `5xx`) muestra un aviso de servicio no disponible con botón «Reintentar», sin borrar la sesión.
+6. Cierre de sesión: botón de `ProtectedRoute` → `logout()` borra los tokens y redirige a `<VITE_COGNITO_DOMAIN>/logout`.
+
+El flujo completo contra Cognito no se puede probar en local: **(por confirmar en `dev`)**.
 
 ## Recursos estáticos
 

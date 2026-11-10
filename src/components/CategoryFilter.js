@@ -42,9 +42,9 @@ const CategoryFilter = ({
         </p>
         <span>
           {isExpanded ? (
-            <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto">keyboard_arrow_up</span>
+            <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto" aria-hidden="true">keyboard_arrow_up</span>
           ) : (
-            <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto">keyboard_arrow_down</span>
+            <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto" aria-hidden="true">keyboard_arrow_down</span>
           )}
         </span>
       </div>

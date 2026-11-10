@@ -81,7 +81,7 @@ const FileDropdown = forwardRef(function FileDropdown({
     <>
       <div ref={dropdownRef} className="relative">
         <div
-          className="form-input bg-[#F9FBFA] w-full resize-none rounded-xl text-[#111418] focus:outline-0 border border-[#15B659] h-14 p-[15px] text-base cursor-pointer"
+          className="form-input bg-[#F9FBFA] w-full resize-none rounded-xl text-[#111418] border border-[#15B659] h-14 p-[15px] text-base cursor-pointer"
           onClick={() => setIsOpen((prev) => !prev)}
         >
           {selectedFile ? FormatFileName(name) : t('dataManagement.fileSelectDropdwon.selectFileDropdownPlaceholder')}
