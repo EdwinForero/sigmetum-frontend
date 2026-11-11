@@ -1,92 +1,54 @@
-import { useState, useEffect, useRef } from 'react';
-
-const ButtonPrincipal = ({ 
+const ButtonPrincipal = ({
   onClick,
-  text, 
-  dropdownOptions, 
-  icon, 
+  text,
+  icon,
   ariaLabel,
   type = 'button',
-  className, 
-  onOptionSelect, 
-  disabled=false 
+  className = '',
+  disabled = false,
+  loading = false,
+  ...rest
 }) => {
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(text);
-  const dropdownRef = useRef(null);
-
-  const toggleDropdown = () => {
-    if (dropdownOptions) {
-      setIsDropdownOpen(!isDropdownOpen);
-    } else if (onClick) {
-      onClick();
+  const handleClick = (event) => {
+    if (loading) {
+      event.preventDefault();
+      return;
     }
+    if (onClick) onClick(event);
   };
 
-  const handleOptionClick = (option) => {
-    setSelectedOption(option);
-    setIsDropdownOpen(false);
-    if (onOptionSelect) {
-      onOptionSelect(option);
-    }
-  };
+  const state = `${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${loading ? 'cursor-progress' : ''}`;
 
-  useEffect(() => {
-    setSelectedOption(text);
-  }, [text]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  return (
-    <div className="relative inline-block" ref={dropdownRef}>
-      {icon ? (
-        <button
-          type={type}
-          aria-label={ariaLabel}
-          onClick={toggleDropdown}
-          disabled={disabled}
-          className={`focus-ring align-middle flex min-w-[70px] max-w-[84px] min-h-[70px] max-h-[84px] text-[#15B659] hover:text-[#F9FBFA] hover:bg-[#15B659] cursor-pointer items-center justify-center overflow-hidden rounded-xl px-4 sm:h-12 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <span className="material-symbols-outlined text-3xl mx-auto" aria-hidden="true">{icon}</span>
-        </button>
-      ) : (
-        <button
-          type={type}
-          onClick={toggleDropdown}
-          disabled={disabled}
-          className={`focus-ring bg-[#15B659] align-middle flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 sm:h-12 sm:px-5 font-bold leading-normal tracking-[0.015em] sm:font-bold sm:leading-normal sm:tracking-[0.015em] ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <span className="text-[#F9FBFA] sm:text-sm md:text-base lg:text-xl truncate">
-            {selectedOption}
-          </span>
-        </button>
+  return icon ? (
+    <button
+      {...rest}
+      type={type}
+      aria-label={ariaLabel}
+      aria-busy={loading || undefined}
+      aria-disabled={loading || undefined}
+      onClick={handleClick}
+      disabled={disabled}
+      className={`focus-ring inline-flex h-12 w-12 items-center justify-center rounded-xl text-brand-dark hover:bg-brand hover:text-ink ${state} ${className}`}
+    >
+      <span className={`material-symbols-outlined text-3xl ${loading ? 'animate-spin' : ''}`} aria-hidden="true">
+        {loading ? 'progress_activity' : icon}
+      </span>
+    </button>
+  ) : (
+    <button
+      {...rest}
+      type={type}
+      aria-busy={loading || undefined}
+      aria-disabled={loading || undefined}
+      onClick={handleClick}
+      disabled={disabled}
+      className={`focus-ring inline-flex min-h-12 min-w-[84px] max-w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2 text-base font-bold leading-tight text-ink hover:bg-brand-dark ${state} ${className}`}
+    >
+      {loading && (
+        <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>
       )}
-
-      {dropdownOptions && isDropdownOpen && (
-        <div className="absolute left-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
-          {dropdownOptions.map((option, index) => (
-            <div
-              key={index}
-              className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-              onClick={() => handleOptionClick(option)}
-            >
-              {option}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      <span>{text}</span>
+    </button>
   );
 };
 

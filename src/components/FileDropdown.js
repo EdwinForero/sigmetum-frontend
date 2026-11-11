@@ -1,156 +1,158 @@
-import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import React, { useCallback, useEffect, useId, useImperativeHandle, useRef, useState, forwardRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FormatFileName } from '../utilities/FormatFileName.js';
-import DialogAdvice from './DialogAdvice';
+import ButtonAlternative from './ButtonAlternative';
+import InlineError from './InlineError';
+import LoadSpinner from './LoadSpinner';
 import api from '../services/api';
-import useDialog from '../hooks/useDialog';
 
 const FileDropdown = forwardRef(function FileDropdown({
+  id,
   onLoad,
   onFileSelect,
-  selectedFile },
+  selectedFile,
+  disabled = false },
   ref
 ) {
-
   const { t } = useTranslation();
-  const [files, setFiles] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [selectedProvince, setSelectedProvince] = useState(null);
-  const [provinces, setProvinces] = useState([]);
-  const [versions, setVersions] = useState([]);
-  const [isError, setIsError] = useState(false);
-  const dropdownRef = useRef();
-  const { dialog, showDialog, closeDialog } = useDialog();
+  const errorId = useId();
+  const [files, setFiles] = useState({});
+  const [listStatus, setListStatus] = useState('loading');
+  const [pendingKey, setPendingKey] = useState(null);
+  const [failedKey, setFailedKey] = useState(null);
+  // La clave que se está pidiendo ahora: una respuesta de otra clave llega tarde y se descarta.
+  const pendingRef = useRef(null);
+
+  const fetchFiles = useCallback(async () => {
+    setListStatus('loading');
+    try {
+      const data = await api.get('/list-files');
+      setFiles(data);
+      setListStatus('ready');
+    } catch {
+      setListStatus('error');
+    }
+  }, []);
 
   useEffect(() => {
     fetchFiles();
-  }, []);
+  }, [fetchFiles]);
 
-  const fetchFiles = async () => {
-    setIsError(false);
-    try {
-      const data = await api.get('/list-files');
-      setProvinces(Object.keys(data));
-      setFiles(data);
-      setSelectedProvince(null);
-    } catch {
-      setIsError(true);
+  useImperativeHandle(ref, () => ({ fetchFiles }), [fetchFiles]);
+
+  const provinces = Object.keys(files);
+
+  const versionLabel = (key) => {
+    for (const province of provinces) {
+      const version = files[province].find((file) => file.key === key);
+      if (version) return `${province} ${FormatFileName(version.name)}`;
     }
+    return key;
   };
 
-  const handleProvinceSelect = (province) => {
-    setSelectedProvince(province);
-    setVersions(files[province] || []);
-  };
-
-  const handleVersionSelect = async (fileKey, fileName) => {
+  const loadVersion = async (key) => {
+    pendingRef.current = key;
+    setPendingKey(key);
+    setFailedKey(null);
     onLoad(true);
+    let data;
     try {
-      const jsonData = await api.get(`/get-data/${fileKey}`);
-      onFileSelect(jsonData, fileKey);
-      setName(fileName);
-      setIsOpen(false);
+      data = await api.get(`/get-data/${key}`);
     } catch {
-      showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorLoadFile'));
-    } finally {
+      if (pendingRef.current !== key) return;
+      setFailedKey(key);
+      onFileSelect([], null, null);
+      pendingRef.current = null;
+      setPendingKey(null);
       onLoad(false);
+      return;
     }
+    if (pendingRef.current !== key) return;
+    onFileSelect(data, key, versionLabel(key));
+    pendingRef.current = null;
+    setPendingKey(null);
+    onLoad(false);
   };
 
-  useImperativeHandle(ref, () => ({ fetchFiles }));
-
-  useEffect(() => {
-    if (selectedFile && !Object.values(files).flat().some((file) => file.key === selectedFile)) {
-      onFileSelect([], null);
+  const handleChange = (event) => {
+    const key = event.target.value;
+    if (key === '') {
+      const wasLoading = pendingRef.current !== null;
+      pendingRef.current = null;
+      setPendingKey(null);
+      setFailedKey(null);
+      if (wasLoading) onLoad(false);
+      onFileSelect([], null, null);
+      return;
     }
-  }, [files, selectedFile, onFileSelect]);
+    loadVersion(key);
+  };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (
+      listStatus === 'ready' &&
+      selectedFile &&
+      !Object.values(files).flat().some((file) => file.key === selectedFile)
+    ) {
+      onFileSelect([], null, null);
+    }
+  }, [files, listStatus, selectedFile, onFileSelect]);
+
+  const isEmpty = listStatus === 'ready' && provinces.length === 0;
+  const statusLabel =
+    listStatus === 'loading'
+      ? t('dataManagement.fileSelectDropdwon.loading')
+      : pendingKey
+        ? t('dataManagement.loadingVersionData')
+        : '';
 
   return (
-    <>
-      <div ref={dropdownRef} className="relative">
-        <div
-          className="form-input bg-[#F9FBFA] w-full resize-none rounded-xl text-[#111418] border border-[#15B659] h-14 p-[15px] text-base cursor-pointer"
-          onClick={() => setIsOpen((prev) => !prev)}
-        >
-          {selectedFile ? FormatFileName(name) : t('dataManagement.fileSelectDropdwon.selectFileDropdownPlaceholder')}
+    <div className="w-full">
+      <select
+        id={id}
+        value={pendingKey ?? selectedFile ?? ''}
+        onChange={handleChange}
+        disabled={listStatus !== 'ready' || isEmpty || disabled}
+        aria-invalid={failedKey ? true : undefined}
+        aria-describedby={failedKey ? errorId : undefined}
+        className="focus-ring h-12 w-full rounded-xl border border-brand-dark bg-surface px-3 text-base text-ink disabled:opacity-50"
+      >
+        <option value="">{t('dataManagement.fileSelectDropdwon.emptyOption')}</option>
+        {provinces.map((province) => (
+          <optgroup key={province} label={province}>
+            {files[province].map(({ key, name }) => (
+              <option key={key} value={key}>{`${province} · ${FormatFileName(name)}`}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+
+      <LoadSpinner inline label={statusLabel} />
+
+      {listStatus === 'error' && (
+        <div className="py-2">
+          <InlineError>{t('dialogAdvice.errorLoadData')}</InlineError>
+          <ButtonAlternative text={t('feedback.retry')} onClick={fetchFiles} />
         </div>
+      )}
 
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              className="absolute z-50 bg-white border border-[#15B659] rounded-xl shadow-lg w-full mt-2"
-              initial={{ clipPath: 'inset(0 0 100% 0)' }}
-              animate={{ clipPath: 'inset(0 0 0 0)' }}
-              exit={{ clipPath: 'inset(0 0 100% 0)' }}
-              transition={{ duration: 0.3 }}
-            >
-              {isError ? (
-                <p className="text-[#0C1811] p-3">{t('dialogAdvice.errorLoadData')}</p>
-              ) : provinces.length > 0 ? (
-                <div className="flex">
-                  <div className="w-1/2 max-h-60 overflow-y-auto border-r border-[#15B659] p-2">
-                    <h3 className="font-bold text-base mb-2">{t('dataManagement.fileSelectDropdwon.provinceTitle')}</h3>
-                    <ul>
-                      {provinces.map((province) => (
-                        <li
-                          key={province}
-                          className={`p-2 cursor-pointer rounded ${province === selectedProvince ? 'bg-[#99BBA8]' : 'hover:bg-[#99BBA8]'}`}
-                          onClick={() => handleProvinceSelect(province)}
-                        >
-                          {province}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="w-1/2 max-h-60 overflow-y-auto p-2">
-                    <h3 className="font-bold text-base mb-2">{t('dataManagement.fileSelectDropdwon.versionTitle')}</h3>
-                    {selectedProvince ? (
-                      <ul>
-                        {versions.map(({ key, name }) => (
-                          <li
-                            key={key}
-                            className={`p-2 cursor-pointer rounded ${selectedFile === key ? 'bg-[#99BBA8]' : 'hover:bg-[#99BBA8]'}`}
-                            onClick={() => handleVersionSelect(key, name)}
-                          >
-                            {FormatFileName(name)}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[#0C1811]">{t('dataManagement.fileSelectDropdwon.versionPlaceholder')}</p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-[#0C1811] p-3">{t('dataManagement.fileSelectDropdwon.noDataFoundPlaceholder')}</p>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {failedKey && (
+        <div className="py-2">
+          <InlineError id={errorId}>{t('dialogAdvice.errorLoadFile')}</InlineError>
+          <ButtonAlternative text={t('feedback.retry')} onClick={() => loadVersion(failedKey)} />
+        </div>
+      )}
 
-      <AnimatePresence>
-        {dialog.visible && (
-          <DialogAdvice
-            dialogTitle={dialog.title}
-            dialogMessage={dialog.message}
-            onClose={closeDialog}
-          />
-        )}
-      </AnimatePresence>
-    </>
+      {isEmpty && (
+        <p className="py-2 text-ink">
+          {t('dataManagement.fileSelectDropdwon.emptyState')}{' '}
+          <Link to="/cargar-archivos" className="focus-ring rounded font-bold text-brand-deep underline">
+            {t('dataManagement.fileSelectDropdwon.emptyStateLink')}
+          </Link>
+        </p>
+      )}
+    </div>
   );
 });
 

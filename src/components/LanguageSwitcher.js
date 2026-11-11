@@ -1,40 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import ButtonAlternative from './ButtonAlternative';
 
 const LanguageSwitcher = () => {
   const { i18n, t } = useTranslation();
-  const [dropdownOptions, setDropdownOptions] = useState([]);
-  const initialLanguage = i18n.language.startsWith('en') ? 'EN' : 'ES';
-  const [language, setLanguage] = useState(initialLanguage);
-
-  useEffect(() => {
-    setDropdownOptions([
-      {label: t('language.spanish'), value: "ES"},
-      {label: t('language.english'), value: "EN"}
-    ]);
-  }, [t]);
-
-  const changeLanguage = (selectedOption) => {
-    const langCode = selectedOption.label.includes(t('language.spanish')) ? "es" : "en";
-    setLanguage(selectedOption.value);
-    i18n.changeLanguage(langCode);
-  };
-
-  const getButtonText = (selectedOption) => {
-    if (selectedOption) {
-      return selectedOption.value;
-    }
-  };
+  const id = useId();
+  const language = i18n.resolvedLanguage === 'en' ? 'en' : 'es';
 
   return (
-    <ButtonAlternative
-      text={dropdownOptions.find((selectedOption) => selectedOption.value === language)}
-      dropdownOptions={dropdownOptions}
-      onOptionSelect={changeLanguage}
-      getButtonText={getButtonText}
-      className={"mx-2"}
-    />
+    <div className="mx-1 shrink-0 sm:mx-2">
+      <label htmlFor={id} className="sr-only">{t('language.label')}</label>
+      <select
+        id={id}
+        value={language}
+        onChange={(event) => i18n.changeLanguage(event.target.value)}
+        className="focus-ring h-11 rounded-lg border-2 border-brand-dark bg-surface px-2 text-base font-bold text-ink"
+      >
+        <option value="es" lang="es">{t('language.spanish')}</option>
+        <option value="en" lang="en">{t('language.english')}</option>
+      </select>
+    </div>
   );
 };
 

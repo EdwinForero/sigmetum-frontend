@@ -11,7 +11,7 @@ const setCookie = (name, value) => {
   document.cookie = `${name}=${value}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
 };
 
-const CookieBanner = () => {
+const CookieBanner = ({ aboveBottomBar = false }) => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -90,10 +90,13 @@ const CookieBanner = () => {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 w-full bg-gray-800 text-[#F9FBFA] p-4 shadow-lg z-50 flex flex-col sm:gap-4 lg:flex-row lg:justify-between lg:items-center">
+      <section
+        aria-label={t("cookies.banner.title")}
+        className={`sticky z-40 ${aboveBottomBar ? "bottom-nav md:bottom-0" : "bottom-0"} bg-gray-800 text-[#F9FBFA] p-3 sm:p-4 shadow-lg flex flex-col gap-2 sm:gap-4 lg:flex-row lg:justify-between lg:items-center`}
+      >
         <div className="flex flex-col text-center lg:text-left sm:mb-2">
-          <h3 className="font-bold">{t("cookies.banner.title")}</h3>
-          <p className="text-sm">
+          <h3 className="text-sm font-bold sm:text-base">{t("cookies.banner.title")}</h3>
+          <p className="text-xs sm:text-sm">
             <Trans
               i18nKey="cookies.banner.description"
               components={{
@@ -109,17 +112,19 @@ const CookieBanner = () => {
           </p>
         </div>
 
-        <div className="flex gap-2 sm:justify-center lg:justify-end">
+        <div className="flex gap-2 justify-center lg:justify-end">
           <ButtonPrincipal
             text={t("cookies.banner.acceptAllButton")}
             onClick={handleAcceptAll}
+            className="!px-3 !text-sm sm:!px-5 sm:!text-base"
           />
           <ButtonAlternative
             text={t("cookies.banner.cookiesConfigurationButton")}
             onClick={handleModalToggle}
+            className="!px-3 !text-sm sm:!px-5 sm:!text-base"
           />
         </div>
-      </div>
+      </section>
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

@@ -42,9 +42,9 @@ const CategoryFilter = ({
         </p>
         <span>
           {isExpanded ? (
-            <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto" aria-hidden="true">keyboard_arrow_up</span>
+            <span className="material-symbols-outlined text-3xl text-brand-dark mx-auto" aria-hidden="true">keyboard_arrow_up</span>
           ) : (
-            <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto" aria-hidden="true">keyboard_arrow_down</span>
+            <span className="material-symbols-outlined text-3xl text-brand-dark mx-auto" aria-hidden="true">keyboard_arrow_down</span>
           )}
         </span>
       </div>
@@ -66,7 +66,7 @@ const CategoryFilter = ({
               />
             </div>
             <FilterSearchBar
-              placeholderText={t(`attributes.${category}`, category)}
+              label={t('filter.categoryFilter.searchLabel', { category: t(`attributes.${category}`, category) })}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
@@ -78,7 +78,7 @@ const CategoryFilter = ({
                     name={`${category}-${item}`}
                     checked={selected.has(item)}
                     onChange={() => handleCheckboxChange(item)}
-                    className="appearance-none h-6 w-6 border-2 border-[#15B659] rounded-md cursor-pointer hover:bg-[#15B659] checked:bg-[#15B659] checked:border-transparent"
+                    className="appearance-none h-6 w-6 border-2 border-brand-dark rounded-md cursor-pointer hover:bg-brand-dark checked:bg-brand-dark checked:border-transparent"
                   />
                   <span className="text-[#0C1811] text-1xl capitalize">{item}</span>
                 </label>

@@ -19,14 +19,15 @@ sigmetum-frontend/
 │   │   ├── srp.js           # Cálculo SRP de Cognito (sin red ni almacenamiento)
 │   │   └── session.js       # Almacén de la sesión: tokens de acceso y de refresco (localStorage)
 │   ├── hooks/
+│   │   ├── useToast.js      # Contexto y hook de los avisos (notifySuccess, notifyError)
 │   │   ├── useCognitoLogin.js   # Máquina de estados del acceso (credenciales, contraseña nueva, TOTP)
 │   │   ├── useDialog.js     # Estado de los diálogos de aviso/confirmación
 │   │   └── useDocumentTitle.js  # Título de la pestaña según la ruta y el idioma
 │   ├── utilities/           # Funciones puras y hooks auxiliares
 │   ├── languages/{es,en}/translation.json
-│   ├── pages/               # Una por ruta (10)
-│   └── components/          # Componentes reutilizables (34)
-├── tailwind.config.js       # Fuentes Amaranth (primary) y Sen (secondary)
+│   ├── pages/               # Una por ruta
+│   └── components/          # Componentes reutilizables
+├── tailwind.config.js       # Fuentes Amaranth y Sen, colores de marca (tokens) y spacing.nav
 ├── .env.example             # Plantilla de variables de entorno
 └── .claude/                 # Plugins y skills de Claude Code compartidos
 ```
@@ -45,23 +46,25 @@ Antes del render se importa `./i18n`, que inicializa i18next con detección auto
 
 ## Layout
 
-`App` pinta siempre la misma estructura:
+`App` pinta siempre la misma estructura, envuelta en `ToastProvider` (dos regiones de avisos siempre montadas, `role="status"` y `role="alert"`):
 
 ```
+[Saltar al contenido]  ← enlace visible solo con foco, hacia #contenido
 ┌──────────────────────── Header (fijo, h-16) ─────────────────────────┐
-│ Logo + SIGMETUM-A      LanguageSwitcher                  Navbar      │
+│ Logo + SIGMETUM-A      LanguageSwitcher (<select>)       Navbar      │
 ├──────────┬───────────────────────────────────────────────────────────┤
-│ Sidebar  │  <main>  ← <Routes> (página activa)                        │
-│ (solo en │                                                           │
-│ rutas de │                                                           │
-│ datos)   │                                                           │
+│ Sidebar  │  <main id="contenido">  ← <Routes> (página activa)         │
+│ (desde md│                                                           │
+│ a la     │                                                           │
+│ izquierda)                                                           │
 ├──────────┴───────────────────────────────────────────────────────────┤
-│ Footer (enlaces + copyright)                             "V 1.0.0"   │
+│ Footer: único <footer> (enlaces, copyright y "V 1.0.0" en <details>)  │
 └──────────────────────────────────────────────────────────────────────┘
-CookieBanner (fijo abajo, hasta que se acepta)
+CookieBanner (sticky al final de la raíz, hasta que se acepta)
+Bajo md, Sidebar es una barra inferior fija (h-nav)
 ```
 
-La barra lateral aparece solo en `/explorar`, `/cargar-archivos`, `/administrar-datos` y `/administrar-contenido`.
+La barra de gestión (`Sidebar`) aparece solo en `/explorar`, `/cargar-archivos`, `/administrar-datos` y `/administrar-contenido`: bajo `md` es una barra inferior fija y desde `md` una columna fija a la izquierda de `w-28`; la raíz reserva su espacio con `pb-nav md:pb-0 md:pl-28` y el banner de cookies, que es `sticky` y ocupa su sitio en el flujo, se coloca encima de la barra (`bottom-nav md:bottom-0`). Hay un solo `<header>`, dos `<nav>` con nombre (`navbar.label`, «Principal», y `privateNav.label`, «Gestión»), un solo `<main>` y un solo `<footer>`. En las capas, la cabecera es `z-50`, la barra `z-40`, los avisos `z-[55]` y el panel de filtros con su fondo `z-[60]`, por encima de todo.
 
 ## Rutas
 
@@ -78,7 +81,7 @@ La barra lateral aparece solo en `/explorar`, `/cargar-archivos`, `/administrar-
 | `/administrar-contenido` | `ContentManagement` | **Protegida** | Términos no latinos e imágenes de la galería |
 | `*` | `NotFound` | Pública | Página 404 |
 
-Las rutas protegidas se envuelven en `<ProtectedRoute element={...} />`, que valida la sesión contra `GET /auth` en cada entrada y pinta el botón de cierre de sesión (ver [05-componentes.md](05-componentes.md#protectedroute)).
+Las rutas protegidas se envuelven en `<ProtectedRoute element={...} />`, que valida la sesión contra `GET /auth` en cada entrada y pinta solo la página (el botón de cierre de sesión está en la barra de gestión y `ProtectedRoute` lo conserva únicamente en el aviso de servicio no disponible; ver [05-componentes.md](05-componentes.md#protectedroute)).
 
 ## Estado global y flujo de datos
 
@@ -93,7 +96,8 @@ No hay Redux ni Context: el estado de datos compartido vive en `App` y se pasa p
 | `selectedData` | `Array<Registro>` | Registros de la versión elegida en "Administrar datos" |
 | `filteredData` | `Array<Registro>` | `selectedData` tras aplicar filtros |
 | `isLoading`, `exploreError` | `boolean` | Carga y error del explorador |
-| `eeVisible` | `boolean` | Mensaje oculto al pulsar "V 1.0.0" en el pie |
+
+El mensaje oculto de «V 1.0.0» ya no es estado de `App`: es un `<details>` dentro de `Footer`.
 
 Un **registro** es una fila del Excel convertida a JSON por el backend. Las claves son los nombres de columna en español (`Provincia`, `Municipio`, `Altitud Media`, `Sector Biogeográfico`, `Piso Bioclimático`, `Ombrotipo`, `Naturaleza del Sustrato`, `Tipo de Serie`, `Serie de Vegetación`, `Vegetación Potencial`, `Especies Características`, `image`...). Algunos valores son arrays, como `Especies Características`.
 
@@ -151,7 +155,7 @@ sequenceDiagram
             API->>S3: activa el borrador
         end
     end
-    FU->>U: diálogo de éxito
+    FU->>U: aviso de éxito (role="status")
 ```
 
 Al cancelar (botón "Cancelar" o clic fuera del diálogo), el frontend envía `confirmed: false` para que el backend borre el borrador y detiene la cola de subida. Antes de la corrección A1 no lo hacía (ver [09](09-estado-actual-y-deuda-tecnica.md)).
@@ -164,8 +168,8 @@ Login con formulario propio y SRP (`USER_SRP_AUTH`) contra `cognito-idp` (client
 2. Retos posibles: `NEW_PASSWORD_REQUIRED` (primer acceso: contraseña nueva), `MFA_SETUP` (registro de la aplicación de autenticación: `AssociateSoftwareToken`, `VerifySoftwareToken`) y `SOFTWARE_TOKEN_MFA` (código de seis dígitos). Con el resultado final `api` guarda el token de acceso y el de refresco en `localStorage` (`token` y `refreshToken`; el de identidad nunca) y `LoginForm` navega a `/cargar-archivos`.
 3. Las llamadas protegidas añaden `Authorization: Bearer <token de acceso>` (`api.getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`).
 4. `401`: una renovación con el token de refresco (`InitiateAuth`, `REFRESH_TOKEN_AUTH`) y un reintento; si Cognito rechaza el refresco, se borra la sesión y se va a `/login`; si no está disponible, se conserva. `503` de autenticación: dos reintentos (1 s y 3 s) sin borrar nada (ver [03-api.md](03-api.md#ante-un-401)).
-5. `ProtectedRoute` llama a `GET /auth` al montar cada ruta protegida: sin token o con `401` va a `/login`; con cualquier otro error (red, `403`, `5xx`) muestra un aviso de servicio no disponible con botón «Reintentar» y «Cerrar sesión», sin borrar la sesión.
-6. Cierre de sesión: botón de `ProtectedRoute` → `api.logout()` borra los tokens, revoca el de refresco (`RevokeToken`, hasta 3 s) y va a `/`.
+5. `ProtectedRoute` llama a `GET /auth` al montar cada ruta protegida (en el estado `ok` devuelve solo la página): sin token o con `401` va a `/login`; con cualquier otro error (red, `403`, `5xx`) muestra un aviso de servicio no disponible con botón «Reintentar» y «Cerrar sesión», sin borrar la sesión.
+6. Cierre de sesión: botón «Cerrar sesión» de la barra de gestión (`Sidebar` con `showLogout`; `ProtectedRoute` lo conserva solo en el estado `unavailable`) → `api.logout()` borra los tokens, revoca el de refresco (`RevokeToken`, hasta 3 s) y va a `/`.
 
 El flujo completo contra Cognito (SRP, orden de los retos, bloqueo por intentos) no se puede probar en local: **(por confirmar en `dev`)**.
 

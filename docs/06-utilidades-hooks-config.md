@@ -82,7 +82,7 @@ El test de `srp.js` usa como oráculo `CognitoUser.authenticateUser` del propio 
 ## Hooks
 
 ### `useDialog()` (`src/hooks/useDialog.js`)
-Estado estándar de un diálogo `DialogAdvice`.
+Estado estándar de un diálogo `DialogAdvice`. Desde la auditoría de las páginas privadas solo lo usan los diálogos de confirmación (`DataManagement`, `TermsManager`, `ImageGalleryManager`) y la decisión de campos vacíos de `FileUpload`; `ContactForm`, `Explore` y `FileDropdown` ya no lo usan.
 
 | Devuelve | Descripción |
 |---|---|
@@ -113,7 +113,10 @@ const { dialog, showDialog, closeDialog } = useDialog();
 | Errores de `signIn` | Reintentable: `serviceUnavailable`; `NotAuthorizedException`, `UserNotFoundException`, `PasswordResetRequiredException` o `UserNotConfirmedException`: `credentialsError` (mismo texto, sin revelar si el usuario existe); el resto, incluida la configuración vacía y un `200` sin tokens ni reto: `startError` |
 | Errores en los retos | Reintentable: `serviceUnavailable` y se queda; `CodeMismatchException`, `ExpiredCodeException`, `EnableSoftwareTokenMFAException` o `ok: false`: `codeError`; `InvalidPasswordException`: `passwordRejected`; `NotAuthorizedException`: vuelve a `credentials` con `sessionExpired` (o `codeSessionLost` si hubo un código erróneo antes, porque Cognito puede invalidar la `Session` tras un `CodeMismatchException`, **(por confirmar en `dev`)**); el resto: vuelve con `startError` |
 | Retos | `NEW_PASSWORD_REQUIRED` responde `{ USERNAME, NEW_PASSWORD }`; `MFA_SETUP`: `associateSoftwareToken`, `verifySoftwareToken` y `respondToChallenge('MFA_SETUP')`; `SOFTWARE_TOKEN_MFA` responde con el código. Cualquier otro reto: `startError`. Un `MFA_SETUP` repetido genera otro secreto (`mfaSetupAgain`). Se asume que no hay `requiredAttributes` en `NEW_PASSWORD_REQUIRED` (**por confirmar en `dev`**) |
-| `otpUri` | `otpauth://totp/SIGMETUM-A:<correo>?secret=…&issuer=SIGMETUM-A` (con `encodeURIComponent`); solo se muestra como texto, nunca en `href` ni en `navigate` |
+| `otpUri` | `otpauth://totp/SIGMETUM-A:<correo>?secret=…&issuer=SIGMETUM-A` (con `encodeURIComponent`); ya no se pinta como texto: solo alimenta el QR (`QrCode`), nunca va en `href` ni en `navigate` |
+
+### `useToast()` (`src/hooks/useToast.js`)
+Avisos no modales. Exporta `ToastContext` (valor por defecto `null`) y el hook `useToast()`, que devuelve `{ notifySuccess(message), notifyError(message) }` y **lanza un error** si se usa fuera de `ToastProvider` (ver [05](05-componentes.md#toastprovider)). Reparto de los mensajes: éxitos de los tres gestores, `FileUpload`, `ContactForm` y las acciones de `DataManagement` → `notifySuccess` (`role="status"`, se cierra solo a los 8 s con pausa); errores de los gestores y de `Explore` → `notifyError` (`role="alert"`, persistente); validaciones y errores de un campo o de una tarjeta → `InlineError`; borrados → `DialogAdvice` de confirmación. Los tests de los componentes que lo usan se envuelven en `ToastProvider`.
 
 ### `useDialogFocus(isOpen, onClose)` (`src/hooks/useDialogFocus.js`)
 Gestiona el foco de un diálogo modal (A6) y devuelve la `ref` de su caja, que debe llevar `tabIndex={-1}`. Lo usan `DialogAdvice` y `DialogSpecies`; un diálogo nuevo debe reutilizarlo.
@@ -145,6 +148,9 @@ Devuelve `true` cuando la ventana está a 5 px o menos del final del documento. 
 
 ### `meetsPasswordPolicy(password)` (`passwordPolicy.js`)
 Ayuda en cliente que replica la política del pool: devuelve `true` con 14 caracteres o más y con minúsculas, mayúsculas, números y símbolos. Cognito es la autoridad: solo evita una petición que se sabe que será rechazada (sus rechazos se tratan como `passwordRejected`).
+
+### `formatSecret(secret)` (`formatSecret.js`)
+Devuelve la clave del MFA en grupos de 4 caracteres separados por espacios (`secret.match(/.{1,4}/g)?.join(' ') ?? ''`): 16 caracteres dan 4 grupos, 17 dejan el último de 1 y una clave vacía o ausente da `''`. Solo es para pintar en `LoginForm`: «Copiar clave» copia el secreto **sin espacios**; quien seleccione la clave a mano copia los espacios (las aplicaciones habituales los aceptan, **por confirmar**). Está en `NO_CONSOLE_FILES`.
 
 ### `convertToXLSX(data)` (`CSVfunctions.js`)
 Crea un libro de SheetJS con una hoja `Sigmetum-A` a partir de un array de objetos (`json_to_sheet`).

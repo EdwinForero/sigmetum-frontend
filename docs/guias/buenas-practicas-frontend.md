@@ -40,7 +40,8 @@ La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta l
 | No compares objetos con `JSON.stringify` para decidir si actualizar | Es caro con muchas filas (M7) | Revisión |
 | `key` estable (un id o el propio valor), no el índice | Con listas que cambian, el índice mezcla estados. `Explore` y `Table` lo usan hoy | Revisión |
 | **No mutes** props ni estado: copia antes de ordenar o transformar (`[...items].sort(...)`) | `downloadXLSX` mutaba los datos de la pantalla y rompía los filtros (A2). `SortItemsList` ordena en el propio array | Test de no mutación |
-| Reutiliza `ButtonPrincipal`, `ButtonAlternative`, `DialogAdvice` y `useDialog` | Aspecto y comportamiento coherentes | Revisión |
+| Reutiliza `ButtonPrincipal`, `ButtonAlternative`, `ToastProvider` (`useToast`) e `InlineError`; `DialogAdvice` y `useDialog` solo para confirmar un borrado o una decisión | Aspecto y comportamiento coherentes: éxito en `role="status"`, error persistente en `role="alert"`, error de campo en línea y un diálogo modal solo cuando hay que decidir (ver [accesibilidad.md](accesibilidad.md) A12) | Revisión |
+| Los tests de componentes que avisan se envuelven en `ToastProvider` y no usan `getByRole('alert')` ni `getByRole('status')` sin filtro | Las dos regiones están siempre montadas; se comprueba el texto y su región (`closest` o `within`), y «no hay error» con `queryByText` nulo | Test del componente |
 | Borra el código que no se usa; no lo dejes comentado | Hay componentes sin uso (`UploadButton`, `ImageCarrousel`) y bloques comentados en `Explore` | `git grep` y revisión |
 
 ## 4. Datos y llamadas HTTP
@@ -80,9 +81,9 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 | Regla | Por qué |
 |---|---|
 | Tailwind con clases utilitarias y **primero móvil** (`sm:`, `md:`, `lg:` para ampliar) | Es la base actual |
-| No añadas colores hexadecimales nuevos: reutiliza los existentes (`#15B659`, `#F9FBFA`, `#0C1811`, `#99BBA8`, `#14281D`, `#4B644A`). Cuando se definan en `tailwind.config.js` (B13), usa esos nombres | La paleta está repetida en cientos de clases |
-| Sin anchos ni márgenes fijos en píxeles que rompan en 320 px (`px-40` en `FilesUpload`) | Adaptabilidad y zoom: ver [accesibilidad.md](accesibilidad.md) |
-| Antes de elegir un color, comprueba el contraste | La paleta actual incumple WCAG AA: ver [accesibilidad.md](accesibilidad.md) |
+| Usa los **tokens** de `tailwind.config.js` (`brand`, `brand-dark`, `brand-deep`, `surface`, `ink`, `ink-soft`, `sage`, `moss`, `danger`) y `spacing.nav`, no hexadecimales arbitrarios; no añadas colores nuevos sin decidirlo y sin comprobar el contraste (`src/theme.test.js` fija los valores y los ratios) | Un cambio de marca se hace en un solo sitio (B13, parcial: quedan hexadecimales en varios componentes). Texto verde sobre fondo claro = `brand-deep`; texto sobre `brand` = `ink`; ver [accesibilidad.md](accesibilidad.md) A1 |
+| Sin anchos ni márgenes fijos en píxeles que rompan en 320 px (`px-40`, `w-[512px]`, `min-w-72` o `max-w-screen`, ya retirados de las páginas privadas); un contenedor `max-w-*` por página y `min-w-0` en los hijos flexibles | Adaptabilidad y zoom: ver [accesibilidad.md](accesibilidad.md) |
+| Antes de elegir un color, comprueba el contraste | Con los tokens nuevos las páginas privadas cumplen WCAG AA; los textos de las páginas públicas fuera de alcance (tarjetas de `About`) siguen pendientes: ver [accesibilidad.md](accesibilidad.md) |
 
 ## 9. Animación
 
@@ -140,7 +141,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 `npm run lint` falla si hay **errores** o si los **avisos superan el tope** de `--max-warnings` en `package.json`.
 
 - Los avisos (accesibilidad, variables sin usar, `console.log`) son deuda visible: no bloquean, pero **no pueden crecer**.
-- **Cuando corrijas avisos, baja el tope** al nuevo número (el valor actual está en [09](../09-estado-actual-y-deuda-tecnica.md); al retirar los campos de `LoginForm` bajó de 62 a 58). `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
+- **Cuando corrijas avisos, baja el tope** al nuevo número (el valor actual está en [09](../09-estado-actual-y-deuda-tecnica.md); bajó al retirar los campos de `LoginForm` y otra vez en la auditoría de las páginas privadas, al quitar `div onClick` y `label` sin texto). Un `role="region" tabIndex={0}` (la región con scroll de `Table`) añade un aviso `no-noninteractive-tabindex`. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
 - No uses `// eslint-disable` sin un comentario que explique el motivo.
 - Una regla de ESLint nueva o relajada se anota en [02](../02-tecnologias.md) y en este documento.
 - Los `.mjs` de `plugins/` (scripts y tests de `node:test` del ciclo agéntico) se lintan con las reglas recomendadas de ESLint y los globales de Node; no están sujetos a las reglas de React ni de accesibilidad de `src/`. Esa excepción no relaja nada de `src/`.

@@ -1,8 +1,9 @@
 import { StrictMode } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent, createEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, createEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import qrcode from 'qrcode-generator';
 
 const EMAIL = 'persona@example.test';
 const PASSWORD = 'Contrasena-Actual-9!';
@@ -10,6 +11,10 @@ const NEW_PASSWORD = 'Abcdefghij1!kl';
 const CODE = '123456';
 const USER_ID = 'b1c2d3e4-0000-4000-8000-0123456789ab';
 const SECRET = 'JBSWY3DPEHPK3PXP';
+const SECRET_GROUPED = 'JBSW Y3DP EHPK 3PXP';
+const OTHER_SECRET = 'OTROSECRETO234567';
+const OTHER_SECRET_GROUPED = 'OTRO SECR ETO2 3456 7';
+const OTP_URI = `otpauth://totp/SIGMETUM-A:${encodeURIComponent(EMAIL)}?secret=${SECRET}&issuer=SIGMETUM-A`;
 const SRP_CHALLENGE = {
   USER_ID_FOR_SRP: USER_ID,
   SRP_B: 'c3a15e7f09d248b6'.repeat(32),
@@ -116,6 +121,21 @@ describe('LoginForm', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('el aviso de error lleva icono decorativo, borde y texto danger, y el texto en su propio span', async () => {
+    renderForm();
+
+    await user.click(screen.getByRole('button', { name: 'login.logInButton' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveClass('border-danger', 'text-danger', 'flex', 'items-start', 'gap-2');
+    expect(alert.className).not.toMatch(/#0C1811/);
+    const icon = alert.querySelector('.material-symbols-outlined');
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(icon).toHaveTextContent('error');
+    expect(screen.getByText('login.requiredFields').tagName).toBe('SPAN');
+    expect(alert).toHaveAttribute('id');
+  });
+
   it('acceso con TOTP: reto SOFTWARE_TOKEN_MFA con el foco en el h2, tokens guardados y navegación', SLOW, async () => {
     route({
       InitiateAuth: srpChallenge,
@@ -127,6 +147,8 @@ describe('LoginForm', () => {
 
     const title = await h2('login.totpTitle');
     expect(title).toHaveFocus();
+    expect(title).toHaveClass('focus-heading');
+    expect(title).not.toHaveClass('focus-ring');
     expect(screen.getByLabelText('login.codeLabel')).toHaveAttribute('autocomplete', 'one-time-code');
     await user.type(screen.getByLabelText('login.codeLabel'), CODE);
     await user.click(screen.getByRole('button', { name: 'login.verifyButton' }));
@@ -336,8 +358,7 @@ describe('LoginForm', () => {
       expect(callsOf('AssociateSoftwareToken')).toHaveLength(1);
       expect(bodyOf(callsOf('AssociateSoftwareToken')[0])).toEqual({ Session: 'S3' });
       expect(bodyOf(fetchMock.mock.calls[2]).ChallengeResponses).toEqual({ USERNAME: USER_ID, NEW_PASSWORD });
-      expect(screen.getByText(SECRET).tagName).toBe('CODE');
-      expect(screen.getByText(`otpauth://totp/SIGMETUM-A:${encodeURIComponent(EMAIL)}?secret=${SECRET}&issuer=SIGMETUM-A`).tagName).toBe('CODE');
+      expect(screen.getByText(SECRET_GROUPED).tagName).toBe('CODE');
       expect(screen.queryAllByRole('link')).toHaveLength(0);
       expect(screen.queryByText('login.mfaSetupAgain')).toBeNull();
 
@@ -393,7 +414,7 @@ describe('LoginForm', () => {
         RespondToAuthChallenge: queue(challenge('MFA_SETUP', 'S3'), challenge('MFA_SETUP', 'S6')),
         AssociateSoftwareToken: queue(
           json(200, { SecretCode: SECRET, Session: 'S4' }),
-          json(200, { SecretCode: 'OTROSECRETO234567', Session: 'S7' })
+          json(200, { SecretCode: OTHER_SECRET, Session: 'S7' })
         ),
         VerifySoftwareToken: json(200, { Status: 'SUCCESS', Session: 'S5' }),
       });
@@ -404,9 +425,9 @@ describe('LoginForm', () => {
       await user.type(screen.getByLabelText('login.codeLabel'), CODE);
       await user.click(screen.getByRole('button', { name: 'login.verifyButton' }));
 
-      expect(await screen.findByText('OTROSECRETO234567')).toBeInTheDocument();
+      expect(await screen.findByText(OTHER_SECRET_GROUPED)).toBeInTheDocument();
       expect(screen.getByText('login.mfaSetupAgain')).toBeInTheDocument();
-      expect(screen.queryByText(SECRET)).toBeNull();
+      expect(screen.queryByText(SECRET_GROUPED)).toBeNull();
     });
 
     it('al volver al primer paso se vacían el secreto y la dirección', SLOW, async () => {
@@ -424,7 +445,8 @@ describe('LoginForm', () => {
       await user.click(screen.getByRole('button', { name: 'login.verifyButton' }));
 
       expect(await screen.findByRole('alert')).toHaveTextContent('login.sessionExpired');
-      expect(screen.queryByText(SECRET)).toBeNull();
+      expect(screen.queryByText(SECRET_GROUPED)).toBeNull();
+      expect(screen.queryByRole('img')).toBeNull();
       expect(document.body.textContent).not.toContain('otpauth://');
     });
 
@@ -453,10 +475,11 @@ describe('LoginForm', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent('login.serviceUnavailable');
       await h2('login.mfaSetupTitle');
       expect(screen.queryByLabelText('login.codeLabel')).toBeNull();
+      expect(screen.queryByRole('img')).toBeNull();
       expect(screen.queryByText('login.credentialsError')).toBeNull();
       await user.click(screen.getByRole('button', { name: 'login.retryButton' }));
 
-      expect(await screen.findByText(SECRET)).toBeInTheDocument();
+      expect(await screen.findByText(SECRET_GROUPED)).toBeInTheDocument();
       expect(callsOf('AssociateSoftwareToken')).toHaveLength(2);
       callsOf('AssociateSoftwareToken').forEach((call) => expect(bodyOf(call)).toEqual({ Session: 'S3' }));
       expect(newPasswordCalls()).toHaveLength(1);
@@ -490,7 +513,7 @@ describe('LoginForm', () => {
 
       expect(await screen.findByRole('alert')).toHaveTextContent('login.serviceUnavailable');
       await user.click(await screen.findByRole('button', { name: 'login.retryButton' }));
-      expect(await screen.findByText(SECRET)).toBeInTheDocument();
+      expect(await screen.findByText(SECRET_GROUPED)).toBeInTheDocument();
     });
 
     it('un Associate sin SecretCode da startError y no pinta secret=undefined', SLOW, async () => {
@@ -544,8 +567,85 @@ describe('LoginForm', () => {
       const copy = screen.getByRole('button', { name: 'login.copyButton' });
 
       expect(copy.closest('form')).toBeNull();
-      expect(screen.getByText(SECRET).compareDocumentPosition(copy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(screen.getByText(SECRET_GROUPED).compareDocumentPosition(copy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
       expect(copy.compareDocumentPosition(screen.getByLabelText('login.codeLabel')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('el orden del DOM en mfaSetup es ayuda, clave, copiar, QR, campo del código y botón', SLOW, async () => {
+      copyClipboard(vi.fn().mockResolvedValue());
+      route({
+        InitiateAuth: srpChallenge,
+        RespondToAuthChallenge: challenge('MFA_SETUP', 'S3'),
+        AssociateSoftwareToken: json(200, { SecretCode: SECRET, Session: 'S4' }),
+      });
+      renderForm();
+      await submitCredentials();
+      await h2('login.mfaSetupTitle');
+
+      const ordered = [
+        screen.getByText('login.mfaSetupHelp'),
+        screen.getByText(SECRET_GROUPED),
+        screen.getByRole('button', { name: 'login.copyButton' }),
+        screen.getByRole('img', { name: 'login.qrLabel' }),
+        screen.getByLabelText('login.codeLabel'),
+        screen.getByRole('button', { name: 'login.verifyButton' }),
+      ];
+
+      ordered.slice(1).forEach((node, index) => {
+        expect(ordered[index].compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      });
+    });
+
+    it('muestra el QR de la URI esperada (no del secreto), sin otpauth ni el secreto sin espacios en pantalla y sin más peticiones que a cognito-idp', SLOW, async () => {
+      route({
+        InitiateAuth: srpChallenge,
+        RespondToAuthChallenge: challenge('MFA_SETUP', 'S3'),
+        AssociateSoftwareToken: json(200, { SecretCode: SECRET, Session: 'S4' }),
+      });
+      renderForm();
+      await submitCredentials();
+      await h2('login.mfaSetupTitle');
+
+      const svg = screen.getByRole('img', { name: 'login.qrLabel' });
+      const expected = qrcode(0, 'M');
+      expected.addData(OTP_URI);
+      expected.make();
+      const modules = expected.getModuleCount();
+      const painted = Array.from({ length: modules }, () => Array(modules).fill(false));
+      for (const [, x, y] of svg.querySelector('path').getAttribute('d').matchAll(/M(\d+) (\d+)h1v1h-1z/g)) painted[Number(y) - 4][Number(x) - 4] = true;
+      const reference = Array.from({ length: modules }, (_, r) => Array.from({ length: modules }, (_, c) => expected.isDark(r, c)));
+      expect(painted).toEqual(reference);
+
+      expect(document.body.textContent).not.toContain('otpauth');
+      expect(document.body.textContent).not.toContain(SECRET);
+      expect(document.body.innerHTML).not.toContain('otpauth');
+      expect(document.body.innerHTML).not.toContain(SECRET);
+      expect(document.querySelector('img')).toBeNull();
+      expect(screen.queryAllByRole('link')).toHaveLength(0);
+      expect(fetchMock.mock.calls.length).toBeGreaterThan(0);
+      fetchMock.mock.calls.forEach((call) => expect(String(call[0])).toMatch(/^https:\/\/cognito-idp\./));
+    });
+
+    it('con un secreto nuevo (MFA_SETUP repetido) el QR cambia con él', SLOW, async () => {
+      route({
+        InitiateAuth: srpChallenge,
+        RespondToAuthChallenge: queue(challenge('MFA_SETUP', 'S3'), challenge('MFA_SETUP', 'S6')),
+        AssociateSoftwareToken: queue(
+          json(200, { SecretCode: SECRET, Session: 'S4' }),
+          json(200, { SecretCode: OTHER_SECRET, Session: 'S7' })
+        ),
+        VerifySoftwareToken: json(200, { Status: 'SUCCESS', Session: 'S5' }),
+      });
+      renderForm();
+      await submitCredentials();
+      await h2('login.mfaSetupTitle');
+      const before = screen.getByRole('img', { name: 'login.qrLabel' }).innerHTML;
+
+      await user.type(screen.getByLabelText('login.codeLabel'), CODE);
+      await user.click(screen.getByRole('button', { name: 'login.verifyButton' }));
+      await screen.findByText(OTHER_SECRET_GROUPED);
+
+      expect(screen.getByRole('img', { name: 'login.qrLabel' }).innerHTML).not.toBe(before);
     });
   });
 
@@ -659,6 +759,297 @@ describe('LoginForm', () => {
     expect(window.location.href).not.toContain(encodeURIComponent(PASSWORD));
   });
 
+  describe('mostrar u ocultar la contraseña', () => {
+    const SHOW = { name: 'login.showPassword' };
+    const SHOW_NEW = { name: 'login.showNewPassword' };
+    const SHOW_CONFIRM = { name: 'login.showConfirmPassword' };
+    const passwordInput = () => screen.getByLabelText('login.passwordLabel');
+    const goToNewPassword = async () => {
+      route({ InitiateAuth: srpChallenge, RespondToAuthChallenge: challenge('NEW_PASSWORD_REQUIRED', 'S2') });
+      renderForm();
+      await submitCredentials();
+      await h2('login.newPasswordTitle');
+    };
+    const pressed = (button) => button.getAttribute('aria-pressed');
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('el botón tiene nombre fijo, type=button, aria-pressed, icono oculto a los lectores y .focus-ring, y alternar no envía nada', async () => {
+      renderForm();
+      await user.type(passwordInput(), PASSWORD);
+      const button = screen.getByRole('button', SHOW);
+
+      expect(button).toHaveAttribute('type', 'button');
+      expect(button).toHaveClass('focus-ring');
+      expect(button).not.toHaveAttribute('title');
+      expect(button.getAttribute('aria-label')).not.toContain(PASSWORD);
+      expect(pressed(button)).toBe('false');
+      const icon = button.querySelector('.material-symbols-outlined');
+      expect(icon).toHaveAttribute('aria-hidden', 'true');
+      expect(icon).toHaveTextContent('visibility');
+      expect(button.closest('label')).toBeNull();
+
+      await user.click(button);
+      expect(passwordInput()).toHaveAttribute('type', 'text');
+      expect(screen.getByRole('button', SHOW)).toBe(button);
+      expect(pressed(button)).toBe('true');
+      expect(icon).toHaveTextContent('visibility_off');
+
+      await user.click(button);
+      expect(passwordInput()).toHaveAttribute('type', 'password');
+      expect(pressed(button)).toBe('false');
+      expect(icon).toHaveTextContent('visibility');
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
+
+    it('los textos de los tres botones existen en español y en inglés, distintos entre sí', async () => {
+      const [es, en] = await Promise.all([import('../languages/es/translation.json'), import('../languages/en/translation.json')]);
+      const keys = ['showPassword', 'showNewPassword', 'showConfirmPassword'];
+
+      [es.default, en.default].forEach((dictionary) => {
+        const names = keys.map((key) => dictionary.login[key]);
+        expect(names.every(Boolean)).toBe(true);
+        expect(new Set(names).size).toBe(3);
+        names.forEach((name) => expect(name).not.toContain(PASSWORD));
+      });
+      expect(es.default.login.showPassword).not.toBe(en.default.login.showPassword);
+    });
+
+    it('la contraseña lleva siempre spellcheck, capitalización y corrección desactivados, oculta o visible', async () => {
+      renderForm();
+      const input = passwordInput();
+      const expectOff = (field) => {
+        expect(field).toHaveAttribute('spellcheck', 'false');
+        expect(field).toHaveAttribute('autocapitalize', 'none');
+        expect(field).toHaveAttribute('autocorrect', 'off');
+      };
+
+      expectOff(input);
+      await user.click(screen.getByRole('button', SHOW));
+      expect(input).toHaveAttribute('type', 'text');
+      expectOff(input);
+    });
+
+    it('en la contraseña nueva y su repetición, cada campo tiene su botón, el estado es independiente y conservan los atributos de seguridad', SLOW, async () => {
+      await goToNewPassword();
+      const newPassword = screen.getByLabelText('login.newPasswordLabel');
+      const confirmation = screen.getByLabelText('login.confirmPasswordLabel');
+      const showNew = screen.getByRole('button', SHOW_NEW);
+      const showConfirm = screen.getByRole('button', SHOW_CONFIRM);
+
+      await user.click(showNew);
+      expect([newPassword.type, confirmation.type]).toEqual(['text', 'password']);
+      expect([pressed(showNew), pressed(showConfirm)]).toEqual(['true', 'false']);
+      await user.click(showConfirm);
+      expect([newPassword.type, confirmation.type]).toEqual(['text', 'text']);
+      await user.click(showNew);
+      expect([newPassword.type, confirmation.type]).toEqual(['password', 'text']);
+      expect([pressed(showNew), pressed(showConfirm)]).toEqual(['false', 'true']);
+
+      [newPassword, confirmation].forEach((field) => {
+        expect(field).toHaveAttribute('autocomplete', 'new-password');
+        expect(field).toHaveAttribute('spellcheck', 'false');
+        expect(field).toHaveAttribute('autocapitalize', 'none');
+        expect(field).toHaveAttribute('autocorrect', 'off');
+        expect(field).not.toHaveAttribute('name');
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('el código TOTP no tiene botón de mostrar', SLOW, async () => {
+      route({ InitiateAuth: srpChallenge, RespondToAuthChallenge: challenge('SOFTWARE_TOKEN_MFA', 'S2') });
+      renderForm();
+      await submitCredentials();
+      await h2('login.totpTitle');
+
+      expect(screen.queryByRole('button', { name: /login\.show/ })).toBeNull();
+      expect(screen.getAllByRole('button')).toHaveLength(1);
+    });
+
+    it('conserva el mismo nodo, el valor, la selección, el id y el autocomplete, y no añade name', async () => {
+      renderForm();
+      const input = passwordInput();
+      await user.type(input, PASSWORD);
+      input.setSelectionRange(2, 4);
+      const button = screen.getByRole('button', SHOW);
+
+      await user.click(button);
+      await user.click(button);
+
+      expect(passwordInput()).toBe(input);
+      expect(input).toHaveValue(PASSWORD);
+      expect([input.selectionStart, input.selectionEnd]).toEqual([2, 4]);
+      expect(input).toHaveAttribute('id', 'login-password');
+      expect(input).toHaveAttribute('autocomplete', 'current-password');
+      expect(input).not.toHaveAttribute('name');
+    });
+
+    it('el foco queda en el botón tras pulsarlo con el ratón y tras un clic que no enfoca (focus imperativo)', async () => {
+      renderForm();
+      const button = screen.getByRole('button', SHOW);
+
+      await user.click(button);
+      expect(button).toHaveFocus();
+
+      passwordInput().focus();
+      expect(button).not.toHaveFocus();
+      fireEvent.click(button);
+      expect(button).toHaveFocus();
+      expect(pressed(button)).toBe('false');
+    });
+
+    it('Enter en la contraseña envía con un solo InitiateAuth y no alterna; el orden de Tab es correo, contraseña, su botón y enviar', SLOW, async () => {
+      route({ InitiateAuth: fail(400, 'NotAuthorizedException') });
+      renderForm();
+      screen.getByLabelText('login.emailLabel').focus();
+
+      await user.tab();
+      expect(passwordInput()).toHaveFocus();
+      await user.tab();
+      expect(screen.getByRole('button', SHOW)).toHaveFocus();
+      await user.tab();
+      expect(screen.getByRole('button', { name: 'login.logInButton' })).toHaveFocus();
+
+      await user.type(screen.getByLabelText('login.emailLabel'), EMAIL);
+      await user.type(passwordInput(), `${PASSWORD}{Enter}`);
+      expect(await screen.findByRole('alert')).toHaveTextContent('login.credentialsError');
+      expect(callsOf('InitiateAuth')).toHaveLength(1);
+      expect(pressed(screen.getByRole('button', SHOW))).toBe('false');
+    });
+
+    it('el orden de Tab en newPassword es usuario, nueva, su botón, repetición, su botón y continuar', SLOW, async () => {
+      await goToNewPassword();
+      screen.getByDisplayValue(EMAIL).focus();
+      const order = [
+        screen.getByLabelText('login.newPasswordLabel'),
+        screen.getByRole('button', SHOW_NEW),
+        screen.getByLabelText('login.confirmPasswordLabel'),
+        screen.getByRole('button', SHOW_CONFIRM),
+        screen.getByRole('button', { name: 'login.continueButton' }),
+      ];
+
+      for (const element of order) {
+        await user.tab();
+        expect(element).toHaveFocus();
+      }
+    });
+
+    it('vuelve a ocultarse al enviar con error de credenciales', SLOW, async () => {
+      route({ InitiateAuth: fail(400, 'NotAuthorizedException') });
+      renderForm();
+      await fillCredentials();
+      await user.click(screen.getByRole('button', SHOW));
+      expect(passwordInput()).toHaveAttribute('type', 'text');
+
+      await user.click(screen.getByRole('button', { name: 'login.logInButton' }));
+
+      await screen.findByRole('alert');
+      expect(passwordInput()).toHaveAttribute('type', 'password');
+      expect(pressed(screen.getByRole('button', SHOW))).toBe('false');
+    });
+
+    it('vuelve a ocultarse con contraseñas distintas (sin petición)', SLOW, async () => {
+      await goToNewPassword();
+      const before = fetchMock.mock.calls.length;
+      await user.type(screen.getByLabelText('login.newPasswordLabel'), NEW_PASSWORD);
+      await user.type(screen.getByLabelText('login.confirmPasswordLabel'), 'Otra-Distinta-1!aa');
+      await user.click(screen.getByRole('button', SHOW_NEW));
+      await user.click(screen.getByRole('button', SHOW_CONFIRM));
+
+      await user.click(screen.getByRole('button', { name: 'login.continueButton' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('login.passwordMismatch');
+      expect(fetchMock.mock.calls).toHaveLength(before);
+      expect(screen.getByLabelText('login.newPasswordLabel')).toHaveAttribute('type', 'password');
+      expect(screen.getByLabelText('login.confirmPasswordLabel')).toHaveAttribute('type', 'password');
+      expect(pressed(screen.getByRole('button', SHOW_NEW))).toBe('false');
+      expect(pressed(screen.getByRole('button', SHOW_CONFIRM))).toBe('false');
+    });
+
+    it('al volver a credenciales por sesión caducada la contraseña, mostrada antes, vuelve oculta', SLOW, async () => {
+      route({
+        InitiateAuth: srpChallenge,
+        RespondToAuthChallenge: queue(challenge('NEW_PASSWORD_REQUIRED', 'S2'), fail(400, 'NotAuthorizedException')),
+      });
+      renderForm();
+      await fillCredentials();
+      await user.click(screen.getByRole('button', SHOW));
+      await user.click(screen.getByRole('button', { name: 'login.logInButton' }));
+      await h2('login.newPasswordTitle');
+      await user.type(screen.getByLabelText('login.newPasswordLabel'), NEW_PASSWORD);
+      await user.type(screen.getByLabelText('login.confirmPasswordLabel'), NEW_PASSWORD);
+      await user.click(screen.getByRole('button', { name: 'login.continueButton' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('login.sessionExpired');
+      expect(passwordInput()).toHaveAttribute('type', 'password');
+      expect(pressed(screen.getByRole('button', SHOW))).toBe('false');
+    });
+
+    it('al entrar otra vez en newPassword, los campos nuevos nacen ocultos aunque se mostraran en la entrada anterior', SLOW, async () => {
+      route({
+        InitiateAuth: srpChallenge,
+        RespondToAuthChallenge: queue(
+          challenge('NEW_PASSWORD_REQUIRED', 'S2'),
+          fail(400, 'NotAuthorizedException'),
+          challenge('NEW_PASSWORD_REQUIRED', 'S3'),
+        ),
+      });
+      renderForm();
+      await submitCredentials();
+      await h2('login.newPasswordTitle');
+      await user.type(screen.getByLabelText('login.newPasswordLabel'), NEW_PASSWORD);
+      await user.type(screen.getByLabelText('login.confirmPasswordLabel'), NEW_PASSWORD);
+      await user.click(screen.getByRole('button', SHOW_NEW));
+      await user.click(screen.getByRole('button', SHOW_CONFIRM));
+      await user.click(screen.getByRole('button', { name: 'login.continueButton' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent('login.sessionExpired');
+
+      await user.type(passwordInput(), PASSWORD);
+      await user.click(screen.getByRole('button', { name: 'login.logInButton' }));
+      await h2('login.newPasswordTitle');
+
+      expect(screen.getByLabelText('login.newPasswordLabel')).toHaveAttribute('type', 'password');
+      expect(screen.getByLabelText('login.confirmPasswordLabel')).toHaveAttribute('type', 'password');
+      expect(pressed(screen.getByRole('button', SHOW_NEW))).toBe('false');
+      expect(pressed(screen.getByRole('button', SHOW_CONFIRM))).toBe('false');
+    });
+
+    it('no se oculta por tiempo ni al perder el foco (sin temporizador)', async () => {
+      // shouldAdvanceTime: sin él, el asyncWrapper de Testing Library espera un setTimeout falso y el test se cuelga (no hay `jest` que lo avance).
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      renderForm();
+      await user.type(passwordInput(), PASSWORD);
+      await user.click(screen.getByRole('button', SHOW));
+
+      await act(async () => {
+        vi.advanceTimersByTime(10 * 60 * 1000);
+      });
+      expect(passwordInput()).toHaveAttribute('type', 'text');
+
+      fireEvent.blur(passwordInput());
+      await user.tab();
+      await user.tab();
+      expect(passwordInput()).toHaveAttribute('type', 'text');
+      expect(pressed(screen.getByRole('button', SHOW))).toBe('true');
+    });
+
+    it('al desmontar y volver a montar el campo nace oculto', async () => {
+      const { unmount } = renderForm();
+      await user.click(screen.getByRole('button', SHOW));
+      expect(passwordInput()).toHaveAttribute('type', 'text');
+
+      unmount();
+      renderForm();
+
+      expect(passwordInput()).toHaveAttribute('type', 'password');
+      expect(pressed(screen.getByRole('button', SHOW))).toBe('false');
+    });
+  });
+
   it('ninguna llamada a console ni a Storage.setItem lleva la contraseña, el código ni el secreto, y sessionStorage queda vacío', SLOW, async () => {
     const consoleSpies = ['log', 'info', 'warn', 'error', 'debug'].map((method) => vi.spyOn(console, method).mockImplementation(() => {}));
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
@@ -673,6 +1064,8 @@ describe('LoginForm', () => {
     await h2('login.newPasswordTitle');
     await user.type(screen.getByLabelText('login.newPasswordLabel'), NEW_PASSWORD);
     await user.type(screen.getByLabelText('login.confirmPasswordLabel'), NEW_PASSWORD);
+    await user.click(screen.getByRole('button', { name: 'login.showNewPassword' }));
+    await user.click(screen.getByRole('button', { name: 'login.showConfirmPassword' }));
     await user.click(screen.getByRole('button', { name: 'login.continueButton' }));
     await h2('login.mfaSetupTitle');
     await user.type(screen.getByLabelText('login.codeLabel'), CODE);

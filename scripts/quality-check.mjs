@@ -46,6 +46,8 @@ const NO_CONSOLE_FILES = [
   'src/services/srp.js',
   'src/hooks/useCognitoLogin.js',
   'src/components/LoginForm.js',
+  'src/components/QrCode.js',
+  'src/utilities/formatSecret.js',
 ];
 
 // Vulnerabilidades altas aceptadas de forma explícita, con su justificación.

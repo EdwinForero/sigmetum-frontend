@@ -16,13 +16,13 @@ import Filter from './components/Filter';
 import LoadSpinner from './components/LoadSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 import CookieBanner from './components/CookieBanner';
+import ToastProvider from './components/ToastProvider';
 import VegetationGallery from './pages/VegetationGallery';
 import { useTranslation } from 'react-i18next';
 import api from './services/api';
 import useDocumentTitle from './hooks/useDocumentTitle';
 
 function App() {
-  const [eeVisible, setEEVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [exploreError, setExploreError] = useState(false);
   const [noItalicTerms, setNoItalicTerms] = useState([]);
@@ -34,7 +34,10 @@ function App() {
   const location = useLocation();
   useDocumentTitle();
   const { t } = useTranslation();
-  const showSideMenu = ['/cargar-archivos', '/administrar-datos', '/administrar-contenido', '/explorar'].includes(location.pathname);
+  // React Router acepta la barra final: se quita para comparar rutas.
+  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const isPrivateRoute = ['/cargar-archivos', '/administrar-datos', '/administrar-contenido'].includes(path);
+  const showSideMenu = ['/cargar-archivos', '/administrar-datos', '/administrar-contenido', '/explorar'].includes(path);
 
   const fetchTerms = useCallback(async () => {
     try {
@@ -57,14 +60,14 @@ function App() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (location.pathname === '/explorar') {
+    if (path === '/explorar') {
       setIsLoading(true);
       setExploreError(false);
       setFilteredSpecies([]);
       setSelectedSpecies([]);
       setNoItalicTerms([]);
       Promise.all([fetchData(), fetchTerms()]).finally(() => setIsLoading(false));
-    } else if (location.pathname === '/administrar-datos') {
+    } else if (path === '/administrar-datos') {
       setSelectedData([]);
       setFilteredData([]);
     } else {
@@ -75,89 +78,83 @@ function App() {
       setFilteredData([]);
       setSelectedData([]);
     }
-  }, [location.pathname, fetchData, fetchTerms]);
+  }, [path, fetchData, fetchTerms]);
 
-  const handleFileDropdownSelect = (data) => {
+  // Identidad estable: Filter repite sus efectos (y dos JSON.stringify del dataset) si estas funciones cambian en cada render.
+  const handleFileDropdownSelect = useCallback((data) => {
     setSelectedData(data);
     setFilteredData(data);
     setIsLoading(false);
-  };
+  }, []);
 
-  const handleFilterDataChange = (filtered) => {
+  const handleFilterDataChange = useCallback((filtered) => {
     setFilteredData((prev) =>
       JSON.stringify(prev) !== JSON.stringify(filtered) ? filtered : prev
     );
-  };
+  }, []);
 
-  const handleOnSpeciesSelect = (speciesSelected) => setSelectedSpecies(speciesSelected);
+  const handleOnSpeciesSelect = useCallback((speciesSelected) => setSelectedSpecies(speciesSelected), []);
 
-  const handleFilterChange = (filtered) => {
+  const handleFilterChange = useCallback((filtered) => {
     setFilteredSpecies((prev) =>
       JSON.stringify(prev) !== JSON.stringify(filtered) ? filtered : prev
     );
-  };
+  }, []);
 
   const menuOptions = [
-    { id: 'filter', name: t('filter.title'), component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} />, icon: 'filter_alt' },
-    { id: 'dataManagementFilter', name: t('filter.title'), component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange} />, icon: 'filter_alt' },
-    { id: 'dataManagement', name: t('dataManagement.title'), icon: 'database', link: '/administrar-datos' },
-    { id: 'contentManagement', name: t('contentManagement.title'), icon: 'settings', link: '/administrar-contenido' },
-    { id: 'uploadFiles', name: t('uploadFiles.title'), icon: 'upload', link: '/cargar-archivos' },
+    { id: 'filter', name: t('privateNav.filters'), component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} />, icon: 'filter_alt' },
+    { id: 'dataManagementFilter', name: t('privateNav.filters'), component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange} />, icon: 'filter_alt' },
+    { id: 'dataManagement', name: t('privateNav.data'), icon: 'database', link: '/administrar-datos' },
+    { id: 'contentManagement', name: t('privateNav.content'), icon: 'settings', link: '/administrar-contenido' },
+    { id: 'uploadFiles', name: t('privateNav.upload'), icon: 'upload', link: '/cargar-archivos' },
   ];
 
   return (
-    <div className="App">
-      <Header />
-
-      <div className="flex w-full min-h-screen sm:overflow-auto md:overflow-hidden mt-16">
-        {showSideMenu && (
-          <Sidebar managementData={selectedData} exploreData={mergedData} menuOptions={menuOptions} />
-        )}
-
-        <main className="flex-grow bg-[#F9FBFA] overflow-y-auto">
-          <Routes>
-            <Route exact path="/" element={<Home />} />
-            <Route
-              path="/explorar"
-              element={
-                isLoading ? (
-                  <div className="flex bg-[#F9FBFA] justify-center items-center min-h-screen">
-                    <LoadSpinner />
-                  </div>
-                ) : (
-                  <Explore data={mergedData} filteredSpecies={filteredSpecies} selectedSpecies={selectedSpecies} noItalicTerms={noItalicTerms} hasError={exploreError} />
-                )
-              }
-            />
-            <Route path="/sobre-nosotros" element={<About />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/galeria" element={<VegetationGallery />} />
-            <Route path="/cookies" element={<Cookies />} />
-            <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload />} />} />
-            <Route path="/administrar-contenido" element={<ProtectedRoute element={<ContentManagement />} />} />
-            <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-      </div>
-
-      <footer className="bg-[#0C1811] flex justify-center relative">
-        <Footer />
-        <span
-          className="text-[#F9FBFA] absolute bottom-2 right-2"
-          onClick={() => setEEVisible(!eeVisible)}
+    <ToastProvider>
+      <div className={`App ${showSideMenu ? 'pb-nav md:pb-0 md:pl-28' : ''}`}>
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[70] focus-ring rounded-lg bg-surface px-4 py-3 font-bold text-ink"
         >
-          V 1.0.0
-        </span>
-        {eeVisible && (
-          <div className="absolute bottom-12 right-2 bg-[#F9FBFA] text-[#0C1811] p-2 rounded shadow-lg">
-            {t('ee')}
-          </div>
-        )}
-      </footer>
+          {t('skipLink')}
+        </a>
+        <Header />
 
-      <CookieBanner />
-    </div>
+        <div className="flex min-h-screen pt-16">
+          {showSideMenu && (
+            <Sidebar exploreData={mergedData} menuOptions={menuOptions} showLogout={isPrivateRoute} />
+          )}
+
+          <main id="contenido" tabIndex={-1} className="min-w-0 flex-1 bg-surface">
+            <Routes>
+              <Route exact path="/" element={<Home />} />
+              <Route
+                path="/explorar"
+                element={
+                  isLoading ? (
+                    <LoadSpinner />
+                  ) : (
+                    <Explore data={mergedData} filteredSpecies={filteredSpecies} selectedSpecies={selectedSpecies} noItalicTerms={noItalicTerms} hasError={exploreError} />
+                  )
+                }
+              />
+              <Route path="/sobre-nosotros" element={<About />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/galeria" element={<VegetationGallery />} />
+              <Route path="/cookies" element={<Cookies />} />
+              <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload />} />} />
+              <Route path="/administrar-contenido" element={<ProtectedRoute element={<ContentManagement />} />} />
+              <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </div>
+
+        <Footer />
+
+        <CookieBanner aboveBottomBar={showSideMenu} />
+      </div>
+    </ToastProvider>
   );
 }
 

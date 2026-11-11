@@ -6,19 +6,15 @@ import ASSETS, { assetUrl } from '../config/assets';
 
 const Header = () => {
   return (
-    <header className="fixed top-0 left-0 w-full bg-[#F9FBFA] border-b-2 border-[#15B659] flex items-center justify-between h-16 z-50">
-      <Link to="/">
-        <div className="flex items-center gap-4">
-          <img src={assetUrl(ASSETS.LOGO)} alt="Logo" className="max-h-14 ml-4 mix-blend-multiply" />
-          <p className="font-bold text-[#0C1811] text-base sm:text-xl">
-            SIGMET<span className="text-red-500">U</span><span className="text-blue-500">M</span>-<span className="text-[#15B659]">A</span>
-          </p>
-        </div>
+    <header className="fixed inset-x-0 top-0 z-50 flex h-16 items-center gap-2 border-b-2 border-brand bg-surface px-2 sm:px-4">
+      <Link to="/" aria-label="SIGMETUM-A" className="focus-ring flex min-h-11 shrink-0 items-center gap-2 rounded-lg sm:gap-4">
+        <img src={assetUrl(ASSETS.LOGO)} alt="" className="h-8 sm:h-12 mix-blend-multiply" />
+        <p className="whitespace-nowrap text-base font-bold text-ink sm:text-xl">
+          SIGMET<span className="text-red-500">U</span><span className="text-blue-500">M</span>-<span className="text-[#15B659]">A</span>
+        </p>
       </Link>
-      <div className="mx-6">
-        <LanguageSwitcher />
-      </div>
-      <div className="flex flex-1 h-full justify-end gap-8 items-center">
+      <LanguageSwitcher />
+      <div className="flex h-full flex-1 items-center justify-end">
         <Navbar />
       </div>
     </header>

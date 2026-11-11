@@ -52,14 +52,7 @@ const ProtectedRoute = ({ element }) => {
 
   if (status === 'denied') return <Navigate to="/login" replace />;
 
-  return (
-    <>
-      <div className="flex justify-end p-4">
-        <ButtonPrincipal text={t('login.logOutButton')} onClick={logOut} disabled={loggingOut} />
-      </div>
-      {element}
-    </>
-  );
+  return element;
 };
 
 export default ProtectedRoute;

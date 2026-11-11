@@ -23,7 +23,7 @@ const About = () => {
       </div>
 
         <motion.h2
-          className="text-[#15B659] tracking-light text-6xl font-bold leading-tight my-4 text-center"
+          className="text-brand-deep text-6xl font-bold leading-tight my-4 text-center"
         >
           {t('aboutUs.title')}
         </motion.h2>
@@ -63,7 +63,7 @@ const About = () => {
         whileInView="visible"
         viewport={{ once: true, amount: 0.7 }}
         transition={{ duration: 0.8, delay: 0.6 }}>
-            <h3 className="text-[#15B659] text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
+            <h3 className="text-brand-deep text-xl sm:text-4xl font-bold leading-tight tracking-[-0.015em] sm:leading-snug pb-2 pt-4">
               {t('aboutUs.ourMissionSubtitle')}
             </h3>
 

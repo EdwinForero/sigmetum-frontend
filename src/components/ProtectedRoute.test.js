@@ -48,14 +48,14 @@ describe('ProtectedRoute', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('con 200 en /auth muestra el contenido y el botón de cierre de sesión', async () => {
+  it('con 200 en /auth muestra el contenido y ya no hay botón de cierre de sesión', async () => {
     session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockResolvedValue(jsonResponse(200, { success: true, data: {} }));
 
     renderRoute();
 
     expect(await screen.findByText('contenido-privado')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
     expect(fetchMock.mock.calls[0][0]).toMatch(/\/auth$/);
   });
 
@@ -149,10 +149,10 @@ describe('ProtectedRoute', () => {
     expect(session.getAccessToken()).toBe('A');
   });
 
-  it('el botón de cierre borra los tokens, revoca el refresco y va a /', async () => {
+  it('el botón de cierre (en el aviso de servicio no disponible) borra los tokens, revoca el refresco y va a /', async () => {
     const user = userEvent.setup();
     session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
-    fetchMock.mockResolvedValue(jsonResponse(200, { success: true, data: {} }));
+    fetchMock.mockResolvedValue(jsonResponse(500, { success: false, error: 'boom' }));
     renderRoute();
 
     await user.click(await screen.findByRole('button', { name: 'login.logOutButton' }));
@@ -164,10 +164,10 @@ describe('ProtectedRoute', () => {
     expect(JSON.parse(revoke[1].body)).toEqual({ Token: 'R', ClientId: 'client123' });
   });
 
-  it('el botón de cierre se deshabilita mientras dura la revocación', async () => {
+  it('el botón de cierre (en el aviso de servicio no disponible) se deshabilita mientras dura la revocación', async () => {
     const user = userEvent.setup();
     session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
-    fetchMock.mockResolvedValueOnce(jsonResponse(200, { success: true, data: {} }));
+    fetchMock.mockResolvedValueOnce(jsonResponse(500, { success: false, error: 'boom' }));
     fetchMock.mockImplementation(() => new Promise(() => {}));
     renderRoute();
 

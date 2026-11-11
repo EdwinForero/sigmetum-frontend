@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 const Table = ({ 
   data, 
-  rowsPerPage = 5  
+  rowsPerPage = 5,
+  label
 }) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,7 +27,7 @@ const Table = ({
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
   return (
-    <div className="overflow-x-auto w-full">
+    <div className="w-full">
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -38,13 +39,16 @@ const Table = ({
           }
         }}
       />
+      <div role="region" aria-label={label} tabIndex={0} className="focus-ring overflow-x-auto">
       <table className="w-full">
+        {label && <caption className="sr-only">{label}</caption>}
         <thead>
           <tr className="bg-[#15B659]">
             {columnNames.map((col) => (
               <th
                 key={col}
-                className="px-4 py-2 text-left text-base font-bold text-[#F9FBFA] border-b border-[#99BBA8]"
+                scope="col"
+                className="px-4 py-2 text-left text-base font-bold text-ink border-b border-[#99BBA8]"
               >
                 {t(`attributes.${col}`, col)}
               </th>
@@ -75,6 +79,7 @@ const Table = ({
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

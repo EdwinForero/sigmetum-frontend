@@ -1,14 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import ButtonPrincipal from '../components/ButtonPrincipal';
-import DialogAdvice from '../components/DialogAdvice';
 import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
 import InfoButton from '../components/InfoButton';
-import api from '../services/api';
-import useDialog from '../hooks/useDialog';
+import useToast from '../hooks/useToast';
 import ASSETS, { assetUrl } from '../config/assets';
 //import ImageCarousel from '../components/ImageCarrousel';
 //import ScrollIndicator from '../components/ScrollIndicator';
@@ -26,7 +24,7 @@ const Explore = ({
   const [itemsPerPage, setItemsPerPage] = useState(24);
   const [pageDirection, setPageDirection] = useState(0);
   const totalResults = useRef(null);
-  const { dialog, showDialog, closeDialog } = useDialog();
+  const { notifyError } = useToast();
 
   useEffect(() => {
     if (!Array.isArray(filteredSpecies)) return;
@@ -107,7 +105,7 @@ const Explore = ({
       link.download = 'glossary.pdf';
       link.click();
     } catch {
-      showDialog(t('dialogAdvice.errorTitle'), t('dialogAdvice.errorDownloadFile'));
+      notifyError(t('dialogAdvice.errorDownloadFile'));
     }
   };
 
@@ -142,13 +140,13 @@ const Explore = ({
         </div>
       ) : (
         <div className="gap-1 px-2 flex flex-1 py-5">
-          <div className="layout-content-container flex flex-col flex-1 whitespace-nowrap">
+          <div className="layout-content-container flex flex-col flex-1 min-w-0">
 
-          <h2 className="text-[#15B659] tracking-light text-[32px] font-bold leading-tight px-4 mb-10">
+          <h1 className="text-brand-deep text-[32px] font-bold leading-tight px-4 mb-10">
               {t('explore.title')}
-            </h2>
+            </h1>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between px-4">
+          <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 px-4">
 
             <span className="text-[#4B644A] text-lg mx-2">
               {t("explore.resultsInfo", { currentResults, totalResults: totalResults.current })}
@@ -220,7 +218,7 @@ const Explore = ({
       
       {/*
       <motion.h2
-        className="text-[#15B659] text-center my-4 tracking-light text-2xl sm:text-4xl font-bold leading-tight"
+        className="text-[#15B659] text-center my-4 text-2xl sm:text-4xl font-bold leading-tight"
         >
           {t('explore.vegetationCaroselTitle')}
       </motion.h2>
@@ -229,15 +227,6 @@ const Explore = ({
       </div>
       */}
 
-      <AnimatePresence>
-        {dialog.visible && (
-          <DialogAdvice
-            dialogTitle={dialog.title}
-            dialogMessage={dialog.message}
-            onClose={closeDialog}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 };
