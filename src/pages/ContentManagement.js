@@ -7,22 +7,16 @@ const ContentManagement = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-[#F9FBFA] min-h-screen layout-container flex h-full grow flex-col px-2">
-      <div className="flex w-full flex-wrap justify-between gap-3 py-4">
-        <div className="flex min-w-72 flex-col gap-3">
-          <h2 className="text-[#15B659] tracking-light text-[32px] font-bold leading-tight">
-            {t('contentManagement.title')}
-          </h2>
-        </div>
-      </div>
-      <p className="text-[#14281D] text-base text-justify sm:text-lg text-center">
+    <div className="mx-auto w-full max-w-6xl px-2 pb-6">
+      <h1 className="py-4 text-[32px] font-bold leading-tight text-brand-deep">
+        {t('contentManagement.title')}
+      </h1>
+      <p className="text-left text-base text-ink sm:text-lg">
         {t('contentManagement.description')}
       </p>
-      <div className="layout-content-container flex flex-col w-full max-w-screen mx-auto">
-        <div className="flex w-full flex-wrap gap-3 py-4">
-          <TermsManager />
-          <ImageGalleryManager />
-        </div>
+      <div className="grid gap-6 py-4 lg:grid-cols-2">
+        <TermsManager />
+        <ImageGalleryManager />
       </div>
     </div>
   );

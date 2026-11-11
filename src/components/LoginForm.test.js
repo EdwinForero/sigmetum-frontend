@@ -121,6 +121,21 @@ describe('LoginForm', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('el aviso de error lleva icono decorativo, borde y texto danger, y el texto en su propio span', async () => {
+    renderForm();
+
+    await user.click(screen.getByRole('button', { name: 'login.logInButton' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveClass('border-danger', 'text-danger', 'flex', 'items-start', 'gap-2');
+    expect(alert.className).not.toMatch(/#0C1811/);
+    const icon = alert.querySelector('.material-symbols-outlined');
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(icon).toHaveTextContent('error');
+    expect(screen.getByText('login.requiredFields').tagName).toBe('SPAN');
+    expect(alert).toHaveAttribute('id');
+  });
+
   it('acceso con TOTP: reto SOFTWARE_TOKEN_MFA con el foco en el h2, tokens guardados y navegación', SLOW, async () => {
     route({
       InitiateAuth: srpChallenge,

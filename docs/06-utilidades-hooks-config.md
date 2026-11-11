@@ -82,7 +82,7 @@ El test de `srp.js` usa como oráculo `CognitoUser.authenticateUser` del propio 
 ## Hooks
 
 ### `useDialog()` (`src/hooks/useDialog.js`)
-Estado estándar de un diálogo `DialogAdvice`.
+Estado estándar de un diálogo `DialogAdvice`. Desde la auditoría de las páginas privadas solo lo usan los diálogos de confirmación (`DataManagement`, `TermsManager`, `ImageGalleryManager`) y la decisión de campos vacíos de `FileUpload`; `ContactForm`, `Explore` y `FileDropdown` ya no lo usan.
 
 | Devuelve | Descripción |
 |---|---|
@@ -114,6 +114,9 @@ const { dialog, showDialog, closeDialog } = useDialog();
 | Errores en los retos | Reintentable: `serviceUnavailable` y se queda; `CodeMismatchException`, `ExpiredCodeException`, `EnableSoftwareTokenMFAException` o `ok: false`: `codeError`; `InvalidPasswordException`: `passwordRejected`; `NotAuthorizedException`: vuelve a `credentials` con `sessionExpired` (o `codeSessionLost` si hubo un código erróneo antes, porque Cognito puede invalidar la `Session` tras un `CodeMismatchException`, **(por confirmar en `dev`)**); el resto: vuelve con `startError` |
 | Retos | `NEW_PASSWORD_REQUIRED` responde `{ USERNAME, NEW_PASSWORD }`; `MFA_SETUP`: `associateSoftwareToken`, `verifySoftwareToken` y `respondToChallenge('MFA_SETUP')`; `SOFTWARE_TOKEN_MFA` responde con el código. Cualquier otro reto: `startError`. Un `MFA_SETUP` repetido genera otro secreto (`mfaSetupAgain`). Se asume que no hay `requiredAttributes` en `NEW_PASSWORD_REQUIRED` (**por confirmar en `dev`**) |
 | `otpUri` | `otpauth://totp/SIGMETUM-A:<correo>?secret=…&issuer=SIGMETUM-A` (con `encodeURIComponent`); ya no se pinta como texto: solo alimenta el QR (`QrCode`), nunca va en `href` ni en `navigate` |
+
+### `useToast()` (`src/hooks/useToast.js`)
+Avisos no modales. Exporta `ToastContext` (valor por defecto `null`) y el hook `useToast()`, que devuelve `{ notifySuccess(message), notifyError(message) }` y **lanza un error** si se usa fuera de `ToastProvider` (ver [05](05-componentes.md#toastprovider)). Reparto de los mensajes: éxitos de los tres gestores, `FileUpload`, `ContactForm` y las acciones de `DataManagement` → `notifySuccess` (`role="status"`, se cierra solo a los 8 s con pausa); errores de los gestores y de `Explore` → `notifyError` (`role="alert"`, persistente); validaciones y errores de un campo o de una tarjeta → `InlineError`; borrados → `DialogAdvice` de confirmación. Los tests de los componentes que lo usan se envuelven en `ToastProvider`.
 
 ### `useDialogFocus(isOpen, onClose)` (`src/hooks/useDialogFocus.js`)
 Gestiona el foco de un diálogo modal (A6) y devuelve la `ref` de su caja, que debe llevar `tabIndex={-1}`. Lo usan `DialogAdvice` y `DialogSpecies`; un diálogo nuevo debe reutilizarlo.

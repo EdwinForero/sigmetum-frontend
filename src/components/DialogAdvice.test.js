@@ -173,4 +173,27 @@ describe('DialogAdvice', () => {
     await user.click(screen.getByText('Mensaje').closest('div.fixed'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('el título usa brand-deep (contraste sobre el fondo claro)', () => {
+    renderSimple();
+
+    expect(screen.getByRole('heading', { name: 'Aviso' })).toHaveClass('text-brand-deep');
+  });
+
+  it('con confirmText, el botón de confirmar lleva ese texto y sigue llamando a onConfirm', async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    renderSimple({ showActions: true, onConfirm, confirmText: 'Eliminar' });
+
+    expect(screen.queryByRole('button', { name: 'dialogAdvice.confirmButton' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Eliminar' }));
+
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it('sin confirmText, el botón de confirmar es dialogAdvice.confirmButton', () => {
+    renderSimple({ showActions: true, onConfirm: vi.fn() });
+
+    expect(screen.getByRole('button', { name: 'dialogAdvice.confirmButton' })).toBeInTheDocument();
+  });
 });

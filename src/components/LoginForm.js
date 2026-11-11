@@ -211,8 +211,14 @@ const LoginForm = () => {
       )}
       <form noValidate method="post" onSubmit={handleSubmit}>
         {error && (
-          <p key={error.seq} id={errorId} role="alert" className="px-4 mb-4 font-bold text-[#0C1811]">
-            {t(error.key)}
+          <p
+            key={error.seq}
+            id={errorId}
+            role="alert"
+            className="mx-4 mb-4 flex items-start gap-2 rounded-lg border border-danger p-3 font-bold text-danger"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>{t(error.key)}</span>
           </p>
         )}
 

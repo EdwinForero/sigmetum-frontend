@@ -10,7 +10,8 @@ const DialogAdvice = ({
   dialogMessage, 
   onConfirm,
   showActions = false,
-  dialogDetails = null
+  dialogDetails = null,
+  confirmText
 }) => {
   const { t } = useTranslation();
   const titleId = useId();
@@ -52,7 +53,7 @@ const DialogAdvice = ({
         tabIndex={-1}
       >
         <div className="flex justify-center px-4 py-2 mx-auto">
-          <h3 id={titleId} className="text-[#15B659] text-4xl mb-4 font-bold">
+          <h3 id={titleId} className="text-brand-deep text-4xl mb-4 font-bold">
             {dialogTitle}
           </h3>
         </div>
@@ -66,7 +67,7 @@ const DialogAdvice = ({
           {showActions ? (
             <>
               <ButtonPrincipal
-                text={t("dialogAdvice.confirmButton")}
+                text={confirmText ?? t("dialogAdvice.confirmButton")}
                 onClick={onConfirm}
               />
               <ButtonPrincipal

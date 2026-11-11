@@ -8,7 +8,7 @@ Todos están en `src/components/`. Son componentes funcionales (salvo `ErrorBoun
 - **Explorador y datos:** [Filter](#filter) · [CategoryFilter](#categoryfilter) · [FilterSearchBar](#filtersearchbar) · [SpeciesCard](#speciescard) · [DialogSpecies](#dialogspecies) · [SpeciesAttribute](#speciesattribute) · [Table](#table) · [Pagination](#pagination) · [FileDropdown](#filedropdown)
 - **Administración:** [FileUpload](#fileupload) · [TermsManager](#termsmanager) · [ImageGalleryManager](#imagegallerymanager) · [LoginForm](#loginform) · [QrCode](#qrcode)
 - **Formularios y contacto:** [ContactForm](#contactform) · [EmailContactGrid](#emailcontactgrid) · [TextInput](#textinput)
-- **Elementos básicos:** [ButtonPrincipal](#buttonprincipal) · [ButtonAlternative](#buttonalternative) · [DialogAdvice](#dialogadvice) · [InfoButton](#infobutton) · [LoadSpinner](#loadspinner) · [Switch](#switch) · [ScrollIndicator](#scrollindicator) · [ImageComponent](#imagecomponent)
+- **Elementos básicos:** [ButtonPrincipal](#buttonprincipal) · [ButtonAlternative](#buttonalternative) · [DialogAdvice](#dialogadvice) · [ToastProvider](#toastprovider) · [InlineError](#inlineerror) · [InfoButton](#infobutton) · [LoadSpinner](#loadspinner) · [Switch](#switch) · [ScrollIndicator](#scrollindicator) · [ImageComponent](#imagecomponent)
 - **Sin uso:** [ImageCarrousel](#imagecarrousel) · [UploadButton](#uploadbutton)
 
 ---
@@ -16,51 +16,51 @@ Todos están en `src/components/`. Son componentes funcionales (salvo `ErrorBoun
 ## Estructura
 
 ### Header
-Barra superior fija (`h-16`, `z-50`). Contiene el logo de S3 con enlace a `/`, el texto "SIGMETUM-A" con letras de colores, `LanguageSwitcher` y `Navbar`.
+Barra superior fija (`h-16`, `z-50`, borde inferior `brand`). Contiene el logo de S3 con enlace a `/` (el enlace se llama «SIGMETUM-A» y la imagen lleva `alt=""`; `focus-ring`, objetivo `min-h-11`), el texto "SIGMETUM-A" con letras de colores (el logotipo está exento de contraste), `LanguageSwitcher` y `Navbar`. El logo es `h-8` bajo `sm` y `h-12` desde `sm`; la cabecera no desborda hasta unos 305 px de ancho.
 Sin efectos: no toca el favicon. Este sale ya correcto del HTML compilado (plugin de `vite.config.js`, ver [06](06-utilidades-hooks-config.md#favicon-viteconfigjs-y-faviconhtml)); `ASSETS.LOGO` y `assetUrl` solo se usan aquí para el `<img>` del logo.
 
 ### Navbar
-Menú principal. `menuItems`: Inicio (`/`), Explorar (`/explorar`), Galería (`/galeria`) y Sobre nosotros (`/sobre-nosotros`).
-- Escritorio (`md+`): lista horizontal; la ruta activa aparece con fondo verde.
-- Móvil: botón con icono `Menu` (`ButtonPrincipal` con `ariaLabel` `iconButton.menu`) que abre un desplegable.
+Menú principal, un `<nav aria-label>` (`navbar.label`). `menuItems`: Inicio (`/`), Explorar (`/explorar`), Galería (`/galeria`) y Sobre nosotros (`/sobre-nosotros`), como `NavLink end` (ponen `aria-current="page"`).
+- Escritorio (`md+`): lista horizontal; la ruta activa aparece con `bg-brand text-ink`.
+- Móvil: botón con icono `Menu` (`ButtonPrincipal` con `ariaLabel` `iconButton.menu`, `aria-expanded` y `aria-controls`) que abre un panel (`max-w-[calc(100vw-1rem)]`, enlaces de `min-h-11`). Escape lo cierra y devuelve el foco al botón.
 
 | Estado / función | Descripción |
 |---|---|
 | `showDropdown` | Desplegable móvil abierto |
 | `toggleDropdown()`, `closeDropdown()` | Abrir o cerrar |
-| Efecto | Cierra al hacer clic fuera (`mousedown` en `document`, solo mientras está abierto) |
+| Efecto | Cierra al hacer clic fuera (`mousedown` en `document`) y con Escape, solo mientras está abierto |
 
 ### LanguageSwitcher
-Selector ES/EN construido sobre `ButtonAlternative` en modo desplegable.
+Selector de idioma: un `<select>` nativo (`focus-ring`, `h-11`) con una `<label className="sr-only">` (`language.label`) y dos `<option>` («Español» con `lang="es"` y «English» con `lang="en"`). Ya no usa `ButtonAlternative` ni el modo desplegable.
 
 | Estado / función | Descripción |
 |---|---|
-| `language` | `'ES'` o `'EN'`, inicializado desde `i18n.language` |
-| `dropdownOptions` | `[{ label, value }]`, que se regenera al cambiar `t` |
-| `changeLanguage(option)` | Llama a `i18n.changeLanguage('es' \| 'en')`. El detector lo guarda en `localStorage` |
-| `getButtonText(option)` | Muestra `option.value` (`ES`/`EN`) en el botón |
+| Valor | `i18n.resolvedLanguage` (no `i18n.language`, que puede valer `es-ES`, `en-US` o `fr`) |
+| Cambio | Llama a `i18n.changeLanguage('es' \| 'en')`. El detector lo guarda en `localStorage` |
 
 ### Footer
-Enlaces a Inicio, Explorar, Sobre nosotros y Cookies, y el copyright con el año actual (`footer.copyright` con `{currentYear}`).
+El único `<footer>` de la aplicación (`App` ya no pinta otro): enlaces a Inicio, Explorar, Sobre nosotros y Cookies (`focus-ring`, `min-h-11`), el copyright con el año actual (`footer.copyright` con `{currentYear}`) y, en la misma fila (columna bajo `sm`), «V 1.0.0» como `<summary>` de un `<details>` que despliega el mensaje `ee` (corrige el solapamiento a 375 px, B32).
 
 ### Sidebar
-Barra lateral de iconos con un panel deslizante.
+Barra de gestión (normaliza la ruta quitando la barra final; desde `md` ocupa toda la altura con `bg-surface`): un `<nav aria-label>` (`privateNav.label`, «Gestión»). Bajo `md` es una barra inferior fija (`h-nav`, `z-40`) y desde `md` una columna fija a la izquierda (`top-16 w-28`). Cada ítem muestra icono (`aria-hidden`) y etiqueta visible; el ítem activo lleva `bg-brand font-bold` y un borde `ink` (color, peso y forma), nunca `surface` sobre `brand`.
 
 | Prop | Tipo | Descripción |
 |---|---|---|
-| `menuOptions` | `Array<{ id, name, icon, link?, component? }>` | Opciones definidas en `App` |
+| `menuOptions` | `Array<{ id, name, icon, link?, component? }>` | Opciones definidas en `App` (`name` ya traducido con `privateNav.*`) |
 | `exploreData` | `Array \| null` | Si es `null` en `/explorar`, se oculta el filtro |
-| `managementData` | `Array` | Se recibe pero no se usa |
+| `showLogout` | `boolean` | `true` en las rutas protegidas: añade el ítem «Cerrar sesión» (`login.logOutButton`) |
 
 | Estado / función | Descripción |
 |---|---|
 | `exclusions` | Mapa ruta → ids ocultos. Por ejemplo, en `/explorar` solo se ve `filter` |
 | `filteredMenuOptions` | Opciones visibles en la ruta actual |
-| `activeComponent`, `isOverlayVisible` | Qué `component` se muestra en el panel y si está abierto |
-| `handleButtonClick(id)` | Abre el panel con el componente de esa opción |
-| `handleOverlayClick()` | Cierra el panel (clic en el fondo o en el botón `Close`) |
+| `activeComponent`, `isOpen` | Qué `component` se muestra en el panel y si está abierto |
+| `loggingOut` | Desactiva «Cerrar sesión» mientras dura `api.logout()` |
+| `NavItem` | Componente local del contenido de un ítem (icono y etiqueta) |
 
-Las opciones con `link` se pintan como `<Link>` y las que tienen `component` abren el panel (`motion.div` que entra desde `x: -100%`). Los botones de icono llevan `ariaLabel` con el `name` de la opción y el de cerrar con `iconButton.close`. El panel **no** cumple A6 (sin `role="dialog"`, foco atrapado ni Escape): deuda anotada en `docs/09`.
+- Los destinos (`Datos`, `Contenido`, `Cargar`) son `NavLink end` con `aria-current="page"`; ya no hay un `<button>` dentro de un enlace (B27 resuelto). «Filtros» es un `<button aria-expanded aria-controls>` y «Cerrar sesión» un `<button>` que llama a `api.logout()` una vez.
+- **Panel de filtros** (B21 resuelto en `Sidebar`): siempre montado (cerrado, con el atributo `hidden`; así el `Filter` no pierde su selección); abierto es `role="dialog" aria-modal="true" aria-label` (`privateNav.filters`) con `useDialogFocus` (foco al abrir, trampa de Tab, Escape y devolución del foco a «Filtros»). Es `fixed inset-y-0 left-0 z-[60] w-full max-w-sm`, hermano de la barra (no hijo), igual que su fondo oscuro `z-[60]`: cubre cabecera y barra. Sin animación de deslizamiento. Su botón de cerrar es un `ButtonPrincipal icon="close"` con `iconButton.close`. Solo se muestra el componente de la opción activa.
+- Objetivos táctiles: la barra mide 72 px de alto; los ítems cumplen 44 px.
 
 ### ErrorBoundary
 Componente de clase. `getDerivedStateFromError` activa `hasError`, `componentDidCatch` escribe el error en consola y el render muestra "Algo salió mal" con un botón para recargar. Envuelve toda la aplicación en `index.js`.
@@ -76,14 +76,14 @@ Guardia de las rutas privadas.
 |---|---|
 | `status` | `'checking'` (spinner), `'ok'`, `'denied'` (redirige a `/login`) o `'unavailable'` |
 | `checkAuth()` | Sin `getAccessToken()` → `denied`. Con token → `api.getAuth('/auth')` (con los reintentos del `503` de `api.js`): si responde, `ok`; solo un `401` (`error.type === 'http'`, tras la renovación de `api.js`) da `denied`; cualquier otro error (red, `403`, `5xx`, `503` agotado, `auth_unavailable` de la renovación) da `unavailable` sin borrar tokens ni redirigir. Ignora la respuesta si el componente se desmonta. Bajo `React.StrictMode` (desarrollo) el efecto corre dos veces y hace dos `GET /auth` |
-| `unavailable` | `<div role="alert">` con un `<h1>` (`login.title`, reutilizado **(por confirmar)** si es el título deseado), el texto `login.serviceUnavailable` un botón `login.retryButton` que vuelve al spinner y repite `GET /auth`, y un botón `login.logOutButton` que cierra la sesión (`api.logout()`, deshabilitado mientras dura la revocación), para no dejar al usuario sin salida si el servicio no se recupera |
+| `unavailable` | (conserva su botón de cierre de sesión) `<div role="alert">` con un `<h1>` (`login.title`, reutilizado **(por confirmar)** si es el título deseado), el texto `login.serviceUnavailable` un botón `login.retryButton` que vuelve al spinner y repite `GET /auth`, y un botón `login.logOutButton` que cierra la sesión (`api.logout()`, deshabilitado mientras dura la revocación), para no dejar al usuario sin salida si el servicio no se recupera |
 | `denied` | `<Navigate to="/login" replace />`: no deja la ruta protegida en el historial |
-| `ok` | Un botón `login.logOutButton` (`ButtonPrincipal`, con texto, sin necesidad de `aria-label`) que llama a `api.logout()` (se deshabilita mientras dura la revocación, hasta 3 s), encima del `element`. Es el único control de cierre de sesión, en todas las rutas privadas |
+| `ok` | Devuelve solo el `element`: el botón de cierre de sesión ya no está aquí, sino como ítem «Cerrar sesión» de la barra de gestión (`Sidebar` con `showLogout`) |
 
 Ya no decodifica el JWT ni comprueba `exp` (se retiraron `jwt-decode`, `isTokenExpired` y el diálogo `tokenExpiration.*`). No toca el almacenamiento directamente: usa `getAccessToken` y `api.logout` (que borra la sesión, revoca el token de refresco y va a `/`), aunque `npm run quality` sigue permitiéndole `localStorage`.
 
 ### CookieBanner
-Banner de consentimiento y modal de configuración.
+Banner de consentimiento y modal de configuración. Prop `aboveBottomBar` (por defecto `false`): el banner es una `<section aria-label>` **`sticky`** `z-40` al final de la raíz, con `bottom-0` o, con la barra de gestión, `bottom-nav md:bottom-0`; ocupa su sitio en el flujo (no tapa contenido ni pie) y libera el espacio al aceptar. Compacto en móvil (`p-3 sm:p-4`, `gap-2`, título `text-sm sm:text-base`, texto `text-xs sm:text-sm`, botones en una fila; 228 px a 320x700). El modal de configuración queda fuera de esa sección. B21 sigue abierto para el banner (sin `role="dialog"`).
 
 | Estado / función | Descripción |
 |---|---|
@@ -130,7 +130,7 @@ Filtro facetado: genera una categoría por cada columna de los datos.
 Nota: en `categories` los arrays se guardan tal cual y en `filteredCategories` se despliegan. Como la vista usa `filteredCategories`, el resultado visible es correcto.
 
 ### CategoryFilter
-Una categoría del filtro: cabecera plegable, botón "Limpiar", buscador y lista de casillas.
+Una categoría del filtro: cabecera plegable, botón "Limpiar", buscador (con etiqueta visible `filter.categoryFilter.searchLabel`, «Buscar en {{category}}») y lista de casillas (checkbox `brand-dark`).
 
 | Prop | Descripción |
 |---|---|
@@ -144,8 +144,8 @@ Una categoría del filtro: cabecera plegable, botón "Limpiar", buscador y lista
 Las ligaduras de los chevrons llevan `aria-hidden="true"` (no entran en el nombre del botón). **Estado:** `searchText`. **Cálculo:** `filteredItems = SortItemsList(items que contienen searchText)`.
 
 ### FilterSearchBar
-Campo de búsqueda con icono de lupa.
-Props: `placeholderText`, `value`, `onChange`. Es un campo controlado: muestra siempre `value`. El `input` lleva `focus-ring-inset` (anillo hacia dentro: el `label` envolvente tiene `overflow-hidden` y recortaría el exterior); el `label` ya no lleva clases de foco, porque no recibe foco.
+Campo de búsqueda con icono de lupa (`aria-hidden`, `pl-10`).
+Props: `label` (obligatoria y visible, asociada con `htmlFor`), `id` (por defecto de `useId`: ya no hay `id="buscar"` repetido), `placeholderText`, `value`, `onChange`, `invalid`, `describedBy` e `inputRef`. Es un campo controlado: muestra siempre `value`. `h-12`, borde `brand-dark`, placeholder `moss` y `focus-ring-inset` (anillo hacia dentro por el `overflow-hidden` del contenedor). B3 resuelto aquí.
 
 ### SpeciesCard
 Tarjeta de una especie en la cuadrícula del explorador.
@@ -180,7 +180,7 @@ Bloque `<details>` abierto con título y lista. Si `description` es una cadena, 
 
 ### Table
 Tabla paginada genérica.
-Props: `data` (`Array<Registro>`) y `rowsPerPage` (5 por defecto).
+Props: `data` (`Array<Registro>`), `rowsPerPage` (5 por defecto) y `label` (nombre accesible). La tabla va dentro de `<div role="region" aria-label={label} tabIndex={0} className="focus-ring overflow-x-auto">` (la paginación queda fuera, así que la tabla ancha se desplaza dentro de su región sin ensanchar la página), con un `<caption className="sr-only">` y `th scope="col"` con `text-ink` sobre `brand`.
 Las columnas son la unión de las claves de todos los registros, en orden de primera aparición (no muta `data`), y se traducen con `attributes.<col>`. Los valores array se muestran uno por línea. **Estado:** `currentPage`.
 
 ### Pagination
@@ -188,68 +188,70 @@ Botones anterior/siguiente con el texto "Página X de Y".
 Props: `currentPage`, `totalPages` y `onPageChange('prev' | 'next')`. Desactiva los extremos. Los dos botones de icono llevan `ariaLabel` (`iconButton.previousPage` y `iconButton.nextPage`).
 
 ### FileDropdown
-Selector de dos columnas (provincia → versión) para "Administrar datos". Se crea con `forwardRef`.
+Selector de la versión de datos para "Administrar datos": un `<select>` nativo (B22 resuelto: se alcanza con Tab y se maneja con el teclado del navegador). Se crea con `forwardRef`.
 
 | Prop | Descripción |
 |---|---|
-| `onLoad(bool)` | Controla el spinner del padre |
-| `onFileSelect(jsonData, key)` | Entrega los registros de la versión elegida |
-| `selectedFile` | `key` seleccionada (para resaltarla) |
+| `id` | `id` del `<select>`, para la etiqueta visible que pinta la página (`htmlFor`) |
+| `disabled` | Desactiva el `<select>`; `DataManagement` lo activa con `busyAction !== null` |
+| `onLoad(bool)` | Controla el estado de carga del padre |
+| `onFileSelect(jsonData, key, versionLabel)` | Entrega los registros, la `key` y el nombre legible (`${provincia} ${FormatFileName(name)}`); con fallo o con la opción vacía llama a `onFileSelect([], null, null)` |
+| `selectedFile` | `key` seleccionada |
 
 | Estado / función | Descripción |
 |---|---|
 | `files` | `{ provincia: [{ key, name }] }` |
-| `provinces`, `selectedProvince`, `versions` | Columnas del desplegable |
-| `name` | Nombre del archivo elegido (se muestra formateado con `FormatFileName`) |
-| `isOpen`, `isError` | Visibilidad y error de carga |
+| `listStatus`, `pendingKey`, `failedKey` | `'loading'` / `'ready'` / `'error'`, versión que se está pidiendo y versión que falló. Valor del `<select>`: `pendingKey ?? selectedFile ?? ''` |
 | `fetchFiles()` | `GET /list-files`. **Se expone al padre** con `useImperativeHandle` |
-| `handleProvinceSelect(p)` | Muestra las versiones de la provincia |
-| `handleVersionSelect(key, name)` | `GET /get-data/<key>` y llama a `onFileSelect` |
-| Efecto de coherencia | Si la versión seleccionada ya no existe en `files` (por ejemplo, tras borrarla), limpia la selección |
-| Efecto de clic fuera | Cierra el desplegable |
+| `loadVersion(key)` | `GET /get-data/<key>`. Se descartan las respuestas cuya clave ya no es la actual (las flechas sobre un `<select>` cerrado disparan `change` por opción en Windows) |
+
+Marcado: opción vacía (`emptyOption`), un `<optgroup label={provincia}>` por provincia y una `<option>` por versión, cuyo texto incluye la provincia («Almería 10/11/2026 · V1»; un `<select>` cerrado no muestra la etiqueta del grupo). Las versiones salen en el orden del backend. Un `LoadSpinner inline` queda siempre montado; los errores se muestran con `InlineError` y un `ButtonAlternative` «Reintentar» (repite la misma clave); la lista vacía muestra `emptyState` y un `Link` estático a `/cargar-archivos`.
 
 ---
 
 ## Administración
 
 ### FileUpload
-Formulario de carga múltiple de Excel (el selector acepta solo `.xlsx`).
-
-| Prop | Descripción |
-|---|---|
-| `onLoad(bool)` | Controla el spinner de la página |
+Formulario de carga múltiple de Excel (el selector acepta solo `.xlsx`). Ya no recibe props: no hay `onLoad`; el progreso, los errores y los éxitos se ven en la propia tarjeta y en `ToastProvider`.
 
 | Estado / función | Descripción |
 |---|---|
-| `files` | Archivos en cola |
+| `entries` | `[{ id, file, status, errorKey }]`, con `status` `'pending'`, `'uploading'`, `'decision'`, `'done'` o `'error'`. Solo se suben las entradas que no están en `done` |
+| `uploading`, `progress`, `cardError` | Subida en curso, `{ completed, total }` y error general de la tarjeta (`InlineError`) |
 | `normalizeFileName(name)` | Quita acentos (NFD) y cualquier carácter que no sea `[a-zA-Z0-9-_]` del nombre, conservando la extensión |
 | `handleFileSelect(e)` | Añade archivos evitando duplicados (mismo nombre y tamaño) y vacía el `<input>` para poder volver a elegir el mismo |
 | `handleRemoveFile(i)` | Quita un archivo de la cola |
-| `handleSubmit()` | Sube los archivos **uno a uno** con `POST /upload`. Si hay campos vacíos (400 con `emptyFields`), pregunta al usuario y confirma con `POST /upload/confirm`. Un `404` al confirmar muestra `dialogAdvice.errorDraftNotFound` y detiene el bucle (se interpreta solo por el estado, sin leer el texto). Cualquier otro error detiene el bucle y muestra un aviso. Si todos suben bien, muestra el éxito y vacía la cola |
+| `handleSubmit()` | Sube los archivos **uno a uno** con `POST /upload`. Si hay campos vacíos (400 con `emptyFields`), pregunta al usuario y confirma con `POST /upload/confirm`. Un `404` al confirmar muestra `dialogAdvice.errorDraftNotFound` y detiene el bucle (se interpreta solo por el estado, sin leer el texto). Cualquier otro error detiene el bucle y lo deja en la lista como `error`. Si todos suben bien, avisa del éxito (`role="status"`) y vacía la cola |
 
-Si el usuario cancela o cierra el diálogo de confirmación, se envía `confirmed: false`, se detiene la cola y no se muestra el éxito. Se comprueba la respuesta de cancelar: `404` muestra `errorDraftNotFound` y otro fallo `errorUploadMessage`; en ambos no se vacía `files` (se puede reintentar). Usa `api.postFormAuth` y `api.postAuth`: no lee el token y un `401` (en `/upload`, al confirmar o al cancelar) redirige a `/login`, cosa que hace `api.js`; el componente solo lo reconoce para no abrir el diálogo de error ni vaciar la cola. Un fallo reintentable de Cognito al renovar (`type: 'auth_unavailable'`, `status: 503`; la sesión se conserva) no es un `401`: muestra el diálogo de error (`errorUploadMessage`) en lugar de cortar en silencio. El `404` de `/upload/confirm` se interpreta por estado: cualquier `404` en esa ruta se muestra como "el borrador ya no existe". Ver el diagrama en [01-arquitectura.md](01-arquitectura.md#flujo-de-subida-de-datos-api-v2).
+**Interfaz:** lista `<ul aria-label>` con el estado de cada archivo (`uploadFiles.fileStatus.*`) y una papelera por fila (nombre `removeFile`); barra `role="progressbar"` con `aria-valuemin`, `aria-valuemax`, `aria-valuenow` y `aria-valuetext` («Subiendo archivo n de N…») y un `LoadSpinner inline` siempre montado; botón «Subir N archivos» (plural de i18next, `uploadFilesButton_one`/`_other`) con `loading`; mientras se sube, quitar o elegir archivos está desactivado; los inputs de archivo ocultos llevan `aria-hidden` y `tabIndex={-1}`. Los errores de subida y de borrador no encontrado van en línea (`InlineError`); `DialogAdvice` queda solo para la decisión sobre campos vacíos. **Cambio de comportamiento deliberado:** tras un `500` al confirmar o un fallo de red, la lista **conserva** el estado de error (antes se vaciaba), de modo que al reintentar solo se suben los archivos que no están en `done`; con dos o más errores solo se muestra el primero (la cola se corta en el primero). Peticiones, cabeceras y cuerpos no cambian.
+
+Si el usuario cancela o cierra el diálogo de confirmación, se envía `confirmed: false`, se detiene la cola y no se muestra el éxito. Se comprueba la respuesta de cancelar: `404` muestra `errorDraftNotFound` y otro fallo `errorUploadMessage`; en ambos no se vacía la lista (se puede reintentar). Usa `api.postFormAuth` y `api.postAuth`: no lee el token y un `401` (en `/upload`, al confirmar o al cancelar) redirige a `/login`, cosa que hace `api.js`; el componente solo lo reconoce para no abrir el diálogo de error ni vaciar la cola. Un fallo reintentable de Cognito al renovar (`type: 'auth_unavailable'`, `status: 503`; la sesión se conserva) no es un `401`: muestra el error en línea (`errorUploadMessage`) en lugar de cortar en silencio. El `404` de `/upload/confirm` se interpreta por estado: cualquier `404` en esa ruta se muestra como "el borrador ya no existe". Ver el diagrama en [01-arquitectura.md](01-arquitectura.md#flujo-de-subida-de-datos-api-v2).
 
 ### TermsManager
-Gestión de términos que no se escriben en cursiva.
+Gestión de términos que no se escriben en cursiva. `<section aria-labelledby>` con un `<h2>` (`.focus-heading`, `tabIndex={-1}`) e `InfoButton`.
 
 | Estado / función | Descripción |
 |---|---|
-| `term`, `terms`, `isLoading`, `isError` | Campo de texto, lista, carga y error |
+| `term`, `terms`, `isLoadingList`, `busy`, `isError` | Campo de texto, lista, carga de la lista, operación en curso y error de carga (con «Reintentar») |
+| `fieldError` | `'empty'` o `'duplicate'`: se muestra con `InlineError`, `aria-invalid` y `aria-describedby`; el foco va al campo solo cuando falla la validación; se limpia al escribir |
 | `fetchTerms()` | `GET /list-terms` |
-| `handleAddTerm()` | Comprueba que no esté vacío ni repetido (sin distinguir mayúsculas), hace `POST /upload-term` y recarga |
-| `handleDeleteTerm(term)` | `DELETE /delete-term` y recarga |
-| `renderList()` | Spinner, error, vacío o lista ordenada con papelera (`aria-label` `iconButton.delete`, `focus-ring`, ligadura en `aria-hidden`). El botón de añadir usa `ariaLabel` `iconButton.add`. **Deuda:** la línea que ordena `terms` no copia el array y muta el estado (anotado en `docs/09`) |
+| `handleAddTerm()` | Comprueba que no esté vacío ni repetido (sin distinguir mayúsculas), hace `POST /upload-term`, avisa con `useToast` y recarga. Botón «Añadir término» (con `loading`) |
+| `handleDeleteTerm(term)` | Pide confirmación (`DialogAdvice` con el nombre y «Eliminar»), después `DELETE /delete-term` y recarga |
+| Lista | `<ul aria-label>` (`termsListLabel`) ordenada sobre una copia (`[...terms].sort(...)`, B24 resuelto), `key={item.term}`, filas `min-h-12` con papelera de 48×48 y nombre `deleteTerm`; texto de vacío que explica qué hacer; `LoadSpinner inline` siempre montado |
+
+El campo lleva etiqueta visible (`noLatinTermsPlaceholder`, sin placeholder).
 
 ### ImageGalleryManager
-Gestión de las imágenes de la galería.
+Gestión de las imágenes de la galería. Mismo patrón que `TermsManager` (`<h2>`, `InfoButton`, avisos con `useToast`, lista `<ul aria-label>` con `imagesListLabel`, borrar con confirmación, papelera con nombre `deleteImage`).
 
 | Estado / función | Descripción |
 |---|---|
 | `imageTitle`, `imageFile`, `images` | Título, archivo elegido y lista actual |
+| `fieldError` | `{ field: 'title' \| 'file', key }`, comprobado en este orden: falta el título (`imageTitleRequired`, tras `trim()`: un título de solo espacios ya no pasa), título no válido (`adviceInvalidImageTitle`) y falta la imagen (`imageFileRequired`, con foco y `aria-describedby` en «Seleccionar imagen»). Error en línea con `InlineError`; sin petición |
 | `fetchImageUrls()` | `GET /list-images` |
-| `handleFileChange(e)` | Guarda el archivo elegido (JPEG, PNG, GIF o WebP) |
-| `handleImageUpload()` | Exige título y archivo, rechaza un título con `/`, `\`, `..`, caracteres de control o `, ' : & # ? % "` (aviso `dialogAdvice.adviceInvalidImageTitle`, sin petición; sin tope de longitud), envía `POST /upload-image` (multipart `file` + `title`) y recarga. No limpia el formulario al terminar |
-| `deleteImage(fileName)` | `DELETE /delete-image { imageKey: fileName }` y recarga |
+| `handleFileChange(e)` | Guarda el archivo elegido (JPEG, PNG, GIF o WebP); se muestra su nombre o `noImageSelected` |
+| `handleImageUpload()` | Rechaza un título con `/`, `\`, `..`, caracteres de control o `, ' : & # ? % "` (sin tope de longitud), envía `POST /upload-image` (multipart `file` + `title`) y recarga. Botón «Añadir imagen» |
+| `deleteImage(fileName)` | Tras confirmar, `DELETE /delete-image { imageKey: fileName }` y recarga |
 
 ### LoginForm
 Formulario propio de acceso con SRP contra Cognito. Solo pinta: la lógica es de [`useCognitoLogin`](06-utilidades-hooks-config.md#acceso-con-cognito-srchooksusecognitologinjs) y nunca toca tokens (los guarda `api`). Si el componente se desmonta durante `signIn`, `api` guarda igualmente los tokens y la persona queda con sesión abierta sin navegar (B28 en [09](09-estado-actual-y-deuda-tecnica.md)). Al autenticarse navega a `/cargar-archivos` con `replace`.
@@ -290,35 +292,36 @@ QR del MFA dibujado en el navegador con `qrcode-generator`, como SVG en línea. 
 
 ### ContactForm
 Formulario de contacto (nombre, email, asunto y mensaje).
-**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email` y muestra un diálogo de éxito o error: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias). Los cuatro campos llevan `focus-ring`. El botón de enviar es `type="submit"`; el «Cerrar» de su `DialogAdvice` (dentro del `<form>`) ya no reenvía el correo porque `ButtonPrincipal` es `type="button"` por defecto.
+**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email`; el éxito se avisa con `notifySuccess` (`role="status"`) y el error se muestra en `InlineError` (`formError`) encima de «Enviar», que se limpia al enviar: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Ya no usa `DialogAdvice` ni `useDialog`. Deuda: placeholders `sage` y borde `brand` en sus campos. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias). Los cuatro campos llevan `focus-ring`. El botón de enviar es `type="submit"`; un `type="submit"` con `loading` ignora el envío mientras dura (el `onSubmit` no actúa).
 
 ### EmailContactGrid
 Lee `home.emailsData`, una cadena con el formato `Nombre / email / Nombre / email ...`, la divide por `/` en pares `{ name, email }` y los muestra en dos columnas con enlaces `mailto:`.
 
 ### TextInput
-Campo de texto con el estilo del proyecto. Props: `placeholderText`, `value` y `onChange`. Es un campo controlado: muestra siempre `value`. El `input` lleva `focus-ring-inset` (ver `FilterSearchBar`).
+Campo de texto con etiqueta visible. Props: `label` (obligatoria, con `htmlFor`), `id` (por defecto de `useId`), `placeholderText`, `value`, `onChange`, `invalid`, `describedBy` e `inputRef`. Es un campo controlado: muestra siempre `value`. `h-12 rounded-xl border-brand-dark`, placeholder `moss` y `focus-ring-inset`. `aria-invalid` y `aria-describedby` solo se ponen cuando se pasan.
 
 ---
 
 ## Elementos básicos
 
 ### ButtonPrincipal
-Botón primario (fondo verde).
+Botón primario (relleno `brand`, texto `ink`, hover `brand-dark`).
 
 | Prop | Descripción |
 |---|---|
-| `text` | Texto. Se copia a un estado interno para el modo desplegable |
-| `onClick` | Acción si no hay `dropdownOptions` |
-| `icon` | Si está presente, pinta un botón cuadrado con el icono de Material Symbols y sin texto |
-| `dropdownOptions`, `onOptionSelect` | Modo desplegable (no se usa en esta variante) |
-| `className`, `disabled` | Estilo extra y estado desactivado |
-| `ariaLabel` | Nombre accesible del botón; solo se aplica en la rama `icon` (sin él, el botón de icono se anunciaría con la ligadura). La ligadura lleva `aria-hidden="true"` |
-| `type` | `type` del `<button>`, `"button"` por defecto (antes era `submit` implícito); quien envíe un formulario debe pasar `type="submit"` |
+| `text` | Texto |
+| `onClick` | Acción |
+| `icon` | Si está presente, pinta un botón cuadrado de 48×48 (`text-brand-dark`, hover `bg-brand text-ink`) con el icono de Material Symbols y sin texto |
+| `className`, `disabled` | Estilo extra y estado desactivado (`opacity-50 cursor-not-allowed`, exento de contraste) |
+| `ariaLabel` | Nombre accesible; solo se aplica en la rama `icon`. La ligadura lleva `aria-hidden="true"` |
+| `type` | `"button"` por defecto; quien envíe un formulario pasa `type="submit"` |
+| `loading` | `aria-busy` y `aria-disabled` (no `disabled`, para no perder el foco), el clic se ignora y se muestra el icono `progress_activity` |
+| `...rest` | Llega al `<button>` (`id`, `aria-expanded`, `aria-controls`...) |
 
-Las dos ramas llevan `focus-ring`.
+Con texto: `min-h-12 min-w-[84px] max-w-full`, sin `truncate`. Desaparecen `dropdownOptions`, `onOptionSelect` y el modo desplegable. Las dos ramas llevan `focus-ring`.
 
 ### ButtonAlternative
-Botón secundario (borde verde). Tiene las mismas props que `ButtonPrincipal` (sin `disabled`), más `getButtonText(option)` para personalizar el texto en modo desplegable. `LanguageSwitcher` lo usa así. Lleva `focus-ring` y las ligaduras de sus chevrons con `aria-hidden="true"`.
+Botón secundario: `border-2 border-brand-dark bg-surface text-brand-deep`, hover `bg-brand text-ink`, mismo tamaño y tipografía que `ButtonPrincipal`. Props: `text`, `onClick`, `className`, `type` (`"button"` por defecto), `disabled`, `loading` y `...rest`. Ya no tiene modo desplegable ni chevrons.
 
 ### DialogAdvice
 Modal de aviso o confirmación, animado.
@@ -328,17 +331,24 @@ Modal de aviso o confirmación, animado.
 | `dialogTitle`, `dialogMessage` | Contenido |
 | `dialogDetails` | `{ title, content }` opcional, en un `<details>` plegable |
 | `showActions` | `true` → botones Confirmar y Cancelar; `false` → solo Cerrar |
+| `confirmText` | Texto del botón de confirmar (por defecto `dialogAdvice.confirmButton`; el borrado usa `dialogAdvice.deleteButton`, «Eliminar») |
 | `onConfirm`, `onClose` | Acciones. Clic en el fondo = `onClose` |
 
-Se usa junto con el hook `useDialog` dentro de `<AnimatePresence>`.
+Se usa junto con el hook `useDialog` dentro de `<AnimatePresence>`. Desde esta iteración solo sirve para confirmar el borrado de una versión, un término o una imagen (con el nombre en el mensaje) y la decisión sobre campos vacíos de `FileUpload`; el resto de avisos van por `ToastProvider` o `InlineError`. El título es `text-brand-deep`.
 
 **Accesibilidad (A6):** la caja interior es `role="dialog"`, `aria-modal="true"`, `aria-labelledby` (el `h3` del título, con `useId`) y `tabIndex={-1}`. Llama a `useDialogFocus(useIsPresent(), onClose)`: mientras el diálogo sale de pantalla se desactivan el listener y la trampa y el foco vuelve a quien abrió. Escape equivale a cancelar: llama a `onClose`, nunca a `onConfirm`.
 
+### ToastProvider
+Proveedor de avisos (`src/components/ToastProvider.js`; el contexto y el hook están en [`useToast`](06-utilidades-hooks-config.md#usetoast-srchooksusetoastjs)). Envuelve `App` y monta **siempre** dos regiones dentro de un contenedor `fixed top-20 z-[55]`: `role="status"` (éxitos) y `role="alert"` (errores). Cada aviso lleva icono `aria-hidden`, texto y un botón de cerrar de 44×44 (`feedback.close`). El éxito se cierra solo a los 8 s y el contador se para con el ratón encima o el foco dentro y reinicia al salir (WCAG 2.2.1); los errores no tienen temporizador y se quedan hasta cerrarlos. Sin animación y nunca mueve el foco. Al estar las regiones siempre montadas, los tests no deben usar `getByRole('alert' \| 'status')` sin filtro: comprueban el texto y su región con `closest` o `within`.
+
+### InlineError
+`InlineError({ id, children })`: un `<p role="alert">` con borde y texto `danger` y el icono `error` en `aria-hidden`. El campo se asocia con `aria-invalid` y `aria-describedby={id}` y el foco va al campo solo cuando la validación falla.
+
 ### InfoButton
-Icono `info` que muestra un tooltip al pasar el ratón o al pulsar. `adjustTooltipPosition()` lo alinea a la izquierda, al centro o a la derecha para que no se salga de la pantalla. Prop: `tooltipText`. El botón lleva `aria-label` `iconButton.info` y `focus-ring`; el icono `info` va en un `<span aria-hidden="true">` (el botón conserva también `material-symbols-outlined`).
+Icono `info` (`text-moss`) que muestra un tooltip al pasar el ratón, al enfocar o al pulsar (el clic lo muestra; no alterna). `adjustTooltipPosition()` lo alinea a la izquierda, al centro o a la derecha para que no se salga de la pantalla. Prop: `tooltipText`. El botón es `type="button"`, de 44×44 (`h-11 w-11`), con `aria-label` `iconButton.info`, `aria-describedby` hacia el tooltip (`role="tooltip"`, `max-w-[calc(100vw-2rem)]`) y `focus-ring`; el icono `info` va en un `<span aria-hidden="true">`. Pasar el ratón al tooltip no lo cierra y Escape lo oculta mientras se ve (WCAG 1.4.13).
 
 ### LoadSpinner
-Capa a pantalla completa semitransparente con un círculo girando (`animate-spin`).
+Props `label` e `inline` (falso por defecto). Por defecto, capa a pantalla completa semitransparente con un círculo girando (`animate-spin`) en `role="status"` y un texto `sr-only` (`label` o `feedback.loading`). Con `inline` es un `div role="status"` de línea que quien lo usa deja **siempre montado** con `label` vacío en reposo (sin spinner); con texto, muestra el círculo y el texto. No es un skeleton.
 
 ### Switch
 Interruptor sobre un checkbox con estilos de `styled-components`. Props: `checked` y `onChange`.

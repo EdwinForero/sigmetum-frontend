@@ -1,22 +1,34 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 const TextInput = ({
-    placeholderText, 
+    id,
+    label,
     value,
-    onChange
+    onChange,
+    placeholderText,
+    invalid = false,
+    describedBy,
+    inputRef
 }) => {
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
 
     return (
-        <label className="form-input bg-[#F9FBFA] my-2 w-full flex resize-none overflow-hidden rounded-xl text-[#111418] border border-[#15B659] focus:border-[#15B659] h-14 placeholder:text-[#0C1811] placeholder:text-[#637588] text-base font-normal leading-normal">
-            <div className="flex bg-[#F9FBFA] w-full items-stretch rounded-xl h-full">
-                <input
+        <div className="my-2 w-full">
+            <label htmlFor={inputId} className="mb-1 block text-base font-bold text-ink">
+                {label}
+            </label>
+            <input
+                id={inputId}
+                ref={inputRef}
                 value={value}
-                placeholder={`${placeholderText}`}
                 onChange={onChange}
-                className="form-input bg-[#F9FBFA] flex w-full min-w-0 resize-none overflow-hidden rounded-xl text-[#0C1811] focus-ring-inset h-full placeholder:text-[#99BBA8] px-[15px] text-sm font-normal sm:text-base"
-                />
-            </div>
-        </label>
+                placeholder={placeholderText}
+                aria-invalid={invalid || undefined}
+                aria-describedby={describedBy}
+                className="focus-ring-inset h-12 w-full min-w-0 rounded-xl border border-brand-dark bg-surface px-4 text-base font-normal text-ink placeholder:text-moss"
+            />
+        </div>
     );
 }
 

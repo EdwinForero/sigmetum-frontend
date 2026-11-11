@@ -104,6 +104,15 @@ describe('traducciones', () => {
     });
   });
 
+  it('no conserva claves huérfanas de iconButton ni de los títulos de diálogo de éxito y error', () => {
+    for (const dictionary of [spanish, english]) {
+      expect(dictionary).not.toHaveProperty(['iconButton.add']);
+      expect(dictionary).not.toHaveProperty(['iconButton.delete']);
+      expect(dictionary).not.toHaveProperty(['dialogAdvice.successTitle']);
+      expect(dictionary).not.toHaveProperty(['dialogAdvice.errorTitle']);
+    }
+  });
+
   it('incluye los nombres accesibles de los botones de icono', () => {
     const pick = (dictionary) =>
       Object.fromEntries(
@@ -114,8 +123,6 @@ describe('traducciones', () => {
 
     expect({ es: pick(spanish), en: pick(english) }).toEqual({
       es: {
-        delete: 'Eliminar',
-        add: 'Añadir',
         menu: 'Menú',
         close: 'Cerrar',
         previousPage: 'Página anterior',
@@ -124,8 +131,6 @@ describe('traducciones', () => {
         scrollDown: 'Bajar',
       },
       en: {
-        delete: 'Delete',
-        add: 'Add',
         menu: 'Menu',
         close: 'Close',
         previousPage: 'Previous page',
@@ -134,6 +139,27 @@ describe('traducciones', () => {
         scrollDown: 'Scroll down',
       },
     });
+  });
+
+  it('incluye los textos exactos de la barra privada, la navegación principal y el enlace de salto', () => {
+    const keys = ['skipLink', 'navbar.label', 'privateNav.label', 'privateNav.data', 'privateNav.content', 'privateNav.upload', 'privateNav.filters'];
+
+    expect({ es: keys.map((key) => spanish[key]), en: keys.map((key) => english[key]) }).toEqual({
+      es: ['Saltar al contenido', 'Principal', 'Gestión', 'Datos', 'Contenido', 'Cargar', 'Filtros'],
+      en: ['Skip to content', 'Main', 'Management', 'Data', 'Content', 'Upload', 'Filters'],
+    });
+  });
+
+  it('el botón de subir archivos tiene singular y plural y se retiraron las claves sustituidas', () => {
+    expect({
+      es: [spanish['uploadFiles.fileUploadForm.uploadFilesButton_one'], spanish['uploadFiles.fileUploadForm.uploadFilesButton_other']],
+      en: [english['uploadFiles.fileUploadForm.uploadFilesButton_one'], english['uploadFiles.fileUploadForm.uploadFilesButton_other']],
+    }).toEqual({
+      es: ['Subir {{count}} archivo', 'Subir {{count}} archivos'],
+      en: ['Upload {{count}} file', 'Upload {{count}} files'],
+    });
+    const retiradas = ['uploadFiles.fileUploadForm.uploadFilesButton', 'dialogAdvice.adviceNoImageData'];
+    expect(retiradas.filter((key) => key in spanish || key in english)).toEqual([]);
   });
 
   it('ninguna traducción está vacía', () => {

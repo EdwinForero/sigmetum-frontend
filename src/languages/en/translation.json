@@ -3,50 +3,51 @@
     "homeOption": "Home",
     "exploreOption": "Explore",
     "galleryOption": "Gallery",
-    "aboutUsOption": "About us"
+    "aboutUsOption": "About us",
+    "label": "Main"
   },
   "footer": {
     "homeOption": "Home",
     "exploreOption": "Explore",
     "aboutUsOption": "About us",
-    "copyright" : "{{currentYear}} SIGMETUM-A. All rights reserved.",
-    "cookies" : "Cookies"
+    "copyright": "{{currentYear}} SIGMETUM-A. All rights reserved.",
+    "cookies": "Cookies"
   },
   "gallery": {
-      "title": "Gallery",
-      "noDataFoundPlaceholder": "No data available."
+    "title": "Gallery",
+    "noDataFoundPlaceholder": "No data available."
   },
   "home": {
     "title": "SIGMETUM-A: EXPLORING ANDALUSIAN VEGETATION",
     "subtitle": "Discover the wealth of plant landscapes in Andalusia, exploring in an interactive way.",
-    "searchButton" : "Search",
-    "descriptionLabel" : "Description",
-    "descriptionContent" : "SIGMETUM-A is an interactive database through which you can discover the different types of vegetation in Andalusia by means of geological, biogeographical and bioclimatic criteria, which will lead you to identify the Vegetation Series of any regional territory, as well as its climax formation (mature stage of each Series) and its characteristic species.",
-    "contactTitle" : "Contact us",
-    "emailTitle" : "E-mail",
-    "emailContact" : "For further information about the project, you can contact the following people at the Department of Botany and Plant Physiology of the University of Malaga:",
-    "emailsData" : "Jaime F. Pereña Ortiz/jperena@uma.es/Á, Enrique Salvo Tierra/salvo@uma.es/Andrés V. Pérez Latorre/avperez@uma.es/Noelia Hidalgo Triana/nhidalgo@uma.es/Marianela Zanolla Balbuena/marianela@uma.es",
+    "searchButton": "Search",
+    "descriptionLabel": "Description",
+    "descriptionContent": "SIGMETUM-A is an interactive database through which you can discover the different types of vegetation in Andalusia by means of geological, biogeographical and bioclimatic criteria, which will lead you to identify the Vegetation Series of any regional territory, as well as its climax formation (mature stage of each Series) and its characteristic species.",
+    "contactTitle": "Contact us",
+    "emailTitle": "E-mail",
+    "emailContact": "For further information about the project, you can contact the following people at the Department of Botany and Plant Physiology of the University of Malaga:",
+    "emailsData": "Jaime F. Pereña Ortiz/jperena@uma.es/Á, Enrique Salvo Tierra/salvo@uma.es/Andrés V. Pérez Latorre/avperez@uma.es/Noelia Hidalgo Triana/nhidalgo@uma.es/Marianela Zanolla Balbuena/marianela@uma.es",
     "locationLabel": "Location",
     "locationContent": "Department of Botany and Plant Physiology.\nFaculty of Science (University of Malaga).\nBoulevard Loius Pasteur, 31, 2nd floor.\n29010 - Málaga",
     "projectLeaderTitle": "Project led by Universidad de Málaga",
     "otherUniversitiesTitle": "Other universities",
     "collaboratingEntitiesTitle": "Collaborating entities",
     "contactForm": {
-      "nameLabel" : "Name",
-      "namePlaceholder" : "Name",
-      "emailLabel" : "E-mail",
-      "emailPlaceholder" : "E-mail",
-      "subjectLabel" : "Subject",
-      "subjectPlaceholder" : "Subject",
-      "messageLabel" : "Message",
-      "messagePlaceholder" : "Message",
-      "sendButton" : "Send"
+      "nameLabel": "Name",
+      "namePlaceholder": "Name",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "E-mail",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "Subject",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Message",
+      "sendButton": "Send"
     }
   },
-  "notFound":{
-    "title" : "Page not found",
-    "content" : "We couldn't find the page you were looking for",
-    "returnButton" : "Return home"
+  "notFound": {
+    "title": "Page not found",
+    "content": "We couldn't find the page you were looking for",
+    "returnButton": "Return home"
   },
   "explore": {
     "title": "Species record",
@@ -58,8 +59,8 @@
     "downloadGlossaryButtonTooltip": "By clicking this button, you will be able to download a file containing the glossary of abbreviations for the vegetation series.",
     "resultsInfo": "Showing {{currentResults}} of {{totalResults}} results",
     "dialogSpecies": {
-      "readMoreLabel" : "Search in IPNI",
-      "closeButton" : "Close",
+      "readMoreLabel": "Search in IPNI",
+      "closeButton": "Close",
       "attributes": {
         "province": "Province",
         "municipality": "Municipality",
@@ -73,13 +74,13 @@
         "potentialVegetation": "Potential vegetation"
       }
     },
-    "vegetationCaroselTitle" : "Type of vegetation"
+    "vegetationCaroselTitle": "Type of vegetation"
   },
   "pagination": {
     "pageInfo": "Page {{currentPage}} of {{totalPages}}"
   },
   "aboutUs": {
-    "title" : "About us",
+    "title": "About us",
     "ourWorkTeam": "The SIGMETUM-A work team is made up of a group of teachers from different Andalusian universities (led by the University of Malaga), from the fields of Botany, Ecology, Geography, etc, with extensive experience in ICT, environment and land use planning, and involved in various subjects and degrees to which the use of SIGMETUM-A can be applied. This group of teachers is complemented by PhD students, who will be in charge of constantly testing the proper functioning of the software, and supported by business entities from the environmental sector, involved in applying the information in their daily activities.",
     "projectPurposeSubtitle": "Project purpose",
     "projectPurposeContent": "This Educational Innovation Project, promoted by the University of Malaga, aims to facilitate the teaching-learning of Andalusian Geobotany in any discipline related to the Environment, as well as to provide a practical tool for the application of this science in restoration projects, recovery and conservation of plant diversity.",
@@ -89,11 +90,12 @@
     "ourValuesContent": "At SIGMETUM-A our main motivation is to train future professionals in environmental management, ecosystem restoration and vegetation conservation, through, firstly, a complete learning of geobotany and knowledge of vegetation and, subsequently, a correct application of the skills acquired, generating a comprehensive vision and critical thinking when resolving conflicts in the natural environment."
   },
   "filter": {
-    "title" : "Filters",
+    "title": "Filters",
     "cleanAllFiltersButton": "Clean all filters",
     "categoryFilter": {
       "noResultsFoundPlaceholder": "No results for",
-      "cleanFilterButton": "Clean filter"
+      "cleanFilterButton": "Clean filter",
+      "searchLabel": "Search in {{category}}"
     }
   },
   "attributes": {
@@ -110,7 +112,7 @@
     "Especies Características": "Characteristic species"
   },
   "login": {
-    "title" : "Log in",
+    "title": "Log in",
     "logInButton": "Log in",
     "startError": "Could not start the login. Please try again later.",
     "retryButton": "Try again",
@@ -150,17 +152,27 @@
     "verifyButton": "Verify"
   },
   "uploadFiles": {
-    "title" : "Upload files",
-    "description" : "On this page, you can upload any Excel files you have on your device. Remember that the information in a file must correspond to a single province, and be sure to check the spelling and inclusion of all data to avoid inconsistencies.",
+    "title": "Upload files",
+    "description": "On this page, you can upload any Excel files you have on your device. Remember that the information in a file must correspond to a single province, and be sure to check the spelling and inclusion of all data to avoid inconsistencies.",
     "fileUploadForm": {
       "selectFilesButton": "Select files",
       "selectFilesButtonTooltip": "Once you click the button, select the files you want to upload to the website. If everything goes well, the data will be displayed on the 'explore' page and you can manage it on the 'data management' page. Only Excel files are supported.",
-      "uploadFilesButton": "Upload files"
+      "uploadFilesButton_one": "Upload {{count}} file",
+      "uploadFilesButton_other": "Upload {{count}} files",
+      "filesListLabel": "Selected files",
+      "removeFile": "Remove file {{name}} from the list",
+      "noFilesSelected": "No files selected."
+    },
+    "progress": "Uploading file {{current}} of {{total}}…",
+    "fileStatus": {
+      "pending": "Pending",
+      "uploading": "Uploading",
+      "done": "Uploaded",
+      "error": "Not uploaded",
+      "decision": "Waiting for your decision"
     }
   },
   "dialogAdvice": {
-    "successTitle": "Success",
-    "errorTitle": "Error",
     "adviceTitle": "Advice",
     "successUploadMessage": "All files were uploaded successfully.",
     "successUploadTerm": "Term uploaded successfully.",
@@ -184,20 +196,24 @@
     "adviceInvalidImageTitle": "The title cannot contain / \\ .. , : & # ? % or quotation marks.",
     "adviceEmptyValues": "Empty values ​​cannot be entered.",
     "adviceDuplicatedTerm": "Duplicate values ​​cannot be entered.",
-    "adviceNoImageData": "Be sure to select an image and enter a title.",
     "fieldsMissingMessage": "Are you sure you want to upload the file {{filename}}? Empty fields were found in some records.",
     "emptyFieldsSummary": "Show details",
     "rowEmpty": "Row {{rowIndex}}",
-    "closeButton" : "Close",
-    "confirmButton" : "Confirm",
-    "cancelButton" : "Cancel",
+    "closeButton": "Close",
+    "confirmButton": "Confirm",
+    "cancelButton": "Cancel",
+    "confirmDeleteTitle": "Confirm deletion",
+    "deleteButton": "Delete",
+    "confirmDeleteVersion": "Version {{name}} will be deleted. This cannot be undone.",
     "errorLoadData": "Error loading data. Please try again.",
     "errorLoadFile": "Error loading the selected file. Please try again.",
-    "errorDownloadFile": "Error downloading the file. Please try again."
+    "errorDownloadFile": "Error downloading the file. Please try again.",
+    "confirmDeleteTerm": "Term {{name}} will be deleted. This cannot be undone.",
+    "confirmDeleteImage": "Image {{name}} will be deleted. This cannot be undone."
   },
   "dataManagement": {
-    "title" : "Data management",
-    "description" : "On this page, you can manage the uploaded files associated with each province and view the data they contain. You also have the option to download the data in Excel format. Make sure that there is at least one file uploaded via the 'upload files' page.",
+    "title": "Data management",
+    "description": "On this page, you can manage the uploaded files associated with each province and view the data they contain. You also have the option to download the data in Excel format. Make sure that there is at least one file uploaded via the 'upload files' page.",
     "downloadExcelButton": "Download excel",
     "downloadExcelButtonTooltip": "By clicking this button, you can download an Excel file containing the filtered results based on the options you have previously selected.",
     "deleteVersionButton": "Delete version",
@@ -206,64 +222,77 @@
     "updateDataButtonTooltip": "Pressing this button will set the data displayed on the 'Explore' page for the province corresponding to the previously chosen file.",
     "fileSelectDropdwon": {
       "selectFileDropdownLabel": "Choose the dataset",
-      "selectFileDropdownPlaceholder": "Choose the dataset",
-      "selectFileDropdownTooltip": "By clicking on the bar below, you will first need to choose a province on the left side and then the file you want to manage. Provinces that do not have at least one corresponding file will not appear in the list.",
-      "provinceTitle" : "Province",
-      "versionTitle" : "Version",
-      "versionPlaceholder" : "Choose a province to see the available versions.",
-      "noDataFoundPlaceholder": "No data available."
+      "selectFileDropdownTooltip": "Open the list below and choose the file you want to manage: versions are grouped by province. Provinces that do not have at least one corresponding file will not appear in the list.",
+      "emptyOption": "Choose a dataset",
+      "loading": "Loading versions…",
+      "emptyState": "There are no versions.",
+      "emptyStateLink": "Upload a file in Upload files"
     },
+    "loadingVersionData": "Loading version data…",
+    "deleteVersionNamed": "Delete version {{name}}",
     "table": {
-      "noDataFoundPlaceholder": "No data available."
+      "noDataFoundPlaceholder": "No data available.",
+      "regionLabel": "Version data"
     }
   },
   "contentManagement": {
-    "title" : "Content management",
-    "description" : "On this page, you can manage the content displayed in certain sections of the website.",
-    "noLatinTermsTitle" : "Non-Latinisms Exception",
-    "noLatinTermsTooltip" : "In this section you can add or remove terms that you do not want to appear in italics on the 'explore' page.",
-    "noLatinTermsPlaceholder" : "Term",
-    "noTermsFoundPlaceholder": "No data available.",
-    "galleryManagementTitle" : "Gallery management",
-    "galleryManagementTooltip" : "In this section you can add or delete images that are on the 'gallery' page.",
-    "galleryManagementPlaceholder" : "Image title",
-    "noImagesFoundPlaceholder": "No data available.",
-    "selectImageButton": "Select image"
+    "title": "Content management",
+    "description": "On this page, you can manage the content displayed in certain sections of the website.",
+    "noLatinTermsTitle": "Non-Latinisms Exception",
+    "noLatinTermsTooltip": "In this section you can add or remove terms that you do not want to appear in italics on the 'explore' page.",
+    "noLatinTermsPlaceholder": "Term",
+    "noTermsFoundPlaceholder": "There are no terms yet. Type one and press “Add term”.",
+    "galleryManagementTitle": "Gallery management",
+    "galleryManagementTooltip": "In this section you can add or delete images that are on the 'gallery' page.",
+    "galleryManagementPlaceholder": "Image title",
+    "noImagesFoundPlaceholder": "There are no images yet. Choose one, enter its title and press “Add image”.",
+    "selectImageButton": "Select image",
+    "addTermButton": "Add term",
+    "addImageButton": "Add image",
+    "termsListLabel": "Saved terms",
+    "imagesListLabel": "Gallery images",
+    "deleteTerm": "Delete term {{name}}",
+    "deleteImage": "Delete image {{name}}",
+    "loadingTerms": "Loading terms…",
+    "loadingImages": "Loading images…",
+    "imageTitleRequired": "Enter a title for the image.",
+    "imageFileRequired": "Choose an image to upload.",
+    "noImageSelected": "No image selected"
   },
-  "cookies":{
-    "title" : "Cookie Policy",
-    "subtitleAboutCookies" : "What Are Cookies and What Are They Used For?",
-    "descriptionAboutCookies" : "A cookie is a simple text file that a website stores on your device to remember information such as your preferences or browsing data. Each cookie is unique to your browser and includes data like an anonymous identifier and the website’s name. Cookies enhance your browsing experience by remembering your preferences or enabling functionalities such as a shopping cart.\n\nWhile our website can function without cookies, disabling them may limit certain features and functionalities.",
-    "subtitleAboutPixel" : "What Is a Pixel?",
-    "descriptionAboutPixel" : "A pixel is a small piece of code that enables cookies to be downloaded onto your device. Pixels are often used by third parties to deliver personalized ads based on your browsing activity.\n\nFor more information about cookies and pixels, visit the website: <a>Information Commissioner’s Office (ICO)</a>.",
-    "subtitleTypeCookies" : "Types of Cookies on Our Website",
+  "cookies": {
+    "title": "Cookie Policy",
+    "subtitleAboutCookies": "What Are Cookies and What Are They Used For?",
+    "descriptionAboutCookies": "A cookie is a simple text file that a website stores on your device to remember information such as your preferences or browsing data. Each cookie is unique to your browser and includes data like an anonymous identifier and the website’s name. Cookies enhance your browsing experience by remembering your preferences or enabling functionalities such as a shopping cart.\n\nWhile our website can function without cookies, disabling them may limit certain features and functionalities.",
+    "subtitleAboutPixel": "What Is a Pixel?",
+    "descriptionAboutPixel": "A pixel is a small piece of code that enables cookies to be downloaded onto your device. Pixels are often used by third parties to deliver personalized ads based on your browsing activity.\n\nFor more information about cookies and pixels, visit the website: <a>Information Commissioner’s Office (ICO)</a>.",
+    "subtitleTypeCookies": "Types of Cookies on Our Website",
     "descriptionTypeCookies": "• <strong>First-party cookies</strong>: Set directly by our website to enable basic functionality or improve your experience.\n\n• <strong>Third-party cookies</strong>: Set by external partners (e.g., advertisers or social media platforms) to collect data that is sent to these third parties.",
-    "subtitleCookiesUse" : "How We Use Cookies",
-    "descriptionCookiesUse" : "We use cookies on our website to:\n\n• Simplify navigation and enable essential features, such as managing preferences.\n\n• Remember personal settings, such as language or region.\n\n• Analyze how you use the website to improve its design and functionality.\n\n• Monitor website traffic and user activity.\n\n• Deliver relevant advertisements based on your interests.\n\nWe do not sell data collected via first-party cookies, but some third parties may access the data from their own cookies.",
-    "subtitleCookiesCategories" : "Categories of Cookies We Use",
-    "subtitleFirstCookiesCategory" : "1. Strictly Necessary",
-    "descriptionFirstCookiesCategory" : "Enable essential functions like logging in or remembering your privacy settings. Without these, parts of the website may not work properly.",
-    "subtitleSecondCookiesCategory" : "2. Functional",
-    "descriptionSecondCookiesCategory" : "Enhance your experience by storing settings such as language or region.",
-    "subtitleThirdCookiesCategory" : "3. Performance",
-    "descriptionThirdCookiesCategory" : "Collect anonymous data on how you use the website, helping us measure and improve its performance.",
-    "subtitleFourthCookiesCategory" : "4. Targeted Advertising",
-    "descriptionFourthCookiesCategory" : "Used by advertising partners to show you relevant ads on other websites based on your interests.",
-    "subtitleCookiesManagement" : "How to manage cookies",
-    "descriptionCookiesManagement" : "You can update your preferences for the cookies on our website through your profile. Please note that our websites will work without cookies, but you will lose some features and functionality if you choose to disable them.\n\nIf you wish to restrict or block web browser cookies which are set on your device then you can do this through your browser settings. Here is how to do this for the most popular browsers, but if yours is not listed you should be able to find this in your browser’s Help section or on  <a>aboutcookies.org</a>:",
-    "browserChrome" : "• <a>Chrome</a>.",
-    "browserInternetExplorer" : "• <a>Internet Explorer</a>.",
-    "browserSafari" : "• <a>Safari</a>.",
-    "browserMicrosoftEdge" : "• <a>Microsoft Edge</a>.",
-    "browserFirefox" : "• <a>Firefox</a>.",
-    "browserOpera" : "• <a>Opera</a>.",
-    "banner" : {
+    "subtitleCookiesUse": "How We Use Cookies",
+    "descriptionCookiesUse": "We use cookies on our website to:\n\n• Simplify navigation and enable essential features, such as managing preferences.\n\n• Remember personal settings, such as language or region.\n\n• Analyze how you use the website to improve its design and functionality.\n\n• Monitor website traffic and user activity.\n\n• Deliver relevant advertisements based on your interests.\n\nWe do not sell data collected via first-party cookies, but some third parties may access the data from their own cookies.",
+    "subtitleCookiesCategories": "Categories of Cookies We Use",
+    "subtitleFirstCookiesCategory": "1. Strictly Necessary",
+    "descriptionFirstCookiesCategory": "Enable essential functions like logging in or remembering your privacy settings. Without these, parts of the website may not work properly.",
+    "subtitleSecondCookiesCategory": "2. Functional",
+    "descriptionSecondCookiesCategory": "Enhance your experience by storing settings such as language or region.",
+    "subtitleThirdCookiesCategory": "3. Performance",
+    "descriptionThirdCookiesCategory": "Collect anonymous data on how you use the website, helping us measure and improve its performance.",
+    "subtitleFourthCookiesCategory": "4. Targeted Advertising",
+    "descriptionFourthCookiesCategory": "Used by advertising partners to show you relevant ads on other websites based on your interests.",
+    "subtitleCookiesManagement": "How to manage cookies",
+    "descriptionCookiesManagement": "You can update your preferences for the cookies on our website through your profile. Please note that our websites will work without cookies, but you will lose some features and functionality if you choose to disable them.\n\nIf you wish to restrict or block web browser cookies which are set on your device then you can do this through your browser settings. Here is how to do this for the most popular browsers, but if yours is not listed you should be able to find this in your browser’s Help section or on  <a>aboutcookies.org</a>:",
+    "browserChrome": "• <a>Chrome</a>.",
+    "browserInternetExplorer": "• <a>Internet Explorer</a>.",
+    "browserSafari": "• <a>Safari</a>.",
+    "browserMicrosoftEdge": "• <a>Microsoft Edge</a>.",
+    "browserFirefox": "• <a>Firefox</a>.",
+    "browserOpera": "• <a>Opera</a>.",
+    "banner": {
       "title": "Cookie policy",
       "description": "We use cookies to recognize your device, optimize your experience, personalize content, display relevant advertising and ensure security. We do not store personal data without your consent or when it is not strictly necessary for the services you use. For more info, please click <a>here</a>.",
       "acceptAllButton": "Accept all",
       "cookiesConfigurationButton": "Configure cookies"
     },
-    "modal" : {
+    "modal": {
       "title": "Cookie preferences",
       "description": "Configure your cookie preferences by selecting the categories you wish to enable.",
       "cancelButton": "Cancel",
@@ -279,8 +308,6 @@
     }
   },
   "iconButton": {
-    "delete": "Delete",
-    "add": "Add",
     "menu": "Menu",
     "close": "Close",
     "previousPage": "Previous page",
@@ -288,9 +315,23 @@
     "info": "Information",
     "scrollDown": "Scroll down"
   },
-  "language":{
-    "spanish" : "Español - ES",
-    "english" : "English - EN"
+  "language": {
+    "spanish": "Español",
+    "label": "Language",
+    "english": "English"
   },
-  "ee": "Developed by Edwin Forero y Juan Patiño"
+  "feedback": {
+    "close": "Dismiss notification",
+    "loading": "Loading…",
+    "retry": "Retry"
+  },
+  "ee": "Developed by Edwin Forero y Juan Patiño",
+  "skipLink": "Skip to content",
+  "privateNav": {
+    "label": "Management",
+    "data": "Data",
+    "content": "Content",
+    "upload": "Upload",
+    "filters": "Filters"
+  }
 }

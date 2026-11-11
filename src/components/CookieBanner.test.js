@@ -125,4 +125,47 @@ describe('CookieBanner', () => {
     expect(screen.queryByText('cookies.banner.acceptAllButton')).toBeNull();
     expect(writes).toHaveLength(0);
   });
+
+  it('con aboveBottomBar el banner es sticky sobre la barra y sin fixed', () => {
+    setProtocol('https:');
+    render(<CookieBanner aboveBottomBar />);
+
+    const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
+    expect(banner).toHaveClass('sticky', 'bottom-nav', 'md:bottom-0', 'z-40');
+    expect(banner).not.toHaveClass('fixed');
+  });
+
+  it('en móvil el banner es compacto: padding y tipografía menores, botones en una fila y enlace a /cookies', () => {
+    setProtocol('https:');
+    render(<CookieBanner aboveBottomBar />);
+
+    const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
+    expect(banner).toHaveClass('p-3', 'sm:p-4');
+    const botones = screen.getByRole('button', { name: 'cookies.banner.acceptAllButton' }).parentElement;
+    expect(botones).toHaveClass('flex', 'gap-2');
+    expect(botones).not.toHaveClass('flex-col');
+    expect(banner.querySelector('p')).toHaveClass('text-xs', 'sm:text-sm');
+    expect(screen.getByRole('button', { name: 'cookies.banner.acceptAllButton' })).toHaveClass('!px-3', '!text-sm');
+  });
+
+  it('sin aboveBottomBar el banner usa bottom-0', () => {
+    setProtocol('https:');
+    render(<CookieBanner />);
+
+    const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
+    expect(banner).toHaveClass('sticky', 'bottom-0');
+    expect(banner).not.toHaveClass('bottom-nav');
+    expect(banner).not.toHaveClass('fixed');
+  });
+
+  it('el modal de configuración queda fuera de la sección sticky del banner', async () => {
+    setProtocol('https:');
+    const user = userEvent.setup();
+    render(<CookieBanner />);
+
+    await user.click(screen.getByText('cookies.banner.cookiesConfigurationButton'));
+
+    const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
+    expect(banner.contains(screen.getByText('cookies.modal.title'))).toBe(false);
+  });
 });

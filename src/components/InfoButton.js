@@ -1,17 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
 
 const InfoButton = ({ tooltipText }) => {
   const { t } = useTranslation();
+  const tooltipId = useId();
   const [isVisible, setIsVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState("center");
   const tooltipRef = useRef(null);
 
-  const showTooltip = () => {
-    setIsVisible(true);
-    adjustTooltipPosition();
-  };
-
+  const showTooltip = () => setIsVisible(true);
   const hideTooltip = () => setIsVisible(false);
 
   const adjustTooltipPosition = () => {
@@ -36,6 +33,16 @@ const InfoButton = ({ tooltipText }) => {
     }
   }, [isVisible]);
 
+  // Escape lo oculta mientras se ve (WCAG 1.4.13: descartable sin mover el puntero ni el foco).
+  useEffect(() => {
+    if (!isVisible) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsVisible(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isVisible]);
+
   const tooltipClasses = {
     center: "left-1/2 transform -translate-x-1/2",
     left: "left-0 transform translate-x-0",
@@ -43,32 +50,39 @@ const InfoButton = ({ tooltipText }) => {
   };
 
   return (
-    <div className="relative inline-block">
+    <span
+      className="relative inline-block"
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
+    >
       <button
-        className="material-symbols-outlined focus-ring text-[#99BBA8] px-3 py-1 rounded"
+        type="button"
+        className="focus-ring inline-flex h-11 w-11 items-center justify-center rounded text-moss"
         aria-label={t("iconButton.info")}
-        onMouseEnter={showTooltip}
-        onMouseLeave={hideTooltip}
+        aria-describedby={tooltipId}
+        onFocus={showTooltip}
+        onBlur={hideTooltip}
         onClick={showTooltip}
       >
         <span className="material-symbols-outlined" aria-hidden="true">info</span>
       </button>
 
-      {isVisible && (
-        <div
+      <span
+        id={tooltipId}
+        role="tooltip"
+        hidden={!isVisible}
         ref={tooltipRef}
-        className={`absolute top-full mt-2 bg-white text-[#0C1811] text-sm rounded px-4 py-2 text-justify shadow-lg z-10 ${tooltipClasses[tooltipPosition]} 
-          min-w-[200px] max-w-[300px] sm:min-w-[300px] sm:max-w-[500px] md:min-w-[400px] md:max-w-[800px]`}
+        className={`absolute top-full z-10 mt-2 rounded bg-surface px-4 py-2 text-left text-sm text-ink shadow-lg ${tooltipClasses[tooltipPosition]}
+          w-max min-w-[200px] max-w-[calc(100vw-2rem)] sm:min-w-[300px] sm:max-w-[500px] md:min-w-[400px] md:max-w-[800px]`}
         style={{
           wordWrap: "break-word",
           wordBreak: "break-word",
           whiteSpace: "pre-wrap",
         }}
       >
-        <span>{tooltipText}</span>
-      </div>
-      )}
-    </div>
+        {tooltipText}
+      </span>
+    </span>
   );
 };
 

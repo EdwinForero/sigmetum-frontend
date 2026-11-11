@@ -1,116 +1,118 @@
 {
-    "navbar": {
-      "homeOption": "Inicio",
-      "exploreOption": "Explorar",
-      "galleryOption": "Galería",
-      "aboutUsOption": "Sobre nosotros"
-    },
-    "footer": {
-      "homeOption": "Inicio",
-      "exploreOption": "Explorar",
-      "aboutUsOption": "Sobre nosotros",
-      "copyright" : "{{currentYear}} SIGMETUM-A. Todos los derechos reservados.",
-      "cookies" : "Cookies"
-    },
-    "gallery": {
-      "title": "Galería",
-      "noDataFoundPlaceholder": "No hay datos disponibles."
-    },
-    "home": {
-      "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
-      "subtitle": "Descubre la riqueza de paisajes vegetales en Andalucía, explorando de manera interactiva.",
-      "searchButton" : "Buscar",
-      "descriptionLabel" : "Descripción",
-      "descriptionContent" : "SIGMETUM-A es una base de datos interactiva a través de la cual podrás descubrir los diferentes tipos de vegetación de Andalucía mediante criterios geológicos, biogeográficos y bioclimáticos, que te llevarán a identificar la Serie de Vegetación de cualquier territorio regional, así como su formación clímax (etapa madura de cada Serie) y sus especies características.",
-      "contactTitle" : "Contáctenos",
-      "emailTitle" : "Correo electrónico",
-      "emailContact" : "Para ampliar información acerca del proyecto, puede contactar a las siguientes personas:",
-      "emailsData" : "Jaime F. Pereña Ortiz/jperena@uma.es/Á, Enrique Salvo Tierra/salvo@uma.es/Andrés V. Pérez Latorre/avperez@uma.es/Noelia Hidalgo Triana/nhidalgo@uma.es/Marianela Zanolla Balbuena/marianela@uma.es",
-      "locationLabel": "Ubicación",
-      "locationContent": "Departamento de Botánica y Fisiología Vegetal.\nFacultad de Ciencias (Universidad de Málaga).\nBoulevard Loius Pasteur, 31, 2º planta.\n29010 - Málaga",
-      "projectLeaderTitle": "Proyecto liderado por la Universidad de Málaga",
-      "otherUniversitiesTitle": "Otras universidades",
-      "collaboratingEntitiesTitle": "Entidades colaboradoras",
-      "contactForm": {
-        "nameLabel" : "Nombre",
-        "namePlaceholder" : "Nombre",
-        "emailLabel" : "Correo electrónico",
-        "emailPlaceholder" : "Correo electrónico",
-        "subjectLabel" : "Asunto",
-        "subjectPlaceholder" : "Asunto",
-        "messageLabel" : "Mensaje",
-        "messagePlaceholder" : "Mensaje",
-        "sendButton" : "Enviar"
-      }
-    },
-    "notFound":{
-      "title" : "Página no encontrada",
-      "content" : "No pudimos encontrar la página que buscas",
-      "returnButton" : "Volver al inicio"
-    },
-    "explore": {
-      "title": "Registro de especies",
-      "noDataFoundPlaceholder": "No hay datos disponibles.",
-      "errorLoadPlaceholder": "Error al cargar los datos. Por favor, recarga la página.",
-      "downloadExcelButton": "Descargar resultados",
-      "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
-      "downloadGlossaryButton": "Descargar glosario",
+  "navbar": {
+    "homeOption": "Inicio",
+    "exploreOption": "Explorar",
+    "galleryOption": "Galería",
+    "aboutUsOption": "Sobre nosotros",
+    "label": "Principal"
+  },
+  "footer": {
+    "homeOption": "Inicio",
+    "exploreOption": "Explorar",
+    "aboutUsOption": "Sobre nosotros",
+    "copyright": "{{currentYear}} SIGMETUM-A. Todos los derechos reservados.",
+    "cookies": "Cookies"
+  },
+  "gallery": {
+    "title": "Galería",
+    "noDataFoundPlaceholder": "No hay datos disponibles."
+  },
+  "home": {
+    "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
+    "subtitle": "Descubre la riqueza de paisajes vegetales en Andalucía, explorando de manera interactiva.",
+    "searchButton": "Buscar",
+    "descriptionLabel": "Descripción",
+    "descriptionContent": "SIGMETUM-A es una base de datos interactiva a través de la cual podrás descubrir los diferentes tipos de vegetación de Andalucía mediante criterios geológicos, biogeográficos y bioclimáticos, que te llevarán a identificar la Serie de Vegetación de cualquier territorio regional, así como su formación clímax (etapa madura de cada Serie) y sus especies características.",
+    "contactTitle": "Contáctenos",
+    "emailTitle": "Correo electrónico",
+    "emailContact": "Para ampliar información acerca del proyecto, puede contactar a las siguientes personas:",
+    "emailsData": "Jaime F. Pereña Ortiz/jperena@uma.es/Á, Enrique Salvo Tierra/salvo@uma.es/Andrés V. Pérez Latorre/avperez@uma.es/Noelia Hidalgo Triana/nhidalgo@uma.es/Marianela Zanolla Balbuena/marianela@uma.es",
+    "locationLabel": "Ubicación",
+    "locationContent": "Departamento de Botánica y Fisiología Vegetal.\nFacultad de Ciencias (Universidad de Málaga).\nBoulevard Loius Pasteur, 31, 2º planta.\n29010 - Málaga",
+    "projectLeaderTitle": "Proyecto liderado por la Universidad de Málaga",
+    "otherUniversitiesTitle": "Otras universidades",
+    "collaboratingEntitiesTitle": "Entidades colaboradoras",
+    "contactForm": {
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Nombre",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "Correo electrónico",
+      "subjectLabel": "Asunto",
+      "subjectPlaceholder": "Asunto",
+      "messageLabel": "Mensaje",
+      "messagePlaceholder": "Mensaje",
+      "sendButton": "Enviar"
+    }
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "content": "No pudimos encontrar la página que buscas",
+    "returnButton": "Volver al inicio"
+  },
+  "explore": {
+    "title": "Registro de especies",
+    "noDataFoundPlaceholder": "No hay datos disponibles.",
+    "errorLoadPlaceholder": "Error al cargar los datos. Por favor, recarga la página.",
+    "downloadExcelButton": "Descargar resultados",
+    "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
+    "downloadGlossaryButton": "Descargar glosario",
     "downloadGlossaryButtonTooltip": "Al pulsar este botón, usted podrá descargar un archivo donde se encuentra el glosario de abreviaturas para la serie de vegetación.",
-      "resultsInfo": "Mostrando {{currentResults}} de {{totalResults}} resultados",
-      "dialogSpecies": {
-        "readMoreLabel" : "Buscar en IPNI",
-        "closeButton" : "Cerrar",
-        "attributes": {
-          "province": "Provincia",
-          "municipality": "Municipio",
-          "averageAltitude": "Altitud media",
-          "biogeographicSector": "Sector biogeográfico",
-          "bioclimaticFloor": "Piso bioclimático",
-          "ombrotype": "Ombrotipo",
-          "natureOfSubstrate": "Naturaleza del sustrato",
-          "seriesType": "Tipo de serie",
-          "vegetationSeries": "Serie de vegetación",
-          "potentialVegetation": "Vegetación potencial"
-        }
-      },
-      "vegetationCaroselTitle" : "Tipo de vegetación"
-    },
-    "pagination": {
-      "pageInfo": "Página {{currentPage}} de {{totalPages}}"
-    },
-    "aboutUs": {
-      "title" : "Sobre nosotros",
-      "ourWorkTeam": "El equipo de trabajo de SIGMETUM-A está conformado por un grupo docentes procedentes de diferentes universidades andaluzas (liderados por la Universidad de Málaga), de las áreas de conocimiento de Botánica, Ecología, Geografía, etc, con amplia experiencia en TICs, medio ambiente y ordenación territorial, e implicados en diversas asignaturas y titulaciones a las que aplicar el uso de SIGMETUM-A. Este grupo de docentes se complementa con estudiantes de doctorado, que serán los encargados de testear de manera constante el adecuado funcionamiento del software, y apoyados por entidades empresariales del sector medioambiental, implicados en aplicar la información en sus actividades cotidianas.",
-      "projectPurposeSubtitle": "Propósito del proyecto",
-      "projectPurposeContent": "Con este Proyecto de Innovación Educativa, impulsado por la Universidad de Málaga, se pretende facilitar la enseñanza-aprendizaje de la Geobotánica andaluza en cualquier disciplina relacionada con el Medio Ambiente, así como aportar una herramienta práctica para la aplicación de esta ciencia en proyectos de restauración, recuperación y conservación de la diversidad vegetal.",
-      "ourMissionSubtitle": "Nuestra misión",
-      "ourMissionContent": "Dada la transversalidad del equipo de trabajo, con SIGMETUM-A pretendemos facilitar el estudio de la vegetación a nivel de enseñanzas superiores, así como facilitar el trabajo a profesionales del Medio Ambiente a diferentes escalas, mediante una herramienta que aglutina toda la información ambiental necesaria para una visión global de la vegetación.",
-      "ourValuesSubtitle": "Nuestros valores",
-      "ourValuesContent": "En SIGMETUM-A nuestra principal motivación es formar a futuros profesionales de la gestión ambiental, la restauración de ecosistemas y la conservación de la vegetación, mediante, en primer lugar, un completo aprendizaje de la geobotánica y conocimiento de la vegetación y, posteriormente, una correcta aplicación de las competencias adquiridas, generando una visión integral y pensamiento críticos a la hora de resolver conflictos en el medio natural."
-    },
-    "filter": {
-      "title" : "Filtros",
-      "cleanAllFiltersButton": "Eliminar todos los filtros",
-      "categoryFilter": {
-        "noResultsFoundPlaceholder": "No hay resultados para",
-        "cleanFilterButton": "Limpiar filtro"
+    "resultsInfo": "Mostrando {{currentResults}} de {{totalResults}} resultados",
+    "dialogSpecies": {
+      "readMoreLabel": "Buscar en IPNI",
+      "closeButton": "Cerrar",
+      "attributes": {
+        "province": "Provincia",
+        "municipality": "Municipio",
+        "averageAltitude": "Altitud media",
+        "biogeographicSector": "Sector biogeográfico",
+        "bioclimaticFloor": "Piso bioclimático",
+        "ombrotype": "Ombrotipo",
+        "natureOfSubstrate": "Naturaleza del sustrato",
+        "seriesType": "Tipo de serie",
+        "vegetationSeries": "Serie de vegetación",
+        "potentialVegetation": "Vegetación potencial"
       }
     },
-    "attributes": {
-      "Provincia": "Provincia",
-      "Municipio": "Municipio",
-      "Altitud Media": "Altitud media",
-      "Sector Biogeográfico": "Sector biogeográfico",
-      "Piso Bioclimático": "Piso bioclimático",
-      "Ombrotipo": "Ombrotipo",
-      "Naturaleza del Sustrato": "Naturaleza del sustrato",
-      "Tipo de Serie": "Tipo de serie",
-      "Serie de Vegetación": "Serie de vegetación",
-      "Vegetación Potencial": "Vegetación potencial",
-      "Especies Características": "Especies características"
-    },
-    "login": {
-    "title" : "Iniciar sesión",
+    "vegetationCaroselTitle": "Tipo de vegetación"
+  },
+  "pagination": {
+    "pageInfo": "Página {{currentPage}} de {{totalPages}}"
+  },
+  "aboutUs": {
+    "title": "Sobre nosotros",
+    "ourWorkTeam": "El equipo de trabajo de SIGMETUM-A está conformado por un grupo docentes procedentes de diferentes universidades andaluzas (liderados por la Universidad de Málaga), de las áreas de conocimiento de Botánica, Ecología, Geografía, etc, con amplia experiencia en TICs, medio ambiente y ordenación territorial, e implicados en diversas asignaturas y titulaciones a las que aplicar el uso de SIGMETUM-A. Este grupo de docentes se complementa con estudiantes de doctorado, que serán los encargados de testear de manera constante el adecuado funcionamiento del software, y apoyados por entidades empresariales del sector medioambiental, implicados en aplicar la información en sus actividades cotidianas.",
+    "projectPurposeSubtitle": "Propósito del proyecto",
+    "projectPurposeContent": "Con este Proyecto de Innovación Educativa, impulsado por la Universidad de Málaga, se pretende facilitar la enseñanza-aprendizaje de la Geobotánica andaluza en cualquier disciplina relacionada con el Medio Ambiente, así como aportar una herramienta práctica para la aplicación de esta ciencia en proyectos de restauración, recuperación y conservación de la diversidad vegetal.",
+    "ourMissionSubtitle": "Nuestra misión",
+    "ourMissionContent": "Dada la transversalidad del equipo de trabajo, con SIGMETUM-A pretendemos facilitar el estudio de la vegetación a nivel de enseñanzas superiores, así como facilitar el trabajo a profesionales del Medio Ambiente a diferentes escalas, mediante una herramienta que aglutina toda la información ambiental necesaria para una visión global de la vegetación.",
+    "ourValuesSubtitle": "Nuestros valores",
+    "ourValuesContent": "En SIGMETUM-A nuestra principal motivación es formar a futuros profesionales de la gestión ambiental, la restauración de ecosistemas y la conservación de la vegetación, mediante, en primer lugar, un completo aprendizaje de la geobotánica y conocimiento de la vegetación y, posteriormente, una correcta aplicación de las competencias adquiridas, generando una visión integral y pensamiento críticos a la hora de resolver conflictos en el medio natural."
+  },
+  "filter": {
+    "title": "Filtros",
+    "cleanAllFiltersButton": "Eliminar todos los filtros",
+    "categoryFilter": {
+      "noResultsFoundPlaceholder": "No hay resultados para",
+      "cleanFilterButton": "Limpiar filtro",
+      "searchLabel": "Buscar en {{category}}"
+    }
+  },
+  "attributes": {
+    "Provincia": "Provincia",
+    "Municipio": "Municipio",
+    "Altitud Media": "Altitud media",
+    "Sector Biogeográfico": "Sector biogeográfico",
+    "Piso Bioclimático": "Piso bioclimático",
+    "Ombrotipo": "Ombrotipo",
+    "Naturaleza del Sustrato": "Naturaleza del sustrato",
+    "Tipo de Serie": "Tipo de serie",
+    "Serie de Vegetación": "Serie de vegetación",
+    "Vegetación Potencial": "Vegetación potencial",
+    "Especies Características": "Especies características"
+  },
+  "login": {
+    "title": "Iniciar sesión",
     "logInButton": "Iniciar sesión",
     "startError": "No se pudo iniciar sesión. Inténtalo de nuevo más tarde.",
     "retryButton": "Reintentar",
@@ -150,17 +152,27 @@
     "verifyButton": "Verificar"
   },
   "uploadFiles": {
-    "title" : "Cargar archivos",
-    "description" : "En esta página, puede cargar los archivos Excel que tenga en su dispositivo. Recuerde que la información de un archivo debe corresponder a una sola provincia, además, asegúrese de revisar la escritura y la inclusión de todos los datos para evitar inconsistencias.",
+    "title": "Cargar archivos",
+    "description": "En esta página, puede cargar los archivos Excel que tenga en su dispositivo. Recuerde que la información de un archivo debe corresponder a una sola provincia, además, asegúrese de revisar la escritura y la inclusión de todos los datos para evitar inconsistencias.",
     "fileUploadForm": {
       "selectFilesButton": "Seleccionar archivos",
       "selectFilesButtonTooltip": "Al pulsar el botón, seleccione los archivos que desea cargar al sitio web. Si todo sale bien, se mostrarán los datos en la página 'explorar' y podrá gestionarlos en la página 'administrar datos'. Solo se admiten archivos Excel.",
-      "uploadFilesButton": "Cargar archivos"
+      "uploadFilesButton_one": "Subir {{count}} archivo",
+      "uploadFilesButton_other": "Subir {{count}} archivos",
+      "filesListLabel": "Archivos seleccionados",
+      "removeFile": "Quitar archivo {{name}} de la lista",
+      "noFilesSelected": "No has elegido ningún archivo."
+    },
+    "progress": "Subiendo archivo {{current}} de {{total}}…",
+    "fileStatus": {
+      "pending": "Pendiente",
+      "uploading": "Subiendo",
+      "done": "Subido",
+      "error": "No subido",
+      "decision": "Pendiente de tu decisión"
     }
   },
   "dialogAdvice": {
-    "successTitle": "Éxito",
-    "errorTitle": "Error",
     "adviceTitle": "Aviso",
     "successUploadMessage": "Todos los archivos se subieron con éxito.",
     "successUploadTerm": "Término subido con éxito.",
@@ -184,21 +196,25 @@
     "adviceInvalidImageTitle": "El título no puede contener / \\ .. , : & # ? % ni comillas.",
     "adviceEmptyValues": "No se pueden introducir valores vacíos.",
     "adviceDuplicatedTerm": "No se pueden introducir términos duplicados.",
-    "adviceNoImageData": "Asegúrese de seleccionar una imagen e introducir un título.",
     "fieldsMissingMessage": "¿Está seguro de cargar el archivo {{filename}}? Se encontraron campos vacíos algunos registros.",
     "emptyFieldsSummary": "Mostrar detalles",
     "rowEmpty": "Fila {{rowIndex}}",
-    "closeButton" : "Cerrar",
-    "confirmButton" : "Confirmar",
-    "cancelButton" : "Cancelar",
+    "closeButton": "Cerrar",
+    "confirmButton": "Confirmar",
+    "cancelButton": "Cancelar",
+    "confirmDeleteTitle": "Confirmar eliminación",
+    "deleteButton": "Eliminar",
+    "confirmDeleteVersion": "Se eliminará la versión {{name}}. No se puede deshacer.",
     "errorLoadData": "Error al cargar los datos. Inténtalo de nuevo.",
     "errorLoadFile": "Error al cargar el archivo seleccionado. Inténtalo de nuevo.",
-    "errorDownloadFile": "Error al descargar el archivo. Inténtalo de nuevo."
+    "errorDownloadFile": "Error al descargar el archivo. Inténtalo de nuevo.",
+    "confirmDeleteTerm": "Se eliminará el término {{name}}. No se puede deshacer.",
+    "confirmDeleteImage": "Se eliminará la imagen {{name}}. No se puede deshacer."
   },
   "dataManagement": {
-    "title" : "Administrar datos",
-    "description" : "En está página, puede gestionar los archivos cargados asociados a cada provincia y visualizar los datos que contienen. También tiene la opción de descargar los datos en formato Excel. Asegúrese de que haya al menos un archivo cargado a trvés de la página 'cargar archivos'.",
-    "downloadExcelButton": "Descargar excel",
+    "title": "Administrar datos",
+    "description": "En esta página, puede gestionar los archivos cargados asociados a cada provincia y visualizar los datos que contienen. También tiene la opción de descargar los datos en formato Excel. Asegúrese de que haya al menos un archivo cargado a través de la página 'cargar archivos'.",
+    "downloadExcelButton": "Descargar Excel",
     "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
     "deleteVersionButton": "Eliminar versión",
     "deleteVersionButtonTooltip": "Al presionar este botón, se eliminará permanentemente el archivo que haya elegido previamente. En caso de existir otras versiones del archivo, se restablecerá con los datos de la versión más reciente.",
@@ -206,64 +222,77 @@
     "updateDataButtonTooltip": "Al presionar este botón, se establecerán los datos que se muestran en la página 'Explorar' para la provincia correspondiente al archivo elegido previamente.",
     "fileSelectDropdwon": {
       "selectFileDropdownLabel": "Elegir conjunto de datos",
-      "selectFileDropdownPlaceholder": "Elegir conjunto de datos",
-      "selectFileDropdownTooltip": "Al pulsar la barra que se encuentra debajo, deberá elegir primero una provincia del lado izquierdo y después el archivo que desea gestionar. Las provincias que no tengan al menos un archivo correspondiente no aparecerán en el listado.",
-      "provinceTitle" : "Provincia",
-      "versionTitle" : "Versión",
-      "versionPlaceholder" : "Selecciona una provincia para ver las versiones disponibles.",
-      "noDataFoundPlaceholder": "No hay datos disponibles."
+      "selectFileDropdownTooltip": "Abre la lista que se encuentra debajo y elige el archivo que quieres gestionar: las versiones aparecen agrupadas por provincia. Las provincias que no tengan al menos un archivo correspondiente no aparecerán en la lista.",
+      "emptyOption": "Elige un conjunto de datos",
+      "loading": "Cargando versiones…",
+      "emptyState": "No hay versiones.",
+      "emptyStateLink": "Sube un archivo en Cargar archivos"
     },
+    "loadingVersionData": "Cargando datos de la versión…",
+    "deleteVersionNamed": "Eliminar versión {{name}}",
     "table": {
-      "noDataFoundPlaceholder": "No hay datos disponibles."
+      "noDataFoundPlaceholder": "No hay datos disponibles.",
+      "regionLabel": "Datos de la versión"
     }
   },
   "contentManagement": {
-    "title" : "Administrar contenido",
-    "description" : "En esta página, puede gestionar el contenido que se muestra en ciertas secciones del sitio web.",
-    "noLatinTermsTitle" : "Excepción de no latinismos",
-    "noLatinTermsTooltip" : "En esta sección puede incluir o eliminar los términos que desee que no aparezcan en cursiva en la página 'explorar'.",
-    "noLatinTermsPlaceholder" : "Término",
-    "noTermsFoundPlaceholder": "No hay datos disponibles.",
-    "galleryManagementTitle" : "Gestionar galería",
-    "galleryManagementTooltip" : "En esta sección, puede añadir o eliminar las imágenes que se encuentran en la página 'galería'.",
-    "galleryManagementPlaceholder" : "Título de la imagen",
-    "noImagesFoundPlaceholder": "No hay datos disponibles.",
-    "selectImageButton": "Seleccionar imagen"
+    "title": "Administrar contenido",
+    "description": "En esta página, puede gestionar el contenido que se muestra en ciertas secciones del sitio web.",
+    "noLatinTermsTitle": "Excepción de no latinismos",
+    "noLatinTermsTooltip": "En esta sección puede incluir o eliminar los términos que desee que no aparezcan en cursiva en la página 'explorar'.",
+    "noLatinTermsPlaceholder": "Término",
+    "noTermsFoundPlaceholder": "Todavía no hay términos. Escribe uno y pulsa «Añadir término».",
+    "galleryManagementTitle": "Gestionar galería",
+    "galleryManagementTooltip": "En esta sección, puede añadir o eliminar las imágenes que se encuentran en la página 'galería'.",
+    "galleryManagementPlaceholder": "Título de la imagen",
+    "noImagesFoundPlaceholder": "Todavía no hay imágenes. Elige una, escribe su título y pulsa «Añadir imagen».",
+    "selectImageButton": "Seleccionar imagen",
+    "addTermButton": "Añadir término",
+    "addImageButton": "Añadir imagen",
+    "termsListLabel": "Términos guardados",
+    "imagesListLabel": "Imágenes de la galería",
+    "deleteTerm": "Eliminar término {{name}}",
+    "deleteImage": "Eliminar imagen {{name}}",
+    "loadingTerms": "Cargando términos…",
+    "loadingImages": "Cargando imágenes…",
+    "imageTitleRequired": "Escribe un título para la imagen.",
+    "imageFileRequired": "Elige una imagen para subir.",
+    "noImageSelected": "Ninguna imagen seleccionada"
   },
-  "cookies":{
-    "title" : "Política de Cookies",
-    "subtitleAboutCookies" : "¿Qué son las cookies y para qué se usan?",
-    "descriptionAboutCookies" : "Una cookie es un archivo de texto simple que un sitio web almacena en tu dispositivo para recordar información, como tus preferencias o datos de navegación. Cada cookie es única para tu navegador e incluye datos como un identificador anónimo y el nombre del sitio. Las cookies mejoran la experiencia de navegación al recordar tus preferencias o permitir funcionalidades como un carrito de compras.\n\nSi bien nuestro sitio funciona sin cookies, desactivarlas podría limitar ciertas características y funcionalidades.",
-    "subtitleAboutPixel" : "¿Qué es un píxel?",
-    "descriptionAboutPixel" : "Un píxel es un fragmento de código que permite que se descarguen cookies en tu dispositivo. A menudo son usados por terceros para mostrar publicidad personalizada basada en tu actividad de navegación.\n\nPara más información sobre cookies y píxeles, consulta el sitio web: <a>Information Commissioner’s Office (ICO)</a>.",
-    "subtitleTypeCookies" : "Tipos de Cookies en Nuestro Sitio",
+  "cookies": {
+    "title": "Política de Cookies",
+    "subtitleAboutCookies": "¿Qué son las cookies y para qué se usan?",
+    "descriptionAboutCookies": "Una cookie es un archivo de texto simple que un sitio web almacena en tu dispositivo para recordar información, como tus preferencias o datos de navegación. Cada cookie es única para tu navegador e incluye datos como un identificador anónimo y el nombre del sitio. Las cookies mejoran la experiencia de navegación al recordar tus preferencias o permitir funcionalidades como un carrito de compras.\n\nSi bien nuestro sitio funciona sin cookies, desactivarlas podría limitar ciertas características y funcionalidades.",
+    "subtitleAboutPixel": "¿Qué es un píxel?",
+    "descriptionAboutPixel": "Un píxel es un fragmento de código que permite que se descarguen cookies en tu dispositivo. A menudo son usados por terceros para mostrar publicidad personalizada basada en tu actividad de navegación.\n\nPara más información sobre cookies y píxeles, consulta el sitio web: <a>Information Commissioner’s Office (ICO)</a>.",
+    "subtitleTypeCookies": "Tipos de Cookies en Nuestro Sitio",
     "descriptionTypeCookies": "• <strong>First party</strong>: Estas cookies son configuradas directamente por nuestro sitio para funcionalidades básicas o mejorar tu experiencia.\n\n• <strong>Third party</strong>: Configuradas por socios externos (como anunciantes y redes sociales), estas cookies recopilan datos que luego son enviados a dichos terceros.",
-    "subtitleCookiesUse" : "Cómo Utilizamos las Cookies",
-    "descriptionCookiesUse" : "En nuestro sitio usamos cookies para: \n\n• Facilitar la navegación y permitir funciones esenciales, como la gestión de preferencias.\n\n• Recordar configuraciones personales, como idioma o región.\n\n• Analizar cómo usas el sitio para mejorar su diseño y funcionalidad.\n\n• Monitorear el tráfico del sitio y la actividad de los usuarios.\n\n• Mostrarte publicidad relevante basada en tus intereses.\n\nNo vendemos los datos recopilados por las cookies de first party, pero algunos terceros pueden acceder a la información de sus cookies.",
-    "subtitleCookiesCategories" : "Categorías de Cookies que Usamos",
-    "subtitleFirstCookiesCategory" : "1. Estrictamente Necesarias",
-    "descriptionFirstCookiesCategory" : "Habilitan funciones esenciales como iniciar sesión o recordar tus preferencias de privacidad. Sin ellas, algunas partes del sitio no funcionarían correctamente.",
-    "subtitleSecondCookiesCategory" : "2. Funcionales",
-    "descriptionSecondCookiesCategory" : "Mejoran tu experiencia al almacenar configuraciones como idioma o región.",
-    "subtitleThirdCookiesCategory" : "3. De Rendimiento",
-    "descriptionThirdCookiesCategory" : "Recopilan datos anónimos sobre cómo usas el sitio, permitiéndonos medir y mejorar su funcionamiento.",
-    "subtitleFourthCookiesCategory" : "4. De Publicidad Dirigida",
-    "descriptionFourthCookiesCategory" : "Utilizadas por socios publicitarios para mostrar anuncios relevantes en otros sitios según tus intereses.",
-    "subtitleCookiesManagement" : "Cómo gestionar las cookies",
-    "descriptionCookiesManagement" : "Puede actualizar sus preferencias sobre las cookies de nuestro sitio web a través de su perfil. Tenga en cuenta que nuestros sitios web funcionarán sin cookies, pero perderá algunas características y funcionalidades si decide desactivarlas.\n\nSi desea restringir o bloquear las cookies del navegador web que se instalan en su dispositivo, puede hacerlo a través de la configuración de su navegador. A continuación, le indicamos cómo hacerlo para los navegadores más populares, pero si el suyo no aparece en la lista, podrá encontrar información al respecto en la sección de Ayuda de su navegador o en <a>aboutcookies.org</a>:",
-    "browserChrome" : "• <a>Chrome</a>.",
-    "browserInternetExplorer" : "• <a>Internet Explorer</a>.",
-    "browserSafari" : "• <a>Safari</a>.",
-    "browserMicrosoftEdge" : "• <a>Microsoft Edge</a>.",
-    "browserFirefox" : "• <a>Firefox</a>.",
-    "browserOpera" : "• <a>Opera</a>.",
-    "banner" : {
+    "subtitleCookiesUse": "Cómo Utilizamos las Cookies",
+    "descriptionCookiesUse": "En nuestro sitio usamos cookies para: \n\n• Facilitar la navegación y permitir funciones esenciales, como la gestión de preferencias.\n\n• Recordar configuraciones personales, como idioma o región.\n\n• Analizar cómo usas el sitio para mejorar su diseño y funcionalidad.\n\n• Monitorear el tráfico del sitio y la actividad de los usuarios.\n\n• Mostrarte publicidad relevante basada en tus intereses.\n\nNo vendemos los datos recopilados por las cookies de first party, pero algunos terceros pueden acceder a la información de sus cookies.",
+    "subtitleCookiesCategories": "Categorías de Cookies que Usamos",
+    "subtitleFirstCookiesCategory": "1. Estrictamente Necesarias",
+    "descriptionFirstCookiesCategory": "Habilitan funciones esenciales como iniciar sesión o recordar tus preferencias de privacidad. Sin ellas, algunas partes del sitio no funcionarían correctamente.",
+    "subtitleSecondCookiesCategory": "2. Funcionales",
+    "descriptionSecondCookiesCategory": "Mejoran tu experiencia al almacenar configuraciones como idioma o región.",
+    "subtitleThirdCookiesCategory": "3. De Rendimiento",
+    "descriptionThirdCookiesCategory": "Recopilan datos anónimos sobre cómo usas el sitio, permitiéndonos medir y mejorar su funcionamiento.",
+    "subtitleFourthCookiesCategory": "4. De Publicidad Dirigida",
+    "descriptionFourthCookiesCategory": "Utilizadas por socios publicitarios para mostrar anuncios relevantes en otros sitios según tus intereses.",
+    "subtitleCookiesManagement": "Cómo gestionar las cookies",
+    "descriptionCookiesManagement": "Puede actualizar sus preferencias sobre las cookies de nuestro sitio web a través de su perfil. Tenga en cuenta que nuestros sitios web funcionarán sin cookies, pero perderá algunas características y funcionalidades si decide desactivarlas.\n\nSi desea restringir o bloquear las cookies del navegador web que se instalan en su dispositivo, puede hacerlo a través de la configuración de su navegador. A continuación, le indicamos cómo hacerlo para los navegadores más populares, pero si el suyo no aparece en la lista, podrá encontrar información al respecto en la sección de Ayuda de su navegador o en <a>aboutcookies.org</a>:",
+    "browserChrome": "• <a>Chrome</a>.",
+    "browserInternetExplorer": "• <a>Internet Explorer</a>.",
+    "browserSafari": "• <a>Safari</a>.",
+    "browserMicrosoftEdge": "• <a>Microsoft Edge</a>.",
+    "browserFirefox": "• <a>Firefox</a>.",
+    "browserOpera": "• <a>Opera</a>.",
+    "banner": {
       "title": "Política de Cookies",
       "description": "Usamos cookies para reconocer tu dispositivo, optimizar tu experiencia, personalizar contenido, mostrar publicidad relevante y garantizar la seguridad. No almacenamos datos personales sin tu consentimiento o cuando no sea estrictamente necesario para los servicios que utilizas. Para mayor información, consulta <a>aquí</a>.",
       "acceptAllButton": "Aceptar todo",
       "cookiesConfigurationButton": "Configurar cookies"
     },
-    "modal" : {
+    "modal": {
       "title": "Preferencia de cookies",
       "description": "Configure sus preferencias de cookies seleccionando las categorías que desea habilitar.",
       "cancelButton": "Cancelar",
@@ -279,8 +308,6 @@
     }
   },
   "iconButton": {
-    "delete": "Eliminar",
-    "add": "Añadir",
     "menu": "Menú",
     "close": "Cerrar",
     "previousPage": "Página anterior",
@@ -288,9 +315,23 @@
     "info": "Información",
     "scrollDown": "Bajar"
   },
-  "language":{
-    "spanish" : "Español - ES",
-    "english" : "English - EN"
+  "language": {
+    "spanish": "Español",
+    "label": "Idioma",
+    "english": "English"
   },
-  "ee": "Desarrollado por Edwin Forero y Juan Patiño"
+  "feedback": {
+    "close": "Cerrar aviso",
+    "loading": "Cargando…",
+    "retry": "Reintentar"
+  },
+  "ee": "Desarrollado por Edwin Forero y Juan Patiño",
+  "skipLink": "Saltar al contenido",
+  "privateNav": {
+    "label": "Gestión",
+    "data": "Datos",
+    "content": "Contenido",
+    "upload": "Cargar",
+    "filters": "Filtros"
+  }
 }

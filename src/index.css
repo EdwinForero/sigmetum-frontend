@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* WCAG 2.4.11: el foco no queda bajo la cabecera (4rem) ni bajo la barra inferior (4,5rem) y el banner de cookies sticky compacto. */
+  html {
+    scroll-padding-top: 5rem;
+    scroll-padding-bottom: 20rem;
+  }
   body {
     @apply font-primary;
   }

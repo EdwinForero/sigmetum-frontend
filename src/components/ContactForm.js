@@ -1,10 +1,9 @@
 import React, { useId, useState } from 'react';
-import { AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
-import DialogAdvice from './DialogAdvice';
+import InlineError from './InlineError';
 import api from '../services/api';
-import useDialog from '../hooks/useDialog';
+import useToast from '../hooks/useToast';
 
 const ContactForm = ({ onLoad }) => {
   const [username, setUsername] = useState('');
@@ -13,14 +12,16 @@ const ContactForm = ({ onLoad }) => {
   const [message, setMessage] = useState('');
   const { t } = useTranslation();
   const id = useId();
-  const { dialog, showDialog, closeDialog } = useDialog();
+  const { notifySuccess } = useToast();
+  const [formError, setFormError] = useState(null);
 
   const handleSubmit = async (e) => {
     onLoad(true);
     e.preventDefault();
+    setFormError(null);
     try {
       await api.post('/send-email', { username, email, subject, message });
-      showDialog(t('dialogAdvice.successTitle'), t('dialogAdvice.successEmailMessage'));
+      notifySuccess(t('dialogAdvice.successEmailMessage'));
     } catch (error) {
       const messageKey =
         error.status === 429
@@ -28,7 +29,7 @@ const ContactForm = ({ onLoad }) => {
           : error.status === 400
             ? 'dialogAdvice.errorEmailInvalid'
             : 'dialogAdvice.errorEmailMessage';
-      showDialog(t('dialogAdvice.errorTitle'), t(messageKey));
+      setFormError(messageKey);
     } finally {
       onLoad(false);
     }
@@ -96,6 +97,12 @@ const ContactForm = ({ onLoad }) => {
           />
         </div>
 
+        {formError && (
+          <div className="px-4">
+            <InlineError>{t(formError)}</InlineError>
+          </div>
+        )}
+
         <div className="flex justify-center px-4">
           <ButtonPrincipal
             type="submit"
@@ -103,16 +110,6 @@ const ContactForm = ({ onLoad }) => {
             disabled={!username || !email || !subject || !message}
           />
         </div>
-
-        <AnimatePresence>
-          {dialog.visible && (
-            <DialogAdvice
-              dialogTitle={dialog.title}
-              dialogMessage={dialog.message}
-              onClose={closeDialog}
-            />
-          )}
-        </AnimatePresence>
       </form>
     </div>
   );

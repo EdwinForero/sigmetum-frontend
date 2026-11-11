@@ -18,8 +18,11 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 | `handleFilterDataChange(filtered)` | Actualiza `filteredData` solo si cambia (comparación por `JSON.stringify`) |
 | `handleFilterChange(filtered)` | Igual, para `filteredSpecies` en el explorador |
 | `handleOnSpeciesSelect(set)` | Guarda las especies elegidas en el filtro |
-| `menuOptions` | Opciones de la barra lateral: `filter` y `dataManagementFilter` abren un `Filter` en un panel deslizante; `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con claves de título ya existentes (`filter.title`, `dataManagement.title`, `contentManagement.title`, `uploadFiles.title`) y `Sidebar` lo usa como `aria-label` del botón de icono |
-| `showSideMenu` | `true` en las cuatro rutas de datos |
+| `menuOptions` | Opciones de la barra de gestión: `filter` y `dataManagementFilter` abren un `Filter` en un panel de filtros (diálogo modal); `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con las claves `privateNav.*` (`filters`, `data`, `content`, `upload`) y es la etiqueta visible de cada ítem |
+| `showSideMenu` | `true` en las cuatro rutas de datos: muestra la barra de gestión y reserva su espacio (`pb-nav md:pb-0 md:pl-28`) |
+| `isPrivateRoute` | `true` en las tres rutas protegidas: es el valor de `showLogout` de `Sidebar` (el botón «Cerrar sesión» vive en la barra) |
+
+**Estructura de la página:** `App` pinta, por este orden, un enlace «Saltar al contenido» (`skipLink`, visible solo con foco, hacia `#contenido`), `Header`, la barra de gestión (si procede), un único `<main id="contenido" tabIndex={-1}>` con las rutas, el único `<footer>` (`Footer`) y `CookieBanner`. Todo va envuelto en `ToastProvider` (avisos) y cada página privada tiene un `<h1>`, un `<h2>` por sección y un contenedor `mx-auto w-full max-w-6xl` (`max-w-3xl` en la carga). Ver [01](01-arquitectura.md#layout).
 
 ---
 
@@ -65,7 +68,7 @@ Portada del proyecto.
 
 ## Explore (`/explorar`)
 
-Explorador público de especies características.
+Explorador público de especies características. Abre con `<h1>`; el contenedor usa `min-w-0` (sin `whitespace-nowrap`) y la barra de herramientas `flex-wrap gap-2`, de modo que a 768 y 1024 px no desborda y «Descargar glosario» cabe entero. `App` normaliza la ruta quitando la barra final (`/administrar-datos/` también muestra la barra de gestión) y memoriza con `useCallback` los cuatro callbacks de `Filter`.
 
 **Props (desde `App`):**
 
@@ -87,6 +90,8 @@ Explorador público de especies características.
 | `handleDownload()` | Abre el glosario PDF (`assets/documents/glossary.pdf`) |
 | `variants` | Transición horizontal entre páginas (`x: ±300`) |
 
+**Avisos:** si `assetUrl` falla al abrir el glosario, `notifyError` (aviso persistente `role="alert"`, ya sin `DialogAdvice`). **Deuda:** el título de la página es un `<h2>`, no hay `<h1>` (ver [09](09-estado-actual-y-deuda-tecnica.md)).
+
 **Render:** error → mensaje; sin elementos → "sin datos"; en otro caso, cabecera con resultados, paginación, botones "Descargar glosario" y "Descargar Excel", y cuadrícula de `SpeciesCard`.
 
 ---
@@ -103,7 +108,7 @@ Explorador público de especies características.
 
 ## About (`/sobre-nosotros`)
 
-Página estática: imagen de S3 (`assets/about/about-us.jpg`), título, texto del equipo y tres bloques animados (propósito, misión y valores) con retardos escalonados de 0,3 s, 0,6 s y 0,9 s. Incluye `ScrollIndicator`.
+Página estática (títulos y texto en `brand-deep`/`ink`; las tarjetas `surface` sobre `brand` siguen como deuda de contraste): imagen de S3 (`assets/about/about-us.jpg`), título, texto del equipo y tres bloques animados (propósito, misión y valores) con retardos escalonados de 0,3 s, 0,6 s y 0,9 s. Incluye `ScrollIndicator`.
 
 ---
 
@@ -121,8 +126,7 @@ Contenedor centrado que renderiza `LoginForm`: formulario de correo y contraseñ
 
 ## FilesUpload (`/cargar-archivos`) · protegida
 
-Página con título, descripción y `FileUpload`.
-**Estado:** `isLoading`. **Función:** `handleOnLoad(state)` muestra u oculta el `LoadSpinner` a pantalla completa.
+Contenedor `max-w-3xl` con `<h1>`, descripción y `FileUpload`, que ya no recibe `onLoad`: el progreso y los errores se muestran en la propia tarjeta (ver [05](05-componentes.md#fileupload)). Sin estado propio.
 
 ---
 
@@ -131,26 +135,26 @@ Página con título, descripción y `FileUpload`.
 Gestión de versiones de los datos por provincia.
 
 **Props:** `onFileDropdownSelect(data)` (de `App`) y `filteredSpecies` (los datos de la versión ya filtrados).
-**Estado:** `fileName` (la `key` de la versión seleccionada), `isLoading`, `fileDropdownRef` (para llamar a `fetchFiles()` del desplegable) y el diálogo.
+**Estado:** `fileName` (la `key` de la versión seleccionada), `versionLabel` (nombre legible, p. ej. «Almería 10/11/2026 · V1»), `isLoadingData`, `busyAction` (`'delete'` o `'update'`), `focusRequest`, `fileDropdownRef` (para llamar a `fetchFiles()` del selector) y el diálogo de confirmación. Los resultados van por `useToast` (éxito en `role="status"`, error en `role="alert"`).
 
 | Función | Descripción |
 |---|---|
-| `handleFileSelect(jsonData, fileName)` | Recibe los registros de la versión elegida, los sube a `App` y guarda la clave |
+| `handleFileSelect(jsonData, key, label)` | Recibe los registros de la versión elegida, los sube a `App` y guarda la clave y su nombre legible |
 | `resetDropdown()` | Vacía la selección y recarga la lista de versiones |
-| `handleFileDelete()` | `POST /delete-file { fileName }`, muestra el resultado y reinicia |
-| `handleFileUpdate()` | `POST /update-file { fileName }`: activa esa versión como la vigente de su provincia y recarga la lista |
-| `handleOnLoad(state)` | Controla el spinner |
+| `askDeleteConfirmation()` | Abre un `DialogAdvice` modal con el nombre de la versión y `confirmText` «Eliminar» (`dialogAdvice.confirmDeleteVersion`) |
+| `handleFileDelete()` | Tras confirmar: `POST /delete-file { fileName }`, aviso de éxito o de error, reinicia y pide `focusRequest` para llevar el foco al `<h1>` (el botón que abrió el diálogo se desmonta) |
+| `handleFileUpdate()` | `POST /update-file { fileName }`: activa esa versión como la vigente de su provincia, recarga la lista y avisa. Su botón usa `updateDataButtonTooltip` (B9) |
 
-**Render:** selector `FileDropdown`. Con una versión elegida aparecen "Descargar Excel", "Eliminar versión" y "Actualizar datos", y debajo una `Table` paginada con los registros filtrados.
+**Render:** `<h1>` (con `.focus-heading`), descripción, etiqueta visible con `InfoButton` y el selector `FileDropdown` (un `<select>` nativo). Con una versión elegida aparecen «Descargar Excel», «Eliminar versión» (con `aria-label` que añade el nombre) y «Actualizar datos» (los dos últimos con `loading`), y debajo una `Table` paginada con los registros filtrados dentro de una región con nombre y desplazamiento propio. Deuda: `dataManagement.description` aún contiene erratas (ver [09](09-estado-actual-y-deuda-tecnica.md)).
 
 ---
 
 ## ContentManagement (`/administrar-contenido`) · protegida
 
-Contenedor de `TermsManager` (términos que no van en cursiva) e `ImageGalleryManager` (imágenes de la galería).
+Contenedor `max-w-6xl` con `<h1>`, descripción y una rejilla de una columna (dos desde `lg`) con `TermsManager` (términos que no van en cursiva) e `ImageGalleryManager` (imágenes de la galería), cada uno con su `<h2>`.
 
 ---
 
 ## NotFound (`*`)
 
-Página 404 con botón de vuelta al inicio. Su título de pestaña es `notFound.title` ("Página no encontrada" / "Page not found"). Además, `VegetationGallery` sin datos muestra `gallery.noDataFoundPlaceholder` (sin texto por defecto en el código).
+Página 404 con botón de vuelta al inicio (títulos en `brand-deep`; conserva su `max-w-[960px]`, sin `px-40`). Su título de pestaña es `notFound.title` ("Página no encontrada" / "Page not found"). Además, `VegetationGallery` sin datos muestra `gallery.noDataFoundPlaceholder` (sin texto por defecto en el código).

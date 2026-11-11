@@ -8,14 +8,14 @@ const Cookies = () => {
   return (
     <div className="relative flex flex-col bg-[#F9FBFA] overflow-x-hidden">
 
-        <h1 className="text-[#15B659] tracking-light text-6xl font-bold leading-tight my-4 text-center my-2">
+        <h1 className="text-brand-deep text-6xl font-bold leading-tight my-4 text-center my-2">
           {t('cookies.title')}
         </h1>
 
-        <div className="max-w-screen-lg mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4">
         <div className="my-10">
 
-            <h2 className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight my-2">
+            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight my-2">
                 {t('cookies.subtitleAboutCookies')}
             </h2>
 
@@ -23,7 +23,7 @@ const Cookies = () => {
                 {t('cookies.descriptionAboutCookies')}
             </p>
 
-            <h2 className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight my-2 mt-10">
+            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight my-2 mt-10">
                 {t('cookies.subtitleAboutPixel')}
             </h2>
 
@@ -49,7 +49,7 @@ const Cookies = () => {
 
           <div className="my-10">
 
-            <h2 className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
+            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
                 {t('cookies.subtitleTypeCookies')}
             </h2>
 
@@ -60,7 +60,7 @@ const Cookies = () => {
                 />
             </p>
 
-            <h2 className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center my-2 mt-10">
+            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2 mt-10">
                 {t('cookies.subtitleCookiesUse')}
             </h2>
 
@@ -74,11 +74,11 @@ const Cookies = () => {
         
         <div className="my-10">
 
-            <h2 className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
+            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
                 {t('cookies.subtitleCookiesCategories')}
             </h2>
 
-            <h3 className="text-[#15B659] tracking-light text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
+            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
                 {t('cookies.subtitleFirstCookiesCategory')}
             </h3>
 
@@ -86,7 +86,7 @@ const Cookies = () => {
                 {t('cookies.descriptionFirstCookiesCategory')}
             </p>
 
-            <h3 className="text-[#15B659] tracking-light text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
+            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
                 {t('cookies.subtitleSecondCookiesCategory')}
             </h3>
 
@@ -94,7 +94,7 @@ const Cookies = () => {
                 {t('cookies.descriptionSecondCookiesCategory')}
             </p>
 
-            <h3 className="text-[#15B659] tracking-light text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
+            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
                 {t('cookies.subtitleThirdCookiesCategory')}
             </h3>
 
@@ -102,7 +102,7 @@ const Cookies = () => {
                 {t('cookies.descriptionThirdCookiesCategory')}
             </p>
 
-            <h3 className="text-[#15B659] tracking-light text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
+            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
                 {t('cookies.subtitleFourthCookiesCategory')}
             </h3>
 
@@ -115,7 +115,7 @@ const Cookies = () => {
 
           <div className="my-10">
 
-            <h2 className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
+            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
                 {t('cookies.subtitleCookiesManagement')}
             </h2>
 

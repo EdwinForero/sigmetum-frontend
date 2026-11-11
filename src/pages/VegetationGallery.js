@@ -60,7 +60,7 @@ const VegetationGallery = () => {
 
   return (
     <>
-      <h2 className="text-[#15B659] tracking-light text-2xl sm:text-4xl font-bold leading-tight text-center mt-12 mb-8">
+      <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center mt-12 mb-8">
         {t('gallery.title')}
       </h2>
       {renderContent()}

@@ -18,7 +18,7 @@ const ScrollIndicator = () => {
           aria-label={t('iconButton.scrollDown')}
           className="focus-ring flex flex-col items-center animate-bounce cursor-pointer"
         >
-        <span className="material-symbols-outlined text-3xl text-[#15B659] mx-auto" aria-hidden="true">arrow_circle_down</span>
+        <span className="material-symbols-outlined text-3xl text-brand-dark mx-auto" aria-hidden="true">arrow_circle_down</span>
         </button>
       </div>
     )
