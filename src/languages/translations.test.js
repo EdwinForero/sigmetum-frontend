@@ -42,6 +42,24 @@ describe('traducciones', () => {
     expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
   });
 
+  it('incluye las claves de los errores y retos del login con formulario propio', () => {
+    const keys = [
+      'login.credentialsError',
+      'login.sessionExpired',
+      'login.codeSessionLost',
+      'login.codeError',
+      'login.passwordRejected',
+      'login.serviceUnavailable',
+      'login.mfaSetupAgain',
+    ];
+
+    expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
+  });
+
+  it('el login ya no tiene las claves del Hosted UI', () => {
+    expect(Object.keys(spanish).concat(Object.keys(english)).filter((key) => /^login\.callback/.test(key))).toEqual([]);
+  });
+
   it('incluye los textos de la galería vacía y del título del 404', () => {
     expect({
       es: [spanish['gallery.noDataFoundPlaceholder'], spanish['notFound.title']],

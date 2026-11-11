@@ -76,11 +76,11 @@ Guardia de las rutas privadas.
 |---|---|
 | `status` | `'checking'` (spinner), `'ok'`, `'denied'` (redirige a `/login`) o `'unavailable'` |
 | `checkAuth()` | Sin `getAccessToken()` → `denied`. Con token → `api.getAuth('/auth')` (con los reintentos del `503` de `api.js`): si responde, `ok`; solo un `401` (`error.type === 'http'`, tras la renovación de `api.js`) da `denied`; cualquier otro error (red, `403`, `5xx`, `503` agotado, `auth_unavailable` de la renovación) da `unavailable` sin borrar tokens ni redirigir. Ignora la respuesta si el componente se desmonta. Bajo `React.StrictMode` (desarrollo) el efecto corre dos veces y hace dos `GET /auth` |
-| `unavailable` | `<div role="alert">` con un `<h1>` (`login.title`, reutilizado **(por confirmar)** si es el título deseado), el texto `login.serviceUnavailable` un botón `login.retryButton` que vuelve al spinner y repite `GET /auth`, y un botón `login.logOutButton` que cierra la sesión (`logout()`), para no dejar al usuario sin salida si el servicio no se recupera |
+| `unavailable` | `<div role="alert">` con un `<h1>` (`login.title`, reutilizado **(por confirmar)** si es el título deseado), el texto `login.serviceUnavailable` un botón `login.retryButton` que vuelve al spinner y repite `GET /auth`, y un botón `login.logOutButton` que cierra la sesión (`api.logout()`, deshabilitado mientras dura la revocación), para no dejar al usuario sin salida si el servicio no se recupera |
 | `denied` | `<Navigate to="/login" replace />`: no deja la ruta protegida en el historial |
-| `ok` | Un botón `login.logOutButton` (`ButtonPrincipal`, con texto, sin necesidad de `aria-label`) que llama a `logout()` de `session.js`, encima del `element`. Es el único control de cierre de sesión, en todas las rutas privadas |
+| `ok` | Un botón `login.logOutButton` (`ButtonPrincipal`, con texto, sin necesidad de `aria-label`) que llama a `api.logout()` (se deshabilita mientras dura la revocación, hasta 3 s), encima del `element`. Es el único control de cierre de sesión, en todas las rutas privadas |
 
-Ya no decodifica el JWT ni comprueba `exp` (se retiraron `jwt-decode`, `isTokenExpired` y el diálogo `tokenExpiration.*`). No toca el almacenamiento directamente: usa `getAccessToken` y `logout`, aunque `npm run quality` sigue permitiéndole `localStorage`.
+Ya no decodifica el JWT ni comprueba `exp` (se retiraron `jwt-decode`, `isTokenExpired` y el diálogo `tokenExpiration.*`). No toca el almacenamiento directamente: usa `getAccessToken` y `api.logout` (que borra la sesión, revoca el token de refresco y va a `/`), aunque `npm run quality` sigue permitiéndole `localStorage`.
 
 ### CookieBanner
 Banner de consentimiento y modal de configuración.
@@ -252,8 +252,22 @@ Gestión de las imágenes de la galería.
 | `deleteImage(fileName)` | `DELETE /delete-image { imageKey: fileName }` y recarga |
 
 ### LoginForm
+Formulario propio de acceso con SRP contra Cognito. Solo pinta: la lógica es de [`useCognitoLogin`](06-utilidades-hooks-config.md#acceso-con-cognito-srchooksusecognitologinjs) y nunca toca tokens (los guarda `api`). Si el componente se desmonta durante `signIn`, `api` guarda igualmente los tokens y la persona queda con sesión abierta sin navegar (B28 en [09](09-estado-actual-y-deuda-tecnica.md)). Al autenticarse navega a `/cargar-archivos` con `replace`.
+
 | Estado / función | Descripción |
 |---|---|
+| `email`, `password`, `newPassword`, `confirmation`, `code` | Campos controlados. La contraseña, la nueva, la confirmación y el código se vacían al terminar cada petición (en un `finally`) |
+| `handleSubmit(event)` | `event.preventDefault()` en la primera línea y, según el paso, `signIn`, `submitNewPassword`, `confirmMfaSetup` o `submitTotp` del hook |
+| `copySecret()` | Copia el secreto con `navigator.clipboard.writeText`; el resultado se anuncia en el `role="status"` (`login.copied` o `login.copyFailed`) |
+| Foco | Al entrar en un reto, al `<h2>` del paso (`tabIndex={-1}`); al volver a credenciales, al correo; tras un error, a un campo: en credenciales, el primer campo vacío (el valor se lee del DOM porque el estado de la contraseña ya se vació), en los demás pasos el primero. En `mfaSetup` con reintento no hay campo ni `ref` (`ButtonPrincipal` no expone `ref`): el foco no va a ningún sitio (B30 en [09](09-estado-actual-y-deuda-tecnica.md)) |
+| `aria-invalid` | Solo con errores de validación (`requiredFields`, `passwordPolicyError`, `passwordMismatch`, `codeFormatError`); con «campos obligatorios», solo en los campos vacíos. Un error de red o de credenciales no marca ningún campo |
+| Estructura | Tarjeta con `<h1>` (`login.title`) y un `<h2>` por reto; `<form noValidate method="post">`; cada campo con `<label htmlFor>` y un `<span id>` referenciado por `aria-labelledby`; **ningún campo lleva `name`** (el autocompletado va por `autoComplete`: `username`, `current-password`, `new-password`, `one-time-code`) y la contraseña nunca puede viajar en una URL. El error es un `<p role="alert">` con `key` (se vuelve a anunciar) referenciado por `aria-describedby`; `<p role="status">` siempre presente (`login.loading` mientras `busy`); botón `type="submit"` deshabilitado mientras `busy` |
+| Paso `newPassword` | Política (`login.passwordPolicy`) en `aria-describedby`, campo `username` de solo lectura con el correo (para los gestores de contraseñas), contraseña nueva y confirmación |
+| Paso `mfaSetup` | **Antes del `<form>`**: ayuda, aviso `login.mfaSetupAgain` si el secreto se generó otra vez, clave y dirección `otpauth://` como texto en `<code className="break-all">` (nunca en un `href`) y botón de copiar (fuera del `form`, solo si existe `navigator.clipboard?.writeText` y no hay reintento). Dentro del `form`: el aviso de error (queda debajo de la clave) y el campo del código. No hay enlaces |
+| Reintento en `mfaSetup` | Si el hook expone `retry` (`'associate'` o `'respond'`), no se pinta secreto, ayuda, copia ni campo de código: solo el aviso `login.serviceUnavailable` y el botón `login.retryButton` en lugar de `login.verifyButton`. Si el reintento ya no es necesario (`CodeMismatch` en `respond`), vuelven la clave y el campo del código |
+| Código | Antes de validar se limpia de espacios (`123 456` vale); el campo admite `maxLength={7}` por ese motivo |
+
+---|---|
 | `hasError` | `true` si `startLogin()` rechaza (falta `VITE_COGNITO_*`, no hay `crypto.subtle`...) |
 | `handleLogin()` | Llama a `startLogin()` de `session.js`; un rechazo acaba en un `<span role="alert">` con `login.startError` (no hay promesa sin capturar) |
 | Estructura | Sin campos, sin `api`, sin `useNavigate` y sin almacenamiento: `<h2>` con `login.title` y un `ButtonPrincipal` (botón nativo) con `login.logInButton`. Se mantiene el nombre `LoginForm` aunque ya no es un formulario |

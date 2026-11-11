@@ -32,7 +32,9 @@ Si el servidor devuelve algo que no es JSON (por ejemplo, una página 502 de un 
 
 ### Ante un 401
 
-Si el método envía token (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) y la respuesta es `401`, `api.js` intenta **una** renovación (`POST <VITE_COGNITO_DOMAIN>/oauth2/token`, `grant_type=refresh_token`, `client_id`, sin secreto). Si va bien, guarda los tokens y repite la petición una vez con el token nuevo. Si en el `401` el token guardado ya no es el que se envió (otra llamada renovó la sesión), repite la petición una vez con el token actual **sin** otra renovación. Si no queda ningún token (la sesión se borró, p. ej., en otra pestaña) no hay nada que renovar: si esta pestaña aún no ha redirigido (bandera de módulo `redirecting`), borra la sesión y ejecuta `window.location.assign('/login')`, y en todo caso lanza el `401`. Con dos llamadas simultáneas cuyo reintento vuelve a dar `401`, `assign('/login')` se llama una sola vez. Si no hay `refreshToken`, si Cognito rechaza la renovación con un `4xx` distinto de `429` que trae `error` en el cuerpo (p. ej. `400 invalid_grant`, **(por confirmar contra el pool real)**), si falta configuración, si responde un `200` sin `access_token` o si la repetición vuelve a dar `401`, borra la sesión (`clearSession`), ejecuta `window.location.assign('/login')` y lanza el error 401. Las llamadas con `401` simultáneas comparten una única renovación. Un fallo de red, un `5xx`, un `429` o un `4xx` sin `error` en el cuerpo (p. ej. el HTML de CloudFront, también un `401` o `403` no JSON) durante la renovación no borran la sesión ni redirigen (son indeterminados). El fallo de red se lanza como `type: 'network'`; los demás, como un error `type: 'auth_unavailable'`, `status: 503`, `message: 'Authentication service unavailable'` (no el `type` ni el `status` reales de Cognito, para que ningún consumidor lo confunda con un `401` del backend). Los componentes que solo miran `status === 401` lo tratan como un error genérico; `ProtectedRoute` lo muestra como servicio no disponible. `get` y `post` no renuevan ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que sigue el mismo camino.
+Si el método envía token (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) y la respuesta es `401`, `api.js` intenta **una** renovación: `InitiateAuth` con `AuthFlow: 'REFRESH_TOKEN_AUTH'`, `ClientId` y `AuthParameters: { REFRESH_TOKEN }` contra `cognito-idp` (ver más abajo; sin secreto). Si va bien, guarda los tokens (un `RefreshToken` nuevo sustituye al anterior; si no viene, se conserva el que había) y repite la petición una vez con el token nuevo. Si en el `401` el token guardado ya no es el que se envió (otra llamada renovó la sesión), repite la petición una vez con el token actual **sin** otra renovación. Si no queda ningún token (la sesión se borró, p. ej., en otra pestaña) no hay nada que renovar: si esta pestaña aún no ha redirigido (bandera de módulo `redirecting`), borra la sesión y ejecuta `window.location.assign('/login')`, y en todo caso lanza el `401`. Con dos llamadas simultáneas cuyo reintento vuelve a dar `401`, `assign('/login')` se llama una sola vez. Las llamadas con `401` simultáneas comparten una única renovación.
+
+**Regla de la renovación (lista blanca de reintentables, `isRetryableAuthError`).** Son indeterminados, y no borran la sesión ni redirigen: fallo de red, configuración vacía, `5xx`, `429`, los `__type` `TooManyRequestsException`, `LimitExceededException` e `InternalErrorException`, un `4xx` sin `__type` (p. ej. el HTML de CloudFront) y un cuerpo no JSON. El fallo de red se lanza como `type: 'network'`; los demás, como un error `type: 'auth_unavailable'`, `status: 503`, `message: 'Authentication service unavailable'` (no el `type` ni el `status` reales de Cognito, para que ningún consumidor lo confunda con un `401` del backend). **Cualquier otro `__type` de un `4xx` cierra la sesión** (`NotAuthorizedException`, `InvalidParameterException`, `ResourceNotFoundException`, `UserNotFoundException`, `PasswordResetRequiredException`...), igual que la falta de `refreshToken`, un `200` sin `AccessToken` o que la repetición vuelva a dar `401`: `clearSession`, `window.location.assign('/login')` y el error `401`. Qué devuelve Cognito para un refresco inválido y si responde `5xx` o `429` **(por confirmar contra el pool real)**. Los componentes que solo miran `status === 401` tratan el error `auth_unavailable` como genérico; `ProtectedRoute` lo muestra como servicio no disponible. `get` y `post` no renuevan ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que sigue el mismo camino.
 
 ### Ante un 503
 
@@ -48,9 +50,13 @@ En un método con token, si la respuesta es `503` **con `error: 'Authentication 
 | `api.postAuth` | `(path, body)` | JSON + `Authorization` | JSON |
 | `api.postFormAuth` | `(path, formData)` | `Authorization` (el navegador pone el `boundary`) | `FormData` |
 | `api.deleteAuth` | `(path, body)` | JSON + `Authorization` | JSON |
-| `api.exchangeCode` | `(code, verifier)` | `application/x-www-form-urlencoded` (a Cognito, no al backend) | `grant_type=authorization_code`, `code`, `code_verifier`, `redirect_uri`, `client_id` |
+| `api.signIn` | `(username, password)` | `application/x-amz-json-1.1` (a Cognito, no al backend) | `InitiateAuth` con `USER_SRP_AUTH` y `RespondToAuthChallenge` con `PASSWORD_VERIFIER`; devuelve `{ done: true }` o `{ challenge, session }` más `username` (el `USER_ID_FOR_SRP`) |
+| `api.respondToChallenge` | `(name, session, responses)` | ídem | `RespondToAuthChallenge` (`NEW_PASSWORD_REQUIRED`, `MFA_SETUP`, `SOFTWARE_TOKEN_MFA`) |
+| `api.associateSoftwareToken` | `(session)` | ídem | `AssociateSoftwareToken`; devuelve `{ secretCode, session }` |
+| `api.verifySoftwareToken` | `(session, code)` | ídem | `VerifySoftwareToken`; devuelve `{ ok, session }` |
+| `api.logout` | `()` | ídem | Borra la sesión, `RevokeToken` con el token de refresco (hasta 3 s) y va a `/` |
 
-`Authorization` vale `Bearer ${getAccessToken()}` (el token de **acceso** de Cognito, de `localStorage['token']`, leído en cada intento; nunca se envía `Bearer null`). El `id_token` no se guarda ni se envía.
+`Authorization` vale `Bearer ${getAccessToken()}` (el token de **acceso** de Cognito, de `localStorage['token']`, leído en cada intento; nunca se envía `Bearer null`). El `IdToken` no se guarda ni se envía. Los métodos de login guardan ellos mismos el `AuthenticationResult` (`saveTokens`): `LoginForm` nunca toca los tokens.
 
 ## Endpoints consumidos
 
@@ -58,15 +64,18 @@ La referencia completa de la API está en `sigmetum-backend/docs/04-api.md`. Qu�
 
 Rutas verificadas contra `sigmetum-backend/routes/*.js`.
 
-### Cognito (Hosted UI, fuera del prefijo de la API)
+### Cognito (`cognito-idp`, fuera del prefijo de la API)
 
-El login ya no usa `POST /log`. Estas URLs son del dominio `VITE_COGNITO_DOMAIN` (no del backend), cliente público con PKCE S256. Los endpoints son los estándar de Cognito **(por confirmar contra el pool real)**.
+El login no usa `POST /log` ni el Hosted UI. Todas las peticiones van a `https://cognito-idp.<región>.amazonaws.com/` (la región es el prefijo de `VITE_COGNITO_USER_POOL_ID`), con `POST`, `Content-Type: application/x-amz-json-1.1`, `X-Amz-Target: AWSCognitoIdentityProviderService.<acción>` y un cuerpo JSON, sin el envoltorio `{ success, data }`. Cliente público: sin secreto ni `Authorization`. Sin pool, sin `_` en el id, sin cliente o con una región que no cumple `/^[a-z]{2}(-[a-z]+)+-\d$/`, lanza `{ type: 'config' }` sin llamar a `fetch`. `signIn` cede un turno real (`await sleep(0)`) antes del cálculo de `SRP_A`. Si el `getRefreshToken()` cambia durante una renovación (carrera con `logout`), `renewSession` no guarda los tokens y devuelve `false` sin redirigir **(por confirmar)**. El CORS de `cognito-idp` y los nombres reales de las acciones **(por confirmar en `dev`)**.
 
-| Endpoint | Cómo | Quién lo llama |
+| Acción | Uso | Quién lo llama |
 |---|---|---|
-| `GET /oauth2/authorize` | Navegación (`window.location.assign`) con `response_type=code`, `client_id`, `redirect_uri`, `scope=openid email`, `state`, `code_challenge` y `code_challenge_method=S256` | `session.startLogin` (`LoginForm`, botón de reintento de `AuthCallback`) |
-| `POST /oauth2/token` | `fetch` de formulario: canje del código (`api.exchangeCode`, desde `AuthCallback`) y renovación (`grant_type=refresh_token`, desde `api.js`). CORS del endpoint **(por confirmar en `dev`)** | `api.js` |
-| `GET /logout` | Navegación con `client_id` y `logout_uri=<origen>/` | `session.logout` (botón de `ProtectedRoute`) |
+| `InitiateAuth` | `USER_SRP_AUTH` (`USERNAME`, `SRP_A`) en el acceso y `REFRESH_TOKEN_AUTH` en la renovación | `api.signIn`, `renewSession` |
+| `RespondToAuthChallenge` | `PASSWORD_VERIFIER` (prueba SRP) y los retos `NEW_PASSWORD_REQUIRED`, `MFA_SETUP` y `SOFTWARE_TOKEN_MFA` | `api.signIn`, `api.respondToChallenge` |
+| `AssociateSoftwareToken`, `VerifySoftwareToken` | Registro de la aplicación de autenticación (TOTP) | `api.associateSoftwareToken`, `api.verifySoftwareToken` |
+| `RevokeToken` | `{ Token: <refresco>, ClientId }` al cerrar sesión | `api.logout` |
+
+`ClientId` solo va en `InitiateAuth`, `RespondToAuthChallenge` y `RevokeToken`. Los errores se leen del `__type` normalizado (`split('#').pop().split(':')[0]`): se guardan el status y ese nombre, nunca el `message` de Cognito (`{ type: 'cognito', status, code }`). El SRP lo calcula `services/srp.js` (ver [06](06-utilidades-hooks-config.md#cálculo-srp-srcservicessrpjs)); el nombre del pool que entra en el cálculo y en la firma es la parte del id posterior al guion bajo. `username_attributes = ["email"]` en el pool: la prueba usa el `USER_ID_FOR_SRP` que devuelve Cognito, no el correo escrito. Con `UserNotFoundException` o `PasswordResetRequiredException` el usuario ve el aviso de acceso incorrecto (con `prevent_user_existence_errors` llegan como `NotAuthorizedException`).
 
 ### Autenticación (`routes/auth.js`)
 

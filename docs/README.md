@@ -33,7 +33,7 @@ Además, [DESIGN.md](../DESIGN.md) (en la raíz) es el sistema de diseño que le
 
 ## Ciclo agéntico
 
-Las features y los fixes con agentes pasan por `/ciclo <tarea>`, del plugin [ciclo-agentico](../plugins/ciclo-agentico/README.md). Su configuración está en `.claude/flujo.json`, los traspasos entre roles (specs, planes y avisos para PR) en `docs/specs/`, y cómo se instala y se activa el marketplace local en [plugins/README.md](../plugins/README.md). Resumen para el equipo: [08](08-guia-desarrollo.md#ciclo-agéntico-ciclo).
+Las features y los fixes con agentes pasan por `/ciclo <tarea>`, del plugin [ciclo-agentico](../plugins/ciclo-agentico/README.md). Su configuración está en `.claude/flujo.json`, los traspasos entre roles (specs, planes y avisos para PR) en `docs/specs/`, y cómo se instala y se activa el marketplace local en [plugins/README.md](../plugins/README.md). Resumen para el equipo: [08](08-guia-desarrollo.md#ciclo-agéntico-ciclo). Desde la versión 0.1.2 del plugin, la spec, el plan y el aviso para PR van en `docs/specs/AAAA-MM/` y el paso 0 de `/ciclo` pregunta qué specs ya fusionadas se depuran (ver «Retención de specs» en el README del plugin); los archivos anteriores siguen en `docs/specs/` sin mover **(por confirmar si se reorganizan)**.
 
 Cada rol del ciclo tiene su modelo y esfuerzo fijados en el frontmatter; `CLAUDE_CODE_SUBAGENT_MODEL` y `CLAUDE_CODE_EFFORT_LEVEL` los anulan y `/ciclo` lo avisa en el paso 0. Tras cambiar el plugin hace falta `/reload-plugins` o una sesión nueva, y la comprobación manual la hace el usuario: ver [Modelos y esfuerzo por rol](../plugins/ciclo-agentico/README.md#modelos-y-esfuerzo-por-rol).
 

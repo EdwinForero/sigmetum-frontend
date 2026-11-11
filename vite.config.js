@@ -28,7 +28,9 @@ function faviconPlugin() {
 export default defineConfig({
   plugins: [react({ include: /\.(js|jsx)$/ }), faviconPlugin()],
   esbuild: { loader: 'jsx', include: /src\/.*\.jsx?$/, exclude: [] },
-  optimizeDeps: { esbuildOptions: { loader: { '.js': 'jsx' } } },
+  // `global: 'globalThis'` solo afecta al pre-empaquetado de dev: el paquete `buffer` (dependencia de
+  // amazon-cognito-identity-js) lee `global.TYPED_ARRAY_SUPPORT`, y esbuild no lo reescribe.
+  optimizeDeps: { esbuildOptions: { loader: { '.js': 'jsx' }, define: { global: 'globalThis' } } },
   server: { port: 3000 },
   test: {
     environment: 'jsdom',

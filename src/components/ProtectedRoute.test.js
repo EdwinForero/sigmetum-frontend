@@ -1,11 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 const jsonResponse = (status, body) => ({ ok: status < 400, status, json: async () => body });
 const AUTH_503 = { success: false, error: 'Authentication service unavailable' };
-const ORIGIN = 'https://app.example.test';
 
 describe('ProtectedRoute', () => {
   let ProtectedRoute;
@@ -24,12 +23,12 @@ describe('ProtectedRoute', () => {
     );
 
   beforeEach(async () => {
-    vi.stubEnv('VITE_COGNITO_DOMAIN', 'https://auth.example.test');
+    vi.stubEnv('VITE_COGNITO_USER_POOL_ID', 'eu-west-1_AbC');
     vi.stubEnv('VITE_COGNITO_CLIENT_ID', 'client123');
     fetchMock = vi.fn();
     assign = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
-    vi.stubGlobal('location', { assign, origin: ORIGIN });
+    vi.stubGlobal('location', { assign });
     vi.resetModules();
     ProtectedRoute = (await import('./ProtectedRoute')).default;
     session = await import('../services/session');
@@ -50,7 +49,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('con 200 en /auth muestra el contenido y el botón de cierre de sesión', async () => {
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockResolvedValue(jsonResponse(200, { success: true, data: {} }));
 
     renderRoute();
@@ -62,7 +61,7 @@ describe('ProtectedRoute', () => {
 
   it('tres 503 seguidos muestran un alert, conservan el token y no redirigen', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockResolvedValue(jsonResponse(503, AUTH_503));
 
     renderRoute();
@@ -76,7 +75,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('con un 401 sin refresco lleva a /login', async () => {
-    session.saveTokens({ access_token: 'A' });
+    session.saveTokens({ AccessToken: 'A' });
     fetchMock.mockResolvedValue(jsonResponse(401, { success: false, error: 'Unauthorized' }));
 
     renderRoute();
@@ -89,7 +88,7 @@ describe('ProtectedRoute', () => {
     ['un 500', () => jsonResponse(500, { success: false, error: 'boom' })],
     ['un 403', () => jsonResponse(403, { success: false, error: 'Origin not allowed' })],
   ])('con %s muestra el aviso, conserva el token y no lleva a /login', async (_nombre, respuesta) => {
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockResolvedValue(respuesta());
 
     renderRoute();
@@ -100,7 +99,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('con un fallo de red muestra el aviso y no lleva a /login', async () => {
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
 
     renderRoute();
@@ -112,7 +111,7 @@ describe('ProtectedRoute', () => {
 
   it('el aviso tiene un h1 y Reintentar repite la comprobación', async () => {
     const user = userEvent.setup();
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockResolvedValueOnce(jsonResponse(500, { success: false, error: 'boom' }));
     fetchMock.mockResolvedValue(jsonResponse(200, { success: true, data: {} }));
 
@@ -126,19 +125,19 @@ describe('ProtectedRoute', () => {
 
   it('con el aviso de servicio no disponible hay un botón de cerrar sesión que borra los tokens', async () => {
     const user = userEvent.setup();
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockResolvedValue(jsonResponse(500, { success: false, error: 'boom' }));
     renderRoute();
 
     await user.click(await screen.findByRole('button', { name: 'login.logOutButton' }));
 
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('/'));
     expect(session.getAccessToken()).toBeNull();
     expect(session.getRefreshToken()).toBeNull();
-    expect(new URL(assign.mock.calls[0][0]).pathname).toBe('/logout');
   });
 
   it('con el refresco de Cognito no disponible muestra el aviso y no lleva a /login', async () => {
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock
       .mockResolvedValueOnce(jsonResponse(401, { success: false, error: 'Unauthorized' }))
       .mockResolvedValueOnce({ ok: false, status: 403, json: async () => { throw new SyntaxError('x'); } });
@@ -150,19 +149,31 @@ describe('ProtectedRoute', () => {
     expect(session.getAccessToken()).toBe('A');
   });
 
-  it('el botón de cierre borra los tokens y redirige al logout de Cognito', async () => {
+  it('el botón de cierre borra los tokens, revoca el refresco y va a /', async () => {
     const user = userEvent.setup();
-    session.saveTokens({ access_token: 'A', refresh_token: 'R' });
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
     fetchMock.mockResolvedValue(jsonResponse(200, { success: true, data: {} }));
     renderRoute();
 
     await user.click(await screen.findByRole('button', { name: 'login.logOutButton' }));
 
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('/'));
     expect(session.getAccessToken()).toBeNull();
     expect(session.getRefreshToken()).toBeNull();
-    const url = new URL(assign.mock.calls[0][0]);
-    expect(url.pathname).toBe('/logout');
-    expect(url.searchParams.get('client_id')).toBe('client123');
-    expect(url.searchParams.get('logout_uri')).toBe(`${ORIGIN}/`);
+    const revoke = fetchMock.mock.calls.find((call) => call[1]?.headers?.['X-Amz-Target']?.endsWith('.RevokeToken'));
+    expect(JSON.parse(revoke[1].body)).toEqual({ Token: 'R', ClientId: 'client123' });
+  });
+
+  it('el botón de cierre se deshabilita mientras dura la revocación', async () => {
+    const user = userEvent.setup();
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, { success: true, data: {} }));
+    fetchMock.mockImplementation(() => new Promise(() => {}));
+    renderRoute();
+
+    await user.click(await screen.findByRole('button', { name: 'login.logOutButton' }));
+
+    expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeDisabled();
+    expect(assign).not.toHaveBeenCalled();
   });
 });

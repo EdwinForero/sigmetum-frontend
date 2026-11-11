@@ -55,7 +55,7 @@ Claude Code ejecuta los comandos, agentes y skills de un plugin instalado desde 
 
 Los scripts que se ejecutan como entradas de `verificacion` de `.claude/flujo.json` (por ejemplo, `npm run docs:gate`, que llama a `plugins/ciclo-agentico/scripts/docs-gate.mjs`) usan la copia del repositorio, así que ven el cambio sin reinstalar nada.
 
-Como `ciclo-agentico` es una copia del backend, un cambio en el núcleo debe hacerse en los dos repositorios para que no diverjan **(por confirmar: no hay mecanismo que lo vigile)**. El núcleo está en 0.1.1 desde el enrutado de modelos por rol (copiado del backend el 09/11/2026); la versión que carga cada equipo es la de su caché (`ciclo-agentico@locales-front`), que se actualiza como se explica arriba.
+Como `ciclo-agentico` es una copia del backend, un cambio en el núcleo debe hacerse en los dos repositorios para que no diverjan **(por confirmar: no hay mecanismo que lo vigile)**. El núcleo está en 0.1.1 desde el enrutado de modelos por rol (copiado del backend el 09/11/2026); la versión que carga cada equipo es la de su caché (`ciclo-agentico@locales-front`), que se actualiza como se explica arriba. Desde la versión 0.1.2 del plugin, la spec, el plan y el aviso para PR van en `docs/specs/AAAA-MM/` y el paso 0 de `/ciclo` pregunta qué specs ya fusionadas se depuran (ver «Retención de specs» en el README del plugin); los archivos anteriores siguen en `docs/specs/` sin mover **(por confirmar si se reorganizan)**.
 
 ## Añadir una categoría nueva
 
