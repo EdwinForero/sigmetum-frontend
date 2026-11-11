@@ -24,7 +24,7 @@
 | `aboutUs` | 8 | Sobre nosotros |
 | `filter` | 3 | Textos del filtro |
 | `attributes` | 11 | **Nombres visibles de las columnas de datos.** La clave es el nombre exacto de la columna en el Excel (`"Provincia"`, `"Sector Biogeográfico"`...) |
-| `login` | 35 | Acceso con Cognito: título, botones (`logInButton`, `continueButton`, `verifyButton`, `copyButton`, `retryButton`, `logOutButton`), etiquetas (`emailLabel`, `passwordLabel`, `newPasswordLabel`, `confirmPasswordLabel`, `codeLabel`, `secretLabel`, `otpUriLabel`), títulos de los retos (`newPasswordTitle`, `mfaSetupTitle`, `totpTitle`), ayudas (`allRequired`, `passwordPolicy`, `mfaSetupHelp`, `mfaSetupAgain`, `loading`, `copied`, `copyFailed`) y errores (`requiredFields`, `credentialsError`, `sessionExpired`, `codeSessionLost`, `passwordPolicyError`, `passwordMismatch`, `passwordRejected`, `codeFormatError`, `codeError`, `startError`, `serviceUnavailable`). Se retiraron `callbackLoading` y `callbackError` (el Hosted UI ya no existe), los textos del acceso anterior, `unauthorizedLabel` y `tooManyAttemptsLabel`. `credentialsError` es el mismo texto para contraseña incorrecta, usuario inexistente y reinicio de contraseña (no revela si el usuario existe) |
+| `login` | 38 | Acceso con Cognito: título, botones (`logInButton`, `continueButton`, `verifyButton`, `copyButton`, `retryButton`, `logOutButton`), etiquetas (`emailLabel`, `passwordLabel`, `newPasswordLabel`, `confirmPasswordLabel`, `codeLabel`, `secretLabel`, `qrLabel`, `showPassword`, `showNewPassword`, `showConfirmPassword`), títulos de los retos (`newPasswordTitle`, `mfaSetupTitle`, `totpTitle`), ayudas (`allRequired`, `passwordPolicy`, `mfaSetupHelp`, `mfaSetupAgain`, `loading`, `copied`, `copyFailed`) y errores (`requiredFields`, `credentialsError`, `sessionExpired`, `codeSessionLost`, `passwordPolicyError`, `passwordMismatch`, `passwordRejected`, `codeFormatError`, `codeError`, `startError`, `serviceUnavailable`). `qrLabel` es el nombre accesible del QR y las tres `show*` nombran los botones de mostrar contraseña (nombres distintos por campo, WCAG 2.4.6); `mfaSetupHelp` menciona el QR y termina en punto; `copyFailed` avisa de que los espacios no forman parte de la clave. Se retiró `otpUriLabel` (la dirección ya no se pinta), además de `callbackLoading` y `callbackError` (el Hosted UI ya no existe), los textos del acceso anterior, `unauthorizedLabel` y `tooManyAttemptsLabel`. `credentialsError` es el mismo texto para contraseña incorrecta, usuario inexistente y reinicio de contraseña (no revela si el usuario existe) |
 | `uploadFiles` | 3 | Carga de archivos |
 | `dataManagement` | 11 | Administrar datos |
 | `contentManagement` | 11 | Administrar contenido |
@@ -55,9 +55,16 @@ Dos clases en `@layer components` de `src/index.css`, sobre `:focus-visible` y c
 | Clase | Efecto | Se usa en |
 |---|---|---|
 | `.focus-ring` | `outline` de 2 px `ink` con `outline-offset: 2px` y `box-shadow: 0 0 0 2px` `surface` (halo interior, para que el anillo se vea sobre fondos oscuros como el `CookieBanner`) | Campos de `ContactForm`, `ButtonPrincipal`, `ButtonAlternative`, papeleras, `InfoButton` y `ScrollIndicator` |
+| `.focus-heading` | Sin `outline`; `text-decoration: underline` de 2 px con `text-underline-offset: 4px` (del color del texto, sin colores nuevos). Patrón para encabezados no interactivos que reciben foco programático | `<h2>` de cada paso de `LoginForm` (con `tabIndex={-1}`) |
 | `.focus-ring-inset` | `outline` de 2 px `ink` con `outline-offset: -2px`, sin halo | `input` de `FilterSearchBar` (con `rounded-r-xl`) y `TextInput` (con `rounded-xl`), cuyo `label` con `overflow-hidden` recortaría el anillo exterior; el radio propio del `input` hace que el anillo interior conserve las esquinas |
 
 Se usa `outline` y no `ring` porque el contorno se mantiene en el modo de alto contraste de Windows. `.focus-ring` fija `box-shadow` con la misma especificidad que las utilidades de Tailwind y en una capa posterior: una utilidad `shadow-*` o `ring-*` futura en el mismo elemento ganaría sobre el halo. Pintado, contraste y recorte sin comprobar en un navegador **(por confirmar)**. Ver [DESIGN.md](../DESIGN.md) y A3 en [accesibilidad](guias/accesibilidad.md).
+
+### Otros ajustes de `index.css` y de clases (acceso)
+
+- `input::-ms-reveal { display: none; }` (en `@layer base`): Edge pinta su propio botón de revelar en `type="password"` y duplicaría el del formulario. Efecto en Edge y con gestores de contraseñas que ponen su icono a la derecha (pueden solaparse con el botón de mostrar) **(por confirmar a mano)**.
+- `block` en `FIELD_CLASS` de `LoginForm`: un input en línea deja un hueco bajo la línea y el botón de mostrar (`bottom-0`) no cuadraría. Afecta igual a todos los campos del formulario.
+- `w-48 max-w-full h-auto` en el QR (192 px, sin `h-48`: la altura sale del `viewBox`; a 320 px de ancho mide 192x192) y `forced-color-adjust-none` (Tailwind 3.4 lo genera; evita que los colores forzados inviertan el QR, **por confirmar a mano** con modo oscuro forzado y contraste alto).
 
 ### Tipografía (`tailwind.config.js` + `index.css`)
 

@@ -12,6 +12,10 @@
   p, button, a, label, span, button, input, td, li {
     @apply font-secondary;
   }
+  /* Edge pinta su propio botón de revelar en type="password": el formulario ya tiene el suyo. */
+  input::-ms-reveal {
+    display: none;
+  }
 }
 
 @layer components {
@@ -19,6 +23,13 @@
     outline: 2px solid #0C1811;
     outline-offset: 2px;
     box-shadow: 0 0 0 2px #F9FBFA;
+  }
+  /* Títulos con foco programático: subrayado en lugar de contorno (el h2 es un bloque a todo el ancho). */
+  .focus-heading:focus-visible {
+    outline: none;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
   }
   .focus-ring-inset:focus-visible {
     outline: 2px solid #0C1811;

@@ -56,6 +56,40 @@ describe('traducciones', () => {
     expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
   });
 
+  it('el paso del MFA tiene el texto del QR y ya no tiene la dirección otpauth', () => {
+    expect({
+      es: [spanish['login.qrLabel'], spanish['login.mfaSetupHelp'], 'login.otpUriLabel' in spanish],
+      en: [english['login.qrLabel'], english['login.mfaSetupHelp'], 'login.otpUriLabel' in english],
+    }).toEqual({
+      es: [
+        'Código QR para añadir la clave a tu aplicación de autenticación',
+        'Escanea el código QR con tu aplicación de autenticación o añade la clave a mano, y escribe el código de seis dígitos que muestre.',
+        false,
+      ],
+      en: [
+        'QR code to add the key to your authenticator app',
+        'Scan the QR code with your authenticator app or add the key manually, and enter the six-digit code it shows.',
+        false,
+      ],
+    });
+  });
+
+  it('incluye los nombres accesibles de los botones de mostrar contraseña', () => {
+    const keys = ['login.showPassword', 'login.showNewPassword', 'login.showConfirmPassword'];
+
+    expect({ es: keys.map((key) => spanish[key]), en: keys.map((key) => english[key]) }).toEqual({
+      es: ['Mostrar contraseña', 'Mostrar contraseña nueva', 'Mostrar la contraseña repetida'],
+      en: ['Show password', 'Show new password', 'Show password confirmation'],
+    });
+  });
+
+  it('el aviso de copia fallida avisa de que los espacios no cuentan', () => {
+    expect({ es: spanish['login.copyFailed'], en: english['login.copyFailed'] }).toEqual({
+      es: 'No se pudo copiar. Selecciona la clave y cópiala a mano; los espacios no forman parte de la clave.',
+      en: 'Could not copy. Select the key and copy it manually; the spaces are not part of the key.',
+    });
+  });
+
   it('el login ya no tiene las claves del Hosted UI', () => {
     expect(Object.keys(spanish).concat(Object.keys(english)).filter((key) => /^login\.callback/.test(key))).toEqual([]);
   });
