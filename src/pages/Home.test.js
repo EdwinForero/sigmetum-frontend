@@ -5,7 +5,16 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import Home from './Home';
 
-vi.mock('../components/ContactForm', () => ({ default: () => <form aria-label="contacto" /> }));
+// El simulacro expone onSent con un botón para comprobar a dónde va el foco tras un envío correcto.
+vi.mock('../components/ContactForm', () => ({
+  default: ({ onSent }) => (
+    <form aria-label="contacto">
+      <button type="button" onClick={onSent}>
+        simular-enviado
+      </button>
+    </form>
+  ),
+}));
 vi.mock('../services/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }));
 
 const HERO = '[class*="min-h-[calc(100svh-4rem)]"]';
@@ -128,6 +137,17 @@ describe('Home', () => {
       expect(ubicacion).toHaveClass('mt-stack-sm', 'text-base', 'text-ink', 'whitespace-pre-line');
       expect(ubicacion.parentElement).toHaveClass('border-b', 'pb-stack-lg');
     });
+  });
+
+  it('tras un envío correcto (onSent) el foco pasa al h2 de contacto', async () => {
+    const user = userEvent.setup();
+    renderHome();
+    await user.click(screen.getByRole('button', { name: 'simular-enviado' }));
+
+    const h2 = within(document.getElementById('contacto')).getByRole('heading', { level: 2 });
+    expect(document.activeElement).toBe(h2);
+    expect(h2).toHaveAttribute('tabindex', '-1');
+    expect(h2).toHaveClass('focus-heading');
   });
 
   describe('enlace a /#contacto', () => {

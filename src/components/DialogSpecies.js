@@ -4,6 +4,7 @@ import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import SpeciesAttribute from '../components/SpeciesAttribute.js';
 import { SortItemsList } from '../utilities/SortItemsList.js';
 import { highlightTerms } from '../utilities/highlightTerms.js';
+import { ipniUrl } from '../utilities/ipniUrl.js';
 import { useTranslation } from 'react-i18next';
 import useDialogFocus from '../hooks/useDialogFocus.js';
 
@@ -25,7 +26,7 @@ const Dialog = ({
 
   if (!isOpen) return null;
   
-  const formattedQuery = encodeURIComponent(species["Especies Características"]);
+  const ipniHref = ipniUrl(species["Especies Características"]);
 
   const filteredSpecies = data.filter((item) =>
     contieneEspecie(item["Especies Características"], species["Especies Características"])
@@ -107,17 +108,19 @@ const Dialog = ({
             <ButtonPrincipal onClick={onClose} text={t('explore.dialogSpecies.closeButton')} />
           </div>
 
-          <div className="flex px-4 py-2 mx-auto">
-            <a
-              href={`https://www.ipni.org/?q=${formattedQuery}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center text-moss underline"
-            >
-              <span>{t('explore.dialogSpecies.readMoreLabel')}</span>
-              <span className="material-symbols-outlined items-center mx-auto" aria-hidden="true">open_in_new</span>
-            </a>
-          </div>
+          {ipniHref && (
+            <div className="flex px-4 py-2 mx-auto">
+              <a
+                href={ipniHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center text-moss underline"
+              >
+                <span>{t('explore.dialogSpecies.readMoreLabel')}</span>
+                <span className="material-symbols-outlined items-center mx-auto" aria-hidden="true">open_in_new</span>
+              </a>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>

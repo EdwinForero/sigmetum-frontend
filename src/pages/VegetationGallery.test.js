@@ -24,14 +24,19 @@ const opener = (name) => ({ name: `gallery.openPhoto:${JSON.stringify({ name })}
 const columnsOf = (container) => Array.from(container.querySelectorAll('ul'));
 const keysOf = (list) => Array.from(list.querySelectorAll('[data-photo]')).map((el) => el.dataset.photo);
 
+// El ancho de la rejilla se simula con clientWidth (jsdom no maqueta); window.innerWidth queda en 1024,
+// de modo que una implementación que lo use daría otro número de columnas (5) que el simulado.
+let gridWidth = 600;
+
 const setWidth = async (width) => {
-  window.innerWidth = width;
+  gridWidth = width;
   await act(async () => {
     fireEvent(window, new Event('resize'));
   });
 };
 
-const renderGallery = async (images = makeImages(6)) => {
+const renderGallery = async (images = makeImages(6), width = 600) => {
+  gridWidth = width;
   api.get.mockResolvedValue(images);
   const result = render(<VegetationGallery />);
   await act(async () => {});
@@ -40,14 +45,18 @@ const renderGallery = async (images = makeImages(6)) => {
 
 describe('VegetationGallery', () => {
   const originalWidth = window.innerWidth;
+  let clientWidthSpy;
 
   beforeEach(() => {
     api.get.mockReset();
     window.innerWidth = 1024;
+    gridWidth = 600;
+    clientWidthSpy = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(() => gridWidth);
     document.body.style.overflow = '';
   });
 
   afterEach(() => {
+    clientWidthSpy.mockRestore();
     window.innerWidth = originalWidth;
   });
 
@@ -133,57 +142,77 @@ describe('VegetationGallery', () => {
       expect(button.closest('figure')).toContainElement(caption);
     });
 
-    it('no usa pulso, hover para mostrar el nombre ni hex', async () => {
+    it('no usa pulso, hex ni recorte: el nombre ya se ve en el pie y el velo solo lo repite', async () => {
       const { container } = await renderGallery();
 
-      expect(container.innerHTML).not.toMatch(/animate-pulse|group-hover|\[#[0-9A-Fa-f]{3,8}\]|object-cover|w-\[300px\]/);
+      expect(container.innerHTML).not.toMatch(/animate-pulse|\[#[0-9A-Fa-f]{3,8}\]|object-cover|w-\[300px\]/);
+    });
+
+    it('el velo con el nombre es decorativo: aria-hidden, solo con hover o foco visible, sin movimiento reducido', async () => {
+      await renderGallery(makeImages(2));
+
+      const button = screen.getByRole('button', opener('foto numero 1'));
+      expect(button).toHaveClass('group', 'relative', 'overflow-hidden');
+      const veil = button.querySelector('span[aria-hidden="true"]');
+      expect(veil).not.toBeNull();
+      expect(veil).toHaveClass(
+        'pointer-events-none', 'absolute', 'inset-0', 'flex', 'items-center', 'justify-center', 'rounded-lg',
+        'bg-ink/70', 'p-stack-sm', 'text-center', 'text-sm', 'font-bold', 'text-surface',
+        'opacity-0', 'transition-opacity', 'duration-150', 'ease-out',
+        'group-hover:opacity-100', 'group-focus-visible:opacity-100',
+        'motion-reduce:transition-none', 'motion-reduce:duration-0'
+      );
+      expect(veil).toHaveTextContent('foto numero 1');
+      expect(within(veil).getByText('foto numero 1')).toHaveClass('line-clamp-3');
+      // El nombre accesible sigue siendo el del botón (no se suma el del velo) y el pie no cambia.
+      expect(button).toHaveAccessibleName('gallery.openPhoto:{"name":"foto numero 1"}');
+      expect(screen.getAllByText('foto numero 1').find((el) => el.tagName === 'FIGCAPTION')).toHaveClass('text-sm', 'text-ink', 'line-clamp-2');
     });
   });
 
   describe('columnas', () => {
+    // El ancho es el de la rejilla (clientWidth), no el de la ventana (1024 en todos estos tests).
     it.each([
-      [600, 1],
-      [640, 2],
-      [1023, 2],
-      [1024, 3],
-      [1279, 3],
-      [1280, 4],
-    ])('a %i px hay %i columnas', async (width, columns) => {
-      window.innerWidth = width;
-      const { container } = await renderGallery(makeImages(8));
+      [0, 1],
+      [343, 2],
+      [705, 4],
+      [945, 5],
+      [1361, 7],
+      [1841, 9],
+    ])('con una rejilla de %i px hay %i columnas', async (width, columns) => {
+      const { container } = await renderGallery(makeImages(12), width);
 
       expect(columnsOf(container)).toHaveLength(columns);
     });
 
-    it('se recalculan al cambiar el ancho y la limpieza quita el listener de resize', async () => {
+    it('se recalculan al cambiar el ancho de la rejilla y la limpieza quita el listener de resize', async () => {
       const remove = vi.spyOn(window, 'removeEventListener');
-      const { container, unmount } = await renderGallery(makeImages(8));
+      const { container, unmount } = await renderGallery(makeImages(12));
       expect(columnsOf(container)).toHaveLength(3);
 
-      await setWidth(1280);
-      expect(columnsOf(container)).toHaveLength(4);
-      await setWidth(500);
-      expect(columnsOf(container)).toHaveLength(1);
+      await setWidth(1361);
+      expect(columnsOf(container)).toHaveLength(7);
+      await setWidth(343);
+      expect(columnsOf(container)).toHaveLength(2);
 
       unmount();
       expect(remove.mock.calls.some(([type]) => type === 'resize')).toBe(true);
       remove.mockRestore();
     });
 
-    it('el reparto es en bloques contiguos: perColumn = ceil(N / n)', async () => {
-      const { container } = await renderGallery(makeImages(7));
+    it('el reparto es en bloques contiguos equilibrados: 7 fotos en 3 columnas dan [3, 2, 2]', async () => {
+      const { container } = await renderGallery(makeImages(7), 600);
 
       const lists = columnsOf(container);
       expect(lists.map(keysOf)).toEqual([
         ['foto_numero_1.jpg', 'foto_numero_2.jpg', 'foto_numero_3.jpg'],
-        ['foto_numero_4.jpg', 'foto_numero_5.jpg', 'foto_numero_6.jpg'],
-        ['foto_numero_7.jpg'],
+        ['foto_numero_4.jpg', 'foto_numero_5.jpg'],
+        ['foto_numero_6.jpg', 'foto_numero_7.jpg'],
       ]);
     });
 
-    it('no pinta columnas vacías', async () => {
-      window.innerWidth = 1280;
-      const { container } = await renderGallery(makeImages(2));
+    it('no pinta columnas vacías: 2 fotos en una rejilla de 1841 px dan 2 listas', async () => {
+      const { container } = await renderGallery(makeImages(2), 1841);
 
       expect(columnsOf(container).map(keysOf)).toEqual([['foto_numero_1.jpg'], ['foto_numero_2.jpg']]);
     });
@@ -211,36 +240,62 @@ describe('VegetationGallery', () => {
       expect(visited).toEqual(images.map((image) => image.fileName));
     });
 
-    it('las listas llevan las clases del layout y las celdas no se encogen', async () => {
+    it('la rejilla es un grid de pistas fijas fuera de .page-container y las listas son columnas flex', async () => {
       const { container } = await renderGallery();
 
-      columnsOf(container).forEach((list) => {
-        expect(list).toHaveClass('flex', 'min-w-0', 'flex-1', 'flex-col', 'gap-stack-lg');
+      const lists = columnsOf(container);
+      lists.forEach((list) => {
+        expect(list).toHaveClass('flex', 'flex-col', 'gap-stack');
       });
-      expect(columnsOf(container)[0].parentElement).toHaveClass('flex', 'gap-stack-lg');
+      const grid = lists[0].parentElement;
+      expect(grid).toHaveClass('mt-stack-xl', 'grid', 'gap-x-stack-md');
+      expect(grid.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
+      // La rejilla entra a sangre: solo el margen lateral; el título conserva su posición en .page-container.
+      expect(grid.closest('.page-container')).toBeNull();
+      expect(grid.parentElement.parentElement).toHaveClass('px-gutter', 'md:px-gutter-md', 'lg:px-gutter-lg');
+      expect(screen.getByRole('heading', { level: 1 }).closest('.page-container')).not.toBeNull();
+      expect(container.firstChild).toHaveClass('pt-stack-xl', 'md:pt-section', 'pb-section');
+      expect(container.firstChild).not.toHaveClass('page-container');
+    });
+
+    it('el esqueleto reparte sus 6 celdas con las mismas pistas y reserva un 4:3 en cada una', () => {
+      api.get.mockReturnValue(new Promise(() => {}));
+      gridWidth = 600;
+      const { container } = render(<VegetationGallery />);
+
+      const cells = container.querySelectorAll('.aspect-\\[4\\/3\\]');
+      expect(cells).toHaveLength(6);
+      const grid = cells[0].parentElement.parentElement;
+      expect(grid).toHaveClass('mt-stack-xl', 'grid', 'gap-x-stack-md');
+      expect(grid.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
+      expect(grid.closest('.page-container')).toBeNull();
+      expect(Array.from(grid.children).map((column) => column.children.length)).toEqual([2, 2, 2]);
     });
   });
 
   describe('foco', () => {
     it('con el foco en una foto, cambiar el número de columnas lo conserva en esa misma foto', async () => {
-      const { container } = await renderGallery(makeImages(8));
+      const { container } = await renderGallery(makeImages(8), 945);
+      expect(columnsOf(container)).toHaveLength(5);
       const target = container.querySelector('[data-photo="foto_numero_5.jpg"]');
       act(() => target.focus());
       expect(document.activeElement).toBe(target);
 
-      await setWidth(1280);
+      await setWidth(1361);
 
-      expect(columnsOf(container)).toHaveLength(4);
+      expect(columnsOf(container)).toHaveLength(7);
+      expect(target.isConnected).toBe(false);
       expect(document.activeElement.dataset.photo).toBe('foto_numero_5.jpg');
       expect(document.activeElement.isConnected).toBe(true);
     });
 
     it('si el foco no está en una foto, cambiar las columnas no lo lleva a ninguna', async () => {
-      await renderGallery(makeImages(8));
+      const { container } = await renderGallery(makeImages(8), 945);
       expect(document.activeElement).toBe(document.body);
 
-      await setWidth(1280);
+      await setWidth(1361);
 
+      expect(columnsOf(container)).toHaveLength(7);
       expect(document.activeElement).toBe(document.body);
     });
   });
@@ -284,12 +339,12 @@ describe('VegetationGallery', () => {
 
     it('con el visor abierto, un resize que cambia las columnas y Escape devuelven el foco a la foto', async () => {
       const user = userEvent.setup();
-      const { container } = await renderGallery(makeImages(8));
+      const { container } = await renderGallery(makeImages(8), 945);
       const button = container.querySelector('[data-photo="foto_numero_5.jpg"]');
 
       await user.click(button);
-      await setWidth(1280);
-      expect(columnsOf(container)).toHaveLength(4);
+      await setWidth(1361);
+      expect(columnsOf(container)).toHaveLength(7);
       expect(button.isConnected).toBe(false);
 
       await user.keyboard('{Escape}');
@@ -328,11 +383,15 @@ describe('VegetationGallery', () => {
       errors.mockRestore();
     });
 
-    it('pide /list-images una sola vez al montar', async () => {
+    it('pide /list-images una sola vez al montar y un cambio de columnas no vuelve a pedirlo', async () => {
       await renderGallery();
 
       expect(api.get).toHaveBeenCalledTimes(1);
       expect(api.get).toHaveBeenCalledWith('/list-images');
+
+      await setWidth(1361);
+
+      expect(api.get).toHaveBeenCalledTimes(1);
     });
   });
 

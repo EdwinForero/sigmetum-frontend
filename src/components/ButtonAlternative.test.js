@@ -51,6 +51,16 @@ describe('ButtonAlternative', () => {
     expect(BUTTON_ALTERNATIVE_CLASS).not.toMatch(/opacity-50|not-allowed/);
   });
 
+  it('desactivado, es discontinuo, en moss, sin opacidad ni hover ni el borde del estado activo', () => {
+    render(<ButtonAlternative text="Nada" disabled />);
+    const boton = screen.getByRole('button', { name: 'Nada' });
+
+    expect(boton).toBeDisabled();
+    expect(boton).toHaveClass('border-2', 'border-dashed', 'border-moss', 'bg-surface', 'text-moss', 'cursor-not-allowed');
+    expect(boton).toHaveClass('min-h-12', 'rounded-xl', 'focus-ring', 'text-base', 'font-bold');
+    expect(boton.className).not.toMatch(/opacity-50|hover:|bg-brand|border-brand-dark|text-brand-deep/);
+  });
+
   it('desactivado, no se puede pulsar', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

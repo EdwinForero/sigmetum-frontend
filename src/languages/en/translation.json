@@ -305,6 +305,28 @@
     "imageFileRequired": "Choose an image to upload.",
     "noImageSelected": "No image selected"
   },
+  "contactRecipients": {
+    "title": "Recipients of contact enquiries",
+    "tooltip": "In this section you can register up to {{max}} e-mail addresses that receive the enquiries sent through the contact form. At least one must always remain.",
+    "label": "Recipient e-mail",
+    "add": "Add recipient",
+    "counter": "{{count}} of {{max}} recipients",
+    "empty": "There are no saved recipients: enquiries from the form go to the site's default address.",
+    "errorLoad": "The recipient list could not be loaded. Try again; if it keeps failing, tell the technical contact: the recipient file may be missing from storage.",
+    "maxReached": "You have reached the maximum of {{max}} recipients. Remove one to add another.",
+    "lastRecipient": "At least one recipient must remain: the last one cannot be removed.",
+    "removeRecipient": "Remove recipient {{name}}",
+    "confirmDelete": "This recipient will be removed and will stop receiving the contact form enquiries.",
+    "successAdded": "Recipient added.",
+    "successRemoved": "Recipient removed.",
+    "errorAdd": "The recipient could not be added. Please try again later.",
+    "errorRemove": "The recipient could not be removed. Please try again later.",
+    "loading": "Loading recipients…",
+    "listLabel": "Recipient list",
+    "errors": {
+      "duplicate": "That e-mail is already on the list."
+    }
+  },
   "cookies": {
     "title": "Cookie Policy",
     "subtitleAboutCookies": "What Are Cookies and What Are They Used For?",

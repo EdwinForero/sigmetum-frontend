@@ -169,3 +169,46 @@ describe('hero de Home: velo sobre la foto', () => {
     expect(ratio(colors.surface, mezclaConBlanco(colors.ink, alfa)) >= 4.5).toBe(cumple);
   });
 });
+
+describe('estados inactivos: una sola gramática (borde discontinuo moss, sin opacity)', () => {
+  const principal = readFileSync('src/components/ButtonPrincipal.js', 'utf8');
+  const alternativo = readFileSync('src/components/ButtonAlternative.js', 'utf8');
+  const linea = (codigo, nombre) => codigo.split('\n').find((l) => l.includes(`export const ${nombre} =`)) ?? '';
+
+  it.each(['ICON_BUTTON_INACTIVE_CLASS', 'BUTTON_INACTIVE_CLASS'])('%s es discontinua, en moss y sin hover', (nombre) => {
+    const definicion = linea(principal, nombre);
+
+    expect(definicion).toMatch(/border-2 .*border-dashed border-moss .*text-moss/);
+    expect(definicion).not.toMatch(/hover:|opacity/);
+  });
+
+  it('ButtonPrincipal y ButtonAlternative ya no usan opacity-50 para indicar el estado inactivo', () => {
+    expect(principal).not.toMatch(/opacity-50/);
+    expect(alternativo).not.toMatch(/opacity-50/);
+    expect(alternativo).toMatch(/BUTTON_INACTIVE_CLASS/);
+  });
+
+  it('Sidebar: Cerrar sesión desactivado es discontinuo en moss, sin hover y sin opacity-50', () => {
+    const barra = readFileSync('src/components/Sidebar.js', 'utf8');
+
+    expect(barra).not.toMatch(/opacity-50/);
+    expect(barra).toMatch(/disabled:border-2 disabled:border-dashed disabled:border-moss disabled:text-moss disabled:hover:bg-transparent/);
+  });
+
+  // De caracterización: el contraste de moss sobre surface ya está comprobado arriba; esto añade el blanco.
+  it('moss sobre blanco cumple 4,5:1', () => {
+    expect(ratio(colors.moss, white)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('galería: velo con el nombre de la foto', () => {
+  const galeria = readFileSync('src/pages/VegetationGallery.js', 'utf8');
+
+  // El contraste de surface sobre ink al 70 % ya está comprobado arriba (hero de Home): aquí solo se
+  // exige que la galería use esos mismos tokens y no un color suelto.
+  it('usa bg-ink/70 con text-surface y ningún hex', () => {
+    expect(galeria).toMatch(/bg-ink\/70/);
+    expect(galeria).toMatch(/text-surface/);
+    expect(galeria).not.toMatch(/#[0-9A-Fa-f]{6}/);
+  });
+});

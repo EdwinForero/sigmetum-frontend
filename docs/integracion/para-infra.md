@@ -183,7 +183,8 @@ El frontend carga recursos de estos orígenes; si se añade una política `Conte
 | La URL de `VITE_BASE_URL` | Llamadas a la API (`connect-src`) |
 | `https://cognito-idp.<región>.amazonaws.com` | `connect-src`: todas las peticiones del acceso, los retos, la renovación y la revocación son `POST` `fetch` a ese origen. Hoy infra solo lo incluye si existe `cognito_domain_url` (ver las peticiones a infra de la sección 3). Ya no hay navegación al Hosted UI **(por confirmar en `dev`: avisos de la CSP Report-Only)** |
 | URLs prefirmadas de S3 (`*.s3.<región>.amazonaws.com`) | Fotos de la galería (`img-src`) |
-| `ipni.org`, enlaces de la política de cookies | Solo enlaces externos, no cargan recursos |
+| `ipni.org`, enlaces de la política de cookies | Solo enlaces externos, no cargan recursos. El enlace «Leer más» de cada especie va a `https://www.ipni.org/search?q=<nombre>` (desde el 12/11/2026; antes `/?q=`, que abría la portada sin buscar). La API JSON `https://www.ipni.org/api/1/search` solo la usa el script local `scripts/ipni-check.mjs` (en Node, no en el navegador: no afecta a la CSP) |
+| `data/contact/recipients.json` (S3 del backend) | **Requisito de despliegue de BL1:** crear el fichero con `[]` en cada entorno antes de desplegar el backend. Sin cambios de infraestructura: el rol de Elastic Beanstalk ya tiene `GetObject`, `PutObject` y `DeleteObject` sobre `data/*`; por S15, un `GetObject` sobre una clave que no existe da `AccessDenied` y no `NoSuchKey`, de ahí el fichero inicial |
 
 El frontend no incluye secretos. Los tokens de sesión (acceso y refresco de Cognito) se guardan en `localStorage` (hoy no se decodifican en el navegador), y ya no se usa `sessionStorage` (no hay PKCE); la contraseña, el código y el secreto TOTP solo viven en memoria; un XSS podría leerlos, de ahí la importancia de la CSP (M1 en `docs/09`).
 

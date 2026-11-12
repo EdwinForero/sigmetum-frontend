@@ -193,6 +193,33 @@ describe('traducciones', () => {
     }
   });
 
+  it('incluye el error de correo duplicado del panel de destinatarios, con paridad en es y en', () => {
+    expect({ es: spanish['contactRecipients.errors.duplicate'], en: english['contactRecipients.errors.duplicate'] }).toEqual({
+      es: 'Ese correo ya está en la lista.',
+      en: 'That e-mail is already on the list.',
+    });
+  });
+
+  it('incluye todas las claves del panel de destinatarios, con el texto de error de carga acordado', () => {
+    const keys = [
+      'title', 'tooltip', 'label', 'add', 'counter', 'empty', 'errorLoad', 'maxReached', 'lastRecipient',
+      'removeRecipient', 'confirmDelete', 'successAdded', 'successRemoved', 'errorAdd', 'errorRemove',
+      'loading', 'listLabel', 'errors.duplicate',
+    ].map((key) => `contactRecipients.${key}`);
+
+    expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
+    expect(spanish['contactRecipients.errorLoad']).toBe(
+      'No se pudo cargar la lista de destinatarios. Vuelve a intentarlo; si el fallo sigue, avisa al responsable técnico: puede faltar el fichero de destinatarios en el almacenamiento.'
+    );
+    expect(english['contactRecipients.errorLoad']).toBe(
+      'The recipient list could not be loaded. Try again; if it keeps failing, tell the technical contact: the recipient file may be missing from storage.'
+    );
+    expect(spanish['contactRecipients.counter']).toContain('{{count}}');
+    expect(spanish['contactRecipients.counter']).toContain('{{max}}');
+    expect(spanish['contactRecipients.removeRecipient']).toContain('{{name}}');
+    expect(spanish['contactRecipients.maxReached']).toContain('{{max}}');
+  });
+
   it('ninguna traducción está vacía', () => {
     const empty = [...flatten(es), ...flatten(en)].filter(([, value]) => String(value).trim() === '');
 

@@ -54,6 +54,8 @@ const measure = () => {
     .filter(visible)
     // Un control deshabilitado (p. ej. «anterior» en la primera página) queda exento de contraste (WCAG 1.4.3).
     .filter((el) => !el.closest(':disabled'))
+    // El velo de la galería (aria-hidden) está a 0 hasta el hover o el foco y repite el pie visible: no es texto de lectura.
+    .filter((el) => !el.closest('[aria-hidden="true"]'))
     .map((el) => {
       let opacity = 1;
       for (let node = el; node; node = node.parentElement) opacity *= Number(getComputedStyle(node).opacity);
@@ -171,6 +173,45 @@ for (const width of [1024, 1440]) {
     expect(xs['/explorar'].h1 - xs['/explorar'].main).toBeGreaterThanOrEqual(0);
   });
 }
+
+// Criterio 28 c: los cinco enlaces del pie van en dos columnas a 390 px y en una desde 768 px.
+for (const [width, columns] of [[390, 2], [768, 1], [1024, 1]]) {
+  test(`pie: los cinco enlaces quedan en ${columns} columna(s) a ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: HEIGHT[width] });
+    await open(page, '/cookies');
+    const links = page.locator('footer ul a');
+    await expect(links).toHaveCount(5);
+    const xs = await links.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().left)));
+    expect(new Set(xs).size, `x de los enlaces del pie: ${JSON.stringify(xs)}`).toBe(columns);
+  });
+}
+
+// Criterio 28 c: el ítem activo del menú móvil se distingue sin color (aria-current, subrayado de 4 px).
+test.describe('menú móvil', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('en /galeria el ítem activo tiene aria-current, subrayado y grosor de 4 px', async ({ page }) => {
+    await open(page, '/galeria');
+    await page.locator('#navbar-menu-button').click();
+    const panel = page.locator('#navbar-menu-panel');
+    await expect(panel).toBeVisible();
+    const active = panel.locator('a[aria-current="page"]');
+    await expect(active).toHaveCount(1);
+    await expect(active).toHaveAttribute('href', '/galeria');
+    const style = await active.evaluate((el) => {
+      const { textDecorationLine, textDecorationThickness } = getComputedStyle(el);
+      return { textDecorationLine, textDecorationThickness };
+    });
+    expect(style.textDecorationLine).toContain('underline');
+    expect(style.textDecorationThickness).toBe('4px');
+    // Los demás ítems no llevan aria-current ni subrayado.
+    const others = await panel.locator('a:not([aria-current])').evaluateAll((els) =>
+      els.map((el) => getComputedStyle(el).textDecorationLine)
+    );
+    expect(others).toHaveLength(3);
+    others.forEach((line) => expect(line).toBe('none'));
+  });
+});
 
 test.describe('movimiento reducido', () => {
   test.use({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });

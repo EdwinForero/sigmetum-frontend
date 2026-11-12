@@ -19,7 +19,7 @@ const missingKey = (field, error) =>
     message: 'home.contactForm.shortMessage',
   })[field];
 
-const ContactForm = ({ onLoad }) => {
+const ContactForm = ({ onLoad, onSent }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
@@ -29,6 +29,8 @@ const ContactForm = ({ onLoad }) => {
   const [silent, setSilent] = useState(NO_TOUCHED);
   const [summaryCount, setSummaryCount] = useState(0);
   const sending = useRef(false);
+  // La ref corta el doble envío al instante; el estado pone los campos en solo lectura mientras dura la petición.
+  const [isSending, setIsSending] = useState(false);
   const { t } = useTranslation();
   const id = useId();
   const helpId = `${id}-help`;
@@ -62,11 +64,20 @@ const ContactForm = ({ onLoad }) => {
       return;
     }
     sending.current = true;
+    setIsSending(true);
     onLoad(true);
     setFormError(null);
     try {
       await api.post('/send-email', { username, email, subject, message });
       notifySuccess(t('dialogAdvice.successEmailMessage'));
+      setUsername('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
+      setTouched(NO_TOUCHED);
+      setSilent(NO_TOUCHED);
+      setSummaryCount(0);
+      onSent?.();
     } catch (error) {
       const messageKey =
         error.status === 429
@@ -77,6 +88,7 @@ const ContactForm = ({ onLoad }) => {
       setFormError(messageKey);
     } finally {
       sending.current = false;
+      setIsSending(false);
       onLoad(false);
     }
   };
@@ -96,6 +108,7 @@ const ContactForm = ({ onLoad }) => {
         autoComplete="name"
         maxLength={100}
         required
+        readOnly={isSending}
         value={username}
         onChange={edit('username', setUsername)}
         onBlur={touch('username')}
@@ -113,6 +126,7 @@ const ContactForm = ({ onLoad }) => {
         autoComplete="email"
         maxLength={254}
         required
+        readOnly={isSending}
         value={email}
         onChange={edit('email', setEmail)}
         onBlur={touch('email')}
@@ -128,6 +142,7 @@ const ContactForm = ({ onLoad }) => {
         inputRef={refs.subject}
         maxLength={150}
         required
+        readOnly={isSending}
         value={subject}
         onChange={edit('subject', setSubject)}
         onBlur={touch('subject')}
@@ -144,6 +159,7 @@ const ContactForm = ({ onLoad }) => {
         multiline
         maxLength={2000}
         required
+        readOnly={isSending}
         value={message}
         onChange={edit('message', setMessage)}
         onBlur={touch('message')}

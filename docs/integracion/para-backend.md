@@ -24,9 +24,12 @@ Qué hace el frontend según el estado:
 |---|---|---|
 | `401` | Métodos `*Auth` de `api.js` (`getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`) | Intenta **una** renovación en silencio (`InitiateAuth` con `REFRESH_TOKEN_AUTH` contra `cognito-idp`; una sola renovación compartida por las llamadas simultáneas) y, si va bien, repite la petición una vez con el token nuevo. Si en el `401` el token guardado ya es otro (otra llamada renovó), repite con el actual sin otra renovación; si ya no hay token (sesión borrada en otra pestaña), no renueva: borra la sesión, redirige a `/login` (una sola vez por pestaña) y lanza el `401`. Si no hay `refreshToken`, si Cognito rechaza la renovación con cualquier `__type` de un `4xx` que no sea de la lista de reintentables (`NotAuthorizedException` esperado, **(por confirmar contra el pool real)**) o si la repetición vuelve a dar `401`, borra la sesión, ejecuta `window.location.assign('/login')` y lanza el error 401 (también con cuerpo no JSON). Un fallo de **red**, un `5xx`, un `429`, `TooManyRequestsException`, `LimitExceededException`, `InternalErrorException` o un `4xx` sin `__type` durante la renovación es indeterminado: no borra la sesión ni redirige y sube como error (`type: 'network'` en la red; `type: 'auth_unavailable'`, `status: 503` en los demás). El backend sigue recibiendo el mismo `Authorization: Bearer`; solo cambia cuándo se renueva el token `api.get` y `api.post` **no** renuevan ni redirigen. `FileUpload` usa `postFormAuth` y `postAuth`, así que un `401` en `/upload` o en `/upload/confirm` sigue el mismo camino |
 | `503` con `error: 'Authentication service unavailable'` | Métodos `*Auth` de `api.js` | Reintenta dos veces, tras 1 s y 3 s. Agotados, lanza el error con `status: 503` **sin** borrar la sesión ni redirigir. Solo se reintenta ese cuerpo exacto (el 503 de autenticación sale antes de que la ruta haga nada, así que es seguro repetir también un `POST`); un `503` con otro cuerpo (p. ej. el HTML de un ALB) no se reintenta ni borra nada. `ProtectedRoute` muestra su propio aviso de servicio no disponible; el resto de pantallas, su error genérico. Riesgo aceptado: tras un `kid` nuevo el backend puede dar hasta 10 s de 503 y los reintentos terminan antes **(por confirmar en `dev`)** |
+| `429` | `POST /add-recipient` y `DELETE /delete-recipient` (`ContactRecipientsManager`) | Limitador del backend (10 cambios por 15 minutos por IP, **(por confirmar)** hasta desplegar). Se trata como cualquier fallo: `notifyError` («No se pudo añadir/quitar el destinatario. Inténtalo de nuevo más tarde.») y se conserva lo escrito; el cliente no lee el estado |
 | `429` | `POST /send-email` (`ContactForm`) | Mensaje propio: "demasiados mensajes", con "inténtalo en 15 minutos". El login ya no usa `429` (lo gestiona Cognito) |
 | `400` | `POST /send-email` (`ContactForm`) | "Revisa los datos del formulario". En `POST /upload` con `data.emptyFields` y `data.draftKey`, abre el diálogo de campos vacíos (sin cambios); el `draftKey` se reenvía sin interpretarlo |
 | `404` | `POST /upload/confirm` (`FileUpload`), al confirmar o al cancelar | Se interpreta **solo por el estado** (no se lee el texto `Draft not found`): "El borrador ya no existe. Vuelve a subir el archivo." Un `404` con otro significado en esa ruta se mostraría igual **(por confirmar con el backend)** |
+| `500` o `404` | `GET /list-recipients` (`ContactRecipientsManager`) | Error de carga con `contactRecipients.errorLoad` y «Reintentar»: un `500` es lo esperable si **falta** `data/contact/recipients.json` (S15: `AccessDenied`); un `404` es un backend sin desplegar. El panel no pinta una lista vacía en ese caso |
+| `500` | `POST /add-recipient` | Si falta el fichero, el alta da `500` sin escribir: `notifyError` genérico |
 | Resto (`500`, red...) | Todos | Mensaje genérico del componente. Cancelar un borrador con un fallo distinto de `404` muestra el error de subida |
 
 El frontend no necesita un código estable (`code`) en la respuesta: usa el estado HTTP.
@@ -65,7 +68,10 @@ Solo aparecen los campos que el frontend **lee**. Lo demás de la respuesta se i
 | `DELETE /delete-image` | `{ imageKey }` (vale `fileName`) | Solo el estado | `ImageGalleryManager` |
 | `POST /upload-term` | `{ term }` | Solo el estado | `TermsManager` |
 | `DELETE /delete-term` | `{ term }` | Solo el estado | `TermsManager` |
-| `POST /send-email` | `{ username, email, subject, message }` (límites en cliente: 100, 254, 150 y 2000 caracteres; además, el cliente comprueba antes de enviar el formato del correo y que el mensaje tenga al menos 20 caracteres, solo una ayuda: la validación del servidor sigue mandando y su límite propio es **(por confirmar)**) | Solo el estado. Distingue `429` y `400` | `ContactForm` |
+| `GET /list-recipients` | — (protegida, token en la cabecera) | `data`: `[{ email }]` en el orden del servidor; `[]` si no hay ninguno guardado | `ContactRecipientsManager` |
+| `POST /add-recipient` | `{ email }` (recortado; el cliente valida antes por usabilidad: formato, máximo 254 caracteres, sin duplicados ni más de 5 destinatarios) | Solo el estado. `400` formato, duplicado o máximo; `401`; `429` | `ContactRecipientsManager` |
+| `DELETE /delete-recipient` | `{ email }` | Solo el estado. `400` (último destinatario o dato no válido), `401`, `404` (no existe, sin escribir), `429` | `ContactRecipientsManager` |
+| `POST /send-email` | `{ username, email, subject, message }` (límites en cliente: 100, 254, 150 y 2000 caracteres; además, el cliente comprueba antes de enviar el formato del correo y que el mensaje tenga al menos 20 caracteres, solo una ayuda: la validación del servidor sigue mandando y su límite propio es **(por confirmar)**) | Solo el estado. Distingue `429` y `400`. **Desde BL1 el backend envía el mensaje a la lista de destinatarios** (un solo envío con `to` como array, `replyTo` el visitante) **y usa `EMAIL` como respaldo** si la lista está vacía o no se puede leer (con `[Aviso: lista de destinatarios no disponible]` en el asunto en el segundo caso); el contrato visible para el cliente no cambia | `ContactForm` |
 | `GET /get-image?imageKey=` | — (`imageKey` con `encodeURIComponent`) | `data.imageUrl` | `ImageComponent`, solo si recibe `imageKey` (hoy ninguna pantalla se lo pasa **(por confirmar)**), e `ImageCarrousel` (no montado: import comentado en `Explore.js`) |
 
 No usa `GET /healthcheck`.
@@ -132,9 +138,26 @@ Son casos en los que lo que hace el frontend y lo que hace el backend **no encaj
 | Las claves o la validación del token de acceso de Cognito (`kid`, `iss`, `client_id`) | Nada en el código (no lo decodifica); un cambio de pool o de cliente es de variables `VITE_COGNITO_*` y de infra |
 | El texto o el estado del `503` de autenticación (`Authentication service unavailable`) | `services/api.js` (`AUTH_UNAVAILABLE` y `RETRY_DELAYS_MS`) |
 | El origen permitido por CORS | Nada en el código, pero hay que asegurar que `ALLOWED_ORIGIN` coincide con el dominio del frontend de cada entorno |
+| Las rutas de destinatarios (`/list-recipients`, `/add-recipient`, `/delete-recipient`), sus límites (1 a 5), el limitador o la forma `{ email }` | `components/ContactRecipientsManager.js` y `utilities/validateRecipientEmail.js` (copia de la regla de correo del backend, `validateContactMessage.js`) |
 | Añades un endpoint protegido | Un método nuevo en `services/api.js` si necesita un verbo distinto |
 | Cierras o restringes `/get-data` | `FileDropdown` (ver D1) |
 | Límites de tamaño o tipo de fichero en `/upload` o `/upload-image` | Mensajes de error y `accept` de los formularios |
+
+## 7b. Destinatarios del formulario de contacto (BL1, 12/11/2026)
+
+**El contrato cambia** (rutas nuevas protegidas y nuevo destino de `POST /send-email`). El backend va en otra PR y **se despliega primero**: un frontend nuevo contra un backend viejo da `404` en `GET /list-recipients` y el panel muestra el error de carga con «Reintentar» (las otras dos secciones de `/administrar-contenido` siguen funcionando; no se pierde nada).
+
+| Ruta | Cuerpo | Respuesta | Notas |
+|---|---|---|---|
+| `GET /list-recipients` | — | `{ success: true, data: [{ email }] }` | `tokenAuth` también en la lectura (la lista guarda correos del personal). Sin fichero lo normal sería `[]`, pero por S15 de `para-infra` un fichero inexistente da `AccessDenied` y por tanto `500` |
+| `POST /add-recipient` | `{ email }` | `data: 'Recipient added successfully'` | `400`: no es un correo válido, duplicado (sin distinguir mayúsculas ni espacios) o ya hay 5. `401` sin token válido. `429` por el limitador |
+| `DELETE /delete-recipient` | `{ email }` | Mensaje | `400` si es el último; `404` si no existe; `401`; `429` |
+
+- **Límites:** mínimo 1 y máximo 5 destinatarios. El cliente los comprueba por usabilidad; manda el servidor.
+- **Aviso que el cliente no ve:** tras cada alta o baja el backend manda un correo con la dirección enmascarada a los destinatarios anteriores (o a `EMAIL` si la lista estaba vacía); no se espera y su fallo no cambia la respuesta. El frontend no lo conoce ni lo muestra.
+- **Riesgo (C16 del backend):** cualquier usuario del pool de Cognito puede cambiar la lista y, con ello, redirigir los datos personales de los mensajes de contacto; el aviso lo detecta, no lo impide. El modelo de autorización no cambia (hay un solo rol; ver S11 de [seguridad](../guias/seguridad.md)).
+- **Requisito de despliegue (decisión del usuario):** crear a mano `data/contact/recipients.json` con `[]` en **cada entorno antes** de desplegar el backend. Si falta, `GET` y `POST` dan `500` (el panel muestra el error de carga claro), `DELETE` no escribe y `/send-email` cae a `EMAIL` con el asunto marcado (el buzón `EMAIL` hay que vigilarlo). Los permisos de S3 ya cubren `data/*`: **sin cambios de infraestructura** (ver [para-infra](para-infra.md)).
+- **Por confirmar:** la integración real contra el backend de `dev` (la hará el usuario tras desplegar; aquí solo hay tests con la API simulada), que la IP vista tras `trust proxy` en producción sea la correcta para el limitador y que `/send-email` entregue a la lista.
 
 ## 8. Compatibilidad de versiones
 

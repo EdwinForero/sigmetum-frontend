@@ -104,7 +104,7 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className={`${itemBase} ${itemInactive} disabled:cursor-not-allowed disabled:opacity-50`}
+                className={`${itemBase} ${itemInactive} disabled:cursor-not-allowed disabled:border-2 disabled:border-dashed disabled:border-moss disabled:text-moss disabled:hover:bg-transparent`}
               >
                 <NavItem icon="logout" label={t('login.logOutButton')} />
               </button>

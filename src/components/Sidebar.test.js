@@ -168,6 +168,25 @@ describe('Sidebar', () => {
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeDisabled();
   });
 
+  it('Cerrar sesión desactivado usa borde discontinuo moss y no opacity-50', async () => {
+    const user = userEvent.setup();
+    renderSidebar('/administrar-datos', { showLogout: true });
+
+    await user.click(screen.getByRole('button', { name: 'login.logOutButton' }));
+
+    const button = screen.getByRole('button', { name: 'login.logOutButton' });
+    expect(button).toBeDisabled();
+    expect(button).toHaveClass(
+      'disabled:cursor-not-allowed',
+      'disabled:border-2',
+      'disabled:border-dashed',
+      'disabled:border-moss',
+      'disabled:text-moss',
+      'disabled:hover:bg-transparent',
+    );
+    expect(button.className).not.toMatch(/opacity-50/);
+  });
+
   it('los destinos inactivos van en peso normal (400) y el activo en negrita', () => {
     renderSidebar('/administrar-datos', { showLogout: true });
 

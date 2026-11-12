@@ -97,10 +97,55 @@ describe('ButtonPrincipal', () => {
     expect(boton.className).not.toMatch(/opacity-50|hover:|bg-brand|text-ink/);
   });
 
-  it('desactivado, el botón de icono conserva su aspecto con opacity-50', () => {
+  it('desactivado, el botón de icono es discontinuo, en moss, sin opacidad ni hover y mantiene 48 por 48', () => {
     render(<ButtonPrincipal icon="add" ariaLabel="Icono" disabled />);
+    const boton = screen.getByRole('button', { name: 'Icono' });
 
-    expect(screen.getByRole('button', { name: 'Icono' })).toHaveClass('opacity-50', 'cursor-not-allowed');
+    expect(boton).toHaveClass('border-2', 'border-dashed', 'border-moss', 'text-moss', 'cursor-not-allowed', 'h-12', 'w-12', 'focus-ring');
+    expect(boton.className).not.toMatch(/opacity-50|hover:|bg-brand|text-brand-dark/);
+  });
+
+  it.each([
+    ['de texto', { text: 'Nada' }, 'Nada'],
+    ['de icono', { icon: 'close', ariaLabel: 'Quitar' }, 'Quitar'],
+  ])('con inactive, el botón %s recibe el foco con Tab, lleva aria-disabled, no es disabled y el clic no llama a onClick', async (_rama, props, nombre) => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(<ButtonPrincipal {...props} inactive onClick={onClick} />);
+    const boton = screen.getByRole('button', { name: nombre });
+
+    await user.tab();
+    expect(boton).toHaveFocus();
+    expect(boton).toHaveAttribute('aria-disabled', 'true');
+    expect(boton).not.toBeDisabled();
+    expect(boton).toHaveClass('border-dashed', 'border-moss', 'text-moss', 'cursor-not-allowed');
+    expect(boton.className).not.toMatch(/opacity-50|hover:/);
+    await user.click(boton);
+    await user.keyboard('{Enter}');
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('con inactive, aria-describedby llega al botón y da su descripción accesible', () => {
+    render(
+      <>
+        <ButtonPrincipal text="Añadir" inactive aria-describedby="maximo" />
+        <p id="maximo">Máximo alcanzado</p>
+      </>
+    );
+
+    expect(screen.getByRole('button', { name: 'Añadir' })).toHaveAccessibleDescription('Máximo alcanzado');
+  });
+
+  it('sin inactive ni loading no lleva aria-disabled en ninguna rama', () => {
+    render(
+      <>
+        <ButtonPrincipal text="Texto" />
+        <ButtonPrincipal icon="add" ariaLabel="Icono" />
+      </>
+    );
+
+    expect(screen.getByRole('button', { name: 'Texto' })).not.toHaveAttribute('aria-disabled');
+    expect(screen.getByRole('button', { name: 'Icono' })).not.toHaveAttribute('aria-disabled');
   });
 
   it('no lee aria-disabled: su semántica no cambia', async () => {

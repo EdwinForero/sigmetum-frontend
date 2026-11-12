@@ -1,4 +1,4 @@
-import { React, useEffect, useState } from 'react';
+import { React, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ContactForm from '../components/ContactForm.js';
@@ -41,6 +41,7 @@ const Home = () => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
+  const contactHeadingRef = useRef(null);
 
   // Enlace del pie a /#contacto: `key` repite el desplazamiento si se pulsa dos veces el mismo enlace.
   useEffect(() => {
@@ -126,9 +127,9 @@ const Home = () => {
       </section>
 
       <section id="contacto" className={SECTION}>
-        <h2 tabIndex={-1} className={`focus-heading ${H2}`}>{t('home.contactTitle')}</h2>
+        <h2 ref={contactHeadingRef} tabIndex={-1} className={`focus-heading ${H2}`}>{t('home.contactTitle')}</h2>
         <div className="mt-stack-lg grid gap-stack-xl md:grid-cols-2">
-          <ContactForm onLoad={handleOnLoad} />
+          <ContactForm onLoad={handleOnLoad} onSent={() => contactHeadingRef.current?.focus()} />
           <div className="flex flex-col gap-stack-lg">
             <div className="border-t border-ink-soft pt-stack-lg">
               <h3 className={H3}>{t('home.emailTitle')}</h3>

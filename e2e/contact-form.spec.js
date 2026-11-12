@@ -98,6 +98,27 @@ test.describe('validación propia (criterio 36)', () => {
       message: 'Mensaje de prueba con más de veinte caracteres.',
     });
   });
+
+  test('tras un envío válido los campos quedan vacíos, sin errores, y el foco va al encabezado de #contacto', async ({ page, mock }) => {
+    await openForm(page);
+    await page.locator(`${FORM} input[autocomplete="name"]`).fill('María López');
+    await page.locator(`${FORM} input[type="email"]`).fill('maria@dominio.es');
+    await page.locator(`${FORM} input[maxlength="150"]`).fill('Consulta de prueba');
+    await page.locator(`${FORM} textarea`).fill('Mensaje de prueba con más de veinte caracteres.');
+    // El foco está en el formulario: el que haya al terminar lo pone el envío, no el punto de partida.
+    await page.locator(SUBMIT).focus();
+
+    await page.locator(SUBMIT).click();
+
+    await expect.poll(() => mock.calls.filter((call) => call.name === 'send-email').length).toBe(1);
+    await expect(page.locator(CONTROLS)).toHaveCount(4);
+    for (const control of await page.locator(CONTROLS).all()) await expect(control).toHaveValue('');
+    await expect(page.locator(`${FORM} [aria-invalid]`)).toHaveCount(0);
+    await expect(page.locator(`${FORM} [role="alert"]`)).toHaveCount(0);
+    await expect(page.locator(SUMMARY)).toHaveText('');
+    await expect(page.locator('section#contacto h2')).toBeFocused();
+    expect(await page.evaluate(() => document.activeElement.tagName)).toBe('H2');
+  });
 });
 
 for (const lang of ['es', 'en']) {

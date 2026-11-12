@@ -53,7 +53,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 - **Reglas:**
   - Enlaces externos con `rel="noopener noreferrer"`. ESLint (`react/jsx-no-target-blank`) lo exige como error.
   - URLs `https://`. `npm run quality` falla con `http://` nuevas. Desde el 12/11/2026 no queda ninguna `http://` (B14 resuelto: EFYVE responde 200 con `https://www.efyve.com`, comprobado, y su entrada de `KNOWN_DEBT.insecureUrl` en `scripts/quality-check.mjs` se retiró; `config/institutions.js` y su test exigen `https` en todos los logos).
-  - Los datos que entren en una URL se codifican (`encodeURIComponent`, como hace el enlace a IPNI).
+  - Los datos que entren en una URL se codifican (`encodeURIComponent`). El enlace a IPNI se construye **solo** con `ipniUrl(nombre)` (`utilities/ipniUrl.js`): devuelve `null` si el nombre no es una cadena o queda vacío (entonces no se pinta el enlace) y, si no, `https://www.ipni.org/search?q=` más la consulta codificada; el nombre sale del dataset del backend, no del usuario. El script `scripts/ipni-check.mjs` solo envía nombres de especie a la API pública de IPNI, no datos de personas.
   - **Ningún dato del usuario llega a `<Link to>`, `<Navigate to>` ni `navigate()`.** Es la condición que hace aceptable el aviso de `react-router` (ver S6).
 - **Estado:** cumple.
 
@@ -122,6 +122,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 
 - `ProtectedRoute` decide qué **se muestra**, no qué se **permite**. Cualquier operación privada debe estar protegida en el backend (todas las rutas de `upload`, `delete` y `update` ya lo están).
 - Al añadir una pantalla privada, se envuelve en `ProtectedRoute` y se comprueba que el endpoint que usa pide token.
+- **Riesgo C16 ampliado (BL1, 12/11/2026; es del backend):** hay un solo rol, así que cualquier usuario del pool de Cognito puede añadir o quitar los destinatarios de las dudas de contacto (`/add-recipient`, `/delete-recipient`) y, con ello, redirigir los datos personales de los mensajes del formulario. El backend lo mitiga con un limitador (10 cambios por 15 minutos por IP) y con un aviso por correo a los destinatarios anteriores con la dirección enmascarada: **lo detecta, no lo impide**. En el frontend **el modelo de autorización no cambia**: `ContactRecipientsManager` va bajo `ProtectedRoute`, usa los métodos `*Auth` de `api.js` y no toca el token; `ProtectedRoute` sigue decidiendo qué se muestra, no qué se permite. La lista se pinta como texto (nunca como HTML), con `break-all`, y el correo se valida en el cliente solo por usabilidad (S5).
 
 ## 3. Estado actual (auditoría del 30/09/2026)
 
