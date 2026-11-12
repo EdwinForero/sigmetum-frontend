@@ -161,7 +161,12 @@
       "uploadFilesButton_other": "Upload {{count}} files",
       "filesListLabel": "Selected files",
       "removeFile": "Remove file {{name}} from the list",
-      "noFilesSelected": "No files selected."
+      "noFilesSelected": "No files selected.",
+      "dropZoneHint": "Drag your Excel files (.xlsx) here or use the button.",
+      "dropZoneActive": "Drop the files to add them.",
+      "dropRejected": "Only Excel files (.xlsx) are accepted. The others were discarded.",
+      "filesAdded_one": "{{count}} file added to the list.",
+      "filesAdded_other": "{{count}} files added to the list."
     },
     "progress": "Uploading file {{current}} of {{total}}…",
     "fileStatus": {
@@ -215,7 +220,7 @@
     "title": "Data management",
     "description": "On this page, you can manage the uploaded files associated with each province and view the data they contain. You also have the option to download the data in Excel format. Make sure that there is at least one file uploaded via the 'upload files' page.",
     "downloadExcelButton": "Download excel",
-    "downloadExcelButtonTooltip": "By clicking this button, you can download an Excel file containing the filtered results based on the options you have previously selected.",
+    "downloadExcelButtonTooltip": "By clicking this button, you can download an Excel file with all the data from the file version you have chosen.",
     "deleteVersionButton": "Delete version",
     "deleteVersionButtonTooltip": "Pressing this button will permanently delete the file you previously selected. If there are other versions of the file, it will be restored with the data from the most recent version.",
     "updateDataButton": "Update data",
@@ -225,7 +230,7 @@
       "selectFileDropdownTooltip": "Open the list below and choose the file you want to manage: versions are grouped by province. Provinces that do not have at least one corresponding file will not appear in the list.",
       "emptyOption": "Choose a dataset",
       "loading": "Loading versions…",
-      "emptyState": "There are no versions.",
+      "emptyState": "No data files have been uploaded yet, so there are no versions to choose from.",
       "emptyStateLink": "Upload a file in Upload files"
     },
     "loadingVersionData": "Loading version data…",
@@ -313,6 +318,7 @@
     "previousPage": "Previous page",
     "nextPage": "Next page",
     "info": "Information",
+    "infoAbout": "Information: {{topic}}",
     "scrollDown": "Scroll down"
   },
   "language": {

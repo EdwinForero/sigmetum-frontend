@@ -174,6 +174,101 @@ describe('ImageGalleryManager', () => {
       expect(screen.getByRole('list', { name: `${NS}.imagesListLabel` })).toBeInTheDocument();
     });
 
+    it('el nombre de la imagen lleva las mismas clases tipográficas que el de los términos', async () => {
+      await renderManager();
+
+      const nombre = await screen.findByText('a.png');
+      expect(nombre).toHaveClass('min-w-0', 'break-words', 'text-base', 'font-normal');
+    });
+
+    describe('miniaturas', () => {
+      const CON_URL = [
+        { fileName: 'a.png', url: 'https://bucket.s3.eu-west-1.amazonaws.com/a.png?firma=1' },
+        { fileName: 'b.png', url: 'https://bucket.s3.eu-west-1.amazonaws.com/b.png?firma=1' },
+      ];
+
+      beforeEach(() => {
+        api.get.mockReset().mockResolvedValue(CON_URL);
+      });
+
+      it('hay un img por fila con src, sin nombre accesible, con dimensiones y carga diferida', async () => {
+        const { container } = await renderManager();
+        await screen.findByText('a.png');
+
+        const imgs = container.querySelectorAll('li img');
+        expect(imgs).toHaveLength(2);
+        imgs.forEach((img, i) => {
+          expect(img).toHaveAttribute('src', CON_URL[i].url);
+          expect(img).toHaveAttribute('alt', '');
+          expect(img).toHaveAttribute('width', '48');
+          expect(img).toHaveAttribute('height', '48');
+          expect(img).toHaveAttribute('loading', 'lazy');
+          expect(img).toHaveClass('h-12', 'w-12', 'shrink-0', 'rounded-lg', 'object-cover');
+        });
+        expect(screen.queryAllByRole('img')).toHaveLength(0);
+      });
+
+      it('si la imagen falla se oculta el img y se conserva la caja de 48 px', async () => {
+        const { container } = await renderManager();
+        await screen.findByText('a.png');
+        const fila = container.querySelector('li');
+
+        fireEvent.error(fila.querySelector('img'));
+
+        expect(fila.querySelector('img')).toBeNull();
+        const caja = fila.querySelector('.h-12.w-12.border-sage');
+        expect(caja).toBeInTheDocument();
+        expect(caja).toHaveAttribute('aria-hidden', 'true');
+        expect(container.querySelectorAll('li img')).toHaveLength(1);
+      });
+
+      it.each([
+        ['http://evil.example/a.png'],
+        ['javascript:alert(1)'],
+        ['data:image/png;base64,AAAA'],
+        ['no es una url'],
+      ])('con la url %s no hay img y se muestra la caja', async (url) => {
+        api.get.mockResolvedValue([{ fileName: 'a.png', url }]);
+        const { container } = await renderManager();
+        await screen.findByText('a.png');
+
+        const fila = container.querySelector('li');
+        expect(fila.querySelector('img')).toBeNull();
+        const caja = fila.querySelector('.h-12.w-12.border-sage');
+        expect(caja).toBeInTheDocument();
+        expect(caja).toHaveAttribute('aria-hidden', 'true');
+      });
+
+      it.each([['http://localhost:3000/a.png'], ['http://127.0.0.1/a.png']])(
+        'admite %s para desarrollo',
+        async (url) => {
+          api.get.mockResolvedValue([{ fileName: 'a.png', url }]);
+          const { container } = await renderManager();
+          await screen.findByText('a.png');
+
+          expect(container.querySelector('li img')).toHaveAttribute('src', url);
+        }
+      );
+
+      it('con una url nueva para el mismo archivo vuelve a aparecer el img', async () => {
+        const { user, container } = await renderManager();
+        await screen.findByText('a.png');
+        fireEvent.error(container.querySelector('li img'));
+        expect(container.querySelectorAll('li img')).toHaveLength(1);
+
+        api.get.mockResolvedValue([{ fileName: 'a.png', url: 'https://bucket.s3.eu-west-1.amazonaws.com/a.png?firma=2' }, CON_URL[1]]);
+        fireEvent.change(campoTitulo(), { target: { value: 'nueva' } });
+        await user.upload(
+          container.querySelector('#imageFileInput'),
+          new File(['x'], 'foto.png', { type: 'image/png' })
+        );
+        await user.click(botonAnadir());
+
+        await waitFor(() => expect(container.querySelectorAll('li img')).toHaveLength(2));
+        expect(container.querySelector('li img')).toHaveAttribute('src', expect.stringContaining('firma=2'));
+      });
+    });
+
     it('borrar pide confirmación: Cancelar no borra y Confirmar borra una sola vez con foco al título', async () => {
       const { user } = await renderManager();
       const abrir = async () => {

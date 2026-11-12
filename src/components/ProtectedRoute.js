@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
-import LoadSpinner from './LoadSpinner';
 import api from '../services/api';
 import { getAccessToken } from '../services/session';
 
 // 'checking' | 'ok' | 'denied' | 'unavailable'
-const ProtectedRoute = ({ element }) => {
+const ProtectedRoute = ({ element, onStatusChange }) => {
   const { t } = useTranslation();
   const [status, setStatus] = useState('checking');
   const [attempt, setAttempt] = useState(0);
@@ -17,6 +16,10 @@ const ProtectedRoute = ({ element }) => {
     setLoggingOut(true);
     api.logout();
   };
+
+  useEffect(() => {
+    if (onStatusChange) onStatusChange(status);
+  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let active = true;
@@ -34,19 +37,29 @@ const ProtectedRoute = ({ element }) => {
     return () => { active = false; };
   }, [attempt]);
 
-  if (status === 'checking') return <LoadSpinner />;
+  if (status === 'checking' && attempt === 0) return null;
 
-  if (status === 'unavailable') {
+  if (status === 'checking' || status === 'unavailable') {
+    const unavailable = status === 'unavailable';
     return (
-      <div role="alert" className="p-6 text-[#0C1811]">
-        <h1 className="text-2xl font-bold">{t('login.title')}</h1>
-        <p>{t('login.serviceUnavailable')}</p>
-        <ButtonPrincipal
-          text={t('login.retryButton')}
-          onClick={() => { setStatus('checking'); setAttempt((n) => n + 1); }}
-        />
-        <ButtonPrincipal text={t('login.logOutButton')} onClick={logOut} disabled={loggingOut} />
-      </div>
+      <>
+        <p role="status" className="sr-only">{unavailable ? '' : t('login.loading')}</p>
+        {unavailable && (
+          <div role="alert" className="p-6 text-[#0C1811]">
+            <h1 className="text-2xl font-bold">{t('login.title')}</h1>
+            <p>{t('login.serviceUnavailable')}</p>
+            <ButtonPrincipal
+              text={t('login.retryButton')}
+              onClick={() => {
+                document.getElementById('contenido')?.focus();
+                setStatus('checking');
+                setAttempt((n) => n + 1);
+              }}
+            />
+            <ButtonPrincipal text={t('login.logOutButton')} onClick={logOut} disabled={loggingOut} />
+          </div>
+        )}
+      </>
     );
   }
 

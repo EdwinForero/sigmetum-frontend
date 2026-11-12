@@ -178,7 +178,7 @@ El frontend carga recursos de estos orígenes; si se añade una política `Conte
 
 | Origen | Para qué |
 |---|---|
-| `fonts.googleapis.com`, `fonts.gstatic.com` | Tipografías (Amaranth, Sen) |
+| `fonts.googleapis.com`, `fonts.gstatic.com` | Tipografías (Amaranth, Sen; ya no Mukta Malar) y el subconjunto de Material Symbols (`icon_names`, 21 iconos, `display=block`); `index.html` añade `preconnect` a los dos orígenes (el de `gstatic` con `crossorigin`) y el código `watchIconFont` va en el bundle, sin `script-src` en línea. Una petición real con ese `icon_names` devolvió HTTP 200 y un `@font-face` woff2 (comprobado el 11/11/2026); la CSP actual es Report-Only y ya incluye googleapis y gstatic |
 | La URL de `VITE_S3_URL` | Logos, banner y glosario |
 | La URL de `VITE_BASE_URL` | Llamadas a la API (`connect-src`) |
 | `https://cognito-idp.<región>.amazonaws.com` | `connect-src`: todas las peticiones del acceso, los retos, la renovación y la revocación son `POST` `fetch` a ese origen. Hoy infra solo lo incluye si existe `cognito_domain_url` (ver las peticiones a infra de la sección 3). Ya no hay navegación al Hosted UI **(por confirmar en `dev`: avisos de la CSP Report-Only)** |

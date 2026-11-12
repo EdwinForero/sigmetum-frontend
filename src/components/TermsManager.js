@@ -130,7 +130,7 @@ const TermsManager = () => {
           .sort((a, b) => a.term.localeCompare(b.term))
           .map((item) => (
             <li key={item.term} className="flex min-h-12 items-center justify-between gap-2 text-ink">
-              <span className="min-w-0 break-words">{item.term}</span>
+              <span className="min-w-0 break-words text-base font-normal">{item.term}</span>
               <ButtonPrincipal
                 icon="delete"
                 ariaLabel={t('contentManagement.deleteTerm', { name: item.term })}
@@ -154,7 +154,10 @@ const TermsManager = () => {
         >
           {t('contentManagement.noLatinTermsTitle')}
         </h2>
-        <InfoButton tooltipText={t('contentManagement.noLatinTermsTooltip')} />
+        <InfoButton
+          topic={t('contentManagement.noLatinTermsTitle')}
+          tooltipText={t('contentManagement.noLatinTermsTooltip')}
+        />
       </div>
 
       <div>

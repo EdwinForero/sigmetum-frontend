@@ -29,13 +29,19 @@ describe('FilesUpload', () => {
     expect(container.querySelector('#fileInput')).toBeInTheDocument();
   });
 
-  it('tiene un único h1 y un contenedor max-w-3xl', () => {
+  it('usa el mismo contenedor que las otras páginas privadas y la descripción y la subida en max-w-3xl', () => {
     const { container } = renderPage();
 
     const h1 = screen.getAllByRole('heading', { level: 1 });
     expect(h1).toHaveLength(1);
     expect(h1[0]).toHaveTextContent('uploadFiles.title');
-    expect(container.querySelector('.max-w-3xl')).toBeInTheDocument();
+    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6');
+    const columna = container.querySelector('.max-w-3xl');
+    expect(columna).toBeInTheDocument();
+    expect(columna).toContainElement(screen.getByText('uploadFiles.description'));
+    expect(columna).toContainElement(container.querySelector('#fileInput'));
+    expect(columna).not.toContainElement(h1[0]);
+    expect(columna.className).not.toMatch(/mx-auto/);
   });
 
   it('no usa anchos fijos que desbordan a 320 px ni la superposición de carga', () => {

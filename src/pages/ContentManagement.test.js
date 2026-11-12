@@ -46,6 +46,7 @@ describe('ContentManagement', () => {
     expect(h1).toHaveLength(1);
     expect(h1[0]).toHaveTextContent('contentManagement.title');
     expect(container.querySelector('.max-w-6xl')).toBeInTheDocument();
+    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6');
     expect(container.querySelector('.grid.lg\\:grid-cols-2')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(2);
   });

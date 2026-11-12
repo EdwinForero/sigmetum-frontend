@@ -68,6 +68,13 @@ describe('TermsManager', () => {
     papeleras.forEach((papelera) => expect(papelera).toHaveClass('focus-ring'));
   });
 
+  it('el nombre del término lleva las mismas clases tipográficas que el de la galería', async () => {
+    await renderManager();
+
+    const nombre = screen.getByText('subsp.');
+    expect(nombre).toHaveClass('min-w-0', 'break-words', 'text-base', 'font-normal');
+  });
+
   describe('validación en línea', () => {
     it('con el campo vacío muestra el error junto al campo, lo marca, le da el foco y no sube ni abre diálogo', async () => {
       const user = userEvent.setup();

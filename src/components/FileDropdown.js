@@ -17,6 +17,8 @@ const FileDropdown = forwardRef(function FileDropdown({
 ) {
   const { t } = useTranslation();
   const errorId = useId();
+  const listErrorId = useId();
+  const emptyId = useId();
   const [files, setFiles] = useState({});
   const [listStatus, setListStatus] = useState('loading');
   const [pendingKey, setPendingKey] = useState(null);
@@ -100,6 +102,9 @@ const FileDropdown = forwardRef(function FileDropdown({
   }, [files, listStatus, selectedFile, onFileSelect]);
 
   const isEmpty = listStatus === 'ready' && provinces.length === 0;
+  const describedBy =
+    [failedKey && errorId, listStatus === 'error' && listErrorId, isEmpty && emptyId].filter(Boolean).join(' ') ||
+    undefined;
   const statusLabel =
     listStatus === 'loading'
       ? t('dataManagement.fileSelectDropdwon.loading')
@@ -115,8 +120,8 @@ const FileDropdown = forwardRef(function FileDropdown({
         onChange={handleChange}
         disabled={listStatus !== 'ready' || isEmpty || disabled}
         aria-invalid={failedKey ? true : undefined}
-        aria-describedby={failedKey ? errorId : undefined}
-        className="focus-ring h-12 w-full rounded-xl border border-brand-dark bg-surface px-3 text-base text-ink disabled:opacity-50"
+        aria-describedby={describedBy}
+        className="focus-ring h-12 w-full rounded-xl border border-brand-dark bg-surface px-3 text-base text-ink disabled:cursor-not-allowed disabled:border-moss disabled:text-moss disabled:opacity-100"
       >
         <option value="">{t('dataManagement.fileSelectDropdwon.emptyOption')}</option>
         {provinces.map((province) => (
@@ -132,7 +137,7 @@ const FileDropdown = forwardRef(function FileDropdown({
 
       {listStatus === 'error' && (
         <div className="py-2">
-          <InlineError>{t('dialogAdvice.errorLoadData')}</InlineError>
+          <InlineError id={listErrorId}>{t('dialogAdvice.errorLoadData')}</InlineError>
           <ButtonAlternative text={t('feedback.retry')} onClick={fetchFiles} />
         </div>
       )}
@@ -145,7 +150,7 @@ const FileDropdown = forwardRef(function FileDropdown({
       )}
 
       {isEmpty && (
-        <p className="py-2 text-ink">
+        <p id={emptyId} className="py-2 text-ink">
           {t('dataManagement.fileSelectDropdwon.emptyState')}{' '}
           <Link to="/cargar-archivos" className="focus-ring rounded font-bold text-brand-deep underline">
             {t('dataManagement.fileSelectDropdwon.emptyStateLink')}

@@ -49,6 +49,14 @@ describe('Navbar', () => {
     expect(button).toHaveFocus();
   });
 
+  it('los enlaces de escritorio no parten el texto en dos líneas y cabe el relleno en 768 px', () => {
+    renderNavbar();
+
+    const link = screen.getAllByRole('link', { name: 'navbar.aboutUsOption' })[0];
+    expect(link).toHaveClass('whitespace-nowrap', 'px-2', 'lg:px-6');
+    expect(link).not.toHaveClass('px-6');
+  });
+
   it('en /explorar el enlace activo tiene aria-current="page"', () => {
     renderNavbar('/explorar');
 

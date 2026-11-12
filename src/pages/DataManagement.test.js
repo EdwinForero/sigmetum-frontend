@@ -118,13 +118,54 @@ describe('DataManagement', () => {
   });
 
   it('la tabla va en una región con nombre alcanzable con teclado y la página no usa anchos mínimos ni overflow-hidden', async () => {
+    const user = userEvent.setup();
     await renderPage([{ especie: 'a', familia: 'b' }]);
+    await chooseVersion(user);
 
     const region = screen.getByRole('region', { name: `${NS}.table.regionLabel` });
     expect(region).toHaveAttribute('tabindex', '0');
     expect(within(region).getByRole('table')).toBeInTheDocument();
     expect(container.querySelector('.min-w-72, .min-h-screen, .max-w-screen, .overflow-hidden')).toBeNull();
     expect(container.querySelector('.text-justify')).toBeNull();
+  });
+
+  it('usa el mismo contenedor que las otras páginas privadas', async () => {
+    await renderPage();
+
+    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6');
+  });
+
+  it('sin versiones se ve el vacío, no la tabla ni su placeholder', async () => {
+    api.get.mockImplementation(async () => ({}));
+    await renderPage([]);
+
+    expect(screen.getByRole('link', { name: `${NS}.fileSelectDropdwon.emptyStateLink` })).toBeInTheDocument();
+    expect(screen.queryByText(`${NS}.table.noDataFoundPlaceholder`)).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: `${NS}.table.regionLabel` })).not.toBeInTheDocument();
+  });
+
+  it('con un fallo de la lista se ve el error y «Reintentar», no el vacío ni la tabla', async () => {
+    api.get.mockRejectedValue(new Error('500'));
+    await renderPage([]);
+
+    expect(screen.getByText('dialogAdvice.errorLoadData')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'feedback.retry' })).toBeInTheDocument();
+    expect(screen.queryByText(new RegExp(`${NS}.fileSelectDropdwon.emptyState`))).not.toBeInTheDocument();
+    expect(screen.queryByText(`${NS}.table.noDataFoundPlaceholder`)).not.toBeInTheDocument();
+  });
+
+  it('cada botón «i» se llama por el título o la etiqueta que tiene al lado', async () => {
+    const user = userEvent.setup();
+    await renderPage();
+    await chooseVersion(user);
+
+    const nombre = (topic) => `iconButton.infoAbout {"topic":"${topic}"}`;
+    [
+      `${NS}.fileSelectDropdwon.selectFileDropdownLabel`,
+      `${NS}.downloadExcelButton`,
+      `${NS}.deleteVersionButton`,
+      `${NS}.updateDataButton`,
+    ].forEach((topic) => expect(screen.getByRole('button', { name: nombre(topic) })).toBeInTheDocument());
   });
 
   describe('eliminar versión', () => {

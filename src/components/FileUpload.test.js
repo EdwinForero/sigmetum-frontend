@@ -438,3 +438,144 @@ describe('FileUpload con campos vacíos en el Excel', () => {
     });
   });
 });
+
+describe('FileUpload: zona de arrastre', () => {
+  let fetchMock;
+
+  const xlsx = (name = 'datos.xlsx') =>
+    new File(['d'], name, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const csv = () => new File(['d'], 'datos.csv', { type: 'text/csv' });
+  const zona = (container) => container.querySelector('[data-testid="dropZone"]');
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    localStorage.setItem('token', 'abc');
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  it('al soltar un .xlsx y un .csv añade solo el .xlsx y muestra dropRejected', () => {
+    const { container } = renderUpload();
+    fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx(), csv()] } });
+
+    expect(screen.getByText('datos.xlsx')).toBeInTheDocument();
+    expect(screen.queryByText('datos.csv')).not.toBeInTheDocument();
+    expect(screen.getByText(`${FS}.dropRejected`)).toBeInTheDocument();
+  });
+
+  it('acepta la extensión en mayúsculas', () => {
+    const { container } = renderUpload();
+    fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('DATOS.XLSX')] } });
+
+    expect(screen.getByText('DATOS.XLSX')).toBeInTheDocument();
+    expect(screen.queryByText(`${FS}.dropRejected`)).not.toBeInTheDocument();
+  });
+
+  it('el input también descarta lo que no es .xlsx', () => {
+    const { container } = renderUpload();
+    fireEvent.change(container.querySelector('#fileInput'), { target: { files: [csv(), xlsx()] } });
+
+    expect(screen.getByText('datos.xlsx')).toBeInTheDocument();
+    expect(screen.queryByText('datos.csv')).not.toBeInTheDocument();
+    expect(screen.getByText(`${FS}.dropRejected`)).toBeInTheDocument();
+  });
+
+  it('durante el arrastre cambian el texto y el borde (continuo), y al salir vuelven', () => {
+    const { container } = renderUpload();
+    const caja = zona(container);
+    expect(screen.getByText(`${FS}.dropZoneHint`)).toBeInTheDocument();
+    expect(caja).toHaveClass('border-dashed');
+
+    fireEvent.dragEnter(caja);
+    expect(screen.getByText(`${FS}.dropZoneActive`)).toBeInTheDocument();
+    expect(caja).toHaveClass('border-solid');
+    expect(caja).not.toHaveClass('border-dashed');
+
+    // Entrar en un hijo y salir del padre no debe apagar el estado.
+    fireEvent.dragEnter(caja);
+    fireEvent.dragLeave(caja);
+    expect(screen.getByText(`${FS}.dropZoneActive`)).toBeInTheDocument();
+    fireEvent.dragLeave(caja);
+    expect(screen.getByText(`${FS}.dropZoneHint`)).toBeInTheDocument();
+    expect(caja).toHaveClass('border-dashed');
+  });
+
+  it('dragOver llama a preventDefault y soltar apaga el estado de arrastre', () => {
+    const { container } = renderUpload();
+    const caja = zona(container);
+    const permitido = fireEvent.dragOver(caja);
+    expect(permitido).toBe(false);
+
+    fireEvent.dragEnter(caja);
+    fireEvent.drop(caja, { dataTransfer: { files: [xlsx()] } });
+    expect(screen.getByText(`${FS}.dropZoneHint`)).toBeInTheDocument();
+  });
+
+  it('soltar algo sin archivos conserva el error de la tarjeta y el anuncio', () => {
+    const { container } = renderUpload();
+    const caja = zona(container);
+    fireEvent.drop(caja, { dataTransfer: { files: [xlsx(), csv()] } });
+    const region = container.querySelector('p.sr-only[role="status"]');
+    const anuncio = region.textContent;
+    expect(anuncio).not.toBe('');
+    expect(screen.getByText(`${FS}.dropRejected`)).toBeInTheDocument();
+
+    fireEvent.drop(caja, { dataTransfer: { files: [] } });
+
+    expect(screen.getByText(`${FS}.dropRejected`)).toBeInTheDocument();
+    expect(region.textContent).toBe(anuncio);
+    expect(screen.getByText('datos.xlsx')).toBeInTheDocument();
+  });
+
+  it('al arrastrar, el font-bold queda solo en el texto de la pista y no en el contenedor', () => {
+    const { container } = renderUpload();
+    const caja = zona(container);
+    fireEvent.dragEnter(caja);
+
+    expect(caja).not.toHaveClass('font-bold');
+    expect(screen.getByText(`${FS}.dropZoneActive`)).toHaveClass('font-bold');
+  });
+
+  it('la región status siempre montada anuncia lo añadido', () => {
+    const { container } = renderUpload();
+    const region = container.querySelector('p.sr-only[role="status"]');
+    expect(region).toBeInTheDocument();
+    expect(region).toBeEmptyDOMElement();
+
+    fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx'), xlsx('b.xlsx')] } });
+    expect(region).toHaveTextContent(`${FS}.filesAdded`);
+  });
+
+  it('el icono de la zona está oculto a los lectores de pantalla', () => {
+    const { container } = renderUpload();
+    const icono = zona(container).querySelector('.material-symbols-outlined');
+    expect(icono).toHaveTextContent('upload_file');
+    expect(icono).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('durante la subida se ignora el drop', async () => {
+    const pendiente = deferred();
+    fetchMock.mockReturnValueOnce(pendiente.promise);
+    const user = userEvent.setup();
+    const { container } = renderUpload();
+    await user.upload(container.querySelector('#fileInput'), xlsx('uno.xlsx'));
+    await user.click(screen.getByText(BTN));
+    await waitFor(() => expect(uploadCalls(fetchMock)).toHaveLength(1));
+
+    fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('dos.xlsx')] } });
+    expect(screen.queryByText('dos.xlsx')).not.toBeInTheDocument();
+
+    pendiente.resolve(jsonResponse(200, { success: true }));
+    await waitFor(() => expect(screen.queryByText('uno.xlsx')).not.toBeInTheDocument());
+  });
+
+  it('el botón de seleccionar sigue siendo el primer elemento enfocable', () => {
+    renderUpload();
+    const botones = screen.getAllByRole('button');
+    expect(botones[0]).toHaveTextContent(`${FS}.selectFilesButton`);
+  });
+});

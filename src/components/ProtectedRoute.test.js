@@ -12,13 +12,15 @@ describe('ProtectedRoute', () => {
   let fetchMock;
   let assign;
 
-  const renderRoute = () =>
+  const renderRoute = (onStatusChange) =>
     render(
       <MemoryRouter initialEntries={['/privada']}>
-        <Routes>
-          <Route path="/privada" element={<ProtectedRoute element={<p>contenido-privado</p>} />} />
-          <Route path="/login" element={<p>pagina-login</p>} />
-        </Routes>
+        <main id="contenido" tabIndex={-1}>
+          <Routes>
+            <Route path="/privada" element={<ProtectedRoute element={<p>contenido-privado</p>} onStatusChange={onStatusChange} />} />
+            <Route path="/login" element={<p>pagina-login</p>} />
+          </Routes>
+        </main>
       </MemoryRouter>
     );
 
@@ -175,5 +177,49 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeDisabled();
     expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('en el primer checking no pinta nada: ni status ni contenido ni spinner', async () => {
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
+    fetchMock.mockImplementation(() => new Promise(() => {}));
+
+    renderRoute();
+
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByText('contenido-privado')).toBeNull();
+    expect(screen.getByRole('main')).toBeEmptyDOMElement();
+  });
+
+  it.each([
+    ['ok', () => { session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' }); fetchMock.mockResolvedValue(jsonResponse(200, { success: true, data: {} })); }],
+    ['denied', () => {}],
+    ['unavailable', () => { session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' }); fetchMock.mockResolvedValue(jsonResponse(500, { success: false, error: 'boom' })); }],
+  ])('onStatusChange recibe checking y después %s', async (final, prepare) => {
+    prepare();
+    const onStatusChange = vi.fn();
+
+    renderRoute(onStatusChange);
+
+    await waitFor(() => expect(onStatusChange).toHaveBeenLastCalledWith(final));
+    expect(onStatusChange.mock.calls[0][0]).toBe('checking');
+  });
+
+  it('tras Reintentar la región status es el mismo nodo, anuncia login.loading y el foco va a main#contenido', async () => {
+    const user = userEvent.setup();
+    session.saveTokens({ AccessToken: 'A', RefreshToken: 'R' });
+    fetchMock.mockResolvedValueOnce(jsonResponse(500, { success: false, error: 'boom' }));
+    fetchMock.mockImplementation(() => new Promise(() => {}));
+
+    renderRoute();
+    await screen.findByRole('alert');
+    const region = screen.getByRole('status');
+    expect(region).toBeEmptyDOMElement();
+
+    await user.click(screen.getByRole('button', { name: 'login.retryButton' }));
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('login.loading'));
+    expect(screen.getByRole('status')).toBe(region);
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole('main'));
   });
 });

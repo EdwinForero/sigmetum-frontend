@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 const Filter = ({ 
   data, 
   onFilterChange, 
-  onSpeciesSelect 
+  onSpeciesSelect,
+  titleId
 }) => {
   
   const [categories, setCategories] = useState({});
@@ -135,7 +136,7 @@ const Filter = ({
 
   return (
     <>
-      <h2 className="text-[#0C1811] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-3">
+      <h2 id={titleId} className="text-[#0C1811] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-3">
         {t('filter.title')}
       </h2>
       <div className="flex justify-center px-4 py-2 mx-auto">

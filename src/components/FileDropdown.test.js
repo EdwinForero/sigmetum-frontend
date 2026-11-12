@@ -267,6 +267,33 @@ describe('FileDropdown como <select> nativo', () => {
     expect(enlace.closest('p')).toHaveTextContent(`${NS}.emptyState ${NS}.emptyStateLink`);
   });
 
+  it('sin versiones, el select deshabilitado se describe con el mensaje de vacío y usa moss con opacidad plena', async () => {
+    api.get.mockResolvedValue({});
+    await renderDropdown();
+
+    const select = combobox();
+    const mensaje = screen.getByRole('link', { name: `${NS}.emptyStateLink` }).closest('p');
+    expect(select).toBeDisabled();
+    expect(mensaje).toHaveAttribute('id');
+    expect(select.getAttribute('aria-describedby').split(' ')).toContain(mensaje.id);
+    expect(select).toHaveClass(
+      'disabled:cursor-not-allowed',
+      'disabled:opacity-100',
+      'disabled:border-moss',
+      'disabled:text-moss'
+    );
+    expect(select.className).not.toMatch(/disabled:opacity-50/);
+  });
+
+  it('si la lista falla, el select se describe con el error de lista y no con el vacío', async () => {
+    api.get.mockRejectedValueOnce(new Error('red'));
+    await renderDropdown();
+
+    const error = (await screen.findByText('dialogAdvice.errorLoadData')).closest('[id]');
+    expect(combobox().getAttribute('aria-describedby').split(' ')).toContain(error.id);
+    expect(screen.queryByText(new RegExp(`${NS}.emptyState`))).not.toBeInTheDocument();
+  });
+
   it('con la lista cargada no se muestra el vacío', async () => {
     await renderDropdown();
 

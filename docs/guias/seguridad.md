@@ -63,7 +63,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 - **Reglas:**
   - Valida en el cliente por usabilidad y **nunca confíes en ello**: el backend valida siempre.
   - Escapa todo texto que vaya a una expresión regular (A3).
-  - **Subida de archivos:** el selector solo acepta `.xlsx` (hoy acepta también `.csv` y `.xls`, que el backend no procesa: D3). Limita el tamaño en el cliente cuando el backend lo limite.
+  - **Subida de archivos:** el cliente solo añade a la cola nombres que acaben en `.xlsx` (sin distinguir mayúsculas), tanto con el botón como al arrastrar (`FileUpload.addFiles`, 11/11/2026): es un filtro de usabilidad **por nombre**, que se salta cambiando la extensión, y el servidor sigue validando; con «Todos los archivos» en el selector del sistema se puede elegir otro tipo, que se descarta con un aviso. Limita el tamaño en el cliente cuando el backend lo limite. Pendiente que el orquestador pase `/security-review` por la subida.
   - **Formulario de contacto:** longitudes máximas y `type="email"`. El backend debe limitar la frecuencia (no lo hace hoy, ver su documento de deuda).
 - **Estado:** parcial (D3).
 
@@ -92,6 +92,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 - **Por qué:** la web se sirve por HTTPS; el navegador bloquea las peticiones a un backend `http://`, y cualquier contraseña viajaría sin cifrar.
 - **Reglas:** toda URL de la API y de recursos es `https://` fuera de `localhost`. `VITE_BASE_URL` de cada entorno desplegado también.
 - **Estado:** el backend de `dev` es `http://` (I4, en infraestructura).
+- **Miniaturas de la galería (11/11/2026):** `ImageGalleryManager` usa la URL prefirmada de `GET /list-images` como `src` de un `<img>`; antes de pedirla, `isSafeImageUrl` la analiza con `new URL` (en `try/catch`) y solo acepta `https:`, y `http:` únicamente para `localhost` y `127.0.0.1`. Una URL no válida (otro protocolo como `javascript:` o `data:`, o texto que no es una URL) muestra la caja vacía y no genera ninguna petición. Cubierto por test; con URLs prefirmadas reales de `dev`, **(por confirmar)**.
 
 ### S8. Cabeceras de seguridad y CSP
 
@@ -134,7 +135,7 @@ Se trata de una SPA pública con una zona privada. **Toda la seguridad real est�
 | Token de sesión | Acceso y refresco de Cognito en `localStorage` (M1); solo los tocan `session.js`, `api.js` y `ProtectedRoute`; `LoginForm` y `useCognitoLogin` no tienen acceso. Contraseña, código y secreto TOTP solo en memoria, y `console.*` prohibido en los archivos del acceso, incluidos `QrCode.js` y `formatSecret.js` (`npm run quality`). El QR se genera en el navegador (sin peticiones ni `data:`); su `d` equivale al secreto. La contraseña solo se ve a petición y se oculta al enviar |
 | Cierre de sesión y gestión del `401` | El botón de cierre vive en la barra de gestión (`Sidebar`) y se conserva en `ProtectedRoute` solo en el estado `unavailable`; `api.js` no cambió en la auditoría de las páginas privadas. Acceso SRP, renovación del `401` con lista blanca de reintentables y `503` con reintentos en `api.js`; cierre con `RevokeToken` (3 s) en `api.logout` (M1 parcial). Probado solo con tests (con un oráculo del propio paquete para el SRP): el flujo contra Cognito es **(por confirmar en `dev`)** |
 | Cookies propias | Con `SameSite=Lax` y, en HTTPS, `Secure` (M15 resuelta); el banner sigue sin efecto real (M11) |
-| Fuentes de Google cargadas antes del consentimiento | Sí (M13 parcial: ya sin `onload` en línea) |
+| Fuentes de Google cargadas antes del consentimiento | Sí (M13 parcial: ya sin `onload` en línea; desde el 11/11/2026 con `preconnect`, sin Mukta Malar y con solo 21 iconos por `icon_names`; sigue siendo un tercero y sigue sin autoalojarse) |
 | Content-Security-Policy y demás cabeceras | Sin definir |
 | URLs `http://` en el código | 1 enlace externo (B14) y el valor por defecto `localhost` |
 | Política de privacidad y aviso de tratamiento de datos en el formulario de contacto | No existen (M17) |

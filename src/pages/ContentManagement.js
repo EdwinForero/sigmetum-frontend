@@ -7,7 +7,7 @@ const ContentManagement = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-2 pb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6">
       <h1 className="py-4 text-[32px] font-bold leading-tight text-brand-deep">
         {t('contentManagement.title')}
       </h1>
