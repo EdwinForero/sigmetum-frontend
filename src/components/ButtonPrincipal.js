@@ -3,7 +3,11 @@ const BUTTON_SHAPE = 'focus-ring inline-flex min-h-12 min-w-[84px] max-w-full it
 // Clases exportables para los Link con aspecto de botón.
 export const BUTTON_PRINCIPAL_CLASS = `${BUTTON_SHAPE} bg-brand text-ink hover:bg-brand-dark`;
 export const BUTTON_INACTIVE_CLASS = `${BUTTON_SHAPE} border-2 border-dashed border-moss bg-surface text-moss cursor-not-allowed`;
+export const ICON_BUTTON_INACTIVE_CLASS = 'focus-ring inline-flex h-12 w-12 items-center justify-center rounded-xl border-2 border-dashed border-moss text-moss cursor-not-allowed';
+const ICON_BUTTON_CLASS = 'focus-ring inline-flex h-12 w-12 items-center justify-center rounded-xl text-brand-dark hover:bg-brand hover:text-ink cursor-pointer';
 
+// disabled: estado transitorio (el navegador lo saca del orden de Tab). inactive: estado que se explica
+// por teclado (aria-disabled): el botón recibe el foco, no hace nada y puede enlazarse con aria-describedby.
 const ButtonPrincipal = ({
   onClick,
   text,
@@ -12,18 +16,19 @@ const ButtonPrincipal = ({
   type = 'button',
   className = '',
   disabled = false,
+  inactive = false,
   loading = false,
   ...rest
 }) => {
   const handleClick = (event) => {
-    if (loading) {
+    if (loading || inactive) {
       event.preventDefault();
       return;
     }
     if (onClick) onClick(event);
   };
 
-  const state = `${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${loading ? 'cursor-progress' : ''}`;
+  const off = disabled || inactive;
 
   return icon ? (
     <button
@@ -31,10 +36,10 @@ const ButtonPrincipal = ({
       type={type}
       aria-label={ariaLabel}
       aria-busy={loading || undefined}
-      aria-disabled={loading || undefined}
+      aria-disabled={loading || inactive || undefined}
       onClick={handleClick}
       disabled={disabled}
-      className={`focus-ring inline-flex h-12 w-12 items-center justify-center rounded-xl text-brand-dark hover:bg-brand hover:text-ink ${state} ${className}`}
+      className={`${off ? ICON_BUTTON_INACTIVE_CLASS : ICON_BUTTON_CLASS} ${loading ? 'cursor-progress' : ''} ${className}`}
     >
       <span className={`material-symbols-outlined text-3xl ${loading ? 'animate-spin' : ''}`} aria-hidden="true">
         {loading ? 'progress_activity' : icon}
@@ -45,10 +50,10 @@ const ButtonPrincipal = ({
       {...rest}
       type={type}
       aria-busy={loading || undefined}
-      aria-disabled={loading || undefined}
+      aria-disabled={loading || inactive || undefined}
       onClick={handleClick}
       disabled={disabled}
-      className={`${disabled ? BUTTON_INACTIVE_CLASS : `${BUTTON_PRINCIPAL_CLASS} cursor-pointer`} ${loading ? 'cursor-progress' : ''} ${className}`}
+      className={`${off ? BUTTON_INACTIVE_CLASS : `${BUTTON_PRINCIPAL_CLASS} cursor-pointer`} ${loading ? 'cursor-progress' : ''} ${className}`}
     >
       {loading && (
         <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>

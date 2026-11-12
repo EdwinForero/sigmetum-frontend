@@ -103,23 +103,23 @@ Explorador público de especies características. Abre con `<h1>` (`text-3xl`, `
 
 ## VegetationGallery (`/galeria`)
 
-Galería en columnas con visor. `<h1>` y un `LoadSpinner inline` siempre montado (`gallery.loading` mientras carga); contenedor `.page-container`.
+Galería en columnas con visor. `<h1>` y un `LoadSpinner inline` siempre montado (`gallery.loading` mientras carga) y los estados de error y vacío van dentro de `.page-container`; la rejilla **rompe el contenedor**: entra a sangre con solo el margen lateral (`px-gutter`, `md:px-gutter-md`, `lg:px-gutter-lg`) y llena el viewport, y el `<h1>` conserva su posición común.
 
 | Elemento | Descripción |
 |---|---|
 | Estado | `images`, `isLoading`, `isError`, `columns` y `viewerIndex` (el visor está abierto si no es `null`) |
 | Carga | `loadImages()`: `GET /list-images`; descarta imágenes con `fileName` vacío; ignora la respuesta si el componente se desmonta (`requestRef`). «Reintentar» del estado de error la repite |
-| Columnas | `columnCount(width)`: 1 bajo 640 px, 2 desde 640, 3 desde 1024 y 4 desde 1280; se recalcula con `resize` |
-| Reparto | `toColumns`: **bloques contiguos**, `perColumn = ceil(N / n)`; la columna `c` recibe `images.slice(c·perColumn, (c+1)·perColumn)`. El orden del DOM, el de los datos y el de Tab coinciden (se lee bajando por cada columna) y la columna de una foto no cambia al cargar otras |
-| Foto | `<li>` con `<figure>`: botón (`data-photo`, nombre `gallery.openPhoto`) con la imagen (`alt` con `photoName`, `width`/`height` 4:3, `loading="lazy"`) sobre `bg-sage-soft` y pie `text-sm text-ink` con `line-clamp-2`. Sin pulso: la caja con la proporción es el esqueleto |
-| Carga (esqueleto) | Seis celdas estáticas `aria-hidden` con proporción 4:3 |
+| Columnas | `galleryColumns(clientWidth)` ([06](06-utilidades-hooks-config.md)) sobre el ancho de la propia rejilla (`gridRef`, `useLayoutEffect` y `resize`), no sobre `window.innerWidth`: `ceil((W + 12) / 212)`, de modo que la celda mide como mucho 200 px por construcción. Rejilla `grid gap-x-stack-md` con `repeat(n, minmax(0, 1fr))` (pistas fijas: con pocas fotos nada se estira); huecos de 12 px (horizontal) y 16 px (vertical, `gap-stack`). Las celdas bajan de 160 px por debajo de unos 848 px de rejilla (unos 130 a 136 px a 320 y 480 px): **desviación consciente del criterio 14 de la spec**, ver [09](09-estado-actual-y-deuda-tecnica.md) |
+| Reparto | `splitInColumns`: **bloques contiguos equilibrados** (las primeras `N % n` columnas reciben `⌈N/n⌉` fotos y el resto `⌊N/n⌋`; las vacías se omiten); el índice de cada foto es `start + i`. El orden del DOM, el de los datos y el de Tab coinciden (se lee bajando por cada columna) y la columna de una foto no cambia al cargar otras |
+| Foto | `<li>` con `<figure>`: botón (`data-photo`, nombre `gallery.openPhoto`) con la imagen (`alt` con `photoName`, `width`/`height` 4:3, `loading="lazy"`) sobre `bg-sage-soft` y pie `text-sm text-ink` con `line-clamp-2`; `rounded-lg`. Sin pulso: la caja con la proporción es el esqueleto. **Velo:** el botón es `group relative overflow-hidden` y lleva un `<span aria-hidden>` con `bg-ink/70` y el nombre en `text-surface` (`line-clamp-3`) que aparece con `group-hover` y `group-focus-visible` (150 ms; 0 s con `motion-reduce`). Es decorativo: el pie visible sigue siendo la vía accesible (en táctil y con teclado el hover no existe) |
+| Carga (esqueleto) | Seis celdas estáticas `aria-hidden` con proporción 4:3, con el mismo reparto y las mismas pistas |
 | Clave por foto | `fileName` y, solo en los repetidos, `fileName#2`, `fileName#3`… (`photoKeys`): es la `key` del `<li>`, el `data-photo` del botón y la clave del mapa de refs, para que dos fotos con el mismo nombre no compartan clave ni foco |
 | URL de la imagen | Solo se pide si `isSafeImageUrl` ([06](06-utilidades-hooks-config.md)) acepta la URL (`https:`, o `http:` en `localhost` y `127.0.0.1`); si no, la caja queda vacía y no hay petición (S7) |
 | Foco | Un mapa de refs por clave de foto: si cambian las columnas con el foco en una foto, el foco vuelve a ella; al cerrar el visor vuelve a la foto que lo abrió (`useEffect`, no `useLayoutEffect`, para ejecutarse después de la limpieza de `useDialogFocus`) |
 | Estados | Error → `EmptyState role="alert"` con «Reintentar»; vacío → `EmptyState` (`gallery.emptyTitle`) |
 | Visor | `GalleryViewer` ([05](05-componentes.md#galleryviewer)) |
 
-Cubierto por `VegetationGallery.test.js` y por la suite E2E (orden del DOM igual al de los datos, columna estable, CLS ≤ 0,25, visor). **No comprobado:** el cambio de 768 a 1024 px con el visor abierto en un navegador real, y Safari **(por confirmar)**. Los cuatro tests de la galería que no discriminan se listan en [09](09-estado-actual-y-deuda-tecnica.md).
+Cubierto por `VegetationGallery.test.js` y por la suite E2E (orden del DOM igual al de los datos, columna estable, CLS ≤ 0,25, visor, suma de pistas y huecos frente al ancho, celdas de 160 a 200 px, velo con hover, con Tab y con movimiento reducido). **No comprobado:** el hover pegajoso en iOS (Tailwind 3.4.14 aplica `group-hover` también en táctil) **(por confirmar)**. **No comprobado:** el cambio de 768 a 1024 px con el visor abierto en un navegador real, y Safari **(por confirmar)**. Los tests de la galería se reescribieron con su mutación (B59 a, ver [09](09-estado-actual-y-deuda-tecnica.md)).
 
 ---
 
@@ -168,7 +168,7 @@ Gestión de versiones de los datos por provincia.
 
 ## ContentManagement (`/administrar-contenido`) · protegida
 
-Contenedor `max-w-6xl` con `<h1>`, descripción y una rejilla de una columna (dos desde `lg`) con `TermsManager` (términos que no van en cursiva) e `ImageGalleryManager` (imágenes de la galería), cada uno con su `<h2>`.
+Contenedor `max-w-6xl` con `<h1>`, descripción y una rejilla de una columna (dos desde `lg`) con `TermsManager` (términos que no van en cursiva) e `ImageGalleryManager` (imágenes de la galería), cada uno con su `<h2>`, y debajo, en un contenedor `lg:col-span-2` con `max-w-3xl`, `ContactRecipientsManager` (destinatarios de las dudas de contacto, con su `<h2>`). Si el panel de destinatarios falla, los otros dos siguen funcionando.
 
 ---
 

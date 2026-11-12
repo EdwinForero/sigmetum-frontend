@@ -109,6 +109,9 @@ El login no usa `POST /log` ni el Hosted UI. Todas las peticiones van a `https:/
 | `DELETE /delete-image` | Sí | `{ imageKey }` (se envía `fileName`) | Mensaje | `ImageGalleryManager.deleteImage` |
 | `POST /upload-term` | Sí | `{ term }` | Mensaje | `TermsManager.handleAddTerm` |
 | `DELETE /delete-term` | Sí | `{ term }` | Mensaje | `TermsManager.handleDeleteTerm` |
+| `GET /list-recipients` | Sí | — | `[{ email }]` (`[]` si no hay ninguno guardado; `500` si falta el fichero) | `ContactRecipientsManager.fetchRecipients` |
+| `POST /add-recipient` | Sí | `{ email }` | Mensaje | `ContactRecipientsManager.handleAdd` |
+| `DELETE /delete-recipient` | Sí | `{ email }` | Mensaje | `ContactRecipientsManager.handleRemove` |
 
 ### Fuera del prefijo
 

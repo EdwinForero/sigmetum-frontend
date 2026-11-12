@@ -285,7 +285,36 @@ describe('DialogSpecies', () => {
     expect(link).toHaveClass('inline-flex', 'min-h-11', 'items-center', 'text-moss', 'underline');
     expect(link).not.toHaveClass('text-sm');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(link.getAttribute('href')).toMatch(/^https:\/\/www\.ipni\.org\/\?q=/);
+    expect(link.getAttribute('href')).toMatch(/^https:\/\/www\.ipni\.org\/search\?q=/);
+  });
+
+  it('el enlace de IPNI consulta el nombre sin autor', () => {
+    render(
+      <DialogSpecies
+        isOpen
+        onClose={vi.fn()}
+        data={[fila('Provincia exacta', 'Pinus pinea L.')]}
+        species={{ 'Especies Características': 'Pinus pinea L.' }}
+        noItalicTerms={[]}
+      />
+    );
+
+    expect(screen.getByRole('link').getAttribute('href')).toBe('https://www.ipni.org/search?q=Pinus%20pinea');
+  });
+
+  it('con el nombre vacío no hay enlace a IPNI', () => {
+    render(
+      <DialogSpecies
+        isOpen
+        onClose={vi.fn()}
+        data={[fila('Provincia exacta', '')]}
+        species={{ 'Especies Características': '' }}
+        noItalicTerms={[]}
+      />
+    );
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'explore.dialogSpecies.closeButton' })).toBeInTheDocument();
   });
 
   it('el nombre científico en cursiva sigue en Amaranth (font-primary italic): Sen no tiene cursiva', () => {

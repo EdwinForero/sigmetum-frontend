@@ -64,7 +64,7 @@ const DialogAdvice = ({
         <div className="p-4 grid grid-cols-1 gap-4 max-h-[300px] overflow-y-auto flex-grow mb-10">
           <div className={`${NOTICE_BASE} ${box}`}>
             <span className={`material-symbols-outlined ${iconClass}`} aria-hidden="true">{icon}</span>
-            <p className="py-2 text-xl whitespace-pre-wrap">{dialogMessage}</p>
+            <p className="py-2 text-xl whitespace-pre-wrap [overflow-wrap:anywhere]">{dialogMessage}</p>
           </div>
           {renderDialogDetails()}
         </div>

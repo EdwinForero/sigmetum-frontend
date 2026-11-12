@@ -2,6 +2,7 @@ import { React } from 'react';
 import { useTranslation } from 'react-i18next';
 import TermsManager from '../components/TermsManager';
 import ImageGalleryManager from '../components/ImageGalleryManager';
+import ContactRecipientsManager from '../components/ContactRecipientsManager';
 
 const ContentManagement = () => {
   const { t } = useTranslation();
@@ -17,6 +18,9 @@ const ContentManagement = () => {
       <div className="grid gap-6 py-4 lg:grid-cols-2">
         <TermsManager />
         <ImageGalleryManager />
+        <div className="min-w-0 max-w-3xl lg:col-span-2">
+          <ContactRecipientsManager />
+        </div>
       </div>
     </div>
   );

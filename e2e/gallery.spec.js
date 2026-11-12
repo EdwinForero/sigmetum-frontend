@@ -1,4 +1,4 @@
-import { test, expect, PHOTOS, trackLayoutShift } from './fixtures.js';
+import { test, expect, PHOTOS, MANY_PHOTOS, trackLayoutShift } from './fixtures.js';
 
 // Criterios 27 a 30 de la galería: cada foto conserva su columna y su orden mientras cargan las demás,
 // el esqueleto reserva espacio, solo se mueven las celdas de abajo y el visor cumple el criterio 30.
@@ -193,5 +193,156 @@ test.describe('visor (criterio 30)', () => {
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
     await expect(page.locator('[data-photo]').nth(4)).toBeFocused();
+  });
+});
+
+// BL3: la rejilla llena el viewport (solo el margen lateral), cada celda mide 200 px como máximo y el
+// título conserva su posición en .page-container.
+const GRID_VIEWPORTS = [
+  { width: 390, height: 844, gutter: 16, h1Left: 16 },
+  { width: 768, height: 1024, gutter: 24, h1Left: 24 },
+  { width: 1024, height: 768, gutter: 32, h1Left: 32 },
+  { width: 1440, height: 900, gutter: 32, h1Left: 168 },
+  { width: 1920, height: 1080, gutter: 32, h1Left: 408 },
+];
+const PAGE_CONTAINER_MAX = 1152; // max-w-6xl
+const MAX_CELL = 200;
+
+// Recorre la página hasta que todas las imágenes han cargado.
+const waitForPhotos = async (page, count) => {
+  await expect(page.locator('[data-photo]')).toHaveCount(count);
+  await expect
+    .poll(async () => {
+      await page.evaluate(() => window.scrollBy(0, Math.max(200, window.innerHeight / 2)));
+      return page.evaluate(() => [...document.querySelectorAll('[data-photo] img')].every((img) => img.complete && img.naturalWidth > 0));
+    }, { timeout: 15000, intervals: [150] })
+    .toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+};
+
+// Medidas de la rejilla: pistas, hueco, celdas, posición del título y desbordamiento.
+const measureGrid = (page) =>
+  page.evaluate(() => {
+    const grid = document.querySelector('[data-photo]').closest('ul').parentElement;
+    const style = getComputedStyle(grid);
+    const tracks = style.gridTemplateColumns.split(' ').map(parseFloat);
+    const cells = [...document.querySelectorAll('[data-photo]')].map((button) => button.getBoundingClientRect());
+    // Altura del contenido de cada columna (el <ul> se estira hasta la fila más alta del grid).
+    const lists = [...grid.children].map((list) => ({ height: list.lastElementChild.getBoundingClientRect().bottom - list.getBoundingClientRect().top }));
+    // Ancho de maquetación de la página: el del contenedor con los márgenes laterales (la rejilla vive dentro).
+    const wrapper = grid.parentElement.parentElement;
+    return {
+      clientWidth: wrapper.clientWidth,
+      innerWidth: window.innerWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      tracks,
+      gap: parseFloat(style.columnGap),
+      firstLeft: cells[0].left,
+      maxCell: Math.max(...cells.map((rect) => rect.width)),
+      minCell: Math.min(...cells.map((rect) => rect.width)),
+      h1Left: document.querySelector('h1').getBoundingClientRect().left,
+      listHeights: lists.map((list) => list.height),
+    };
+  });
+
+for (const { width, height, gutter, h1Left } of GRID_VIEWPORTS) {
+  test.describe(`rejilla a todo el ancho a ${width} px`, () => {
+    test.use({ viewport: { width, height } });
+
+    test('con 24 fotos: pistas y huecos suman clientWidth menos dos márgenes, celdas de 200 px como máximo y título en su sitio', async ({ page, mock }, testInfo) => {
+      mock.photos = MANY_PHOTOS;
+      await page.goto('/galeria');
+      await waitForPhotos(page, 24);
+
+      const m = await measureGrid(page);
+      const total = m.tracks.reduce((sum, track) => sum + track, 0) + (m.tracks.length - 1) * m.gap;
+      expect(Math.abs(total - (m.clientWidth - 2 * gutter)), 'pistas + huecos = clientWidth − 2·gutter').toBeLessThanOrEqual(1);
+      expect(Math.abs(m.firstLeft - gutter), 'la primera celda empieza en el margen lateral').toBeLessThanOrEqual(1);
+      expect(m.scrollWidth, 'sin desbordamiento horizontal').toBeLessThanOrEqual(m.innerWidth);
+      expect(m.maxCell, `celda máxima ${m.maxCell}`).toBeLessThanOrEqual(MAX_CELL + 0.5);
+      expect(m.minCell).toBeGreaterThan(0);
+
+      // El título no cambia: la posición de .page-container (centrado, tope de 1152 px) más el margen lateral.
+      const expectedH1 = Math.max(0, (m.clientWidth - PAGE_CONTAINER_MAX) / 2) + gutter;
+      expect(Math.abs(m.h1Left - expectedH1), `left del h1 ${m.h1Left}`).toBeLessThanOrEqual(1);
+      // Línea base anterior a BL3 (16/24/32/168/408), medida con barra de desplazamiento de 15 px.
+      if (m.innerWidth - m.clientWidth === 15) expect(Math.abs(m.h1Left - h1Left), 'left del h1 frente a la línea base').toBeLessThanOrEqual(1);
+
+      await testInfo.attach(`medidas-${width}`, {
+        body: JSON.stringify({ columnas: m.tracks.length, celdaMax: m.maxCell, celdaMin: m.minCell, h1Left: m.h1Left, clientWidth: m.clientWidth }, null, 1),
+        contentType: 'application/json',
+      });
+    });
+  });
+}
+
+test.describe('rejilla con pocas fotos', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('con 6 fotos a 1440 px ninguna celda pasa de 200 px', async ({ page }) => {
+    await page.goto('/galeria');
+    await expect(page.locator('[data-photo]')).toHaveCount(6);
+
+    const m = await measureGrid(page);
+    expect(m.maxCell, `celda máxima ${m.maxCell}`).toBeLessThanOrEqual(MAX_CELL + 0.5);
+  });
+
+  test('desequilibrio de alturas de las columnas con 24 fotos a 1440 px (se adjunta)', async ({ page, mock }, testInfo) => {
+    mock.photos = MANY_PHOTOS;
+    await page.goto('/galeria');
+    await waitForPhotos(page, 24);
+
+    const { listHeights } = await measureGrid(page);
+    const max = Math.max(...listHeights);
+    const min = Math.min(...listHeights);
+    const report = { alturas: listHeights.map(Math.round), maxMenosMin: Math.round(max - min), maxSobreMin: Number((max / min).toFixed(2)) };
+    await testInfo.attach('desequilibrio-1440', { body: JSON.stringify(report, null, 1), contentType: 'application/json' });
+    console.log(`desequilibrio a 1440 px: ${JSON.stringify(report)}`);
+    expect(listHeights.length).toBeGreaterThan(1);
+  });
+});
+
+test.describe('velo con el nombre de la foto', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  const veilOf = (page, index) => page.locator('[data-photo]').nth(index).locator('span[aria-hidden="true"]');
+  const veilOpacity = (page, index) => veilOf(page, index).evaluate((node) => Number(getComputedStyle(node).opacity));
+
+  test('opacidad 0 en reposo, mayor que 0 con el ratón encima y con el foco de teclado (:focus-visible)', async ({ page }) => {
+    await page.goto('/galeria');
+    const first = page.locator('[data-photo]').first();
+    await expect(first).toBeVisible();
+
+    expect(await veilOpacity(page, 0), 'sin hover ni foco').toBe(0);
+    await first.hover();
+    await expect.poll(() => veilOpacity(page, 0)).toBeGreaterThan(0);
+    await page.mouse.move(0, 0);
+    await expect.poll(() => veilOpacity(page, 0)).toBe(0);
+
+    // Con Tab (modalidad de teclado) el botón recibe :focus-visible.
+    for (let i = 0; i < 40 && !(await first.evaluate((node) => node === document.activeElement)); i += 1) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(first).toBeFocused();
+    await expect.poll(() => veilOpacity(page, 0)).toBeGreaterThan(0);
+    await page.keyboard.press('Tab');
+    await expect(page.locator('[data-photo]').nth(1)).toBeFocused();
+    await expect.poll(() => veilOpacity(page, 0)).toBe(0);
+  });
+
+  test('sin movimiento reducido la transición dura 0,15 s', async ({ page }) => {
+    await page.goto('/galeria');
+    await expect(veilOf(page, 0)).toHaveCount(1);
+    expect(await veilOf(page, 0).evaluate((node) => getComputedStyle(node).transitionDuration)).toBe('0.15s');
+  });
+
+  test.describe('con movimiento reducido', () => {
+    test.use({ reducedMotion: 'reduce' });
+
+    test('transition-duration es 0 s', async ({ page }) => {
+      await page.goto('/galeria');
+      await expect(veilOf(page, 0)).toHaveCount(1);
+      expect(await veilOf(page, 0).evaluate((node) => getComputedStyle(node).transitionDuration)).toBe('0s');
+    });
   });
 });

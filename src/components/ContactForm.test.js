@@ -25,12 +25,15 @@ const MESSAGE = 'home.contactForm.messageLabel';
 const SEND = 'home.contactForm.sendButton';
 const LONG_MESSAGE = 'Un mensaje con más de veinte caracteres.';
 
-const renderForm = () =>
+const renderForm = (props = {}) =>
   render(
     <ToastProvider>
-      <ContactForm onLoad={vi.fn()} />
+      <ContactForm onLoad={vi.fn()} {...props} />
     </ToastProvider>
   );
+
+const FIELD_LABELS = [NAME, EMAIL, SUBJECT, MESSAGE];
+const FILLED = ['Ana', 'ana@example.com', 'Hola', LONG_MESSAGE];
 
 // El ToastProvider monta una región role=alert vacía: los avisos del formulario son los que están dentro del <form>.
 const formAlerts = () => [...document.querySelectorAll('form [role=alert]')];
@@ -136,6 +139,104 @@ describe('ContactForm', () => {
     expect(aviso.closest('[role=status]')).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(api.post).toHaveBeenCalledTimes(1);
+  });
+
+  describe('tras el envío', () => {
+    it('con éxito vacía los cuatro campos, limpia errores y resumen, mantiene el aviso y llama a onSent', async () => {
+      api.post.mockResolvedValue({});
+      const onSent = vi.fn();
+      const user = userEvent.setup();
+      renderForm({ onSent });
+
+      await fillAndSend(user);
+
+      await screen.findByText('dialogAdvice.successEmailMessage');
+      FIELD_LABELS.forEach((label) => {
+        expect(screen.getByLabelText(label)).toHaveValue('');
+        expect(screen.getByLabelText(label)).not.toHaveAttribute('aria-invalid');
+      });
+      expect(formAlerts()).toHaveLength(0);
+      expect(fieldErrors()).toHaveLength(0);
+      expect(summary()).toBeEmptyDOMElement();
+      expect(onSent).toHaveBeenCalledTimes(1);
+    });
+
+    it('un resumen de un intento inválido anterior no reaparece al limpiar tras el éxito', async () => {
+      api.post.mockResolvedValue({});
+      const user = userEvent.setup();
+      renderForm();
+      await user.click(screen.getByRole('button', { name: SEND }));
+      expect(summary()).toHaveTextContent('home.contactForm.errorSummary:4');
+
+      await fillAndSend(user);
+      await screen.findByText('dialogAdvice.successEmailMessage');
+
+      expect(summary()).toBeEmptyDOMElement();
+    });
+
+    it('tras limpiar, un envío inválido vuelve a contar los errores desde cero', async () => {
+      api.post.mockResolvedValue({});
+      const user = userEvent.setup();
+      renderForm();
+      await fillAndSend(user);
+      await screen.findByText('dialogAdvice.successEmailMessage');
+
+      await user.click(screen.getByRole('button', { name: SEND }));
+
+      expect(fieldErrors()).toHaveLength(4);
+      expect(summary()).toHaveTextContent('home.contactForm.errorSummary:4');
+    });
+
+    it.each([
+      ['400', httpError(400), 'dialogAdvice.errorEmailInvalid'],
+      ['429', httpError(429), 'dialogAdvice.errorEmailRateLimit'],
+      ['500', httpError(500), 'dialogAdvice.errorEmailMessage'],
+      ['de red', Object.assign(new Error('Failed to fetch'), { type: 'network' }), 'dialogAdvice.errorEmailMessage'],
+    ])('con un fallo %s conserva lo escrito, muestra su error y no llama a onSent', async (_nombre, error, key) => {
+      api.post.mockRejectedValue(error);
+      const onSent = vi.fn();
+      const user = userEvent.setup();
+      renderForm({ onSent });
+
+      await fillAndSend(user);
+
+      expect(await screen.findByText(key)).toBeInTheDocument();
+      FIELD_LABELS.forEach((label, i) => expect(screen.getByLabelText(label)).toHaveValue(FILLED[i]));
+      expect(onSent).not.toHaveBeenCalled();
+    });
+
+    it('mientras la petición está pendiente los cuatro campos son de solo lectura y escribir no cambia nada', async () => {
+      let resolve;
+      api.post.mockReturnValue(new Promise((r) => { resolve = r; }));
+      const user = userEvent.setup();
+      renderForm();
+      await fill(user);
+      expect(screen.getByLabelText(NAME)).not.toHaveAttribute('readonly');
+
+      await user.click(screen.getByRole('button', { name: SEND }));
+
+      FIELD_LABELS.forEach((label) => expect(screen.getByLabelText(label)).toHaveAttribute('readonly'));
+      await user.type(screen.getByLabelText(NAME), 'XYZ');
+      expect(screen.getByLabelText(NAME)).toHaveValue('Ana');
+
+      await act(async () => resolve({}));
+
+      FIELD_LABELS.forEach((label) => {
+        expect(screen.getByLabelText(label)).toHaveValue('');
+        expect(screen.getByLabelText(label)).not.toHaveAttribute('readonly');
+      });
+    });
+
+    it('tras un fallo los campos vuelven a ser editables', async () => {
+      api.post.mockRejectedValue(httpError(500));
+      const user = userEvent.setup();
+      renderForm();
+
+      await fillAndSend(user);
+      await screen.findByText('dialogAdvice.errorEmailMessage');
+
+      FIELD_LABELS.forEach((label) => expect(screen.getByLabelText(label)).not.toHaveAttribute('readonly'));
+    });
   });
 
   it('los cuatro campos llevan el anillo de foco', () => {
@@ -302,6 +403,8 @@ describe('ContactForm', () => {
 
       expect(api.post).toHaveBeenCalledTimes(1);
       await act(async () => resolve({}));
+      // Tras el éxito el formulario se vacía: hay que rellenarlo de nuevo para volver a enviar.
+      await fill(user);
       await user.click(screen.getByRole('button', { name: SEND }));
       expect(api.post).toHaveBeenCalledTimes(2);
     });

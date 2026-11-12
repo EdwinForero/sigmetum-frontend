@@ -70,7 +70,7 @@ Notas:
 | `sigmetum-backend` (Express, Node) | API REST bajo `/api/v1` |
 | Amazon S3 (región de `sigmetum-infra`; el bucket antiguo estaba en otra región) | Datos por provincia, Excel versionados, imágenes y recursos estáticos |
 | AWS Amplify | Despliegue del frontend, definido en `sigmetum-infra` |
-| IPNI (`ipni.org`) | Enlace "Leer más" de cada especie |
+| IPNI (`ipni.org`) | Enlace "Leer más" de cada especie (`https://www.ipni.org/search?q=`, construido por `ipniUrl`) y, solo en la comprobación manual `scripts/ipni-check.mjs`, su API JSON `https://www.ipni.org/api/1/search` (sin contrato documentado **(por confirmar)**) |
 
 ## Navegadores objetivo
 

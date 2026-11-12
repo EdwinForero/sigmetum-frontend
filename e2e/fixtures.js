@@ -30,7 +30,16 @@ export const PHOTOS = RATIOS.map(([w, h], i) => ({
   url: `${ASSETS}/gallery/foto-${i + 1}.jpg?w=${w}&h=${h}&delay=${150 * (i + 1)}`,
 }));
 
-const SPECIES = Array.from({ length: 30 }, (_, i) => ({
+// 24 fotos con las mismas proporciones, para llenar varias filas de la rejilla a todos los anchos.
+export const MANY_PHOTOS = Array.from({ length: 24 }, (_, i) => {
+  const [w, h] = RATIOS[i % RATIOS.length];
+  return {
+    fileName: `Foto_${i + 1}_${w}x${h}.jpg`,
+    url: `${ASSETS}/gallery/foto-${i + 1}.jpg?w=${w}&h=${h}&delay=${50 * ((i % 6) + 1)}`,
+  };
+});
+
+const SPECIES =Array.from({ length: 30 }, (_, i) => ({
   'Especies Características': `Especie ${String(i + 1).padStart(2, '0')} ejemplar`,
   Hábitat: i % 2 === 0 ? 'Bosque' : 'Matorral',
   Clima: ['Seco', 'Húmedo', 'Templado'][i % 3],
@@ -70,7 +79,7 @@ export const installRoutes = async (page, mock) => {
     if (name === 'list-terms') return reply(200, { success: true, data: [] });
     if (name === 'list-images') {
       await wait(mock.listImagesDelay);
-      return reply(200, { success: true, data: PHOTOS });
+      return reply(200, { success: true, data: mock.photos });
     }
     if (name === 'send-email') {
       return mock.sendEmailStatus === 200
@@ -87,6 +96,7 @@ export const installRoutes = async (page, mock) => {
  *  - `consent` (true por defecto): cookie `cookieConsent=accepted`; false deja el banner visible.
  *  - `mock.calls`: peticiones a la API que se han recibido (método, ruta y cuerpo).
  *  - `mock.listImagesDelay`: retraso en ms de `list-images`.
+ *  - `mock.photos`: fotos que devuelve `list-images` (`PHOTOS` por defecto; `MANY_PHOTOS` son 24).
  * La API (con el sobre `{ success, data }` y el preflight CORS) y los recursos de S3 se simulan; las
  * fuentes de Google se cortan para que la medida no dependa de la red.
  */
@@ -96,7 +106,7 @@ export const test = base.extend({
   // Playwright exige desestructurar el primer argumento aunque no use fixtures.
   // eslint-disable-next-line no-empty-pattern
   mock: async ({}, use) => {
-    await use({ calls: [], listImagesDelay: 0, sendEmailStatus: 200 });
+    await use({ calls: [], listImagesDelay: 0, sendEmailStatus: 200, photos: PHOTOS });
   },
   page: async ({ page, context, lang, consent, mock }, use, testInfo) => {
     // Diagnóstico: si la prueba falla, se adjunta lo que el navegador registró (errores, peticiones fallidas y respuestas >= 400).

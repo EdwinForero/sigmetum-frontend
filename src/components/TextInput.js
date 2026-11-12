@@ -16,6 +16,7 @@ const TextInput = ({
     maxLength,
     autoComplete,
     required,
+    readOnly = false,
     multiline = false,
     hint,
     error,
@@ -41,6 +42,7 @@ const TextInput = ({
         maxLength,
         autoComplete,
         required,
+        readOnly,
         'aria-invalid': isInvalid || undefined,
         'aria-describedby': ariaDescribedBy,
     };

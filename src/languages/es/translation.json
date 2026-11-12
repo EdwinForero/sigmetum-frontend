@@ -305,6 +305,28 @@
     "imageFileRequired": "Elige una imagen para subir.",
     "noImageSelected": "Ninguna imagen seleccionada"
   },
+  "contactRecipients": {
+    "title": "Destinatarios de las dudas de contacto",
+    "tooltip": "En esta sección puede registrar hasta {{max}} correos que reciben las dudas del formulario de contacto. Siempre debe quedar al menos uno.",
+    "label": "Correo del destinatario",
+    "add": "Añadir destinatario",
+    "counter": "{{count}} de {{max}} destinatarios",
+    "empty": "No hay destinatarios guardados: las dudas del formulario llegan a la dirección por defecto del sitio.",
+    "errorLoad": "No se pudo cargar la lista de destinatarios. Vuelve a intentarlo; si el fallo sigue, avisa al responsable técnico: puede faltar el fichero de destinatarios en el almacenamiento.",
+    "maxReached": "Has llegado al máximo de {{max}} destinatarios. Quita uno para poder añadir otro.",
+    "lastRecipient": "Debe quedar al menos un destinatario: no se puede quitar el último.",
+    "removeRecipient": "Quitar al destinatario {{name}}",
+    "confirmDelete": "Se quitará este destinatario y dejará de recibir las dudas del formulario de contacto.",
+    "successAdded": "Destinatario añadido.",
+    "successRemoved": "Destinatario quitado.",
+    "errorAdd": "No se pudo añadir el destinatario. Inténtalo de nuevo más tarde.",
+    "errorRemove": "No se pudo quitar el destinatario. Inténtalo de nuevo más tarde.",
+    "loading": "Cargando destinatarios…",
+    "listLabel": "Lista de destinatarios",
+    "errors": {
+      "duplicate": "Ese correo ya está en la lista."
+    }
+  },
   "cookies": {
     "title": "Política de Cookies",
     "subtitleAboutCookies": "¿Qué son las cookies y para qué se usan?",

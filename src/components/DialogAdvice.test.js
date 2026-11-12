@@ -201,6 +201,12 @@ describe('DialogAdvice', () => {
     expect(screen.getByText('Mensaje')).toHaveClass('text-xl', 'whitespace-pre-wrap');
   });
 
+  it('el mensaje parte las palabras largas (un correo de 254 caracteres) aunque sea hijo flex', () => {
+    renderSimple({ dialogMessage: `${'a'.repeat(240)}@dominio.es` });
+
+    expect(screen.getByText(/^a{240}@dominio\.es$/)).toHaveClass('[overflow-wrap:anywhere]');
+  });
+
   it.each([
     ['success', 'check_circle', 'border-brand-deep'],
     ['warning', 'warning', 'border-warning'],
