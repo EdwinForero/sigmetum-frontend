@@ -12,7 +12,7 @@ const menuOptions = [
   { id: 'dataManagement', name: 'Administrar datos', icon: 'database', link: '/administrar-datos' },
   { id: 'contentManagement', name: 'Administrar contenido', icon: 'settings', link: '/administrar-contenido' },
   { id: 'uploadFiles', name: 'Cargar archivos', icon: 'upload', link: '/cargar-archivos' },
-  { id: 'filter', name: 'Filtros', icon: 'filter_alt', component: <button type="button">dentro-del-panel</button> },
+  { id: 'filter', name: 'Filtros', icon: 'filter_alt', titleId: 'filtros-titulo', component: <><h2 id="filtros-titulo">Título del panel</h2><button type="button">dentro-del-panel</button></> },
 ];
 
 const renderSidebar = (path = '/administrar-datos', props = {}) =>
@@ -54,7 +54,7 @@ describe('Sidebar', () => {
     await user.click(button);
 
     expect(button).toHaveAttribute('aria-expanded', 'true');
-    expect(document.getElementById(button.getAttribute('aria-controls'))).toBe(screen.getByRole('dialog', { name: 'privateNav.filters' }));
+    expect(document.getElementById(button.getAttribute('aria-controls'))).toBe(screen.getByRole('dialog', { name: 'Título del panel' }));
   });
 
   it('con el panel cerrado su contenido no es visible ni accesible (hidden; el Tab real se mide con Playwright)', () => {
@@ -71,7 +71,7 @@ describe('Sidebar', () => {
     const button = screen.getByRole('button', { name: 'Filtros' });
 
     await user.click(button);
-    expect(screen.getByRole('dialog', { name: 'privateNav.filters' })).toHaveFocus();
+    expect(screen.getByRole('dialog', { name: 'Título del panel' })).toHaveFocus();
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
 
     await user.keyboard('{Escape}');
@@ -108,8 +108,48 @@ describe('Sidebar', () => {
     renderSidebar('/explorar');
 
     const nav = screen.getByRole('navigation', { name: 'privateNav.label' });
-    expect(nav).toHaveClass('md:top-16', 'md:bottom-0', 'bg-surface');
-    expect(nav).not.toHaveClass('md:bottom-auto');
+    expect(nav).toHaveClass('md:sticky', 'md:top-16', 'md:bottom-auto', 'md:h-[calc(100dvh-4rem)]', 'md:self-start', 'md:shrink-0', 'bg-surface');
+    expect(nav).not.toHaveClass('md:bottom-0');
+    expect(nav).not.toHaveClass('md:h-auto');
+    expect(nav).not.toHaveClass('md:left-0');
+  });
+
+  it('el panel se nombra con aria-labelledby hacia el h2 de la opción y no lleva min-h-full ni deja el scroll encadenado', async () => {
+    const user = userEvent.setup();
+    renderSidebar('/explorar');
+    await user.click(screen.getByRole('button', { name: 'Filtros' }));
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-labelledby', 'filtros-titulo');
+    expect(dialog).not.toHaveAttribute('aria-label');
+    expect(document.getElementById('filtros-titulo')).toHaveTextContent('Título del panel');
+    expect(dialog.querySelector('.min-h-full')).toBeNull();
+    expect(dialog.firstElementChild.nextElementSibling).toHaveClass('overscroll-contain');
+  });
+
+  it('con el panel abierto el body no se desplaza y al cerrar recupera su valor anterior', async () => {
+    const user = userEvent.setup();
+    document.body.style.overflow = 'scroll';
+    renderSidebar('/explorar');
+    expect(document.body.style.overflow).toBe('scroll');
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }));
+    expect(document.body.style.overflow).toBe('hidden');
+
+    await user.keyboard('{Escape}');
+    expect(document.body.style.overflow).toBe('scroll');
+    document.body.style.overflow = '';
+  });
+
+  it('al desmontar con el panel abierto se restaura el overflow del body', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderSidebar('/explorar');
+    await user.click(screen.getByRole('button', { name: 'Filtros' }));
+    expect(document.body.style.overflow).toBe('hidden');
+
+    unmount();
+
+    expect(document.body.style.overflow).toBe('');
   });
 
   it('no muestra Cerrar sesión por defecto', () => {

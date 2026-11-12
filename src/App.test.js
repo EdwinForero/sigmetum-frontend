@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { useEffect } from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 
 vi.mock('./services/api', () => ({
   default: {
@@ -14,7 +15,16 @@ vi.mock('./services/api', () => ({
     logout: vi.fn(),
   },
 }));
-vi.mock('./components/ProtectedRoute', () => ({ default: ({ element }) => element }));
+// Estado que controla el test; el mock avisa a App en un efecto (nunca durante el render) y cuenta sus montajes.
+const protectedMock = { status: 'ok', mounts: 0 };
+vi.mock('./components/ProtectedRoute', () => {
+  const ProtectedRouteMock = ({ element, onStatusChange }) => {
+    useEffect(() => { protectedMock.mounts += 1; }, []);
+    useEffect(() => { onStatusChange?.(protectedMock.status); }, [onStatusChange]);
+    return protectedMock.status === 'ok' ? element : null;
+  };
+  return { default: ProtectedRouteMock };
+});
 
 // Registra las funciones que App pasa a Filter en cada render: si cambian de identidad, los efectos de Filter se repiten.
 const filterCallbacks = [];
@@ -27,9 +37,21 @@ vi.mock('./components/Filter', () => ({
 
 import App from './App';
 
+let navigateTo;
+const NavigatorProbe = () => {
+  navigateTo = useNavigate();
+  return null;
+};
+
+const goTo = async (path, status) => {
+  protectedMock.status = status;
+  await act(async () => { navigateTo(path); });
+};
+
 const renderApp = async (path) => {
   const result = render(
     <MemoryRouter initialEntries={[path]}>
+      <NavigatorProbe />
       <App />
     </MemoryRouter>
   );
@@ -40,6 +62,8 @@ const renderApp = async (path) => {
 describe('App', () => {
   beforeEach(() => {
     filterCallbacks.length = 0;
+    protectedMock.status = 'ok';
+    protectedMock.mounts = 0;
     vi.stubGlobal(
       'IntersectionObserver',
       class {
@@ -90,7 +114,8 @@ describe('App', () => {
 
   it('en ruta privada la raíz reserva el espacio de la barra y en /login no', async () => {
     const { container, unmount } = await renderApp('/administrar-datos');
-    expect(container.querySelector('.App')).toHaveClass('pb-nav', 'md:pl-28');
+    expect(container.querySelector('.App')).toHaveClass('pb-nav', 'md:pb-0');
+    expect(container.querySelector('.App')).not.toHaveClass('md:pl-28');
     unmount();
 
     const login = await renderApp('/login');
@@ -110,6 +135,46 @@ describe('App', () => {
     await renderApp('/explorar');
 
     expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
+  });
+
+  it.each(['checking', 'denied', 'unavailable'])('en una ruta privada con la sesión en %s no hay barra, Cerrar sesión ni pb-nav', async (status) => {
+    protectedMock.status = status;
+    const { container } = await renderApp('/administrar-datos');
+
+    expect(screen.queryByRole('navigation', { name: 'privateNav.label' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
+    expect(container.querySelector('.App')).not.toHaveClass('pb-nav');
+  });
+
+  it('con la sesión en ok sí hay barra, Cerrar sesión y pb-nav', async () => {
+    const { container } = await renderApp('/administrar-datos');
+
+    expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
+    expect(container.querySelector('.App')).toHaveClass('pb-nav');
+  });
+
+  it('al salir de las rutas privadas y volver a entrar sin confirmar, la barra no reaparece', async () => {
+    const { container } = await renderApp('/administrar-datos');
+    expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
+
+    await goTo('/explorar', 'ok');
+    await goTo('/cargar-archivos', 'checking');
+
+    expect(screen.queryByRole('navigation', { name: 'privateNav.label' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
+    expect(container.querySelector('.App')).not.toHaveClass('pb-nav');
+  });
+
+  it('entre dos rutas privadas la barra se queda durante la revalidación y se vuelve a montar la ruta', async () => {
+    await renderApp('/administrar-datos');
+    expect(protectedMock.mounts).toBe(1);
+
+    await goTo('/cargar-archivos', 'checking');
+
+    expect(protectedMock.mounts).toBe(2);
+    expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
   });
 
   it('el orden de Tab es: enlace de salto, cabecera, barra, contenido, pie y banner', async () => {
@@ -152,6 +217,15 @@ describe('App', () => {
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
     expect(container.querySelector('.App')).toHaveClass('pb-nav');
+  });
+
+  it('/administrar-datos no tiene el botón de filtros y /explorar sí', async () => {
+    const { unmount } = await renderApp('/administrar-datos');
+    expect(screen.queryByRole('button', { name: 'privateNav.filters' })).toBeNull();
+    unmount();
+
+    await renderApp('/explorar');
+    expect(screen.getByRole('button', { name: 'privateNav.filters' })).toBeInTheDocument();
   });
 
   it('con /explorar/ (barra final) la barra lateral ofrece Filtros y no las opciones privadas', async () => {

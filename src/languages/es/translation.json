@@ -161,7 +161,12 @@
       "uploadFilesButton_other": "Subir {{count}} archivos",
       "filesListLabel": "Archivos seleccionados",
       "removeFile": "Quitar archivo {{name}} de la lista",
-      "noFilesSelected": "No has elegido ningún archivo."
+      "noFilesSelected": "No has elegido ningún archivo.",
+      "dropZoneHint": "Arrastra aquí tus archivos Excel (.xlsx) o usa el botón.",
+      "dropZoneActive": "Suelta los archivos para añadirlos.",
+      "dropRejected": "Solo se admiten archivos Excel (.xlsx). Se han descartado los demás.",
+      "filesAdded_one": "Se ha añadido {{count}} archivo a la lista.",
+      "filesAdded_other": "Se han añadido {{count}} archivos a la lista."
     },
     "progress": "Subiendo archivo {{current}} de {{total}}…",
     "fileStatus": {
@@ -215,7 +220,7 @@
     "title": "Administrar datos",
     "description": "En esta página, puede gestionar los archivos cargados asociados a cada provincia y visualizar los datos que contienen. También tiene la opción de descargar los datos en formato Excel. Asegúrese de que haya al menos un archivo cargado a través de la página 'cargar archivos'.",
     "downloadExcelButton": "Descargar Excel",
-    "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
+    "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel con todos los datos de la versión del archivo que hayas elegido.",
     "deleteVersionButton": "Eliminar versión",
     "deleteVersionButtonTooltip": "Al presionar este botón, se eliminará permanentemente el archivo que haya elegido previamente. En caso de existir otras versiones del archivo, se restablecerá con los datos de la versión más reciente.",
     "updateDataButton": "Actualizar datos",
@@ -225,7 +230,7 @@
       "selectFileDropdownTooltip": "Abre la lista que se encuentra debajo y elige el archivo que quieres gestionar: las versiones aparecen agrupadas por provincia. Las provincias que no tengan al menos un archivo correspondiente no aparecerán en la lista.",
       "emptyOption": "Elige un conjunto de datos",
       "loading": "Cargando versiones…",
-      "emptyState": "No hay versiones.",
+      "emptyState": "Todavía no se ha subido ningún archivo de datos, así que no hay versiones para elegir.",
       "emptyStateLink": "Sube un archivo en Cargar archivos"
     },
     "loadingVersionData": "Cargando datos de la versión…",
@@ -313,6 +318,7 @@
     "previousPage": "Página anterior",
     "nextPage": "Página siguiente",
     "info": "Información",
+    "infoAbout": "Información: {{topic}}",
     "scrollDown": "Bajar"
   },
   "language": {

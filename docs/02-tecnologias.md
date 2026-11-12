@@ -57,8 +57,8 @@ Notas:
 
 | Recurso | Uso |
 |---|---|
-| Google Fonts: Amaranth, Sen (y Mukta Malar, que no se usa) | Tipografías `font-primary` y `font-secondary` |
-| Google Fonts: Material Symbols Outlined | Iconos por ligadura (`<span class="material-symbols-outlined">delete</span>`) |
+| Google Fonts: Amaranth y Sen (con `preconnect` a `fonts.googleapis.com` y `fonts.gstatic.com`; Mukta Malar ya no se pide) | Tipografías `font-primary` y `font-secondary` |
+| Google Fonts: Material Symbols Outlined, solo el subconjunto `icon_names` (21 iconos) con `display=block` | Iconos por ligadura (`<span class="material-symbols-outlined">delete</span>`), ocultos hasta que carga la fuente (`watchIconFont`, ver [07](07-i18n-y-estilos.md#fuentes-e-iconos)) |
 | Favicon | Ya no está fijo en `index.html`: el plugin `sigmetum-favicon` de `vite.config.js` lo inyecta al compilar (y en `npm run dev`) desde `VITE_S3_URL` y `ASSETS.LOGO`; sin la variable no hay favicon (ver [06](06-utilidades-hooks-config.md#favicon-viteconfigjs-y-faviconhtml)) |
 
 ## Servicios externos

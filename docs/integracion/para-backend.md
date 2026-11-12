@@ -41,7 +41,7 @@ Solo aparecen los campos que el frontend **lee**. Lo demás de la respuesta se i
 
 | Endpoint | El frontend envía | El frontend lee | Quién lo llama |
 |---|---|---|---|
-| `GET /auth` | `Authorization: Bearer <token de acceso>` | Solo el código de estado (con reintentos ante el `503` de autenticación) | `ProtectedRoute` (al entrar en cada ruta privada) |
+| `GET /auth` | `Authorization: Bearer <token de acceso>` | Solo el código de estado (con reintentos ante el `503` de autenticación) | `ProtectedRoute` (al entrar en cada ruta privada; se repite al cambiar de ruta privada, porque cada una lleva `key` propia) |
 
 ### Datos
 
@@ -89,9 +89,10 @@ Las columnas del Excel se leen **por posición** (`fixedColumnOrder` en `convert
 - Login: formulario propio en `/login` (correo y contraseña) con SRP contra `cognito-idp` (cliente público, sin secreto); la contraseña solo se usa para un cálculo local y nunca viaja. Retos que puede devolver Cognito: `NEW_PASSWORD_REQUIRED`, `MFA_SETUP` (registro de la aplicación de autenticación) y `SOFTWARE_TOKEN_MFA`. Con el resultado final guarda los tokens. Ante red, `5xx` o `429` al registrar el TOTP ofrece reintentar solo esa petición con la `Session` vigente, sin reenviar la contraseña nueva; el contrato con el backend no cambia. **(El flujo completo contra Cognito no se ha probado: por confirmar en `dev`.)**
 - Los tokens van en `localStorage`: el de acceso en `token` y el de refresco en `refreshToken`. El `IdToken` nunca se guarda y ya no se usa `sessionStorage`. Solo lo tocan `services/session.js`, `services/api.js` y `ProtectedRoute` (este último hoy solo a través de `session.js`); `LoginForm` no los toca.
 - El frontend **ya no decodifica el JWT ni lee `exp`**: la caducidad se detecta por el `401` del backend y se renueva con el token de refresco.
-- `ProtectedRoute` llama a `GET /auth` al entrar en cada ruta privada (y bajo `React.StrictMode` en desarrollo lo hace dos veces). Sin token de acceso o con `401` (tras intentar renovar) redirige a `/login`; con cualquier otro error (`503` agotado, `500`, `403`, red) muestra un aviso de servicio no disponible con botones «Reintentar» y «Cerrar sesión» y conserva la sesión.
+- `ProtectedRoute` llama a `GET /auth` al entrar en cada ruta privada (se repite al cambiar de ruta privada, sin cambio de contrato: es la misma petición con más frecuencia; y bajo `React.StrictMode` en desarrollo lo hace dos veces). Sin token de acceso o con `401` (tras intentar renovar) redirige a `/login`; con cualquier otro error (`503` agotado, `500`, `403`, red) muestra un aviso de servicio no disponible con botones «Reintentar» y «Cerrar sesión» y conserva la sesión.
 - Cierre de sesión: botón en las rutas privadas (lo pinta `ProtectedRoute`). `api.logout` borra los dos tokens, revoca el de refresco con `RevokeToken` (`cognito-idp`, de mejor esfuerzo, hasta 3 s) y redirige a `/`. El backend no interviene.
 - Un token de `JWT_EXPIRATION` muy largo ya no aplica al login: la caducidad la fija Cognito.
+- **Un `401` en `GET /auth` y un `400` de `cognito-idp` en la consola de una sesión recién abierta son comportamiento esperado, sin acción para el backend (diagnóstico del 11/11/2026, leído del código; no medido en `dev`).** El `401` es el primer intento de `ProtectedRoute` con un token de acceso caducado o no válido: el cliente no lee `exp` y lo detecta por el `401` (`api.getAuth`, `api.js`). El `400` es la renovación `InitiateAuth` con `REFRESH_TOKEN_AUTH` contra `cognito-idp` rechazada (`api.js`), lo más probable por un refresco revocado o caducado; qué `__type` devuelve Cognito está **(por confirmar en `dev`)**: si resultara ser de configuración (p. ej. un cliente sin ese flujo), iría a [para-infra.md](para-infra.md). No contradice [seguridad.md S3](../guias/seguridad.md): una sola renovación por ráfaga de `401` (la promesa se comparte), `/auth` no se envía sin token, sin token de refresco no se llama a Cognito y la bandera `redirecting` evita reintentos tras redirigir.
 
 ## 5. CORS
 

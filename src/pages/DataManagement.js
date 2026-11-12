@@ -79,7 +79,7 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-2 pb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6">
       <h1
         ref={headingRef}
         tabIndex={-1}
@@ -96,7 +96,10 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
         <label htmlFor={selectId} className="text-lg font-bold leading-tight tracking-[-0.015em] text-ink">
           {t('dataManagement.fileSelectDropdwon.selectFileDropdownLabel')}
         </label>
-        <InfoButton tooltipText={t('dataManagement.fileSelectDropdwon.selectFileDropdownTooltip')} />
+        <InfoButton
+          topic={t('dataManagement.fileSelectDropdwon.selectFileDropdownLabel')}
+          tooltipText={t('dataManagement.fileSelectDropdwon.selectFileDropdownTooltip')}
+        />
       </div>
 
       <div className="py-3">
@@ -118,7 +121,10 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
               text={t('dataManagement.downloadExcelButton')}
               disabled={isLoadingData}
             />
-            <InfoButton tooltipText={t('dataManagement.downloadExcelButtonTooltip')} />
+            <InfoButton
+              topic={t('dataManagement.downloadExcelButton')}
+              tooltipText={t('dataManagement.downloadExcelButtonTooltip')}
+            />
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <ButtonAlternative
@@ -128,7 +134,10 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
               loading={busyAction === 'delete'}
               disabled={busyAction === 'update' || isLoadingData}
             />
-            <InfoButton tooltipText={t('dataManagement.deleteVersionButtonTooltip')} />
+            <InfoButton
+              topic={t('dataManagement.deleteVersionButton')}
+              tooltipText={t('dataManagement.deleteVersionButtonTooltip')}
+            />
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <ButtonAlternative
@@ -137,13 +146,16 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
               loading={busyAction === 'update'}
               disabled={busyAction === 'delete' || isLoadingData}
             />
-            <InfoButton tooltipText={t('dataManagement.updateDataButtonTooltip')} />
+            <InfoButton
+              topic={t('dataManagement.updateDataButton')}
+              tooltipText={t('dataManagement.updateDataButtonTooltip')}
+            />
           </div>
         </div>
       )}
 
       <div className="w-full py-3">
-        {!isLoadingData && <Table data={filteredSpecies} label={t('dataManagement.table.regionLabel')} />}
+        {fileName && !isLoadingData && <Table data={filteredSpecies} label={t('dataManagement.table.regionLabel')} />}
       </div>
 
       <AnimatePresence>

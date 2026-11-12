@@ -45,7 +45,7 @@ const Navbar = () => {
   ];
 
   const desktopClass = ({ isActive }) =>
-    `focus-ring-inset flex h-full w-full items-center justify-center px-6 text-center font-bold text-ink ${
+    `focus-ring-inset flex h-full w-full items-center justify-center whitespace-nowrap px-2 text-center font-bold lg:px-6 text-ink ${
       isActive ? 'bg-brand' : 'hover:bg-brand'
     }`;
   const panelClass = ({ isActive }) =>

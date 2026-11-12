@@ -128,6 +128,7 @@ describe('traducciones', () => {
         previousPage: 'Página anterior',
         nextPage: 'Página siguiente',
         info: 'Información',
+        infoAbout: 'Información: {{topic}}',
         scrollDown: 'Bajar',
       },
       en: {
@@ -136,6 +137,7 @@ describe('traducciones', () => {
         previousPage: 'Previous page',
         nextPage: 'Next page',
         info: 'Information',
+        infoAbout: 'Information: {{topic}}',
         scrollDown: 'Scroll down',
       },
     });

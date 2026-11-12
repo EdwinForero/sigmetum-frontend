@@ -1,37 +1,54 @@
-import React, { useState, useRef, useEffect, useId } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from "react";
 import { useTranslation } from "react-i18next";
 
-const InfoButton = ({ tooltipText }) => {
+const VIEWPORT_MARGIN = 16;
+const BOTTOM_BAR_HEIGHT = 72;
+const BOTTOM_BAR_BREAKPOINT = 768;
+
+const InfoButton = ({ tooltipText, topic }) => {
   const { t } = useTranslation();
   const tooltipId = useId();
   const [isVisible, setIsVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState("center");
+  // Desplazamiento horizontal (px) y lado: se recalculan al mostrarse y en resize.
+  const [shift, setShift] = useState(0);
+  const [isAbove, setIsAbove] = useState(false);
+  const anchorRef = useRef(null);
   const tooltipRef = useRef(null);
+  const shiftRef = useRef(0);
 
   const showTooltip = () => setIsVisible(true);
   const hideTooltip = () => setIsVisible(false);
 
-  const adjustTooltipPosition = () => {
+  const adjustTooltipPosition = useCallback(() => {
     const tooltipElement = tooltipRef.current;
-    if (tooltipElement) {
-      const { left, right } = tooltipElement.getBoundingClientRect();
-      const screenWidth = window.innerWidth;
+    const anchorElement = anchorRef.current;
+    if (!tooltipElement || !anchorElement) return;
 
-      if (left < 0) {
-        setTooltipPosition("left");
-      } else if (right > screenWidth) {
-        setTooltipPosition("right");
-      } else {
-        setTooltipPosition("center");
-      }
+    const rect = tooltipElement.getBoundingClientRect();
+    const naturalLeft = rect.left - shiftRef.current;
+    const naturalRight = rect.right - shiftRef.current;
+    let nextShift = 0;
+    if (naturalLeft < VIEWPORT_MARGIN) {
+      nextShift = VIEWPORT_MARGIN - naturalLeft;
+    } else if (naturalRight > window.innerWidth - VIEWPORT_MARGIN) {
+      nextShift = window.innerWidth - VIEWPORT_MARGIN - naturalRight;
     }
-  };
+    shiftRef.current = nextShift;
+    setShift(nextShift);
 
-  useEffect(() => {
-    if (isVisible) {
-      adjustTooltipPosition();
-    }
-  }, [isVisible]);
+    const anchor = anchorElement.getBoundingClientRect();
+    const reserved = window.innerWidth < BOTTOM_BAR_BREAKPOINT ? BOTTOM_BAR_HEIGHT : 0;
+    const overflowsBelow = anchor.bottom + rect.height > window.innerHeight - reserved;
+    const fitsAbove = anchor.top - rect.height >= 0;
+    setIsAbove(overflowsBelow && fitsAbove);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isVisible) return undefined;
+    adjustTooltipPosition();
+    window.addEventListener("resize", adjustTooltipPosition);
+    return () => window.removeEventListener("resize", adjustTooltipPosition);
+  }, [isVisible, adjustTooltipPosition]);
 
   // Escape lo oculta mientras se ve (WCAG 1.4.13: descartable sin mover el puntero ni el foco).
   useEffect(() => {
@@ -43,22 +60,17 @@ const InfoButton = ({ tooltipText }) => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isVisible]);
 
-  const tooltipClasses = {
-    center: "left-1/2 transform -translate-x-1/2",
-    left: "left-0 transform translate-x-0",
-    right: "right-0 transform translate-x-0",
-  };
-
   return (
     <span
-      className="relative inline-block"
+      ref={anchorRef}
+      className="relative inline-block shrink-0"
       onMouseEnter={showTooltip}
       onMouseLeave={hideTooltip}
     >
       <button
         type="button"
-        className="focus-ring inline-flex h-11 w-11 items-center justify-center rounded text-moss"
-        aria-label={t("iconButton.info")}
+        className="focus-ring inline-flex h-11 w-11 shrink-0 items-center justify-center rounded text-moss"
+        aria-label={topic ? t("iconButton.infoAbout", { topic }) : t("iconButton.info")}
         aria-describedby={tooltipId}
         onFocus={showTooltip}
         onBlur={hideTooltip}
@@ -67,20 +79,27 @@ const InfoButton = ({ tooltipText }) => {
         <span className="material-symbols-outlined" aria-hidden="true">info</span>
       </button>
 
+      {/* La envoltura es transparente: el hueco con el botón forma parte del tooltip y no dispara onMouseLeave (WCAG 1.4.13). */}
       <span
         id={tooltipId}
         role="tooltip"
         hidden={!isVisible}
         ref={tooltipRef}
-        className={`absolute top-full z-10 mt-2 rounded bg-surface px-4 py-2 text-left text-sm text-ink shadow-lg ${tooltipClasses[tooltipPosition]}
-          w-max min-w-[200px] max-w-[calc(100vw-2rem)] sm:min-w-[300px] sm:max-w-[500px] md:min-w-[400px] md:max-w-[800px]`}
-        style={{
-          wordWrap: "break-word",
-          wordBreak: "break-word",
-          whiteSpace: "pre-wrap",
-        }}
+        className={`absolute left-1/2 z-10 w-max max-w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 ${
+          isAbove ? "bottom-full pb-2" : "top-full pt-2"
+        }`}
+        style={{ marginLeft: `${shift}px` }}
       >
-        {tooltipText}
+        <span
+          className="block rounded-lg border border-sage bg-surface px-4 py-2 text-left text-sm text-ink shadow-lg"
+          style={{
+            wordWrap: "break-word",
+            wordBreak: "break-word",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {tooltipText}
+        </span>
       </span>
     </span>
   );

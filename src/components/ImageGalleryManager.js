@@ -14,6 +14,38 @@ import { useToast } from '../hooks/useToast';
 
 const INVALID_TITLE = /[/\\,':&#?%"]|\.\.|\p{Cc}/u;
 
+// La URL es prefirmada y caduca a la hora: si falla, se oculta el img y se conserva la caja.
+// Solo se pide la imagen si la URL es https (o http en localhost/127.0.0.1, para desarrollo): seguridad.md S7.
+const isSafeImageUrl = (url) => {
+  try {
+    const { protocol, hostname } = new URL(url);
+    if (protocol === 'https:') return true;
+    return protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1');
+  } catch {
+    return false;
+  }
+};
+
+const Thumbnail = ({ url }) => {
+  const [failed, setFailed] = useState(false);
+  if (failed || !isSafeImageUrl(url)) {
+    return <span aria-hidden="true" className="h-12 w-12 shrink-0 rounded-lg border border-sage" />;
+  }
+  return (
+    // onError no es una interacción: la regla lo confunde con un manejador de ratón o teclado.
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+    <img
+      src={url}
+      alt=""
+      width={48}
+      height={48}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-12 w-12 shrink-0 rounded-lg border border-sage object-cover"
+    />
+  );
+};
+
 const ImageGalleryManager = () => {
   const { t } = useTranslation();
   const { notifySuccess, notifyError } = useToast();
@@ -145,7 +177,10 @@ const ImageGalleryManager = () => {
       <ul aria-label={t('contentManagement.imagesListLabel')} className="rounded-xl border border-brand-dark px-3 py-1">
         {images.map((image) => (
           <li key={image.fileName} className="flex min-h-12 items-center justify-between gap-2 text-ink">
-            <span className="min-w-0 break-words">{image.fileName}</span>
+            <span className="flex min-w-0 items-center gap-3">
+              <Thumbnail key={image.url} url={image.url} />
+              <span className="min-w-0 break-words text-base font-normal">{image.fileName}</span>
+            </span>
             <ButtonPrincipal
               icon="delete"
               ariaLabel={t('contentManagement.deleteImage', { name: image.fileName })}
@@ -172,7 +207,10 @@ const ImageGalleryManager = () => {
         >
           {t('contentManagement.galleryManagementTitle')}
         </h2>
-        <InfoButton tooltipText={t('contentManagement.galleryManagementTooltip')} />
+        <InfoButton
+          topic={t('contentManagement.galleryManagementTitle')}
+          tooltipText={t('contentManagement.galleryManagementTooltip')}
+        />
       </div>
 
       <div>

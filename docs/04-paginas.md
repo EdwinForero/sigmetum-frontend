@@ -14,12 +14,12 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 |---|---|
 | `fetchTerms()` | `GET /list-terms` → `noItalicTerms`. Si falla, `exploreError = true`. Memorizada con `useCallback` |
 | `fetchData()` | `GET /get-merged-data` → `mergedData` y `filteredSpecies`. Si falla, `exploreError = true` |
-| `handleFileDropdownSelect(data)` | La llama `DataManagement` al elegir una versión: fija `selectedData` y `filteredData` y quita el spinner |
-| `handleFilterDataChange(filtered)` | Actualiza `filteredData` solo si cambia (comparación por `JSON.stringify`) |
+| `handleFileDropdownSelect(data)` | La llama `DataManagement` al elegir una versión: fija `filteredData` y quita el spinner |
 | `handleFilterChange(filtered)` | Igual, para `filteredSpecies` en el explorador |
 | `handleOnSpeciesSelect(set)` | Guarda las especies elegidas en el filtro |
-| `menuOptions` | Opciones de la barra de gestión: `filter` y `dataManagementFilter` abren un `Filter` en un panel de filtros (diálogo modal); `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con las claves `privateNav.*` (`filters`, `data`, `content`, `upload`) y es la etiqueta visible de cada ítem |
-| `showSideMenu` | `true` en las cuatro rutas de datos: muestra la barra de gestión y reserva su espacio (`pb-nav md:pb-0 md:pl-28`) |
+| `menuOptions` | Opciones de la barra de gestión: `filter` (solo en `/explorar`; en `/administrar-datos` ya no hay panel de filtros) abre un `Filter` en un panel de filtros (diálogo modal con `aria-labelledby` hacia el `<h2>` de `Filter`, `titleId`); `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con las claves `privateNav.*` (`filters`, `data`, `content`, `upload`) y es la etiqueta visible de cada ítem |
+| `showSideMenu` | `true` en `/explorar` y, en las tres rutas protegidas, solo cuando `privateSessionOk` (sesión confirmada por `ProtectedRoute`, que avisa con `onStatusChange`): muestra la barra de gestión y reserva el espacio de la barra inferior (`pb-nav md:pb-0`; desde `md` la barra es `sticky` y no necesita margen) |
+| `privateSessionOk` | Estado: `ok` lo pone a `true`; `denied` y `unavailable`, a `false`; `checking` no lo cambia; salir de las rutas privadas, a `false`. Cada `ProtectedRoute` lleva `key` propia, así que cambiar de ruta privada revalida con `/auth` |
 | `isPrivateRoute` | `true` en las tres rutas protegidas: es el valor de `showLogout` de `Sidebar` (el botón «Cerrar sesión» vive en la barra) |
 
 **Estructura de la página:** `App` pinta, por este orden, un enlace «Saltar al contenido» (`skipLink`, visible solo con foco, hacia `#contenido`), `Header`, la barra de gestión (si procede), un único `<main id="contenido" tabIndex={-1}>` con las rutas, el único `<footer>` (`Footer`) y `CookieBanner`. Todo va envuelto en `ToastProvider` (avisos) y cada página privada tiene un `<h1>`, un `<h2>` por sección y un contenedor `mx-auto w-full max-w-6xl` (`max-w-3xl` en la carga). Ver [01](01-arquitectura.md#layout).

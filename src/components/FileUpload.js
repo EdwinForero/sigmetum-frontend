@@ -13,6 +13,7 @@ import { useToast } from '../hooks/useToast';
 
 const ERROR_UPLOAD = 'dialogAdvice.errorUploadMessage';
 const ERROR_DRAFT_NOT_FOUND = 'dialogAdvice.errorDraftNotFound';
+const DROP_REJECTED = 'uploadFiles.fileUploadForm.dropRejected';
 
 function normalizeFileName(fileName) {
   const lastDotIndex = fileName.lastIndexOf('.');
@@ -32,19 +33,25 @@ const FileUploadForm = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const [cardError, setCardError] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
   const { dialog, showDialog, closeDialog } = useDialog();
   const nextId = useRef(0);
   // Evita un segundo envío antes de que React pinte `uploading`.
   const uploadingRef = useRef(false);
+  // dragenter/dragleave se disparan también al cruzar hijos: se cuenta la profundidad.
+  const dragDepth = useRef(0);
 
   const updateEntry = (id, patch) => {
     setEntries((current) => current.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)));
   };
 
-  const handleFileSelect = (event) => {
-    const selectedFiles = Array.from(event.target.files);
+  // Una sola vía para el input y el drop: solo .xlsx (seguridad.md S5), sin repetir nombre y tamaño.
+  const addFiles = (fileList) => {
+    const selectedFiles = Array.from(fileList);
+    const accepted = selectedFiles.filter((file) => file.name.toLowerCase().endsWith('.xlsx'));
 
-    const newEntries = selectedFiles
+    const newEntries = accepted
       .filter(
         (newFile) => !entries.some(
           (existing) => existing.file.name === newFile.name && existing.file.size === newFile.size
@@ -56,9 +63,39 @@ const FileUploadForm = () => {
       });
 
     setEntries((prevEntries) => [...prevEntries, ...newEntries]);
-    setCardError(null);
+    setCardError(accepted.length < selectedFiles.length ? DROP_REJECTED : null);
+    setAnnouncement(newEntries.length > 0 ? t('uploadFiles.fileUploadForm.filesAdded', { count: newEntries.length }) : '');
+  };
 
+  const handleFileSelect = (event) => {
+    addFiles(event.target.files);
     event.target.value = '';
+  };
+
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    if (uploadingRef.current) return;
+    dragDepth.current += 1;
+    setDragging(true);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleDragLeave = () => {
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setDragging(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    dragDepth.current = 0;
+    setDragging(false);
+    if (uploadingRef.current) return;
+    // Texto o un enlace: no hay archivos, y no debe borrar el error ni el anuncio vigentes.
+    if (!event.dataTransfer.files || event.dataTransfer.files.length === 0) return;
+    addFiles(event.dataTransfer.files);
   };
 
   const askDecision = (entry, draft) => {
@@ -193,7 +230,23 @@ const FileUploadForm = () => {
   return (
     <>
       <form onSubmit={handleSubmit} noValidate>
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-brand-dark p-4">
+        {/* El arrastre es un atajo: el botón «Seleccionar archivos» es la vía accesible por teclado. */}
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+        <div
+          data-testid="dropZone"
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`flex flex-col items-center gap-4 rounded-xl border-2 border-brand-dark p-4 ${
+            dragging ? 'border-solid bg-surface' : 'border-dashed'
+          }`}
+        >
+          <span className="material-symbols-outlined text-3xl text-brand-dark" aria-hidden="true">upload_file</span>
+          <p className={`text-center text-ink ${dragging ? 'font-bold' : ''}`}>
+            {dragging ? t('uploadFiles.fileUploadForm.dropZoneActive') : t('uploadFiles.fileUploadForm.dropZoneHint')}
+          </p>
+          <p role="status" className="sr-only">{announcement}</p>
 
           <input
             type="file"
@@ -213,6 +266,7 @@ const FileUploadForm = () => {
               onClick={() => document.getElementById('fileInput').click()}
             />
             <InfoButton
+              topic={t('uploadFiles.fileUploadForm.selectFilesButton')}
               tooltipText={t('uploadFiles.fileUploadForm.selectFilesButtonTooltip')}
             />
           </div>

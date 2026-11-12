@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useId } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -30,14 +30,25 @@ function App() {
   const [selectedSpecies, setSelectedSpecies] = useState([]);
   const [filteredSpecies, setFilteredSpecies] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [selectedData, setSelectedData] = useState([]);
+  const [privateSessionOk, setPrivateSessionOk] = useState(false);
+  const filterTitleId = useId();
   const location = useLocation();
   useDocumentTitle();
   const { t } = useTranslation();
   // React Router acepta la barra final: se quita para comparar rutas.
   const path = location.pathname.replace(/\/+$/, '') || '/';
   const isPrivateRoute = ['/cargar-archivos', '/administrar-datos', '/administrar-contenido'].includes(path);
-  const showSideMenu = ['/cargar-archivos', '/administrar-datos', '/administrar-contenido', '/explorar'].includes(path);
+  const showSideMenu = path === '/explorar' || (isPrivateRoute && privateSessionOk);
+
+  // Nada privado (barra incluida) hasta que ProtectedRoute confirma la sesión; 'checking' no cambia el estado.
+  const handlePrivateStatus = useCallback((status) => {
+    if (status === 'ok') setPrivateSessionOk(true);
+    else if (status === 'denied' || status === 'unavailable') setPrivateSessionOk(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isPrivateRoute) setPrivateSessionOk(false);
+  }, [isPrivateRoute]);
 
   const fetchTerms = useCallback(async () => {
     try {
@@ -68,7 +79,6 @@ function App() {
       setNoItalicTerms([]);
       Promise.all([fetchData(), fetchTerms()]).finally(() => setIsLoading(false));
     } else if (path === '/administrar-datos') {
-      setSelectedData([]);
       setFilteredData([]);
     } else {
       setIsLoading(true);
@@ -76,21 +86,13 @@ function App() {
       setSelectedSpecies([]);
       setFilteredSpecies([]);
       setFilteredData([]);
-      setSelectedData([]);
     }
   }, [path, fetchData, fetchTerms]);
 
   // Identidad estable: Filter repite sus efectos (y dos JSON.stringify del dataset) si estas funciones cambian en cada render.
   const handleFileDropdownSelect = useCallback((data) => {
-    setSelectedData(data);
     setFilteredData(data);
     setIsLoading(false);
-  }, []);
-
-  const handleFilterDataChange = useCallback((filtered) => {
-    setFilteredData((prev) =>
-      JSON.stringify(prev) !== JSON.stringify(filtered) ? filtered : prev
-    );
   }, []);
 
   const handleOnSpeciesSelect = useCallback((speciesSelected) => setSelectedSpecies(speciesSelected), []);
@@ -102,8 +104,7 @@ function App() {
   }, []);
 
   const menuOptions = [
-    { id: 'filter', name: t('privateNav.filters'), component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} />, icon: 'filter_alt' },
-    { id: 'dataManagementFilter', name: t('privateNav.filters'), component: <Filter data={selectedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterDataChange} />, icon: 'filter_alt' },
+    { id: 'filter', name: t('privateNav.filters'), component: <Filter data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} titleId={filterTitleId} />, titleId: filterTitleId, icon: 'filter_alt' },
     { id: 'dataManagement', name: t('privateNav.data'), icon: 'database', link: '/administrar-datos' },
     { id: 'contentManagement', name: t('privateNav.content'), icon: 'settings', link: '/administrar-contenido' },
     { id: 'uploadFiles', name: t('privateNav.upload'), icon: 'upload', link: '/cargar-archivos' },
@@ -111,7 +112,7 @@ function App() {
 
   return (
     <ToastProvider>
-      <div className={`App ${showSideMenu ? 'pb-nav md:pb-0 md:pl-28' : ''}`}>
+      <div className={`App ${showSideMenu ? 'pb-nav md:pb-0' : ''}`}>
         <a
           href="#contenido"
           className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[70] focus-ring rounded-lg bg-surface px-4 py-3 font-bold text-ink"
@@ -142,9 +143,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/galeria" element={<VegetationGallery />} />
               <Route path="/cookies" element={<Cookies />} />
-              <Route path="/cargar-archivos" element={<ProtectedRoute element={<FilesUpload />} />} />
-              <Route path="/administrar-contenido" element={<ProtectedRoute element={<ContentManagement />} />} />
-              <Route path="/administrar-datos" element={<ProtectedRoute element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
+              <Route path="/cargar-archivos" element={<ProtectedRoute key="cargar-archivos" onStatusChange={handlePrivateStatus} element={<FilesUpload />} />} />
+              <Route path="/administrar-contenido" element={<ProtectedRoute key="administrar-contenido" onStatusChange={handlePrivateStatus} element={<ContentManagement />} />} />
+              <Route path="/administrar-datos" element={<ProtectedRoute key="administrar-datos" onStatusChange={handlePrivateStatus} element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

@@ -66,7 +66,7 @@ describe('index.html', () => {
 
   it('carga las fuentes de Google Fonts con rel="stylesheet" y sin manejadores en línea', () => {
     expect(indexHtml).not.toMatch(/\sonload=/);
-    const links = [...indexHtml.matchAll(/<link[^>]*fonts\.googleapis\.com[^>]*>/g)].map((m) => m[0]);
+    const links = [...indexHtml.matchAll(/<link[^>]*fonts\.googleapis\.com\/css2[^>]*>/g)].map((m) => m[0]);
     expect(links).toHaveLength(2);
     links.forEach((link) => expect(link).toMatch(/rel="stylesheet"/));
   });

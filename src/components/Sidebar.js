@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
@@ -27,10 +27,10 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
   const location = useLocation();
 
   const exclusions = {
-    '/explorar': ['dataManagement', 'uploadFiles', 'dataManagementFilter', 'contentManagement'],
-    '/cargar-archivos': ['filter', 'dataManagementFilter'],
+    '/explorar': ['dataManagement', 'uploadFiles', 'contentManagement'],
+    '/cargar-archivos': ['filter'],
     '/administrar-datos': ['filter'],
-    '/administrar-contenido': ['filter', 'dataManagementFilter'],
+    '/administrar-contenido': ['filter'],
   };
 
   const path = location.pathname.replace(/\/+$/, '') || '/';
@@ -45,6 +45,16 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
   const close = () => setIsOpen(false);
   const dialogRef = useDialogFocus(isOpen, close);
 
+  // El diálogo es modal: el body no se desplaza detrás (A6); se restaura al cerrar o desmontar.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [isOpen]);
+
   const handleOpen = (optionId) => {
     setActiveComponent(optionId);
     setIsOpen(true);
@@ -56,12 +66,13 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
   };
 
   const panelOptions = filteredMenuOptions.filter((option) => option.component);
+  const activeOption = panelOptions.find((option) => option.id === activeComponent);
 
   return (
     <>
       <nav
         aria-label={t('privateNav.label')}
-        className="fixed inset-x-0 bottom-0 z-40 h-nav border-t-2 border-brand bg-surface md:inset-x-auto md:bottom-0 md:left-0 md:top-16 md:h-auto md:w-28 md:border-r-2 md:border-t-0 md:p-2"
+        className="fixed inset-x-0 bottom-0 z-40 h-nav border-t-2 border-brand bg-surface md:sticky md:inset-x-auto md:bottom-auto md:top-16 md:h-[calc(100dvh-4rem)] md:w-28 md:shrink-0 md:self-start md:border-r-2 md:border-t-0 md:p-2"
       >
         <ul className="flex h-full md:flex-col md:gap-1">
           {filteredMenuOptions.map((option) => (
@@ -110,14 +121,15 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
         hidden={!isOpen}
         role={isOpen ? 'dialog' : undefined}
         aria-modal={isOpen ? 'true' : undefined}
-        aria-label={isOpen ? t('privateNav.filters') : undefined}
+        aria-labelledby={isOpen ? activeOption?.titleId : undefined}
+        aria-label={isOpen && !activeOption?.titleId ? t('privateNav.filters') : undefined}
         tabIndex={-1}
         className="fixed inset-y-0 left-0 z-[60] w-full max-w-sm overflow-y-auto bg-surface py-4"
       >
         <div className="flex justify-end px-2">
           <ButtonPrincipal icon="close" ariaLabel={t('iconButton.close')} onClick={close} />
         </div>
-        <div className="min-h-full px-4 pb-6">
+        <div className="overscroll-contain px-4 pb-6">
           {panelOptions.map((option) => (
             <div key={option.id} hidden={option.id !== activeComponent}>
               {option.component}
