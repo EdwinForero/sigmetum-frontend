@@ -9,18 +9,32 @@
   "footer": {
     "homeOption": "Inicio",
     "exploreOption": "Explorar",
+    "galleryOption": "Galería",
     "aboutUsOption": "Sobre nosotros",
     "copyright": "{{currentYear}} SIGMETUM-A. Todos los derechos reservados.",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "institutionsTitle": "Instituciones",
+    "contactTitle": "Contacto",
+    "contactFormLink": "Escríbenos desde el formulario",
+    "linksTitle": "Enlaces"
   },
   "gallery": {
     "title": "Galería",
-    "noDataFoundPlaceholder": "No hay datos disponibles."
+    "noDataFoundPlaceholder": "No hay datos disponibles.",
+    "loading": "Cargando fotos…",
+    "openPhoto": "Abrir la foto {{name}}",
+    "errorTitle": "No se han podido cargar las fotos",
+    "errorCause": "Ha fallado la conexión con el servidor. Comprueba tu conexión e inténtalo de nuevo.",
+    "emptyTitle": "La galería está vacía",
+    "viewer": {
+      "counter": "{{current}} de {{total}}"
+    }
   },
   "home": {
-    "title": "SIGMETUM-A: EXPLORANDO LA VEGETACIÓN DE ANDALUCÍA",
+    "title": "SIGMETUM-A: explorando la vegetación de Andalucía",
     "subtitle": "Descubre la riqueza de paisajes vegetales en Andalucía, explorando de manera interactiva.",
-    "searchButton": "Buscar",
+    "exploreButton": "Explorar",
+    "galleryButton": "Galería",
     "descriptionLabel": "Descripción",
     "descriptionContent": "SIGMETUM-A es una base de datos interactiva a través de la cual podrás descubrir los diferentes tipos de vegetación de Andalucía mediante criterios geológicos, biogeográficos y bioclimáticos, que te llevarán a identificar la Serie de Vegetación de cualquier territorio regional, así como su formación clímax (etapa madura de cada Serie) y sus especies características.",
     "contactTitle": "Contáctenos",
@@ -34,14 +48,34 @@
     "collaboratingEntitiesTitle": "Entidades colaboradoras",
     "contactForm": {
       "nameLabel": "Nombre",
-      "namePlaceholder": "Nombre",
+      "namePlaceholder": "Ej.: María López",
+      "nameHint": "Máximo 100 caracteres.",
       "emailLabel": "Correo electrónico",
-      "emailPlaceholder": "Correo electrónico",
+      "emailPlaceholder": "nombre@dominio.es",
+      "emailHint": "Máximo 254 caracteres.",
       "subjectLabel": "Asunto",
-      "subjectPlaceholder": "Asunto",
+      "subjectPlaceholder": "Ej.: Consulta sobre las series de vegetación",
+      "subjectHint": "Máximo 150 caracteres.",
       "messageLabel": "Mensaje",
-      "messagePlaceholder": "Mensaje",
+      "messagePlaceholder": "Escribe tu consulta con el mayor detalle posible.",
+      "messageHint": "Mínimo {{min}} y máximo 2000 caracteres.",
+      "allRequired": "Todos los campos son obligatorios.",
+      "errorSummary_one": "Hay {{count}} error en el formulario.",
+      "errorSummary_other": "Hay {{count}} errores en el formulario.",
+      "submitHelpTitle": "Para enviar, falta:",
+      "missingName": "Escribe tu nombre.",
+      "missingEmail": "Escribe tu correo electrónico.",
+      "invalidEmail": "Revisa el correo electrónico: debe tener el formato nombre@dominio.es.",
+      "missingSubject": "Escribe el asunto.",
+      "shortMessage": "Escribe un mensaje de al menos {{min}} caracteres.",
       "sendButton": "Enviar"
+    }
+  },
+  "form": {
+    "errors": {
+      "required": "Este campo es obligatorio.",
+      "email": "Escribe un correo válido, por ejemplo nombre@dominio.es.",
+      "minLength": "El mensaje debe tener al menos {{count}} caracteres."
     }
   },
   "notFound": {
@@ -51,8 +85,15 @@
   },
   "explore": {
     "title": "Registro de especies",
-    "noDataFoundPlaceholder": "No hay datos disponibles.",
-    "errorLoadPlaceholder": "Error al cargar los datos. Por favor, recarga la página.",
+    "empty": {
+      "errorTitle": "No se han podido cargar los datos",
+      "errorCause": "Ha fallado la conexión con el servidor. Comprueba tu conexión e inténtalo de nuevo.",
+      "noDataTitle": "Todavía no hay especies que mostrar",
+      "noDataCause": "Esta versión de SIGMETUM-A no tiene datos publicados. Vuelve a intentarlo más tarde.",
+      "noResultsTitle": "Ninguna especie coincide con los filtros",
+      "noResultsCause": "Los filtros que has elegido no tienen resultados en común. Quítalos para ver todas las especies.",
+      "clearFilters": "Quitar filtros"
+    },
     "downloadExcelButton": "Descargar resultados",
     "downloadExcelButtonTooltip": "Al presionar este botón, podrás descargar un archivo en formato Excel que contiene los resultados filtrados según las opciones que hayas seleccionado previamente.",
     "downloadGlossaryButton": "Descargar glosario",
@@ -269,7 +310,7 @@
     "subtitleAboutCookies": "¿Qué son las cookies y para qué se usan?",
     "descriptionAboutCookies": "Una cookie es un archivo de texto simple que un sitio web almacena en tu dispositivo para recordar información, como tus preferencias o datos de navegación. Cada cookie es única para tu navegador e incluye datos como un identificador anónimo y el nombre del sitio. Las cookies mejoran la experiencia de navegación al recordar tus preferencias o permitir funcionalidades como un carrito de compras.\n\nSi bien nuestro sitio funciona sin cookies, desactivarlas podría limitar ciertas características y funcionalidades.",
     "subtitleAboutPixel": "¿Qué es un píxel?",
-    "descriptionAboutPixel": "Un píxel es un fragmento de código que permite que se descarguen cookies en tu dispositivo. A menudo son usados por terceros para mostrar publicidad personalizada basada en tu actividad de navegación.\n\nPara más información sobre cookies y píxeles, consulta el sitio web: <a>Information Commissioner’s Office (ICO)</a>.",
+    "descriptionAboutPixel": "Un píxel es un fragmento de código que permite que se descarguen cookies en tu dispositivo. A menudo son usados por terceros para mostrar publicidad personalizada basada en tu actividad de navegación.\n\nPara más información sobre cookies y píxeles, consulta el sitio web de la Information Commissioner’s Office (ICO) en la sección «Más información», al final de esta página.",
     "subtitleTypeCookies": "Tipos de Cookies en Nuestro Sitio",
     "descriptionTypeCookies": "• <strong>First party</strong>: Estas cookies son configuradas directamente por nuestro sitio para funcionalidades básicas o mejorar tu experiencia.\n\n• <strong>Third party</strong>: Configuradas por socios externos (como anunciantes y redes sociales), estas cookies recopilan datos que luego son enviados a dichos terceros.",
     "subtitleCookiesUse": "Cómo Utilizamos las Cookies",
@@ -284,13 +325,16 @@
     "subtitleFourthCookiesCategory": "4. De Publicidad Dirigida",
     "descriptionFourthCookiesCategory": "Utilizadas por socios publicitarios para mostrar anuncios relevantes en otros sitios según tus intereses.",
     "subtitleCookiesManagement": "Cómo gestionar las cookies",
-    "descriptionCookiesManagement": "Puede actualizar sus preferencias sobre las cookies de nuestro sitio web a través de su perfil. Tenga en cuenta que nuestros sitios web funcionarán sin cookies, pero perderá algunas características y funcionalidades si decide desactivarlas.\n\nSi desea restringir o bloquear las cookies del navegador web que se instalan en su dispositivo, puede hacerlo a través de la configuración de su navegador. A continuación, le indicamos cómo hacerlo para los navegadores más populares, pero si el suyo no aparece en la lista, podrá encontrar información al respecto en la sección de Ayuda de su navegador o en <a>aboutcookies.org</a>:",
-    "browserChrome": "• <a>Chrome</a>.",
-    "browserInternetExplorer": "• <a>Internet Explorer</a>.",
-    "browserSafari": "• <a>Safari</a>.",
-    "browserMicrosoftEdge": "• <a>Microsoft Edge</a>.",
-    "browserFirefox": "• <a>Firefox</a>.",
-    "browserOpera": "• <a>Opera</a>.",
+    "descriptionCookiesManagement": "Puede actualizar sus preferencias sobre las cookies de nuestro sitio web a través de su perfil. Tenga en cuenta que nuestros sitios web funcionarán sin cookies, pero perderá algunas características y funcionalidades si decide desactivarlas.\n\nSi desea restringir o bloquear las cookies del navegador web que se instalan en su dispositivo, puede hacerlo a través de la configuración de su navegador. A continuación, le indicamos cómo hacerlo para los navegadores más populares, pero si el suyo no aparece en la lista, podrá encontrar información al respecto en la sección de Ayuda de su navegador o en aboutcookies.org:",
+    "browserChrome": "Chrome",
+    "browserInternetExplorer": "Internet Explorer",
+    "browserSafari": "Safari",
+    "browserMicrosoftEdge": "Microsoft Edge",
+    "browserFirefox": "Firefox",
+    "browserOpera": "Opera",
+    "moreInfoTitle": "Más información",
+    "linkIco": "Information Commissioner’s Office (ICO)",
+    "linkAboutCookies": "aboutcookies.org",
     "banner": {
       "title": "Política de Cookies",
       "description": "Usamos cookies para reconocer tu dispositivo, optimizar tu experiencia, personalizar contenido, mostrar publicidad relevante y garantizar la seguridad. No almacenamos datos personales sin tu consentimiento o cuando no sea estrictamente necesario para los servicios que utilizas. Para mayor información, consulta <a>aquí</a>.",
@@ -312,6 +356,19 @@
       }
     }
   },
+  "a11y": {
+    "opensInNewTab": "(se abre en una pestaña nueva)"
+  },
+  "institutions": {
+    "uma": "Universidad de Málaga",
+    "ual": "Universidad de Almería",
+    "ugr": "Universidad de Granada",
+    "uhu": "Universidad de Huelva",
+    "uja": "Universidad de Jaén",
+    "efyve": "EFYVE",
+    "geospace": "3DGeoSpace",
+    "mafo": "Malagueña Forestal"
+  },
   "iconButton": {
     "menu": "Menú",
     "close": "Cerrar",
@@ -319,7 +376,9 @@
     "nextPage": "Página siguiente",
     "info": "Información",
     "infoAbout": "Información: {{topic}}",
-    "scrollDown": "Bajar"
+    "scrollDown": "Bajar",
+    "previousPhoto": "Foto anterior",
+    "nextPhoto": "Foto siguiente"
   },
   "language": {
     "spanish": "Español",

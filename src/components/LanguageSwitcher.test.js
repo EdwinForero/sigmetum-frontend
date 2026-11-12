@@ -30,6 +30,14 @@ describe('LanguageSwitcher', () => {
     expect(selector).toHaveClass('h-11', 'focus-ring');
   });
 
+  it('es más ligero: borde de 1 px, peso normal, esquinas xl y relleno compacto', () => {
+    render(<LanguageSwitcher />);
+    const selector = screen.getByRole('combobox', { name: 'language.label' });
+
+    expect(selector).toHaveClass('border', 'font-normal', 'rounded-xl', 'pl-2', 'pr-1');
+    expect(selector).not.toHaveClass('border-2', 'font-bold', 'rounded-lg', 'px-2');
+  });
+
   it('cada opción declara su idioma con lang', () => {
     render(<LanguageSwitcher />);
 

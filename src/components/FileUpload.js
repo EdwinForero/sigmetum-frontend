@@ -334,6 +334,7 @@ const FileUploadForm = () => {
       <AnimatePresence>
         {dialog.visible && (
           <DialogAdvice
+            variant="warning"
             dialogTitle={dialog.title}
             dialogMessage={dialog.message}
             dialogDetails={dialog.details}

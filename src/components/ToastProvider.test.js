@@ -104,6 +104,21 @@ describe('ToastProvider', () => {
     expect(screen.getByRole('button', { name: 'feedback.close' })).toHaveClass('h-11', 'w-11');
   });
 
+  it.each([
+    ['lanzar éxito', 'Guardado', 'border-brand-deep', 'check_circle', 'text-brand-deep'],
+    ['lanzar error', 'Falló', 'border-danger', 'error', 'text-danger'],
+  ])('%s usa el sistema de avisos: clases base, color de su variante e icono', async (boton, texto, border, icon, iconClass) => {
+    const user = renderLauncher();
+    await user.click(screen.getByText(boton));
+
+    const caja = screen.getByText(texto).parentElement;
+    expect(caja).toHaveClass('flex', 'items-start', 'gap-2', 'rounded-lg', 'border', 'p-stack-md', 'bg-surface', border, 'shadow-lg');
+    expect(caja).not.toHaveClass('border-2');
+    const ligadura = caja.querySelector('[aria-hidden="true"]');
+    expect(ligadura).toHaveTextContent(icon);
+    expect(ligadura).toHaveClass(iconClass);
+  });
+
   it('no mueve el foco al aparecer un aviso', async () => {
     const user = renderLauncher();
     const lanzar = screen.getByText('lanzar éxito');

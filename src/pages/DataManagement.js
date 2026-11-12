@@ -161,6 +161,7 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
       <AnimatePresence>
         {dialog.visible && (
           <DialogAdvice
+            variant="warning"
             dialogTitle={dialog.title}
             dialogMessage={dialog.message}
             showActions

@@ -167,4 +167,13 @@ describe('Sidebar', () => {
     expect(api.logout).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeDisabled();
   });
+
+  it('los destinos inactivos van en peso normal (400) y el activo en negrita', () => {
+    renderSidebar('/administrar-datos', { showLogout: true });
+
+    expect(screen.getByRole('link', { name: 'Cargar archivos' })).toHaveClass('font-normal');
+    expect(screen.getByRole('link', { name: 'Cargar archivos' })).not.toHaveClass('font-medium');
+    expect(screen.getByRole('link', { name: 'Administrar datos' })).toHaveClass('font-bold');
+    expect(screen.getByRole('button', { name: 'login.logOutButton' })).toHaveClass('font-normal');
+  });
 });

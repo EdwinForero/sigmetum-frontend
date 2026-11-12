@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ToastContext } from '../hooks/useToast';
+import { NOTICE_BASE, noticeVariant } from '../utilities/noticeStyles';
 
 const SUCCESS_DURATION = 8000;
 
@@ -8,6 +9,7 @@ const Toast = ({ toast, onDismiss }) => {
   const { t } = useTranslation();
   const [paused, setPaused] = useState(false);
   const isSuccess = toast.type === 'success';
+  const { box, icon, iconClass } = noticeVariant(isSuccess ? 'success' : 'error');
 
   // El éxito se cierra solo; el contador se para con el ratón encima o el foco dentro y vuelve a empezar al salir.
   useEffect(() => {
@@ -18,19 +20,14 @@ const Toast = ({ toast, onDismiss }) => {
 
   return (
     <div
-      className={`pointer-events-auto flex items-start gap-2 rounded-lg border-2 bg-surface p-3 shadow-lg ${
-        isSuccess ? 'border-brand-deep text-ink' : 'border-danger text-danger'
-      }`}
+      className={`pointer-events-auto ${NOTICE_BASE} ${box} shadow-lg`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <span
-        className={`material-symbols-outlined mt-2 ${isSuccess ? 'text-brand-deep' : ''}`}
-        aria-hidden="true"
-      >
-        {isSuccess ? 'check_circle' : 'error'}
+      <span className={`material-symbols-outlined mt-2 ${iconClass}`} aria-hidden="true">
+        {icon}
       </span>
       <span className="min-w-0 flex-1 break-words py-2 font-bold">{toast.message}</span>
       <button

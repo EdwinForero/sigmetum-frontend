@@ -266,4 +266,32 @@ describe('DialogSpecies', () => {
 
     expect(screen.getByRole('main')).toHaveFocus();
   });
+
+  it('usa tokens: fondo bg-ink/70, caja bg-surface y título text-moss, sin hex', () => {
+    renderDialog([fila('Provincia exacta', ESPECIE)]);
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveClass('bg-surface');
+    expect(dialog.parentElement).toHaveClass('bg-ink/70');
+    expect(document.getElementById(dialog.getAttribute('aria-labelledby'))).toHaveClass('text-moss');
+    const propias = [dialog.parentElement.className, dialog.className, dialog.querySelector('a').className].join(' ');
+    expect(propias).not.toMatch(/\[#[0-9A-Fa-f]{3,8}\]|gray-\d/);
+  });
+
+  it('el enlace de IPNI mide al menos 44 px, es moss y subrayado, y se abre de forma segura', () => {
+    renderDialog([fila('Provincia exacta', ESPECIE)]);
+
+    const link = screen.getByRole('link', { name: /explore.dialogSpecies.readMoreLabel/ });
+    expect(link).toHaveClass('inline-flex', 'min-h-11', 'items-center', 'text-moss', 'underline');
+    expect(link).not.toHaveClass('text-sm');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link.getAttribute('href')).toMatch(/^https:\/\/www\.ipni\.org\/\?q=/);
+  });
+
+  it('el nombre científico en cursiva sigue en Amaranth (font-primary italic): Sen no tiene cursiva', () => {
+    renderDialog([fila('Provincia exacta', ESPECIE)]);
+
+    const nombre = screen.getByRole('heading', { level: 2, name: ESPECIE });
+    expect(nombre).toHaveClass('font-primary', 'italic');
+  });
 });

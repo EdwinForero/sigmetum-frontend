@@ -136,6 +136,21 @@ describe('LoginForm', () => {
     expect(alert).toHaveAttribute('id');
   });
 
+  it('solo estilos: el aviso usa las clases base del sistema de avisos y los campos usan tokens y rounded-xl', async () => {
+    const { container } = renderForm();
+
+    await user.click(screen.getByRole('button', { name: 'login.logInButton' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveClass('rounded-lg', 'border', 'p-stack-md', 'bg-surface', 'border-danger', 'text-danger');
+    expect(alert).toHaveClass('mx-4', 'mb-4');
+    const campo = screen.getByLabelText('login.emailLabel');
+    expect(campo).toHaveClass('rounded-xl', 'border-moss', 'bg-white', 'text-ink');
+    expect(screen.getByLabelText('login.passwordLabel')).toHaveClass('rounded-xl');
+    expect(screen.getByRole('button', { name: 'login.showPassword' })).toHaveClass('text-moss');
+    expect(container.innerHTML).not.toMatch(/\[#|#[0-9A-Fa-f]{6}/);
+  });
+
   it('acceso con TOTP: reto SOFTWARE_TOKEN_MFA con el foco en el h2, tokens guardados y navegación', SLOW, async () => {
     route({
       InitiateAuth: srpChallenge,

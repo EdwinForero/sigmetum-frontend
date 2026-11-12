@@ -61,6 +61,16 @@ describe('FileUpload con campos vacíos en el Excel', () => {
     await screen.findByText('dialogAdvice.fieldsMissingMessage');
   };
 
+  it('el aviso de campos vacíos sale con el icono de advertencia, no el de información', async () => {
+    fetchMock.mockResolvedValueOnce(draftResponse());
+    const user = userEvent.setup();
+    await uploadOneFile(user);
+
+    const dialogo = screen.getByRole('dialog');
+    expect(within(dialogo).getByText('warning')).toHaveClass('text-warning');
+    expect(within(dialogo).queryByText('info')).toBeNull();
+  });
+
   beforeEach(() => {
     fetchMock = vi.fn();
     assign = vi.fn();

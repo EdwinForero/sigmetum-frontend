@@ -1,239 +1,88 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import ScrollIndicator from '../components/ScrollIndicator';
+
+const H2 = 'text-2xl md:text-4xl font-bold leading-tight text-brand-deep';
+const H3 = 'mt-stack-xl text-xl md:text-3xl font-bold leading-tight text-brand-deep';
+const P = 'mt-stack max-w-prose text-base md:text-lg text-ink-soft whitespace-pre-line';
+const BLOCK = 'mt-section border-t border-moss pt-section';
+
+// Enlaces externos de «Más información»: fuera de los párrafos, cada uno con su objetivo de 44 px.
+const MORE_INFO = [
+  { key: 'linkIco', href: 'https://ico.org.uk/' },
+  { key: 'linkAboutCookies', href: 'https://www.aboutcookies.org' },
+  { key: 'browserChrome', href: 'https://support.google.com/chrome/answer/95647' },
+  { key: 'browserInternetExplorer', href: 'https://support.microsoft.com/en-gb/help/17442/windows-internet-explorer-delete-manage-cookies' },
+  { key: 'browserSafari', href: 'https://support.apple.com/en-hk/guide/safari/sfri11471/mac' },
+  { key: 'browserMicrosoftEdge', href: 'https://support.microsoft.com/en-gb/microsoft-edge/microsoft-edge-browsing-data-and-privacy-bb8174ba-9d73-dcf2-9b4a-c582b4e640dd' },
+  { key: 'browserFirefox', href: 'https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop?redirectslug=enable-and-disable-cookies-website-preferences&redirectlocale=en-US' },
+  { key: 'browserOpera', href: 'https://help.opera.com/en/latest/web-preferences/#cookies' },
+];
+
+const CATEGORIES = ['First', 'Second', 'Third', 'Fourth'];
 
 const Cookies = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="relative flex flex-col bg-[#F9FBFA] overflow-x-hidden">
+    <article className="page-container pt-stack-xl md:pt-section pb-section">
+      <h1 className="text-4xl md:text-5xl font-bold leading-tight text-brand-deep">
+        {t('cookies.title')}
+      </h1>
 
-        <h1 className="text-brand-deep text-6xl font-bold leading-tight my-4 text-center my-2">
-          {t('cookies.title')}
-        </h1>
+      <section className="mt-stack-xl">
+        <h2 className={H2}>{t('cookies.subtitleAboutCookies')}</h2>
+        <p className={P}>{t('cookies.descriptionAboutCookies')}</p>
 
-        <div className="max-w-5xl mx-auto px-4">
-        <div className="my-10">
+        <h2 className={`${H2} mt-stack-xl`}>{t('cookies.subtitleAboutPixel')}</h2>
+        <p className={P}>{t('cookies.descriptionAboutPixel')}</p>
+      </section>
 
-            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight my-2">
-                {t('cookies.subtitleAboutCookies')}
-            </h2>
+      <section className={BLOCK}>
+        <h2 className={H2}>{t('cookies.subtitleTypeCookies')}</h2>
+        <p className={P}>
+          <Trans
+            i18nKey="cookies.descriptionTypeCookies"
+            components={{ strong: <strong className="font-bold" /> }}
+          />
+        </p>
 
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                {t('cookies.descriptionAboutCookies')}
-            </p>
+        <h2 className={`${H2} mt-stack-xl`}>{t('cookies.subtitleCookiesUse')}</h2>
+        <p className={P}>{t('cookies.descriptionCookiesUse')}</p>
+      </section>
 
-            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight my-2 mt-10">
-                {t('cookies.subtitleAboutPixel')}
-            </h2>
+      <section className={BLOCK}>
+        <h2 className={H2}>{t('cookies.subtitleCookiesCategories')}</h2>
+        {CATEGORIES.map((category) => (
+          <React.Fragment key={category}>
+            <h3 className={H3}>{t(`cookies.subtitle${category}CookiesCategory`)}</h3>
+            <p className={P}>{t(`cookies.description${category}CookiesCategory`)}</p>
+          </React.Fragment>
+        ))}
+      </section>
 
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.descriptionAboutPixel"
-                components={{
-                    a: (
-                    <a
-                        href="https://ico.org.uk/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
+      <section className={BLOCK}>
+        <h2 className={H2}>{t('cookies.subtitleCookiesManagement')}</h2>
+        <p className={P}>{t('cookies.descriptionCookiesManagement')}</p>
 
-          </div>
-
-          <div className="border-t-2 border-[#4B644A] my-4"></div>
-
-          <div className="my-10">
-
-            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
-                {t('cookies.subtitleTypeCookies')}
-            </h2>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.descriptionTypeCookies"
-                components={{ strong: <strong className="font-bold" /> }}
-                />
-            </p>
-
-            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2 mt-10">
-                {t('cookies.subtitleCookiesUse')}
-            </h2>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                {t('cookies.descriptionCookiesUse')}
-            </p>
-
-          </div>
-
-          <div className="border-t-2 border-[#4B644A] my-4"></div>
-        
-        <div className="my-10">
-
-            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
-                {t('cookies.subtitleCookiesCategories')}
-            </h2>
-
-            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
-                {t('cookies.subtitleFirstCookiesCategory')}
-            </h3>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2 ">
-                {t('cookies.descriptionFirstCookiesCategory')}
-            </p>
-
-            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
-                {t('cookies.subtitleSecondCookiesCategory')}
-            </h3>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                {t('cookies.descriptionSecondCookiesCategory')}
-            </p>
-
-            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
-                {t('cookies.subtitleThirdCookiesCategory')}
-            </h3>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                {t('cookies.descriptionThirdCookiesCategory')}
-            </p>
-
-            <h3 className="text-brand-deep text-xl sm:text-3xl font-bold leading-tight my-2 mt-10">
-                {t('cookies.subtitleFourthCookiesCategory')}
-            </h3>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                {t('cookies.descriptionFourthCookiesCategory')}
-            </p>
-        </div>
-
-          <div className="border-t-2 border-[#4B644A] my-4"></div>
-
-          <div className="my-10">
-
-            <h2 className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center my-2">
-                {t('cookies.subtitleCookiesManagement')}
-            </h2>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.descriptionCookiesManagement"
-                components={{
-                    a: (
-                    <a
-                        href="https://www.aboutcookies.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.browserChrome"
-                components={{
-                    a: (
-                    <a
-                        href="https://support.google.com/chrome/answer/95647"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.browserInternetExplorer"
-                components={{
-                    a: (
-                    <a
-                        href="https://support.microsoft.com/en-gb/help/17442/windows-internet-explorer-delete-manage-cookies"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.browserSafari"
-                components={{
-                    a: (
-                    <a
-                        href="https://support.apple.com/en-hk/guide/safari/sfri11471/mac"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.browserMicrosoftEdge"
-                components={{
-                    a: (
-                    <a
-                        href="https://support.microsoft.com/en-gb/microsoft-edge/microsoft-edge-browsing-data-and-privacy-bb8174ba-9d73-dcf2-9b4a-c582b4e640dd"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.browserFirefox"
-                components={{
-                    a: (
-                    <a
-                        href="https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop?redirectslug=enable-and-disable-cookies-website-preferences&redirectlocale=en-US"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
-
-            <p className="text-[#14281D] text-base text-justify sm:text-lg text-center whitespace-pre-line my-2">
-                <Trans
-                i18nKey="cookies.browserOpera"
-                components={{
-                    a: (
-                    <a
-                        href="https://help.opera.com/en/latest/web-preferences/#cookies"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                    />
-                    ),
-                }}
-                />
-            </p>
-          </div>
-          </div>
-        <ScrollIndicator />
-    </div>
+        <h3 className={H3}>{t('cookies.moreInfoTitle')}</h3>
+        <ul className="mt-stack">
+          {MORE_INFO.map(({ key, href }) => (
+            <li key={key}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="focus-ring inline-flex min-h-11 items-center gap-stack-sm text-brand-deep underline"
+              >
+                <span>{t(`cookies.${key}`)}</span>
+                <span className="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                <span className="sr-only">{t('a11y.opensInNewTab')}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </article>
   );
 };
 

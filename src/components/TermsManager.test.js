@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TermsManager from './TermsManager';
 import ToastProvider from './ToastProvider';
@@ -182,6 +182,15 @@ describe('TermsManager', () => {
 
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
       expect(api.deleteAuth).not.toHaveBeenCalled();
+    });
+
+
+    it('la confirmación sale con el icono de advertencia, no el de información', async () => {
+      const user = userEvent.setup();
+      await renderManager();
+      const dialogo = await abrirConfirmacion(user);
+      expect(within(dialogo).getByText('warning')).toHaveClass('text-warning');
+      expect(within(dialogo).queryByText('info')).toBeNull();
     });
 
     it('Confirmar borra una sola vez, avisa en status, recarga y lleva el foco al título de la sección', async () => {

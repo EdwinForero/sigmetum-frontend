@@ -29,6 +29,9 @@ Catálogo de claves de S3 de los recursos estáticos y la función `assetUrl`.
 
 `assetUrl(key)` → `` `${env.S3_URL}/${key}` ``. Para añadir un recurso: súbelo a esa ruta del bucket, añade la clave aquí y úsalo con `assetUrl(ASSETS.X)`. `ASSETS.LOGO` es además la **única fuente** de la clave del favicon (ver abajo): no se copia en ningún otro sitio.
 
+### `institutions.js` (`src/config/institutions.js`)
+Datos de los logos institucionales, compartidos por `Footer` y `Home`: `UNIVERSITIES` (UMA, UAL, UGR, UHU y UJA; la primera es la líder del proyecto) y `ENTITIES` (EFYVE, 3D Geospace y Malagueña Forestal). Cada elemento es `{ id, url, asset }`: `url` es el enlace externo (todas `https://`; EFYVE responde 200 con `https`, comprobado el 12/11/2026, y su entrada de `KNOWN_DEBT` en `scripts/quality-check.mjs` se retiró), `asset` la clave de `ASSETS.LOGOS` y el nombre accesible sale de `institutions.<id>` en las traducciones. Los nombres de los colaboradores siguen fijos en `Home.js`.
+
 ### Favicon (`vite.config.js` y `faviconHtml`)
 El `<link rel="icon">` ya no está en `index.html`: lo inyecta el plugin inline `sigmetum-favicon` de `vite.config.js` con `transformIndexHtml`, así que la primera petición del navegador ya va a la URL correcta y no depende de JavaScript (`Header` no toca el favicon). Actúa en `npm run build` y en `npm run dev`.
 
@@ -119,7 +122,7 @@ const { dialog, showDialog, closeDialog } = useDialog();
 Avisos no modales. Exporta `ToastContext` (valor por defecto `null`) y el hook `useToast()`, que devuelve `{ notifySuccess(message), notifyError(message) }` y **lanza un error** si se usa fuera de `ToastProvider` (ver [05](05-componentes.md#toastprovider)). Reparto de los mensajes: éxitos de los tres gestores, `FileUpload`, `ContactForm` y las acciones de `DataManagement` → `notifySuccess` (`role="status"`, se cierra solo a los 8 s con pausa); errores de los gestores y de `Explore` → `notifyError` (`role="alert"`, persistente); validaciones y errores de un campo o de una tarjeta → `InlineError`; borrados → `DialogAdvice` de confirmación. Los tests de los componentes que lo usan se envuelven en `ToastProvider`.
 
 ### `useDialogFocus(isOpen, onClose)` (`src/hooks/useDialogFocus.js`)
-Gestiona el foco de un diálogo modal (A6) y devuelve la `ref` de su caja, que debe llevar `tabIndex={-1}`. Lo usan `DialogAdvice` y `DialogSpecies`; un diálogo nuevo debe reutilizarlo.
+Gestiona el foco de un diálogo modal (A6) y devuelve la `ref` de su caja, que debe llevar `tabIndex={-1}`. Lo usan `DialogAdvice`, `DialogSpecies` y `GalleryViewer`; un diálogo nuevo debe reutilizarlo.
 
 | Comportamiento | Descripción |
 |---|---|
@@ -140,11 +143,19 @@ Pone `document.title` con el formato `` `${t(clave)} · SIGMETUM-A` `` según la
 
 Al añadir una ruta en `App.js` hay que añadirla a `PAGE_TITLE_KEYS`: un test lee `App.js` y falla si falta alguna.
 
-### `UseAtBottom()` (`src/utilities/UseAtBottom.js`)
-Devuelve `true` cuando la ventana está a 5 px o menos del final del documento. Escucha `scroll` en `window` sin limitar la frecuencia. El nombre empieza en mayúscula, lo que se sale de la convención `useXxx`, aunque funciona.
-
-
 ## Utilidades
+
+### `noticeStyles.js` (`NOTICE_BASE` y `noticeVariant(variant)`)
+Sistema de avisos único. `NOTICE_BASE` (`flex items-start gap-2 rounded-lg border p-stack-md`) es la caja; `noticeVariant` devuelve `{ box, icon, iconClass }` para `info` (`border-moss`, icono `info`), `success` (`border-brand-deep`, `check_circle`), `warning` (`border-warning`, `warning`) y `error` (`border-danger text-danger`, `error`), y `info` si la variante no existe. Todas llevan `bg-surface`, borde de 1 px y texto `ink` (`danger` en el error), sin fondos tintados. Lo usan `InlineError`, `InfoButton`, `ToastProvider`, `DialogAdvice` y `LoginForm`; el banner de cookies usa los mismos tokens (`border-moss bg-surface text-ink`) sin importarlo.
+
+### `validateContact({ username, email, subject, message })` (`validateContact.js`)
+Validación en cliente de `ContactForm`: aplica `trim` y devuelve `{ [campo]: { key, count? } }` solo con los campos inválidos, sin mutar la entrada. Campos vacíos: `form.errors.required`; correo: `form.errors.email` si no cumple la expresión fija `/^[^s@]+@[^s@]+.[^s@]+$/`; mensaje: `form.errors.minLength` con `count` si tiene menos de `MESSAGE_MIN_LENGTH` (20) caracteres. **No sustituye a la validación del servidor** (S5): el backend sigue siendo la autoridad y su límite propio para el mensaje es **(por confirmar)**.
+
+### `photoName(fileName)` (`photoName.js`)
+Nombre legible de una foto de la galería: quita la extensión y cambia los `_` por espacios; devuelve `''` con `null` o `undefined`. Lo usan `VegetationGallery` (pie, `alt` y nombre accesible del botón) y `GalleryViewer` (título y `alt`).
+
+### `isSafeImageUrl(url)` (`isSafeImageUrl.js`)
+Devuelve `true` solo si la URL se analiza con `new URL` (dentro de un `try/catch`) y su protocolo es `https:`, o `http:` con host `localhost` o `127.0.0.1` (desarrollo). Con cualquier otra cosa (otro host con `http:`, `javascript:`, `data:`, texto que no es una URL, cadena vacía, `null` o `undefined`) devuelve `false`. La usan `ImageGalleryManager` (miniaturas), `VegetationGallery` (fotos) y `GalleryViewer` (visor): si da `false` no se pide la imagen y queda una caja vacía ([seguridad](guias/seguridad.md), S7). Es una defensa en profundidad: las URL vienen prefirmadas del backend. Cubierta por `isSafeImageUrl.test.js`.
 
 ### `meetsPasswordPolicy(password)` (`passwordPolicy.js`)
 Ayuda en cliente que replica la política del pool: devuelve `true` con 14 caracteres o más y con minúsculas, mayúsculas, números y símbolos. Cognito es la autoridad: solo evita una petición que se sabe que será rechazada (sus rechazos se tratan como `passwordRejected`).

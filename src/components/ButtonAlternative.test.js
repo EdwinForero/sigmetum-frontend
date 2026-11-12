@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ButtonAlternative from './ButtonAlternative';
+import ButtonAlternative, { BUTTON_ALTERNATIVE_CLASS } from './ButtonAlternative';
 
 describe('ButtonAlternative', () => {
   it('lleva el anillo de foco', () => {
@@ -42,6 +42,13 @@ describe('ButtonAlternative', () => {
     expect(boton).not.toBeDisabled();
     await user.click(boton);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('exporta las clases del estado habilitado para enlaces con aspecto de botón', () => {
+    for (const clase of ['focus-ring', 'min-h-12', 'text-brand-deep', 'border-brand-dark', 'rounded-xl']) {
+      expect(BUTTON_ALTERNATIVE_CLASS).toContain(clase);
+    }
+    expect(BUTTON_ALTERNATIVE_CLASS).not.toMatch(/opacity-50|not-allowed/);
   });
 
   it('desactivado, no se puede pulsar', async () => {

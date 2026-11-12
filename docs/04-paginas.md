@@ -20,9 +20,11 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 | `menuOptions` | Opciones de la barra de gestión: `filter` (solo en `/explorar`; en `/administrar-datos` ya no hay panel de filtros) abre un `Filter` en un panel de filtros (diálogo modal con `aria-labelledby` hacia el `<h2>` de `Filter`, `titleId`); `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con las claves `privateNav.*` (`filters`, `data`, `content`, `upload`) y es la etiqueta visible de cada ítem |
 | `showSideMenu` | `true` en `/explorar` y, en las tres rutas protegidas, solo cuando `privateSessionOk` (sesión confirmada por `ProtectedRoute`, que avisa con `onStatusChange`): muestra la barra de gestión y reserva el espacio de la barra inferior (`pb-nav md:pb-0`; desde `md` la barra es `sticky` y no necesita margen) |
 | `privateSessionOk` | Estado: `ok` lo pone a `true`; `denied` y `unavailable`, a `false`; `checking` no lo cambia; salir de las rutas privadas, a `false`. Cada `ProtectedRoute` lleva `key` propia, así que cambiar de ruta privada revalida con `/auth` |
+| `loadExplore()` | Carga de `/explorar` (limpia filtros y selección y pide `get-merged-data` y `list-terms` en paralelo); la usa el efecto de la ruta y el «Reintentar» de `Explore` (`onRetry`) |
+| `handleClearFilters()` | Incrementa `filterResetKey`: el `Filter` se remonta y borra su selección («Quitar filtros» de `Explore`, `onClearFilters`) |
 | `isPrivateRoute` | `true` en las tres rutas protegidas: es el valor de `showLogout` de `Sidebar` (el botón «Cerrar sesión» vive en la barra) |
 
-**Estructura de la página:** `App` pinta, por este orden, un enlace «Saltar al contenido» (`skipLink`, visible solo con foco, hacia `#contenido`), `Header`, la barra de gestión (si procede), un único `<main id="contenido" tabIndex={-1}>` con las rutas, el único `<footer>` (`Footer`) y `CookieBanner`. Todo va envuelto en `ToastProvider` (avisos) y cada página privada tiene un `<h1>`, un `<h2>` por sección y un contenedor `mx-auto w-full max-w-6xl` (`max-w-3xl` en la carga). Ver [01](01-arquitectura.md#layout).
+**Estructura de la página:** `App` pinta, por este orden, un enlace «Saltar al contenido» (`skipLink`, visible solo con foco, hacia `#contenido`), `Header`, la barra de gestión (si procede), un único `<main id="contenido" tabIndex={-1}>` con las rutas, el único `<footer>` (`Footer`) y `CookieBanner`. Todo va envuelto en `MotionConfig reducedMotion="user"` y `ToastProvider` (avisos) y cada página privada tiene un `<h1>`, un `<h2>` por sección y un contenedor `mx-auto w-full max-w-6xl` (`max-w-3xl` en la carga); las páginas públicas usan `.page-container` (márgenes 16, 24 y 32 px). Ver [01](01-arquitectura.md#layout).
 
 ---
 
@@ -49,26 +51,26 @@ El título sigue al `pathname`, no a lo que pinta `ProtectedRoute`: si una ruta 
 
 ## Home (`/`)
 
-Portada del proyecto.
+Portada del proyecto. Todo con tokens y el contenedor común `.page-container`; sin animaciones de revelado por scroll ni parallax.
 
 | Sección | Contenido |
 |---|---|
-| Hero | `ImageComponent` de fondo (banner de S3, efecto parallax con `background-attachment: fixed`), título, subtítulo y botón a `/explorar` |
-| Descripción | Texto `home.descriptionContent` sobre fondo oscuro, animado al entrar en pantalla |
-| Líder del proyecto | Logo de la UMA con enlace y lista `umaCollaborators` (fija en el código) |
-| Otras universidades | `anotherUniverities`: UAL, UGR, UHU y UJA con enlace y colaboradores |
-| Entidades colaboradoras | `anotherEntities`: EFYVE, 3D Geospace y Malagueña Forestal |
-| Contacto | `ContactForm`, lista de correos (`EmailContactGrid`) y ubicación |
+| Hero | `ImageComponent` de fondo (banner de S3, velo uniforme `ink` al 70 %) de alto `calc(100svh - 4rem)`: `<h1>` (`home.title`, 36 px y 48 px desde `md`, peso 700, sin mayúsculas forzadas), subtítulo (`<p>`), dos CTA que son enlaces (`Link`): «Explorar» con `BUTTON_PRINCIPAL_CLASS` (único botón principal relleno de la página) y «Galería» con `BUTTON_ALTERNATIVE_CLASS`; la flecha (`ScrollIndicator`, `targetId="home-descripcion"`) va dentro del hero, en el flujo |
+| Descripción | `<section id="home-descripcion">` con `home.descriptionContent` sobre `bg-ink` (destino de la flecha) |
+| Líder del proyecto | Logo de la UMA (`LogoLink`) con la lista de colaboradores (`COLLABORATORS`, fija en el código) |
+| Otras universidades | UAL, UGR, UHU y UJA con enlace y colaboradores, en una rejilla |
+| Entidades colaboradoras | EFYVE, 3D Geospace y Malagueña Forestal (todos con enlace `https`) |
+| Contacto | `<section id="contacto">`: `ContactForm` y, al lado desde `md`, la lista de correos (`EmailContactGrid`) y la ubicación, cada bloque con su `<h3>` |
 
-**Estado:** `isLoading` (spinner mientras se envía el formulario).
-**Funciones:** `handleOnLoad(state)` se pasa a `ContactForm` como `onLoad`.
-**Animación:** `sectionVariants` (`hidden: opacity 0, y 50` → `visible`) con `whileInView` y `viewport.once`.
+Los datos de los logos salen de `config/institutions.js` ([06](06-utilidades-hooks-config.md)). **Estado:** `isLoading` (spinner mientras se envía el formulario). **Funciones:** `handleOnLoad(state)` se pasa a `ContactForm` como `onLoad`. **Ancla `#contacto`:** un efecto sobre `[location.key, location.hash]` lleva la sección a la vista al montar y al pulsar de nuevo el mismo enlace (el del pie, `/#contacto`); `App` no sube al principio si hay `#ancla`. Con `/#contacto` el mismo efecto **enfoca el `<h2>` de contacto** (`tabIndex={-1}`, `.focus-heading`, `preventScroll`), para que el siguiente Tab continúe desde ese bloque; la flecha del hero (`ScrollIndicator`) enfoca igual su destino, la sección `home-descripcion` (`tabIndex={-1}` y `.focus-heading`). Cubierto por un E2E nuevo (foco con `/#contacto`).
+
+Medido el 12/11/2026 (local, API simulada; las imágenes de S3 salen rotas en local): la flecha no se cruza con los CTA a 390×844 (es), 1440×700 (en), 1024×600 (en), 320×568 (es) y 390×667 (es), con un hueco CTA→flecha de 166, 146, 96, 24 y 77 px; a 320×568 la flecha termina 3 px por debajo del viewport (hero de 588 px), caso extremo conocido. `<h1>` a 1440 px con `x`=168 (`page-container`), 48 px y peso 700; a 390 px `x`=16 y 36 px. Contraste real del texto sobre la foto: solo se comprobó el peor caso calculado en `theme.test.js` (foto blanca con velo uniforme: `surface` sobre `ink` al 70 % cumple 4,5:1); sobre la foto real **(por confirmar)**.
 
 ---
 
 ## Explore (`/explorar`)
 
-Explorador público de especies características. Abre con `<h1>`; el contenedor usa `min-w-0` (sin `whitespace-nowrap`) y la barra de herramientas `flex-wrap gap-2`, de modo que a 768 y 1024 px no desborda y «Descargar glosario» cabe entero. `App` normaliza la ruta quitando la barra final (`/administrar-datos/` también muestra la barra de gestión) y memoriza con `useCallback` los cuatro callbacks de `Filter`.
+Explorador público de especies características. Abre con `<h1>` (`text-3xl`, `brand-deep`) y contenedor `.page-container`; el contenedor usa `min-w-0` (sin `whitespace-nowrap`) y la barra de herramientas `flex-wrap gap-2`, de modo que a 768 y 1024 px no desborda y «Descargar glosario» cabe entero. `App` normaliza la ruta quitando la barra final (`/administrar-datos/` también muestra la barra de gestión) y memoriza con `useCallback` los cuatro callbacks de `Filter`.
 
 **Props (desde `App`):**
 
@@ -78,43 +80,58 @@ Explorador público de especies características. Abre con `<h1>`; el contenedor
 | `filteredSpecies` | `Array<Registro>` | Registros tras aplicar filtros |
 | `selectedSpecies` | `Set<string>` | Especies marcadas explícitamente |
 | `noItalicTerms` | `Array` | Términos que no van en cursiva |
-| `hasError` | `boolean` | Muestra el mensaje de error de carga |
+| `hasError` | `boolean` | Estado de error de carga |
+| `isLoading` | `boolean` | Carga en curso: la página pinta el `<h1>` y un `LoadSpinner inline` siempre montado (nodo `status`, con texto solo mientras carga); `App` ya no lo sustituye por un spinner a pantalla completa |
+| `onRetry` | `() => void` | «Reintentar» del estado de error: repite las mismas llamadas (`loadExplore` de `App`) |
+| `onClearFilters` | `() => void` | «Quitar filtros» del estado sin resultados |
 
-**Estado:** `uniqueSpecies`, `currentPage`, `itemsPerPage`, `pageDirection` (sentido de la animación), `totalResults` (ref con el total inicial) y el diálogo (`useDialog`).
+**Estado:** `uniqueSpecies`, `currentPage`, `itemsPerPage`, `pageDirection` (sentido de la animación), `totalResults` (un `useMemo` sobre `data`: número de especies únicas, sin vacíos, calculado en cada cambio de `data`) y el diálogo (`useDialog`). **Corregido en la vuelta 1 (12/11/2026):** antes era un valor guardado una sola vez y, como `Explore` se monta durante la carga, el «de M» quedaba en 0; no llegó a ningún commit. Cubierto por un E2E nuevo (total «de 30»). Las tarjetas llevan `key={species}`.
 
 | Función / efecto | Descripción |
 |---|---|
-| Efecto sobre `filteredSpecies`, `selectedSpecies` | Aplana `Especies Características` de todos los registros, elimina vacíos y duplicados, filtra por `selectedSpecies` si hay selección, ordena alfabéticamente sin distinguir mayúsculas ni acentos y vuelve a la página 1. Guarda el total inicial en `totalResults` |
+| Efecto sobre `filteredSpecies`, `selectedSpecies` | Aplana `Especies Características` de todos los registros, elimina vacíos y duplicados, filtra por `selectedSpecies` si hay selección, ordena alfabéticamente sin distinguir mayúsculas ni acentos y vuelve a la página 1 |
 | `calculateItemsPerPage()` | Elementos por página según el ancho: ≥1280 → 24, ≥1024 → 16, ≥768 → 12 y menos → 7. Se recalcula con `resize` |
 | `handlePageChange('next' \| 'prev')` | Cambia de página dentro de los límites y fija la dirección de la animación |
 | `handleDownload()` | Abre el glosario PDF (`assets/documents/glossary.pdf`) |
 | `variants` | Transición horizontal entre páginas (`x: ±300`) |
 
-**Avisos:** si `assetUrl` falla al abrir el glosario, `notifyError` (aviso persistente `role="alert"`, ya sin `DialogAdvice`). **Deuda:** el título de la página es un `<h2>`, no hay `<h1>` (ver [09](09-estado-actual-y-deuda-tecnica.md)).
+**Avisos:** si `assetUrl` falla al abrir el glosario, `notifyError` (aviso persistente `role="alert"`, ya sin `DialogAdvice`). **Medida de la `x` del `<h1>`:** a 1024 y 1440 px no coincide con la de las otras páginas públicas porque la barra lateral de gestión (112 px) ocupa el lado izquierdo; la suite E2E solo exige `h1.x − main.x ≥ 0` (excepción documentada, fuera de alcance mover la barra).
 
-**Render:** error → mensaje; sin elementos → "sin datos"; en otro caso, cabecera con resultados, paginación, botones "Descargar glosario" y "Descargar Excel", y cuadrícula de `SpeciesCard`.
+**Render** (`renderContent()`, con el `<h1>` y el `LoadSpinner` siempre delante): cargando → nada más; error → `EmptyState role="alert"` con «Reintentar» (`explore.empty.errorTitle`); sin elementos y con filtros activos → `EmptyState` «Ninguna especie coincide con los filtros» con «Quitar filtros» (llama a `onClearFilters` y enfoca el `<h1>`, `tabIndex={-1}` y `.focus-heading`, porque el botón desaparece); sin elementos y sin filtros → `EmptyState` «Todavía no hay especies que mostrar»; en otro caso, cabecera con resultados, paginación, botones "Descargar glosario" y "Descargar Excel" (cada uno con su `InfoButton`) y cuadrícula de `SpeciesCard`. El test «con datos pero sin especies y sin filtros activos se trata como sin datos» no discrimina (pasaba con el código antiguo; ver [09](09-estado-actual-y-deuda-tecnica.md)).
 
 ---
 
 ## VegetationGallery (`/galeria`)
 
+Galería en columnas con visor. `<h1>` y un `LoadSpinner inline` siempre montado (`gallery.loading` mientras carga); contenedor `.page-container`.
+
 | Elemento | Descripción |
 |---|---|
-| Estado | `imageUrls`, `isLoading`, `isError` |
-| Efecto inicial | `GET /list-images`; descarta imágenes con `fileName` vacío |
-| `renderContent()` | Nada mientras carga, mensaje de error, mensaje vacío o cuadrícula de 300×300 px. Al pasar el ratón muestra el nombre del archivo sin extensión y con `_` cambiados por espacios |
+| Estado | `images`, `isLoading`, `isError`, `columns` y `viewerIndex` (el visor está abierto si no es `null`) |
+| Carga | `loadImages()`: `GET /list-images`; descarta imágenes con `fileName` vacío; ignora la respuesta si el componente se desmonta (`requestRef`). «Reintentar» del estado de error la repite |
+| Columnas | `columnCount(width)`: 1 bajo 640 px, 2 desde 640, 3 desde 1024 y 4 desde 1280; se recalcula con `resize` |
+| Reparto | `toColumns`: **bloques contiguos**, `perColumn = ceil(N / n)`; la columna `c` recibe `images.slice(c·perColumn, (c+1)·perColumn)`. El orden del DOM, el de los datos y el de Tab coinciden (se lee bajando por cada columna) y la columna de una foto no cambia al cargar otras |
+| Foto | `<li>` con `<figure>`: botón (`data-photo`, nombre `gallery.openPhoto`) con la imagen (`alt` con `photoName`, `width`/`height` 4:3, `loading="lazy"`) sobre `bg-sage-soft` y pie `text-sm text-ink` con `line-clamp-2`. Sin pulso: la caja con la proporción es el esqueleto |
+| Carga (esqueleto) | Seis celdas estáticas `aria-hidden` con proporción 4:3 |
+| Clave por foto | `fileName` y, solo en los repetidos, `fileName#2`, `fileName#3`… (`photoKeys`): es la `key` del `<li>`, el `data-photo` del botón y la clave del mapa de refs, para que dos fotos con el mismo nombre no compartan clave ni foco |
+| URL de la imagen | Solo se pide si `isSafeImageUrl` ([06](06-utilidades-hooks-config.md)) acepta la URL (`https:`, o `http:` en `localhost` y `127.0.0.1`); si no, la caja queda vacía y no hay petición (S7) |
+| Foco | Un mapa de refs por clave de foto: si cambian las columnas con el foco en una foto, el foco vuelve a ella; al cerrar el visor vuelve a la foto que lo abrió (`useEffect`, no `useLayoutEffect`, para ejecutarse después de la limpieza de `useDialogFocus`) |
+| Estados | Error → `EmptyState role="alert"` con «Reintentar»; vacío → `EmptyState` (`gallery.emptyTitle`) |
+| Visor | `GalleryViewer` ([05](05-componentes.md#galleryviewer)) |
+
+Cubierto por `VegetationGallery.test.js` y por la suite E2E (orden del DOM igual al de los datos, columna estable, CLS ≤ 0,25, visor). **No comprobado:** el cambio de 768 a 1024 px con el visor abierto en un navegador real, y Safari **(por confirmar)**. Los cuatro tests de la galería que no discriminan se listan en [09](09-estado-actual-y-deuda-tecnica.md).
 
 ---
 
 ## About (`/sobre-nosotros`)
 
-Página estática (títulos y texto en `brand-deep`/`ink`; las tarjetas `surface` sobre `brand` siguen como deuda de contraste): imagen de S3 (`assets/about/about-us.jpg`), título, texto del equipo y tres bloques animados (propósito, misión y valores) con retardos escalonados de 0,3 s, 0,6 s y 0,9 s. Incluye `ScrollIndicator`.
+Página estática con `.page-container`: `<h1>` (`brand-deep`), texto del equipo (`max-w-prose`), la imagen de S3 (`assets/about/about-us.jpg`, decorativa con `alt=""`, caja 12:5 reservada con `width`/`height` y **sin** `loading="lazy"`, por estar en la primera pantalla) y tres tarjetas iguales (propósito, misión y valores: `<ul>` de tres `<li>` con `bg-sage-soft`, `border-sage` y un `<h2>` en `forest`, contraste 10,78:1). Ya no lleva `ScrollIndicator` ni animaciones.
 
 ---
 
 ## Cookies (`/cookies`)
 
-Política de cookies estática. Todos los textos vienen de `cookies.*` en las traducciones. Usa `<Trans>` para insertar enlaces (ICO, aboutcookies.org y la ayuda de Chrome, Internet Explorer, Safari, Edge, Firefox y Opera) y negritas.
+Política de cookies estática, en un `<article>` con `.page-container`. Todos los textos vienen de `cookies.*` en las traducciones. Usa `<Trans>` solo para las negritas; los enlaces externos (ICO, aboutcookies.org y la ayuda de Chrome, Internet Explorer, Safari, Edge, Firefox y Opera) van en una lista «Más información» fuera de los párrafos, cada uno con `rel="noopener noreferrer"`, objetivo de 44 px y aviso de pestaña nueva. Texto a la izquierda, sin justificar, con medida de lectura (`max-w-prose`); los separadores son `border-moss`.
 
 ---
 

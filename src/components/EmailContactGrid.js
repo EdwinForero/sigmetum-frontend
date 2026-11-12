@@ -15,13 +15,13 @@ const EmailContactGrid = () => {
         return acc;
       }, [])
       .filter(entry => entry.name && entry.email);
-  
+
     return (
-      <div className="grid grid-cols-2 gap-4 text-sm font-normal mt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack text-base font-normal mt-stack-sm">
         {emailList.map((item, index) => (
           <div key={index} className="flex flex-col space-y-1">
-            <span className="text-[#0C1811] font-semibold">{item.name}</span>
-            <a href={`mailto:${item.email}`} className="italic text-[#4B644A] hover:underline">
+            <span className="text-ink font-bold">{item.name}</span>
+            <a href={`mailto:${item.email}`} className="focus-ring inline-flex min-h-11 items-center break-all text-moss underline">
                 {item.email}
             </a>
         </div>
@@ -29,5 +29,5 @@ const EmailContactGrid = () => {
       </div>
     );
   };
-  
+
   export default EmailContactGrid;

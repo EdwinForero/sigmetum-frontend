@@ -1,6 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import ButtonPrincipal from '../components/ButtonPrincipal';
+import ButtonAlternative from '../components/ButtonAlternative';
+import EmptyState from '../components/EmptyState';
+import LoadSpinner from '../components/LoadSpinner';
 import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
@@ -17,13 +20,16 @@ const Explore = ({
   selectedSpecies,
   noItalicTerms,
   hasError = false,
+  isLoading = false,
+  onRetry,
+  onClearFilters,
 }) => {
   const { t } = useTranslation();
   const [uniqueSpecies, setUniqueSpecies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(24);
   const [pageDirection, setPageDirection] = useState(0);
-  const totalResults = useRef(null);
+  const headingRef = useRef(null);
   const { notifyError } = useToast();
 
   useEffect(() => {
@@ -50,11 +56,6 @@ const Explore = ({
     );
   
     setUniqueSpecies(sortedSpecies);
-    
-    if (totalResults.current === null) {
-      totalResults.current = sortedSpecies.length;
-    }
-
     setCurrentPage(1);
   }, [filteredSpecies, selectedSpecies]);
 
@@ -89,6 +90,15 @@ const Explore = ({
 
   const currentResults = uniqueSpecies.length;
 
+  // Especies únicas de todos los datos, sin filtro: se recalcula en cada carga (también al reintentar).
+  const totalResults = useMemo(() => {
+    if (!Array.isArray(data)) return 0;
+    const all = data
+      .flatMap((item) => item["Especies Características"] ?? [])
+      .filter((species) => species && String(species).trim() !== "");
+    return new Set(all).size;
+  }, [data]);
+
   const handlePageChange = (direction) => {
     setPageDirection(direction === "next" ? 1 : -1);
     if (direction === "next" && currentPage < totalPages) {
@@ -96,6 +106,12 @@ const Explore = ({
     } else if (direction === "prev" && currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
     }
+  };
+
+  // El botón se desmonta al pulsarlo: el foco pasa al título para no caer a <body>.
+  const handleClearFilters = () => {
+    onClearFilters?.();
+    headingRef.current?.focus();
   };
 
   const handleDownload = () => {
@@ -124,98 +140,113 @@ const Explore = ({
     }),
   };
 
+  const hasData = Array.isArray(data) && data.length > 0;
+  const filtersActive =
+    hasData && (filteredSpecies.length !== data.length || selectedSpecies?.size > 0);
+
+  const renderContent = () => {
+    if (isLoading) return null;
+    if (hasError) {
+      return (
+        <EmptyState
+          role="alert"
+          title={t('explore.empty.errorTitle')}
+          action={<ButtonPrincipal onClick={onRetry} text={t('feedback.retry')} />}
+        >
+          {t('explore.empty.errorCause')}
+        </EmptyState>
+      );
+    }
+    if (currentItems.length === 0) {
+      return filtersActive ? (
+        <EmptyState
+          title={t('explore.empty.noResultsTitle')}
+          action={<ButtonAlternative onClick={handleClearFilters} text={t('explore.empty.clearFilters')} />}
+        >
+          {t('explore.empty.noResultsCause')}
+        </EmptyState>
+      ) : (
+        <EmptyState title={t('explore.empty.noDataTitle')}>{t('explore.empty.noDataCause')}</EmptyState>
+      );
+    }
+    return (
+      <>
+        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2">
+          <span className="text-moss text-lg">
+            {t("explore.resultsInfo", { currentResults, totalResults })}
+          </span>
+
+          <div className="flex-grow text-center sm:w-auto">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+
+          <ButtonPrincipal
+            onClick={handleDownload}
+            text={t('explore.downloadGlossaryButton')}
+          />
+
+          <InfoButton
+            tooltipText={t('explore.downloadGlossaryButtonTooltip')}
+          />
+
+          <ButtonPrincipal
+            onClick={() => {
+              downloadXLSX(filteredSpecies);
+            }}
+            text={t('explore.downloadExcelButton')}
+          />
+
+          <InfoButton
+            tooltipText={t('explore.downloadExcelButtonTooltip')}
+          />
+        </div>
+
+        <AnimatePresence initial={false} mode="wait" custom={pageDirection}>
+          <motion.div
+            key={currentPage}
+            custom={pageDirection}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.3 }}
+            className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 py-4"
+          >
+            {currentItems.map((species) => (
+              <SpeciesCard
+                key={species}
+                data={data}
+                noItalicTerms={noItalicTerms}
+                species={{
+                  ...filteredSpecies,
+                  "Especies Características": species,
+                }}
+              />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </>
+    );
+  };
+
   return (
     <>
-      {hasError ? (
-        <div className="flex justify-center items-center min-h-[300px]">
-          <p className="text-[#0C1811] text-lg font-semibold">
-            {t('explore.errorLoadPlaceholder')}
-          </p>
-        </div>
-      ) : currentItems.length === 0 ? (
-        <div className="flex justify-center items-center min-h-[300px]">
-          <p className="text-[#0C1811] text-lg font-semibold">
-            {t('explore.noDataFoundPlaceholder')}
-          </p>
-        </div>
-      ) : (
-        <div className="gap-1 px-2 flex flex-1 py-5">
-          <div className="layout-content-container flex flex-col flex-1 min-w-0">
+      <div className="page-container min-w-0 py-stack-xl">
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="focus-heading text-brand-deep text-3xl font-bold leading-tight mb-stack-lg"
+        >
+          {t('explore.title')}
+        </h1>
+        <LoadSpinner inline label={isLoading ? t('feedback.loading') : undefined} />
+        {renderContent()}
+      </div>
 
-          <h1 className="text-brand-deep text-[32px] font-bold leading-tight px-4 mb-10">
-              {t('explore.title')}
-            </h1>
-
-          <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 px-4">
-
-            <span className="text-[#4B644A] text-lg mx-2">
-              {t("explore.resultsInfo", { currentResults, totalResults: totalResults.current })}
-            </span>
-
-            <div className="flex-grow text-center sm:w-auto">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            </div>
-
-            <ButtonPrincipal
-              onClick={handleDownload}
-              text={t('explore.downloadGlossaryButton')}
-            />
-
-            <InfoButton 
-              tooltipText={t('explore.downloadGlossaryButtonTooltip')}
-            />
-
-            <ButtonPrincipal
-              onClick={() => {
-                downloadXLSX(filteredSpecies);
-              }}
-              text={t('explore.downloadExcelButton')}
-            />
-
-            <InfoButton 
-              tooltipText={t('explore.downloadExcelButtonTooltip')}
-            />
-          </div>
-            
-            
-            <div className="relative min-h-[700px]">
-              <AnimatePresence initial={false} custom={pageDirection}>
-                <motion.div
-                  key={currentPage}
-                  custom={pageDirection}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: 0.3 }}
-                  className="absolute top-0 left-0 w-full grid gap-4 px-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 py-4"
-                >
-                  {currentItems.map((species, index) => (
-                    <SpeciesCard
-                      key={index}
-                      data={data}
-                      noItalicTerms={noItalicTerms}
-                      species={{
-                        ...filteredSpecies,
-                        "Especies Características": species,
-                      }}
-                    />
-                  ))}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/*
-          <ScrollIndicator/>
-          */}
-        </div>
-      )}
-      
       {/*
       <motion.h2
         className="text-[#15B659] text-center my-4 text-2xl sm:text-4xl font-bold leading-tight"

@@ -148,6 +148,42 @@ describe('CookieBanner', () => {
     expect(screen.getByRole('button', { name: 'cookies.banner.acceptAllButton' })).toHaveClass('!px-3', '!text-sm');
   });
 
+  it('el banner es una barra compacta sobre surface con borde moss, sin gris ni hexadecimales', () => {
+    setProtocol('https:');
+    render(<CookieBanner />);
+
+    const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
+    expect(banner).toHaveClass('border-t', 'border-moss', 'bg-surface', 'text-ink');
+    expect(banner.className).not.toMatch(/gray|black|#/);
+  });
+
+  it('el título es un h2 con el icono info oculto a lectores en su fila', () => {
+    setProtocol('https:');
+    render(<CookieBanner />);
+
+    const titulo = screen.getByRole('heading', { level: 2, name: 'cookies.banner.title' });
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+    const icono = titulo.parentElement.querySelector('[aria-hidden="true"]');
+    expect(icono).toHaveClass('material-symbols-outlined', 'text-moss');
+    expect(icono).toHaveTextContent('info');
+  });
+
+  it('el modal usa los tokens ink, surface y sage, sin bg-black ni hexadecimales', async () => {
+    setProtocol('https:');
+    const user = userEvent.setup();
+    render(<CookieBanner />);
+
+    await user.click(screen.getByText('cookies.banner.cookiesConfigurationButton'));
+
+    const caja = screen.getByText('cookies.modal.title').parentElement;
+    const fondo = caja.parentElement;
+    expect(fondo).toHaveClass('bg-ink/70');
+    expect(caja).toHaveClass('bg-surface');
+    expect(screen.getByText('cookies.modal.description')).toHaveClass('text-ink');
+    expect(screen.getByText('cookies.modal.categories.security').parentElement).toHaveClass('border-sage');
+    expect(fondo.outerHTML).not.toMatch(/#|bg-black|bg-gray|bg-opacity/);
+  });
+
   it('sin aboveBottomBar el banner usa bottom-0', () => {
     setProtocol('https:');
     render(<CookieBanner />);

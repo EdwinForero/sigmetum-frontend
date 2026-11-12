@@ -13,7 +13,7 @@ const LanguageSwitcher = () => {
         id={id}
         value={language}
         onChange={(event) => i18n.changeLanguage(event.target.value)}
-        className="focus-ring h-11 rounded-lg border-2 border-brand-dark bg-surface px-2 text-base font-bold text-ink"
+        className="focus-ring h-11 rounded-xl border border-brand-dark bg-surface pl-2 pr-1 text-base font-normal text-ink"
       >
         <option value="es" lang="es">{t('language.spanish')}</option>
         <option value="en" lang="en">{t('language.english')}</option>

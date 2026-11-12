@@ -102,6 +102,30 @@ describe('InfoButton', () => {
     expect(tooltip().className + tooltip().firstElementChild.className).not.toMatch(/text-justify/);
   });
 
+  it('la caja del tooltip usa el sistema de avisos (info) con el icono oculto y text-left', () => {
+    render(<InfoButton tooltipText="Ayuda" />);
+    const caja = tooltip().firstElementChild;
+
+    expect(caja).toHaveClass(
+      'flex', 'items-start', 'gap-2', 'rounded-lg', 'border', 'p-stack-md',
+      'border-moss', 'bg-surface', 'text-ink', 'text-sm', 'text-left', 'shadow-lg'
+    );
+    expect(caja).not.toHaveClass('border-sage');
+    const ligadura = caja.querySelector('[aria-hidden="true"]');
+    expect(ligadura).toHaveClass('material-symbols-outlined', 'text-moss');
+    expect(ligadura).toHaveTextContent('info');
+    expect(caja).toHaveStyle({ whiteSpace: 'pre-wrap' });
+  });
+
+  it('la descripción accesible del botón es el texto, sin la ligadura info', async () => {
+    const user = userEvent.setup();
+    render(<InfoButton tooltipText="Ayuda" />);
+
+    await user.tab();
+
+    expect(screen.getByRole('button', { name: 'iconButton.info' })).toHaveAccessibleDescription('Ayuda');
+  });
+
   it('con topic, el nombre accesible es «Información: tema»; sin topic se queda en el genérico', () => {
     const { rerender } = render(<InfoButton tooltipText="Ayuda" topic="Elegir conjunto" />);
     expect(screen.getByRole('button', { name: 'iconButton.infoAbout Elegir conjunto' })).toBeInTheDocument();

@@ -8,6 +8,10 @@
 # testing
 /coverage
 
+# Playwright (npm run e2e): capturas, informes y resultados
+/test-results
+/playwright-report
+
 # production
 /build
 /dist

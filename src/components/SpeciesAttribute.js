@@ -14,12 +14,12 @@ const SpeciesAttribute = ({
             <div className="mt-2 max-h-32 overflow-y-auto bg-[#F9FBFA] p-2 rounded">
                 {items.length > 0 ? (
                     items.map((item, index) => (
-                        <p key={index} className="text-[#0C1811] text-base italic leading-normal">
+                        <p key={index} className="text-[#0C1811] text-base font-primary italic leading-normal">
                             {item.trim()}
                         </p>
                     ))
                 ) : (
-                    <p className="text-[#0C1811] text-base italic leading-normal">{description}</p>
+                    <p className="text-[#0C1811] text-base font-primary italic leading-normal">{description}</p>
                 )}
             </div>
         </details>

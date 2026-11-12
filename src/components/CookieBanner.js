@@ -92,10 +92,13 @@ const CookieBanner = ({ aboveBottomBar = false }) => {
     <>
       <section
         aria-label={t("cookies.banner.title")}
-        className={`sticky z-40 ${aboveBottomBar ? "bottom-nav md:bottom-0" : "bottom-0"} bg-gray-800 text-[#F9FBFA] p-3 sm:p-4 shadow-lg flex flex-col gap-2 sm:gap-4 lg:flex-row lg:justify-between lg:items-center`}
+        className={`sticky z-40 ${aboveBottomBar ? "bottom-nav md:bottom-0" : "bottom-0"} border-t border-moss bg-surface text-ink p-3 sm:p-4 shadow-lg flex flex-col gap-2 sm:gap-4 lg:flex-row lg:justify-between lg:items-center`}
       >
         <div className="flex flex-col text-center lg:text-left sm:mb-2">
-          <h3 className="text-sm font-bold sm:text-base">{t("cookies.banner.title")}</h3>
+          <div className="flex items-center justify-center gap-2 lg:justify-start">
+            <span className="material-symbols-outlined text-moss" aria-hidden="true">info</span>
+            <h2 className="text-sm font-bold sm:text-base">{t("cookies.banner.title")}</h2>
+          </div>
           <p className="text-xs sm:text-sm">
             <Trans
               i18nKey="cookies.banner.description"
@@ -127,21 +130,21 @@ const CookieBanner = ({ aboveBottomBar = false }) => {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#F9FBFA] p-6 rounded-md shadow-lg max-w-lg w-full">
+        <div className="fixed inset-0 bg-ink/70 flex items-center justify-center z-50">
+          <div className="bg-surface text-ink p-6 rounded-md shadow-lg max-w-lg w-full">
             <h2 className="text-lg font-bold mb-4">
               {t("cookies.modal.title")}
             </h2>
-            <p className="text-sm text-[#0C1811] mb-4">
+            <p className="text-sm text-ink mb-4">
               {t("cookies.modal.description")}
             </p>
             <div className="space-y-4">
               {Object.entries(cookiePreferences).map(([key, value]) => (
                 <div
                   key={key}
-                  className="flex items-center justify-between border-b border-[#99BBA8] py-2"
+                  className="flex items-center justify-between border-b border-sage py-2"
                 >
-                  <span className="text-sm text-[#0C1811]">{t(`cookies.modal.categories.${key}`, key)}</span>
+                  <span className="text-sm text-ink">{t(`cookies.modal.categories.${key}`, key)}</span>
                   <Switch
                     checked={value}
                     onChange={() => handlePreferenceChange(key)}

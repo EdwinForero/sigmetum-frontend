@@ -10,12 +10,12 @@
     scrollbar-gutter: stable;
   }
   body {
-    @apply font-primary;
+    @apply font-secondary;
   }
   h1, h2, h3, th, summary {
     @apply font-primary;
   }
-  p, button, a, label, span, button, input, td, li {
+  p, button, a, label, span, button, input, textarea, select, td, li {
     @apply font-secondary;
   }
   /* Edge pinta su propio botón de revelar en type="password": el formulario ya tiene el suyo. */
@@ -25,6 +25,9 @@
 }
 
 @layer components {
+  .page-container {
+    @apply mx-auto w-full max-w-6xl px-gutter md:px-gutter-md lg:px-gutter-lg;
+  }
   .focus-ring:focus-visible {
     outline: 2px solid #0C1811;
     outline-offset: 2px;

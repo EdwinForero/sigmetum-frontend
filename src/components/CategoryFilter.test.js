@@ -19,4 +19,22 @@ describe('CategoryFilter', () => {
     const buscador = await screen.findByLabelText('filter.categoryFilter.searchLabel');
     expect(buscador).toHaveClass('placeholder:text-moss');
   });
+
+  it('el título de la categoría usa peso normal (400), no font-medium', () => {
+    render(
+      <CategoryFilter
+        category="province"
+        items={['Almería']}
+        blocked={false}
+        onChange={() => {}}
+        selected={new Set()}
+        isExpanded={false}
+        onExpand={() => {}}
+      />
+    );
+
+    const titulo = screen.getByText('attributes.province');
+    expect(titulo).toHaveClass('font-normal');
+    expect(titulo).not.toHaveClass('font-medium');
+  });
 });

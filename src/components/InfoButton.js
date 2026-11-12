@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from "react";
 import { useTranslation } from "react-i18next";
+import { NOTICE_BASE, noticeVariant } from "../utilities/noticeStyles";
+
+const { box, icon, iconClass } = noticeVariant("info");
 
 const VIEWPORT_MARGIN = 16;
 const BOTTOM_BAR_HEIGHT = 72;
@@ -91,14 +94,15 @@ const InfoButton = ({ tooltipText, topic }) => {
         style={{ marginLeft: `${shift}px` }}
       >
         <span
-          className="block rounded-lg border border-sage bg-surface px-4 py-2 text-left text-sm text-ink shadow-lg"
+          className={`${NOTICE_BASE} ${box} text-left text-sm shadow-lg`}
           style={{
             wordWrap: "break-word",
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
           }}
         >
-          {tooltipText}
+          <span className={`material-symbols-outlined ${iconClass}`} aria-hidden="true">{icon}</span>
+          <span>{tooltipText}</span>
         </span>
       </span>
     </span>
