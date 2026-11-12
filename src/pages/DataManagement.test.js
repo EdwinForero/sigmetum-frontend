@@ -169,6 +169,18 @@ describe('DataManagement', () => {
   });
 
   describe('eliminar versión', () => {
+    it('la confirmación sale con el icono de advertencia, no el de información', async () => {
+      const user = userEvent.setup();
+      await renderPage();
+      await chooseVersion(user);
+
+      await user.click(screen.getByRole('button', { name: DELETE_NAME }));
+
+      const dialog = screen.getByRole('dialog', { name: 'dialogAdvice.confirmDeleteTitle' });
+      expect(within(dialog).getByText('warning')).toHaveClass('text-warning');
+      expect(within(dialog).queryByText('info')).toBeNull();
+    });
+
     it('pide confirmación con el nombre de la versión y Cancelar no llama a /delete-file', async () => {
       const user = userEvent.setup();
       await renderPage();

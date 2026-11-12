@@ -30,6 +30,7 @@ Este documento dice **qué hay que revisar y actualizar en `docs/` después de c
 | Algo de **seguridad**: sesión, cookies, cabeceras, privacidad, subida de archivos | [seguridad.md](seguridad.md) (regla y estado) y [09](../09-estado-actual-y-deuda-tecnica.md) | Lista de comprobación de la PR |
 | Algo de **accesibilidad**: contraste, teclado, diálogos, idioma, foco | [accesibilidad.md](accesibilidad.md) (regla y estado) y [07](../07-i18n-y-estilos.md) si cambia la paleta | Recalcular el contraste |
 | Un **test** nuevo | [08](../08-guia-desarrollo.md) (tabla de cobertura) | Sale de "Pendiente" si estaba allí |
+| La **suite E2E** (`e2e/`, `playwright.config.js`) | [08](../08-guia-desarrollo.md#suite-e2e-con-playwright-npm-run-e2e) y [accesibilidad.md](accesibilidad.md) (sección 3) | Es local: no está en la CI; si cambia, dilo en el resumen |
 | Un **fallo corregido** | [09](../09-estado-actual-y-deuda-tecnica.md): pasa el hallazgo a "Resueltos" con su commit | Quítalo también de `integracion/` si estaba allí |
 | Una **deuda o discrepancia nueva** | [09](../09-estado-actual-y-deuda-tecnica.md) y, si afecta al backend o la infra, `integracion/` | Id, prioridad, archivo y qué hay que hacer |
 | Algo que **cambia el contrato con el backend** (forma de una respuesta, columnas del Excel, autenticación) | [integracion/para-backend.md](../integracion/para-backend.md) y avisar al backend (sección 6 de este documento) | |

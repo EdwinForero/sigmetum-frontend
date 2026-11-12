@@ -180,6 +180,39 @@ describe('DialogAdvice', () => {
     expect(screen.getByRole('heading', { name: 'Aviso' })).toHaveClass('text-brand-deep');
   });
 
+  it('el fondo y la caja usan los tokens ink/70 y surface, sin hexadecimales', () => {
+    renderSimple();
+    const caja = screen.getByRole('dialog');
+    const fondo = caja.parentElement;
+
+    expect(fondo).toHaveClass('bg-ink/70');
+    expect(caja).toHaveClass('bg-surface');
+    expect(fondo.className + caja.className).not.toMatch(/#|bg-opacity/);
+  });
+
+  it('el mensaje va en una caja de aviso info por defecto, con icono oculto y texto xl', () => {
+    renderSimple();
+    const caja = screen.getByText('Mensaje').closest('[class*="rounded-lg"][class*="border"]');
+
+    expect(caja).toHaveClass('flex', 'items-start', 'gap-2', 'rounded-lg', 'border', 'p-stack-md', 'border-moss', 'bg-surface', 'text-ink');
+    const ligadura = caja.querySelector('[aria-hidden="true"]');
+    expect(ligadura).toHaveTextContent('info');
+    expect(ligadura).toHaveClass('material-symbols-outlined', 'text-moss');
+    expect(screen.getByText('Mensaje')).toHaveClass('text-xl', 'whitespace-pre-wrap');
+  });
+
+  it.each([
+    ['success', 'check_circle', 'border-brand-deep'],
+    ['warning', 'warning', 'border-warning'],
+    ['error', 'error', 'border-danger'],
+  ])('con variant=%s la caja del mensaje lleva el icono %s y %s', (variant, icon, border) => {
+    renderSimple({ variant });
+    const caja = screen.getByText('Mensaje').closest('[class*="rounded-lg"][class*="border"]');
+
+    expect(caja).toHaveClass(border);
+    expect(caja.querySelector('[aria-hidden="true"]')).toHaveTextContent(icon);
+  });
+
   it('con confirmText, el botón de confirmar lleva ese texto y sigue llamando a onConfirm', async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();

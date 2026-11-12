@@ -26,7 +26,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "docs:check": "node scripts/docs-check.mjs",
-    "lint": "eslint . --max-warnings 43",
+    "lint": "eslint . --max-warnings 18",
+    "e2e": "playwright test",
     "quality": "node scripts/quality-check.mjs",
     "docs:gate": "node plugins/ciclo-agentico/scripts/docs-gate.mjs",
     "agentes:test": "node --test \"plugins/**/tests/**/*.test.mjs\"",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.65.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",

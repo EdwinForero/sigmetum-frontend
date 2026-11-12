@@ -130,6 +130,8 @@ describe('traducciones', () => {
         info: 'Información',
         infoAbout: 'Información: {{topic}}',
         scrollDown: 'Bajar',
+        previousPhoto: 'Foto anterior',
+        nextPhoto: 'Foto siguiente',
       },
       en: {
         menu: 'Menu',
@@ -139,6 +141,8 @@ describe('traducciones', () => {
         info: 'Information',
         infoAbout: 'Information: {{topic}}',
         scrollDown: 'Scroll down',
+        previousPhoto: 'Previous photo',
+        nextPhoto: 'Next photo',
       },
     });
   });
@@ -164,9 +168,69 @@ describe('traducciones', () => {
     expect(retiradas.filter((key) => key in spanish || key in english)).toEqual([]);
   });
 
+  it('incluye las claves de las instituciones, el aviso de pestaña nueva y los enlaces de cookies', () => {
+    const keys = [
+      'institutions.uma', 'institutions.ual', 'institutions.ugr', 'institutions.uhu', 'institutions.uja',
+      'institutions.efyve', 'institutions.geospace', 'institutions.mafo',
+      'a11y.opensInNewTab',
+      'home.exploreButton', 'home.galleryButton',
+      'cookies.moreInfoTitle', 'cookies.linkIco', 'cookies.linkAboutCookies',
+    ];
+
+    expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
+    expect('home.searchButton' in spanish || 'home.searchButton' in english).toBe(false);
+  });
+
+  it('el título del hero no va en mayúsculas ni los textos de cookies llevan viñetas ni enlaces incrustados', () => {
+    for (const idioma of [spanish, english]) {
+      expect(idioma['home.title']).not.toBe(idioma['home.title'].toUpperCase());
+      for (const key of ['cookies.descriptionAboutPixel', 'cookies.descriptionCookiesManagement']) {
+        expect(idioma[key]).not.toMatch(/<a>/);
+      }
+      for (const key of Object.keys(idioma).filter((k) => k.startsWith('cookies.browser'))) {
+        expect(idioma[key]).not.toMatch(/<a>|•/);
+      }
+    }
+  });
+
   it('ninguna traducción está vacía', () => {
     const empty = [...flatten(es), ...flatten(en)].filter(([, value]) => String(value).trim() === '');
 
     expect(empty).toEqual([]);
+  });
+
+  it('incluye los textos de los estados de Explorar y de la galería con visor', () => {
+    const keys = [
+      'explore.empty.errorTitle',
+      'explore.empty.errorCause',
+      'explore.empty.noDataTitle',
+      'explore.empty.noDataCause',
+      'explore.empty.noResultsTitle',
+      'explore.empty.noResultsCause',
+      'explore.empty.clearFilters',
+      'gallery.loading',
+      'gallery.openPhoto',
+      'gallery.errorTitle',
+      'gallery.errorCause',
+      'gallery.emptyTitle',
+      'gallery.viewer.counter',
+    ];
+
+    expect({ es: keys.filter((key) => !spanish[key]), en: keys.filter((key) => !english[key]) }).toEqual({ es: [], en: [] });
+    expect({ es: spanish['gallery.viewer.counter'], en: english['gallery.viewer.counter'] }).toEqual({
+      es: '{{current}} de {{total}}',
+      en: '{{current}} of {{total}}',
+    });
+    expect({ es: placeholders(spanish['gallery.openPhoto']), en: placeholders(english['gallery.openPhoto']) }).toEqual({
+      es: ['{{name}}'],
+      en: ['{{name}}'],
+    });
+  });
+
+  it('Explorar ya no conserva las claves sustituidas por los estados con título', () => {
+    for (const dictionary of [spanish, english]) {
+      expect(dictionary).not.toHaveProperty(['explore.noDataFoundPlaceholder']);
+      expect(dictionary).not.toHaveProperty(['explore.errorLoadPlaceholder']);
+    }
   });
 });

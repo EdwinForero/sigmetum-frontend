@@ -26,7 +26,7 @@ La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta l
 |---|---|---|
 | Una página por ruta en `src/pages`; componentes reutilizables en `src/components`; un componente por archivo con exportación por defecto | Es la estructura actual y `docs:check` espera una sección por página y componente | `npm run docs:check` |
 | Lógica sin interfaz (formato, ordenación, conversión) en `src/utilities` como **funciones puras** | Se prueban sin montar nada. Ejemplo: `highlightTerms` | Revisión y tests |
-| Componentes en `PascalCase`; hooks como `useXxx`; utilidades en `camelCase` (`highlightTerms.js`). No imitar `CSVfunctions.js` ni `UseAtBottom.js`, que rompen la convención | Coherencia y búsqueda | Revisión |
+| Componentes en `PascalCase`; hooks como `useXxx`; utilidades en `camelCase` (`highlightTerms.js`). No imitar `CSVfunctions.js`, que rompe la convención (`UseAtBottom.js` se retiró el 12/11/2026) | Coherencia y búsqueda | Revisión |
 | Código y commits en inglés; rutas y textos de usuario en español | Convención del proyecto | Revisión |
 | El test va junto al archivo: `Componente.test.js` | Se encuentra y se mantiene | `docs:check` exige que figure en la tabla de cobertura |
 
@@ -81,16 +81,16 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 | Regla | Por qué |
 |---|---|
 | Tailwind con clases utilitarias y **primero móvil** (`sm:`, `md:`, `lg:` para ampliar) | Es la base actual |
-| Usa los **tokens** de `tailwind.config.js` (`brand`, `brand-dark`, `brand-deep`, `surface`, `ink`, `ink-soft`, `sage`, `moss`, `danger`) y `spacing.nav`, no hexadecimales arbitrarios; no añadas colores nuevos sin decidirlo y sin comprobar el contraste (`src/theme.test.js` fija los valores y los ratios) | Un cambio de marca se hace en un solo sitio (B13, parcial: quedan hexadecimales en varios componentes). Texto verde sobre fondo claro = `brand-deep`; texto sobre `brand` = `ink`; ver [accesibilidad.md](accesibilidad.md) A1 |
+| Usa los **tokens** de `tailwind.config.js` (`brand`, `brand-dark`, `brand-deep`, `surface`, `ink`, `ink-soft`, `sage`, `moss`, `danger`, `forest`, `sage-soft`, `warning`) y el espaciado con nombre (`gutter*`, `stack*`, `section*` y `nav`, escala {4, 8, 12, 16, 24, 32, 48, 64} px), no hexadecimales arbitrarios; letra con pesos 400 y 700 y la escala de Tailwind de 14 a 48 px (`xs` de 12 px solo en la barra inferior y el banner); no añadas colores nuevos sin decidirlo y sin comprobar el contraste (`src/theme.test.js` fija los valores y los ratios) | Un cambio de marca se hace en un solo sitio (B13, parcial: las públicas, los avisos y `LoginForm` ya usan tokens; quedan hexadecimales en `CategoryFilter`, `Filter`, `Table`, `Login`, `NotFound` y otros). Texto verde sobre fondo claro = `brand-deep`; texto sobre `brand` = `ink`; ver [accesibilidad.md](accesibilidad.md) A1 |
 | Sin anchos ni márgenes fijos en píxeles que rompan en 320 px (`px-40`, `w-[512px]`, `min-w-72` o `max-w-screen`, ya retirados de las páginas privadas); un contenedor `max-w-*` por página y `min-w-0` en los hijos flexibles | Adaptabilidad y zoom: ver [accesibilidad.md](accesibilidad.md) |
-| Antes de elegir un color, comprueba el contraste | Con los tokens nuevos las páginas privadas cumplen WCAG AA; los textos de las páginas públicas fuera de alcance (tarjetas de `About`) siguen pendientes: ver [accesibilidad.md](accesibilidad.md) |
+| Antes de elegir un color, comprueba el contraste | Con los tokens nuevos las páginas privadas y las públicas cumplen WCAG AA (el contraste real sobre la foto del hero está por confirmar): ver [accesibilidad.md](accesibilidad.md). Un estado desactivado se resuelve con borde discontinuo y `moss`, no con `opacity-50` (deuda que queda en botones de icono y `ButtonAlternative`, B60) |
 
 ## 9. Animación
 
 - Importa desde `motion/react`, no desde `framer-motion`.
 - Envuelve en `<AnimatePresence>` lo que se desmonta con animación.
 - Anima `transform` y `opacity`; evita animar dimensiones.
-- Una animación nueva **respeta `prefers-reduced-motion`** (`useReducedMotion` o `<MotionConfig reducedMotion="user">`). Hoy no se respeta en ningún sitio (B19).
+- Una animación nueva **respeta `prefers-reduced-motion`** (`useReducedMotion` o `<MotionConfig reducedMotion="user">`). `App` ya envuelve todo en `MotionConfig reducedMotion="user"` (B19 resuelto); en CSS, `motion-reduce:transition-none`. No uses `background-attachment: fixed` ni rebotes infinitos.
 - Nada de animaciones infinitas salvo indicadores de carga.
 
 ## 10. Rendimiento
@@ -99,7 +99,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 |---|---|
 | Carga las rutas bajo demanda (`React.lazy` y `Suspense`) y `xlsx` con `import()` al descargar | Hoy todo va en un solo paquete que supera el aviso de Vite (M16) |
 | Las listas largas se paginan | `Explore` y `Table` ya lo hacen |
-| Las imágenes llevan `width`/`height` (o proporción) para no mover la página, y `loading="lazy"` si están fuera de pantalla | Revisión |
+| Las imágenes llevan `width`/`height` (o proporción) para no mover la página, y `loading="lazy"` si están fuera de pantalla (no en la primera pantalla: la imagen de `About` va sin `lazy`) | Cumplido en las públicas; el CLS de Home y de la galería lo comprueba la suite E2E |
 | No hagas en el render cálculos pesados sobre todos los registros: memoriza o mueve la lógica a una utilidad | `Filter` recalcula las facetas en un efecto |
 
 ## 11. Pruebas (TDD)
@@ -115,7 +115,8 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 | La red se simula con `vi.stubGlobal('fetch', ...)` y `vi.unstubAllGlobals()` | Los tests no dependen de la red |
 | `react-i18next` está simulado en `setupTests.js`: `t('clave')` devuelve la clave | No dependen del idioma |
 | No simules código propio si puedes usar el real | Un mock que repite la implementación no prueba nada |
-| Cuando el test pasa a la primera, sospecha: puede probar lo que ya funcionaba | El test de `highlightTerms` para el punto literal pasaba por el motivo equivocado |
+| Cuando el test pasa a la primera, sospecha: puede probar lo que ya funcionaba | El test de `highlightTerms` para el punto literal pasaba por el motivo equivocado. En el pulido de las públicas varios tests pasaban con el código antiguo (ver «Tests que no discriminan» en [09](../09-estado-actual-y-deuda-tecnica.md)): anota el rojo antes de escribir el cambio |
+| Lo que jsdom no puede medir (desbordamiento, solapes, CLS, orden de Tab) va en la suite E2E local (`npm run e2e`, [08](../08-guia-desarrollo.md#suite-e2e-con-playwright-npm-run-e2e)); no entra en la CI | jsdom no tiene maquetación |
 | Cobertura mínima: utilidades, lógica de filtros y flujos críticos (login y subida de datos) | Es donde están los fallos más caros |
 
 ## 12. Dependencias
@@ -141,7 +142,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 `npm run lint` falla si hay **errores** o si los **avisos superan el tope** de `--max-warnings` en `package.json`.
 
 - Los avisos (accesibilidad, variables sin usar, `console.log`) son deuda visible: no bloquean, pero **no pueden crecer**.
-- **Cuando corrijas avisos, baja el tope** al nuevo número (el valor actual está en [09](../09-estado-actual-y-deuda-tecnica.md); bajó al retirar los campos de `LoginForm` y otra vez en la auditoría de las páginas privadas, al quitar `div onClick` y `label` sin texto). Un `role="region" tabIndex={0}` (la región con scroll de `Table`) añade un aviso `no-noninteractive-tabindex`. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
+- **Cuando corrijas avisos, baja el tope** al nuevo número (el valor actual está en [09](../09-estado-actual-y-deuda-tecnica.md); bajó al retirar los campos de `LoginForm` y otra vez en la auditoría de las páginas privadas, al quitar `div onClick` y `label` sin texto, y en el pulido de las páginas públicas). Un `role="region" tabIndex={0}` (la región con scroll de `Table`) añade un aviso `no-noninteractive-tabindex`. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
 - No uses `// eslint-disable` sin un comentario que explique el motivo.
 - Una regla de ESLint nueva o relajada se anota en [02](../02-tecnologias.md) y en este documento.
 - Los `.mjs` de `plugins/` (scripts y tests de `node:test` del ciclo agéntico) se lintan con las reglas recomendadas de ESLint y los globales de Node; no están sujetos a las reglas de React ni de accesibilidad de `src/`. Esa excepción no relaja nada de `src/`.
@@ -160,7 +161,7 @@ No los repitas al escribir código nuevo:
 | `console.log` con datos | Corregido en `Filter.js` | M9 |
 | Código muerto y bloques comentados | `UploadButton`, `ImageCarrousel`, `Explore` | M8 |
 | `import { React, useState } from 'react'` (`React` no es una exportación con nombre) | Varias páginas | B6 |
-| Nombre de archivo que no sigue la convención | `CSVfunctions.js`, `UseAtBottom.js` | |
+| Nombre de archivo que no sigue la convención | `CSVfunctions.js` | |
 
 ## 16. Mantener esta guía
 

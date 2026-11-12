@@ -44,13 +44,14 @@ const Navbar = () => {
     { label: t('navbar.aboutUsOption'), path: '/sobre-nosotros' },
   ];
 
+  // Activo: barra inferior de 4 px y negrita (no solo color). Todos los ítems tienen el mismo borde, así el texto no salta.
   const desktopClass = ({ isActive }) =>
-    `focus-ring-inset flex h-full w-full items-center justify-center whitespace-nowrap px-2 text-center font-bold lg:px-6 text-ink ${
-      isActive ? 'bg-brand' : 'hover:bg-brand'
+    `focus-ring-inset flex h-full w-full items-center justify-center whitespace-nowrap border-y-4 border-t-transparent px-2 text-center text-ink hover:bg-sage-soft lg:px-6 ${
+      isActive ? 'border-b-brand-dark font-bold' : 'border-b-transparent font-normal hover:border-b-moss'
     }`;
   const panelClass = ({ isActive }) =>
-    `focus-ring-inset flex min-h-11 items-center px-4 py-2 font-bold text-ink ${
-      isActive ? 'bg-brand' : 'hover:bg-brand'
+    `focus-ring-inset flex min-h-11 items-center px-stack py-stack-sm text-ink hover:bg-sage-soft ${
+      isActive ? 'bg-sage-soft font-bold underline decoration-4 decoration-brand-dark underline-offset-4' : 'font-normal'
     }`;
 
   return (

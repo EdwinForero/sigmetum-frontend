@@ -14,4 +14,12 @@ describe('Pagination', () => {
 
     expect(onPageChange.mock.calls).toEqual([['prev'], ['next']]);
   });
+
+  it('el texto de página usa tokens y la escala: text-ink, text-base y font-bold, sin hex', () => {
+    const { container } = render(<Pagination currentPage={1} totalPages={3} onPageChange={() => {}} />);
+
+    const info = screen.getByText('pagination.pageInfo');
+    expect(info).toHaveClass('text-ink', 'text-base', 'font-bold');
+    expect(container.innerHTML).not.toMatch(/\[#[0-9A-Fa-f]{3,8}\]|font-semibold|text-lg/);
+  });
 });

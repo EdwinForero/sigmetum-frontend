@@ -37,7 +37,7 @@ const CategoryFilter = ({
         }`}
         onClick={onExpand}
       >
-        <p className="text-[#0C1811] text-xl font-medium leading-normal">
+        <p className="text-[#0C1811] text-xl font-normal leading-normal">
           {t(`attributes.${category}`, category)}
         </p>
         <span>

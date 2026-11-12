@@ -6,14 +6,17 @@ import ButtonAlternative from './ButtonAlternative';
 import QrCode from './QrCode';
 import formatSecret from '../utilities/formatSecret';
 import useCognitoLogin from '../hooks/useCognitoLogin';
+import { NOTICE_BASE, noticeVariant } from '../utilities/noticeStyles';
 
-const FIELD_CLASS = 'focus-ring block w-full h-12 px-3 rounded-lg border-2 border-[#4B644A] bg-white text-[#0C1811]';
+const { box: errorBox, iconClass: errorIconClass } = noticeVariant('error');
+
+const FIELD_CLASS = 'focus-ring block w-full h-12 px-3 rounded-xl border-2 border-moss bg-white text-ink';
 
 // Campo con su etiqueta: el span con id da el nombre accesible (aria-labelledby) y evita avisos de jsx-a11y.
 // Ningún campo lleva `name`: el autocompletado funciona con `autoComplete` y nada puede viajar en una URL.
 const Field = ({ id, label, inputRef, describedBy, ...props }) => (
   <label htmlFor={id} className="block px-4 mb-4">
-    <span id={`${id}-label`} className="block mb-1 font-bold text-[#0C1811]">{label}</span>
+    <span id={`${id}-label`} className="block mb-1 font-bold text-ink">{label}</span>
     <input
       id={id}
       ref={inputRef}
@@ -32,7 +35,7 @@ const Field = ({ id, label, inputRef, describedBy, ...props }) => (
 const PasswordField = ({ id, label, inputRef, describedBy, visible, onToggle, toggleLabel, ...props }) => (
   <div className="relative px-4 mb-4">
     <label htmlFor={id} className="block">
-      <span id={`${id}-label`} className="block mb-1 font-bold text-[#0C1811]">{label}</span>
+      <span id={`${id}-label`} className="block mb-1 font-bold text-ink">{label}</span>
       <input
         id={id}
         ref={inputRef}
@@ -52,7 +55,7 @@ const PasswordField = ({ id, label, inputRef, describedBy, visible, onToggle, to
       aria-label={toggleLabel}
       aria-pressed={visible}
       onClick={onToggle}
-      className="focus-ring absolute bottom-0 right-4 flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg text-[#4B644A]"
+      className="focus-ring absolute bottom-0 right-4 flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl text-moss"
     >
       <span className="material-symbols-outlined" aria-hidden="true">{visible ? 'visibility_off' : 'visibility'}</span>
     </button>
@@ -177,8 +180,8 @@ const LoginForm = () => {
   );
 
   return (
-    <div className="bg-[#F9FBFA] p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-      <h1 className="text-2xl font-bold text-left text-[#0C1811] tracking-tight px-4 pb-3 pt-5">
+    <div className="bg-surface p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+      <h1 className="text-2xl font-bold text-left text-ink tracking-tight px-4 pb-3 pt-5">
         {t('login.title')}
       </h1>
       {step !== 'credentials' && (
@@ -186,17 +189,17 @@ const LoginForm = () => {
           key={step}
           ref={titleRef}
           tabIndex={-1}
-          className="focus-heading text-xl font-bold text-left text-[#0C1811] px-4 pb-3"
+          className="focus-heading text-xl font-bold text-left text-ink px-4 pb-3"
         >
           {t(titles[step])}
         </h2>
       )}
       {step === 'mfaSetup' && !retrying && (
         <>
-          <p className="px-4 mb-4 text-[#0C1811]">{t('login.mfaSetupHelp')}</p>
-          {login.mfaSetupAgain && <p className="px-4 mb-4 font-bold text-[#0C1811]">{t('login.mfaSetupAgain')}</p>}
-          <p className="px-4 mb-1 font-bold text-[#0C1811]">{t('login.secretLabel')}</p>
-          <p className="px-4 mb-4 text-[#0C1811]"><code>{formatSecret(login.secret)}</code></p>
+          <p className="px-4 mb-4 text-ink">{t('login.mfaSetupHelp')}</p>
+          {login.mfaSetupAgain && <p className="px-4 mb-4 font-bold text-ink">{t('login.mfaSetupAgain')}</p>}
+          <p className="px-4 mb-1 font-bold text-ink">{t('login.secretLabel')}</p>
+          <p className="px-4 mb-4 text-ink"><code>{formatSecret(login.secret)}</code></p>
           {canCopy && (
             <div className="flex justify-center px-4 mb-4">
               <ButtonAlternative text={t('login.copyButton')} onClick={copySecret} />
@@ -215,16 +218,16 @@ const LoginForm = () => {
             key={error.seq}
             id={errorId}
             role="alert"
-            className="mx-4 mb-4 flex items-start gap-2 rounded-lg border border-danger p-3 font-bold text-danger"
+            className={`mx-4 mb-4 font-bold ${NOTICE_BASE} ${errorBox}`}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">error</span>
+            <span className={`material-symbols-outlined ${errorIconClass}`} aria-hidden="true">error</span>
             <span>{t(error.key)}</span>
           </p>
         )}
 
         {step === 'credentials' && (
           <>
-            <p className="px-4 mb-4 text-[#0C1811]">{t('login.allRequired')}</p>
+            <p className="px-4 mb-4 text-ink">{t('login.allRequired')}</p>
             <Field
               id="login-email"
               label={t('login.emailLabel')}
@@ -253,7 +256,7 @@ const LoginForm = () => {
 
         {step === 'newPassword' && (
           <>
-            <p id="login-password-policy" className="px-4 mb-4 text-[#0C1811]">{t('login.passwordPolicy')}</p>
+            <p id="login-password-policy" className="px-4 mb-4 text-ink">{t('login.passwordPolicy')}</p>
             <Field
               id="login-username"
               label={t('login.emailLabel')}
@@ -295,7 +298,7 @@ const LoginForm = () => {
         </div>
       </form>
 
-      <p role="status" className="px-4 mt-4 text-[#0C1811]">{busy ? t('login.loading') : copyStatus && t(copyStatus)}</p>
+      <p role="status" className="px-4 mt-4 text-ink">{busy ? t('login.loading') : copyStatus && t(copyStatus)}</p>
     </div>
   );
 };

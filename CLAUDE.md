@@ -9,6 +9,7 @@ SPA de React + Vite de SIGMETUM-A (web de investigación ambiental de una univer
 - `npm run lint`: ESLint (errores y tope de avisos) · `npm run quality`: seguridad (patrones, secretos, `npm audit`) y lint
 - `npm run docs:check`: comprueba que la documentación no se ha quedado atrás
 - `npm run docs:gate`: cierre documental del ciclo (documentos tocados, fecha de `docs/09` y aviso para PR); se ejecuta antes del commit
+- `npm run e2e`: suite E2E de las páginas públicas (Playwright, solo local, no entra en la CI; la primera vez, `npx playwright install chromium`)
 - `npm run agentes:test`: tests (`node:test`) del plugin `ciclo-agentico`; `npm run agentes:bootstrap` comprueba e instala sus dependencias
 
 ## Ciclo de desarrollo (ciclo-agentico)

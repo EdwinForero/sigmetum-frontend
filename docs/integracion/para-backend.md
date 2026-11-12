@@ -65,7 +65,7 @@ Solo aparecen los campos que el frontend **lee**. Lo demás de la respuesta se i
 | `DELETE /delete-image` | `{ imageKey }` (vale `fileName`) | Solo el estado | `ImageGalleryManager` |
 | `POST /upload-term` | `{ term }` | Solo el estado | `TermsManager` |
 | `DELETE /delete-term` | `{ term }` | Solo el estado | `TermsManager` |
-| `POST /send-email` | `{ username, email, subject, message }` (límites en cliente: 100, 254, 150 y 2000 caracteres) | Solo el estado. Distingue `429` y `400` | `ContactForm` |
+| `POST /send-email` | `{ username, email, subject, message }` (límites en cliente: 100, 254, 150 y 2000 caracteres; además, el cliente comprueba antes de enviar el formato del correo y que el mensaje tenga al menos 20 caracteres, solo una ayuda: la validación del servidor sigue mandando y su límite propio es **(por confirmar)**) | Solo el estado. Distingue `429` y `400` | `ContactForm` |
 | `GET /get-image?imageKey=` | — (`imageKey` con `encodeURIComponent`) | `data.imageUrl` | `ImageComponent`, solo si recibe `imageKey` (hoy ninguna pantalla se lo pasa **(por confirmar)**), e `ImageCarrousel` (no montado: import comentado en `Explore.js`) |
 
 No usa `GET /healthcheck`.

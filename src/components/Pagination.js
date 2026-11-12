@@ -18,7 +18,7 @@ const Pagination = ({
         onClick={() => onPageChange("prev")}
         disabled={currentPage === 1}
       />
-      <span className="text-[#0C1811] text-lg font-semibold mx-2">
+      <span className="text-ink text-base font-bold mx-2">
         {t("pagination.pageInfo", { currentPage, totalPages })}
       </span>
       <ButtonPrincipal

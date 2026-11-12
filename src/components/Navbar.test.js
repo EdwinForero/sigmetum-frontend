@@ -57,6 +57,48 @@ describe('Navbar', () => {
     expect(link).not.toHaveClass('px-6');
   });
 
+  describe('indicador del ítem activo', () => {
+    const desktop = (name) => screen.getAllByRole('link', { name })[0];
+
+    it('el activo lleva barra inferior brand-dark de 4 px y negrita; no es un bloque bg-brand', () => {
+      renderNavbar('/explorar');
+
+      const activo = desktop('navbar.exploreOption');
+      expect(activo).toHaveAttribute('aria-current', 'page');
+      expect(activo).toHaveClass('border-y-4', 'border-t-transparent', 'border-b-brand-dark', 'font-bold');
+      expect(activo.className).not.toMatch(/bg-brand(\s|$)/);
+    });
+
+    it('el inactivo es del mismo alto (misma borde), sin negrita, con hover moss y fondo sage-soft', () => {
+      renderNavbar('/explorar');
+
+      const inactivo = desktop('navbar.homeOption');
+      expect(inactivo).not.toHaveAttribute('aria-current');
+      expect(inactivo).toHaveClass(
+        'border-y-4', 'border-t-transparent', 'border-b-transparent', 'hover:border-b-moss', 'hover:bg-sage-soft', 'font-normal'
+      );
+      expect(inactivo).not.toHaveClass('font-bold', 'border-b-brand-dark');
+      expect(inactivo.className).not.toMatch(/hover:border-b-sage(\s|$)/);
+    });
+
+    it('el activo del panel móvil va en negrita con subrayado grueso brand-dark y fondo sage-soft, sin franja lateral', async () => {
+      const user = userEvent.setup();
+      renderNavbar('/galeria');
+      await user.click(screen.getByRole('button', { name: 'iconButton.menu' }));
+
+      const panel = document.getElementById('navbar-menu-panel');
+      const activo = [...panel.querySelectorAll('a')].find((a) => a.getAttribute('aria-current') === 'page');
+      expect(activo).toHaveClass(
+        'bg-sage-soft', 'font-bold', 'underline', 'decoration-4', 'decoration-brand-dark', 'underline-offset-4', 'min-h-11'
+      );
+      expect(activo.className).not.toMatch(/border-l|border-brand-dark/);
+      const inactivo = [...panel.querySelectorAll('a')].find((a) => !a.hasAttribute('aria-current'));
+      expect(inactivo).toHaveClass('min-h-11', 'font-normal', 'hover:bg-sage-soft');
+      expect(inactivo.className).not.toMatch(/border-l|underline/);
+      expect(inactivo.className).not.toMatch(/hover:bg-brand/);
+    });
+  });
+
   it('en /explorar el enlace activo tiene aria-current="page"', () => {
     renderNavbar('/explorar');
 

@@ -35,7 +35,7 @@ const KNOWN_DEBT = {
   },
   insecureUrl: {
     allowed: ['src/config/env.js'],
-    debt: { 'src/pages/Home.js': 'enlace http:// a una entidad colaboradora (por confirmar si admite https)' },
+    debt: {},
   },
 };
 

@@ -10,7 +10,7 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 const warnAll = (rules) => Object.fromEntries(Object.keys(rules).map((name) => [name, 'warn']));
 
 export default [
-  { ignores: ['dist/**', 'node_modules/**', '.playwright-mcp/**'] },
+  { ignores: ['dist/**', 'node_modules/**', '.playwright-mcp/**', 'test-results/**', 'playwright-report/**'] },
   js.configs.recommended,
   {
     files: ['src/**/*.js', 'scripts/**/*.mjs', '*.config.js'],
@@ -47,6 +47,11 @@ export default [
     files: ['plugins/**/*.mjs'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { ...globals.node } },
     rules: { 'no-console': 'off' },
+  },
+  {
+    // Suite E2E de Playwright (npm run e2e): el código de `page.evaluate` corre en el navegador y el resto en Node.
+    files: ['e2e/**/*.js'],
+    languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { ...globals.browser, ...globals.node } },
   },
   {
     files: ['src/**/*.test.js', 'src/setupTests.js'],

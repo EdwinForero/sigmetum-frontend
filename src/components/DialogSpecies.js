@@ -58,7 +58,7 @@ const Dialog = ({
 
   return (
     <motion.div
-      className="fixed overflow-hidden inset-0 z-50 flex overflow-auto items-center justify-center bg-[#0C1811] bg-opacity-70"
+      className="fixed overflow-hidden inset-0 z-50 flex overflow-auto items-center justify-center bg-ink/70"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -66,7 +66,7 @@ const Dialog = ({
       onClick={onClose}
     >
       <motion.div
-        className="bg-[#F9FBFA] max-h-screen overflow-auto rounded-lg p-6 w-full max-w-md flex flex-col"
+        className="bg-surface max-h-screen overflow-auto rounded-lg p-6 w-full max-w-md flex flex-col"
         initial={{ y: -1000 }}
         animate={{ y: 0 }}
         exit={{ y: 1000 }}
@@ -79,11 +79,11 @@ const Dialog = ({
         tabIndex={-1}
       >
         <div className="flex justify-center px-4 py-2 mx-auto w-full">
-          <div id={titleId} className="text-[#4B644A] text-4xl mb-4 font-bold text-center break-words whitespace-normal">
+          <div id={titleId} className="text-moss text-4xl mb-4 font-bold text-center break-words whitespace-normal">
             {textParts.map((part, index) => (
                 <h2
                   key={index}
-                  className={part.isItalic ? 'italic' : ''}
+                  className={part.isItalic ? 'font-primary italic' : ''}
                 >
                   {part.text}
                 </h2>
@@ -112,9 +112,9 @@ const Dialog = ({
               href={`https://www.ipni.org/?q=${formattedQuery}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm text-gray-600"
+              className="inline-flex min-h-11 items-center text-moss underline"
             >
-              <span className="hover:underline">{t('explore.dialogSpecies.readMoreLabel')}</span>
+              <span>{t('explore.dialogSpecies.readMoreLabel')}</span>
               <span className="material-symbols-outlined items-center mx-auto" aria-hidden="true">open_in_new</span>
             </a>
           </div>

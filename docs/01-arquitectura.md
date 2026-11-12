@@ -27,7 +27,8 @@ sigmetum-frontend/
 │   ├── languages/{es,en}/translation.json
 │   ├── pages/               # Una por ruta
 │   └── components/          # Componentes reutilizables
-├── tailwind.config.js       # Fuentes Amaranth y Sen, colores de marca (tokens) y spacing.nav
+├── tailwind.config.js       # Fuentes Amaranth y Sen, colores de marca (tokens) y espaciado con nombre
+├── e2e/ y playwright.config.js  # Suite E2E local de las páginas públicas (`npm run e2e`, fuera de la CI)
 ├── .env.example             # Plantilla de variables de entorno
 └── .claude/                 # Plugins y skills de Claude Code compartidos
 ```
@@ -46,7 +47,7 @@ Antes del render se importa `./i18n`, que inicializa i18next con detección auto
 
 ## Layout
 
-`App` pinta siempre la misma estructura, envuelta en `ToastProvider` (dos regiones de avisos siempre montadas, `role="status"` y `role="alert"`):
+`App` pinta siempre la misma estructura, envuelta en `MotionConfig reducedMotion="user"` (las animaciones de `motion` se desactivan si el sistema pide movimiento reducido; B19) y en `ToastProvider` (dos regiones de avisos siempre montadas, `role="status"` y `role="alert"`):
 
 ```
 [Saltar al contenido]  ← enlace visible solo con foco, hacia #contenido
@@ -58,7 +59,7 @@ Antes del render se importa `./i18n`, que inicializa i18next con detección auto
 │ a la     │                                                           │
 │ izquierda)                                                           │
 ├──────────┴───────────────────────────────────────────────────────────┤
-│ Footer: único <footer> (enlaces, copyright y "V 1.0.0" en <details>)  │
+│ Footer: único <footer> (instituciones, contacto, enlaces, copyright)   │
 └──────────────────────────────────────────────────────────────────────┘
 CookieBanner (sticky al final de la raíz, hasta que se acepta)
 Bajo md, Sidebar es una barra inferior fija (h-nav)
@@ -95,7 +96,8 @@ No hay Redux ni Context: el estado de datos compartido vive en `App` y se pasa p
 | `noItalicTerms` | `Array<{ term }>` | Términos que no se escriben en cursiva (`GET /list-terms`) |
 | `filteredData` | `Array<Registro>` | Registros de la versión elegida en "Administrar datos" (los fija `handleFileDropdownSelect`) |
 | `privateSessionOk` | `boolean` | `ProtectedRoute` confirmó la sesión en una ruta privada; gobierna la barra de gestión fuera de `/explorar` |
-| `isLoading`, `exploreError` | `boolean` | Carga y error del explorador |
+| `isLoading`, `exploreError` | `boolean` | Carga y error del explorador. Van como props de `Explore` (`isLoading`, `hasError`), que pinta el estado; `App` ya no sustituye la página por un `LoadSpinner` |
+| `filterResetKey` | `number` | `key` del `Filter`: `handleClearFilters` la incrementa y el `Filter` remontado borra su selección (botón «Quitar filtros» de `Explore`) |
 
 El mensaje oculto de «V 1.0.0» ya no es estado de `App`: es un `<details>` dentro de `Footer`.
 
@@ -105,11 +107,11 @@ Un **registro** es una fila del Excel convertida a JSON por el backend. Las clav
 
 El `useEffect` de `App` sobre `location.pathname`:
 
-- **`/explorar`**: activa el spinner, limpia filtros y selección y descarga en paralelo `get-merged-data` y `list-terms`. Al terminar, quita el spinner.
+- **`/explorar`**: `loadExplore()` activa la carga, limpia filtros y selección y descarga en paralelo `get-merged-data` y `list-terms`; al terminar, la quita. La misma función es el «Reintentar» de `Explore` (`onRetry`): repite las mismas llamadas, sin endpoints nuevos.
 - **`/administrar-datos`**: vacía `filteredData`. Los datos se cargan cuando el usuario elige una versión en `FileDropdown`.
 - **Cualquier otra ruta**: libera `mergedData` y todos los filtros para no mantener en memoria el conjunto completo.
 
-En todos los casos hace `window.scrollTo(0, 0)`.
+Un efecto aparte, sobre `[path, location.hash]`, hace `window.scrollTo(0, 0)` solo si la URL no lleva `#ancla` (con `/#contacto`, el enlace del pie, `Home` lleva su sección a la vista).
 
 ### Flujo del explorador
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ButtonPrincipal from './ButtonPrincipal';
+import ButtonPrincipal, { BUTTON_PRINCIPAL_CLASS, BUTTON_INACTIVE_CLASS } from './ButtonPrincipal';
 
 describe('ButtonPrincipal', () => {
   it('con ariaLabel, el botón de icono se nombra por él y la ligadura queda oculta', () => {
@@ -85,6 +85,51 @@ describe('ButtonPrincipal', () => {
     expect(boton).toHaveAttribute('aria-expanded', 'false');
     expect(boton).toHaveAttribute('aria-controls', 'panel');
     expect(boton).toHaveAttribute('id', 'boton');
+  });
+
+  it('desactivado, el botón de texto es discontinuo, en moss sobre surface, sin opacidad ni hover', () => {
+    render(<ButtonPrincipal text="Nada" disabled />);
+    const boton = screen.getByRole('button', { name: 'Nada' });
+
+    expect(boton).toBeDisabled();
+    expect(boton).toHaveClass('border-2', 'border-dashed', 'border-moss', 'bg-surface', 'text-moss', 'cursor-not-allowed');
+    expect(boton).toHaveClass('min-h-12', 'rounded-xl', 'focus-ring', 'text-base', 'font-bold');
+    expect(boton.className).not.toMatch(/opacity-50|hover:|bg-brand|text-ink/);
+  });
+
+  it('desactivado, el botón de icono conserva su aspecto con opacity-50', () => {
+    render(<ButtonPrincipal icon="add" ariaLabel="Icono" disabled />);
+
+    expect(screen.getByRole('button', { name: 'Icono' })).toHaveClass('opacity-50', 'cursor-not-allowed');
+  });
+
+  it('no lee aria-disabled: su semántica no cambia', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(<ButtonPrincipal text="Enviar" aria-disabled="true" onClick={onClick} />);
+    const boton = screen.getByRole('button', { name: 'Enviar' });
+
+    expect(boton).toHaveClass('bg-brand');
+    expect(boton).not.toHaveClass('border-dashed');
+    await user.click(boton);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('con loading y sin disabled mantiene el aspecto activo con cursor-progress', () => {
+    render(<ButtonPrincipal text="Guardar" loading />);
+    const boton = screen.getByRole('button', { name: /Guardar/ });
+
+    expect(boton).toHaveClass('bg-brand', 'cursor-progress');
+    expect(boton).not.toHaveClass('border-dashed');
+  });
+
+  it('exporta las clases del estado habilitado y del inactivo para enlaces con aspecto de botón', () => {
+    expect(BUTTON_PRINCIPAL_CLASS).toContain('bg-brand');
+    expect(BUTTON_PRINCIPAL_CLASS).toContain('min-h-12');
+    expect(BUTTON_PRINCIPAL_CLASS).toContain('focus-ring');
+    expect(BUTTON_INACTIVE_CLASS).toContain('border-dashed');
+    expect(BUTTON_INACTIVE_CLASS).toContain('cursor-not-allowed');
+    expect(BUTTON_INACTIVE_CLASS).toContain('min-h-12');
   });
 
   it('desactivado, no se puede pulsar', async () => {

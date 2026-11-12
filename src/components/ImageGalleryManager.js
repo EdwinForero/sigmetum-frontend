@@ -11,21 +11,11 @@ import ButtonAlternative from './ButtonAlternative';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
 import { useToast } from '../hooks/useToast';
+import isSafeImageUrl from '../utilities/isSafeImageUrl';
 
 const INVALID_TITLE = /[/\\,':&#?%"]|\.\.|\p{Cc}/u;
 
-// La URL es prefirmada y caduca a la hora: si falla, se oculta el img y se conserva la caja.
-// Solo se pide la imagen si la URL es https (o http en localhost/127.0.0.1, para desarrollo): seguridad.md S7.
-const isSafeImageUrl = (url) => {
-  try {
-    const { protocol, hostname } = new URL(url);
-    if (protocol === 'https:') return true;
-    return protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1');
-  } catch {
-    return false;
-  }
-};
-
+// La URL es prefirmada y caduca a la hora: si falla (o no es segura, S7), se oculta el img y se conserva la caja.
 const Thumbnail = ({ url }) => {
   const [failed, setFailed] = useState(false);
   if (failed || !isSafeImageUrl(url)) {
@@ -267,6 +257,7 @@ const ImageGalleryManager = () => {
       <AnimatePresence>
         {dialog.visible && (
           <DialogAdvice
+            variant="warning"
             dialogTitle={dialog.title}
             dialogMessage={dialog.message}
             showActions

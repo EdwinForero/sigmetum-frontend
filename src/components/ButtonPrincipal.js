@@ -1,3 +1,9 @@
+const BUTTON_SHAPE = 'focus-ring inline-flex min-h-12 min-w-[84px] max-w-full items-center justify-center gap-2 rounded-xl px-5 py-2 text-base font-bold leading-tight';
+
+// Clases exportables para los Link con aspecto de botón.
+export const BUTTON_PRINCIPAL_CLASS = `${BUTTON_SHAPE} bg-brand text-ink hover:bg-brand-dark`;
+export const BUTTON_INACTIVE_CLASS = `${BUTTON_SHAPE} border-2 border-dashed border-moss bg-surface text-moss cursor-not-allowed`;
+
 const ButtonPrincipal = ({
   onClick,
   text,
@@ -42,7 +48,7 @@ const ButtonPrincipal = ({
       aria-disabled={loading || undefined}
       onClick={handleClick}
       disabled={disabled}
-      className={`focus-ring inline-flex min-h-12 min-w-[84px] max-w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2 text-base font-bold leading-tight text-ink hover:bg-brand-dark ${state} ${className}`}
+      className={`${disabled ? BUTTON_INACTIVE_CLASS : `${BUTTON_PRINCIPAL_CLASS} cursor-pointer`} ${loading ? 'cursor-progress' : ''} ${className}`}
     >
       {loading && (
         <span className="material-symbols-outlined animate-spin" aria-hidden="true">progress_activity</span>

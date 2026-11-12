@@ -5,10 +5,10 @@ Todos están en `src/components/`. Son componentes funcionales (salvo `ErrorBoun
 Índice por grupo:
 
 - **Estructura:** [Header](#header) · [Navbar](#navbar) · [LanguageSwitcher](#languageswitcher) · [Footer](#footer) · [Sidebar](#sidebar) · [ErrorBoundary](#errorboundary) · [ProtectedRoute](#protectedroute) · [CookieBanner](#cookiebanner)
-- **Explorador y datos:** [Filter](#filter) · [CategoryFilter](#categoryfilter) · [FilterSearchBar](#filtersearchbar) · [SpeciesCard](#speciescard) · [DialogSpecies](#dialogspecies) · [SpeciesAttribute](#speciesattribute) · [Table](#table) · [Pagination](#pagination) · [FileDropdown](#filedropdown)
+- **Explorador y datos:** [Filter](#filter) · [CategoryFilter](#categoryfilter) · [FilterSearchBar](#filtersearchbar) · [SpeciesCard](#speciescard) · [DialogSpecies](#dialogspecies) · [SpeciesAttribute](#speciesattribute) · [Table](#table) · [Pagination](#pagination) · [FileDropdown](#filedropdown) · [GalleryViewer](#galleryviewer)
 - **Administración:** [FileUpload](#fileupload) · [TermsManager](#termsmanager) · [ImageGalleryManager](#imagegallerymanager) · [LoginForm](#loginform) · [QrCode](#qrcode)
 - **Formularios y contacto:** [ContactForm](#contactform) · [EmailContactGrid](#emailcontactgrid) · [TextInput](#textinput)
-- **Elementos básicos:** [ButtonPrincipal](#buttonprincipal) · [ButtonAlternative](#buttonalternative) · [DialogAdvice](#dialogadvice) · [ToastProvider](#toastprovider) · [InlineError](#inlineerror) · [InfoButton](#infobutton) · [LoadSpinner](#loadspinner) · [Switch](#switch) · [ScrollIndicator](#scrollindicator) · [ImageComponent](#imagecomponent)
+- **Elementos básicos:** [ButtonPrincipal](#buttonprincipal) · [ButtonAlternative](#buttonalternative) · [DialogAdvice](#dialogadvice) · [ToastProvider](#toastprovider) · [InlineError](#inlineerror) · [InfoButton](#infobutton) · [LoadSpinner](#loadspinner) · [Switch](#switch) · [ScrollIndicator](#scrollindicator) · [ImageComponent](#imagecomponent) · [EmptyState](#emptystate) · [LogoLink](#logolink)
 - **Sin uso:** [ImageCarrousel](#imagecarrousel) · [UploadButton](#uploadbutton)
 
 ---
@@ -16,13 +16,14 @@ Todos están en `src/components/`. Son componentes funcionales (salvo `ErrorBoun
 ## Estructura
 
 ### Header
-Barra superior fija (`h-16`, `z-50`, borde inferior `brand`). Contiene el logo de S3 con enlace a `/` (el enlace se llama «SIGMETUM-A» y la imagen lleva `alt=""`; `focus-ring`, objetivo `min-h-11`), el texto "SIGMETUM-A" con letras de colores (el logotipo está exento de contraste), `LanguageSwitcher` y `Navbar`. El logo es `h-8` bajo `sm` y `h-12` desde `sm`; la cabecera no desborda hasta unos 305 px de ancho.
-Sin efectos: no toca el favicon. Este sale ya correcto del HTML compilado (plugin de `vite.config.js`, ver [06](06-utilidades-hooks-config.md#favicon-viteconfigjs-y-faviconhtml)); `ASSETS.LOGO` y `assetUrl` solo se usan aquí para el `<img>` del logo.
+Barra superior fija (`h-16`, `z-50`, sin borde: `shadow-md` solo cuando la página se ha desplazado, `window.scrollY > 0`, con `transition-shadow motion-reduce:transition-none`). Contiene el logo de S3 con enlace a `/` (el enlace se llama «SIGMETUM-A» y la imagen lleva `alt=""`, `width`/`height` de 48; `focus-ring`, objetivo `min-h-11`), el texto "SIGMETUM-A" con letras de colores (la «A» en `brand`; el logotipo está exento de contraste), `LanguageSwitcher` y `Navbar`. Margen lateral `px-stack-sm` y `px-gutter` desde 360 px. El logo es `h-8` bajo `sm` y `h-12` desde `sm`; bajo 360 px el texto del nombre pasa a `sr-only` y solo queda el logo (el nombre sigue en el `aria-label` del enlace).
+Medido a 320 px el 12/11/2026 (local con API simulada, en español): `header.scrollWidth` 305 igual a `clientWidth` 305 (sin desborde), botón del menú de 48 px con su borde derecho en x=297 (antes: `scrollWidth` 343 frente a 321 y el botón en x=345, fuera de pantalla).
+Sin efectos sobre el favicon. Este sale ya correcto del HTML compilado (plugin de `vite.config.js`, ver [06](06-utilidades-hooks-config.md#favicon-viteconfigjs-y-faviconhtml)); `ASSETS.LOGO` y `assetUrl` solo se usan aquí para el `<img>` del logo.
 
 ### Navbar
 Menú principal, un `<nav aria-label>` (`navbar.label`). `menuItems`: Inicio (`/`), Explorar (`/explorar`), Galería (`/galeria`) y Sobre nosotros (`/sobre-nosotros`), como `NavLink end` (ponen `aria-current="page"`).
-- Escritorio (`md+`): lista horizontal; la ruta activa aparece con `bg-brand text-ink`. Los enlaces llevan `whitespace-nowrap` y `px-2` (`lg:px-6`) para que «About us» no se parta en dos líneas a 768 px; medido en local con API simulada (11/11/2026, en inglés): «About us» mide 62 px de alto igual que «Home» (una línea) y `header.scrollWidth <= clientWidth` a 1440 y 768 px. En español **no se midió (por confirmar)**: si la cabecera desbordara a 768 px haría falta `md:text-sm lg:text-base`.
-- Móvil: botón con icono `Menu` (`ButtonPrincipal` con `ariaLabel` `iconButton.menu`, `aria-expanded` y `aria-controls`) que abre un panel (`max-w-[calc(100vw-1rem)]`, enlaces de `min-h-11`). Escape lo cierra y devuelve el foco al botón.
+- Escritorio (`md+`): lista horizontal; la ruta activa lleva una barra inferior de 4 px `brand-dark` y `font-bold` (la señal no es solo el color); los demás ítems, `font-normal` y el mismo borde transparente para que el texto no salte, con hover `bg-sage-soft` y `border-b-moss` (5,76:1 sobre `sage-soft`). Los enlaces llevan `whitespace-nowrap` y `px-2` (`lg:px-6`) para que «About us» no se parta en dos líneas a 768 px; medido en local con API simulada (11/11/2026, en inglés): «About us» mide 62 px de alto igual que «Home» (una línea) y `header.scrollWidth <= clientWidth` a 1440 y 768 px. En español **no se midió (por confirmar)**: si la cabecera desbordara a 768 px haría falta `md:text-sm lg:text-base`.
+- Móvil: botón con icono `Menu` (`ButtonPrincipal` con `ariaLabel` `iconButton.menu`, `aria-expanded` y `aria-controls`) que abre un panel (`max-w-[calc(100vw-1rem)]`, enlaces de `min-h-11`; el activo lleva `bg-sage-soft font-bold underline decoration-4 decoration-brand-dark underline-offset-4`: sin franja lateral, la señal es el subrayado y el peso, no solo el color; B61, decisión del usuario del 12/11/2026; medido en local con API simulada a 390 px: subrayado de 4 px, peso 700, `border-left-width` 0 y 44 px de alto). Escape lo cierra y devuelve el foco al botón.
 
 | Estado / función | Descripción |
 |---|---|
@@ -31,7 +32,7 @@ Menú principal, un `<nav aria-label>` (`navbar.label`). `menuItems`: Inicio (`/
 | Efecto | Cierra al hacer clic fuera (`mousedown` en `document`) y con Escape, solo mientras está abierto |
 
 ### LanguageSwitcher
-Selector de idioma: un `<select>` nativo (`focus-ring`, `h-11`) con una `<label className="sr-only">` (`language.label`) y dos `<option>` («Español» con `lang="es"` y «English» con `lang="en"`). Ya no usa `ButtonAlternative` ni el modo desplegable.
+Selector de idioma: un `<select>` nativo (`focus-ring`, `h-11`, `rounded-xl`, `font-normal`, aligerado para caber en la cabecera a 320 px) con una `<label className="sr-only">` (`language.label`) y dos `<option>` («Español» con `lang="es"` y «English» con `lang="en"`). Ya no usa `ButtonAlternative` ni el modo desplegable.
 
 | Estado / función | Descripción |
 |---|---|
@@ -39,7 +40,8 @@ Selector de idioma: un `<select>` nativo (`focus-ring`, `h-11`) con una `<label 
 | Cambio | Llama a `i18n.changeLanguage('es' \| 'en')`. El detector lo guarda en `localStorage` |
 
 ### Footer
-El único `<footer>` de la aplicación (`App` ya no pinta otro): enlaces a Inicio, Explorar, Sobre nosotros y Cookies (`focus-ring`, `min-h-11`), el copyright con el año actual (`footer.copyright` con `{currentYear}`) y, en la misma fila (columna bajo `sm`), «V 1.0.0» como `<summary>` de un `<details>` que despliega el mensaje `ee` (corrige el solapamiento a 375 px, B32).
+El único `<footer>` de la aplicación (`App` ya no pinta otro), con fondo `ink` y texto `surface`, dentro de `.page-container`. Tres columnas desde `md` (`2fr 1fr 1fr`): **Instituciones** (`<h2>`; los cinco logos de las universidades de `UNIVERSITIES` como `LogoLink` dentro de **una sola placa** clara `rounded-xl bg-surface`), **Contacto** (`<h2>`, la dirección `home.locationContent` y un enlace a `/#contacto`) y **Enlaces** (`<h2>`; Inicio, Explorar, Galería, Sobre nosotros y Cookies, `focus-ring`, `min-h-11`; la lista es una rejilla `grid grid-cols-2 gap-x-stack md:grid-cols-1`: dos columnas bajo `md` y una desde `md`). Debajo, con un filete `moss`, el copyright con el año actual (`footer.copyright` con `{currentYear}`) y «V 1.0.0» en negrita como `<summary>` de un `<details>` que despliega el mensaje `ee` (corrige el solapamiento a 375 px, B32).
+Medido el 12/11/2026 en local con API simulada y en inglés: tres `<h2>`, cinco logos de 112×48 en una placa de 512×176 px a 1440 y de 343×256 a 390; alto del pie 450 px a 1440 y 1032 px a 390 (antes 168 y 260). **Vuelta 1 (12/11/2026, B62, decisión del usuario):** a 390 px los cinco enlaces van en dos columnas (Inicio, Galería y Cookies en x=16; Explorar y Sobre nosotros en x=195; todos de 44 px de alto; «Cookies» queda sola en su fila) y el pie mide 944 px. Sigue siendo largo por la placa de logos (343×256 px). Sin E2E de la rejilla (B59).
 
 ### Sidebar
 Barra de gestión (normaliza la ruta quitando la barra final; desde `md` ocupa toda la altura con `bg-surface`): un `<nav aria-label>` (`privateNav.label`, «Gestión»). Bajo `md` es una barra inferior fija (`h-nav`, `z-40`) y desde `md` una columna fija a la izquierda (`top-16 w-28`). Cada ítem muestra icono (`aria-hidden`) y etiqueta visible; el ítem activo lleva `bg-brand font-bold` y un borde `ink` (color, peso y forma), nunca `surface` sobre `brand`.
@@ -86,7 +88,7 @@ Guardia de las rutas privadas.
 Ya no decodifica el JWT ni comprueba `exp` (se retiraron `jwt-decode`, `isTokenExpired` y el diálogo `tokenExpiration.*`). No toca el almacenamiento directamente: usa `getAccessToken` y `api.logout` (que borra la sesión, revoca el token de refresco y va a `/`), aunque `npm run quality` sigue permitiéndole `localStorage`.
 
 ### CookieBanner
-Banner de consentimiento y modal de configuración. Prop `aboveBottomBar` (por defecto `false`): el banner es una `<section aria-label>` **`sticky`** `z-40` al final de la raíz, con `bottom-0` o, con la barra de gestión, `bottom-nav md:bottom-0`; ocupa su sitio en el flujo (no tapa contenido ni pie) y libera el espacio al aceptar. Compacto en móvil (`p-3 sm:p-4`, `gap-2`, título `text-sm sm:text-base`, texto `text-xs sm:text-sm`, botones en una fila; 228 px a 320x700). El modal de configuración queda fuera de esa sección. B21 sigue abierto para el banner (sin `role="dialog"`).
+Banner de consentimiento y modal de configuración. Prop `aboveBottomBar` (por defecto `false`): el banner es una `<section aria-label>` **`sticky`** `z-40` al final de la raíz, con `bottom-0` o, con la barra de gestión, `bottom-nav md:bottom-0`; ocupa su sitio en el flujo (no tapa contenido ni pie) y libera el espacio al aceptar. Compacto en móvil (`p-3 sm:p-4`, `gap-2`, título `text-sm sm:text-base`, texto `text-xs sm:text-sm`, botones en una fila; 228 px a 320x700). El modal de configuración queda fuera de esa sección. B21 sigue abierto para el banner (sin `role="dialog"`). **Variante B** (decisión del plan, con medición): ya no es oscuro; lleva `border-t border-moss bg-surface text-ink`, un icono `info` (`aria-hidden`, `text-moss`) delante del título y el título es un `<h2>` (antes `<h3>`). Los textos son `text-xs sm:text-sm`; los 12 px de `text-xs` y que no sea una tarjeta redondeada son excepciones documentadas en `DESIGN.md`. Altura medida a 320x700 el 12/11/2026 (local, API simulada): 217 px en inglés y 233 px en español; con la barra inferior de `/explorar` (72 px), 289 y 305 px, dentro de los 320 px de `scroll-padding-bottom` (20 rem). El modal de configuración usa tokens (`bg-ink/70`, `bg-surface`, `border-sage`).
 
 | Estado / función | Descripción |
 |---|---|
@@ -152,7 +154,7 @@ Campo de búsqueda con icono de lupa (`aria-hidden`, `pl-10`).
 Props: `label` (obligatoria y visible, asociada con `htmlFor`), `id` (por defecto de `useId`: ya no hay `id="buscar"` repetido), `placeholderText`, `value`, `onChange`, `invalid`, `describedBy` e `inputRef`. Es un campo controlado: muestra siempre `value`. `h-12`, borde `brand-dark`, placeholder `moss` y `focus-ring-inset` (anillo hacia dentro por el `overflow-hidden` del contenedor). B3 resuelto aquí.
 
 ### SpeciesCard
-Tarjeta de una especie en la cuadrícula del explorador.
+Tarjeta de una especie en la cuadrícula del explorador. Es un `div role="button"` (antes un `motion.div` sin teclado) con `aria-label` (el nombre de la especie), `tabIndex={0}` y `focus-ring`: Enter y Espacio abren el diálogo (`onKeyDown` con `preventDefault`). Esto corrige de paso la deuda A2 de la tarjeta (no se podía abrir con teclado). Estilo con tokens: `rounded-lg`, `border-sage`, `bg-surface`, `hover:bg-sage` con `transition-colors motion-reduce:transition-none` (sustituye al hover animado con `motion`), texto `ink` en peso 400 y el nombre científico en Amaranth cursiva (`font-primary italic`: Sen no tiene cursiva).
 
 | Prop | Descripción |
 |---|---|
@@ -163,6 +165,7 @@ Tarjeta de una especie en la cuadrícula del explorador.
 | Estado / función | Descripción |
 |---|---|
 | `isDialogOpen`, `openDialog()`, `closeDialog()` | Control del diálogo de detalle |
+| `handleKeyDown(event)` | Enter y Espacio abren el diálogo |
 | `highlightTerms(text, terms)` | Utilidad compartida (`utilities/highlightTerms.js`): divide el nombre en fragmentos `{ text, isItalic }`. Los términos de `terms` (por ejemplo `subsp.`, `var.`) van en redonda y el resto en cursiva, como exige la nomenclatura botánica. Escapa los caracteres especiales de cada término antes de construir la expresión regular |
 
 ### DialogSpecies
@@ -180,7 +183,7 @@ Muestra el título con cursivas, un `SpeciesAttribute` por atributo, el botón "
 **Accesibilidad (A6):** la caja interior es `role="dialog"`, `aria-modal="true"`, `aria-labelledby` (el `div` que contiene los `h2` del título compuesto) y `tabIndex={-1}`. Llama a `useDialogFocus(isOpen && useIsPresent(), onClose)` antes del `if (!isOpen) return null`: el foco entra en la caja al abrir, Tab queda atrapado, Escape llama a `onClose` y el foco vuelve a quien abrió. Con la caja ya enfocada, el primer elemento enfocable es el primer `summary` de atributos, no «Cerrar».
 
 ### SpeciesAttribute
-Bloque `<details>` abierto con título y lista. Si `description` es una cadena, la divide por comas y pinta un párrafo en cursiva por valor.
+Bloque `<details>` abierto con título y lista. Si `description` es una cadena, la divide por comas y pinta un párrafo en cursiva por valor; la cursiva va en Amaranth (`font-primary italic`), porque Sen solo se carga en 400 y 700 y no tiene cursiva.
 
 ### Table
 Tabla paginada genérica.
@@ -190,6 +193,9 @@ Las columnas son la unión de las claves de todos los registros, en orden de pri
 ### Pagination
 Botones anterior/siguiente con el texto "Página X de Y".
 Props: `currentPage`, `totalPages` y `onPageChange('prev' | 'next')`. Desactiva los extremos. Los dos botones de icono llevan `ariaLabel` (`iconButton.previousPage` y `iconButton.nextPage`).
+
+### GalleryViewer
+Visor a pantalla completa de `VegetationGallery`; se monta solo cuando `index !== null`. Props: `images`, `index`, `onIndexChange` y `onClose`. Es un diálogo modal (`role="dialog"`, `aria-modal`, `aria-labelledby` hacia el nombre de la foto, `tabIndex={-1}`) sobre un fondo `bg-ink/95`, con `useDialogFocus` (foco a la caja, trampa de Tab, Escape y devolución del foco). Una envoltura `aria-live="polite" aria-atomic` contiene el `<h2>` con el nombre legible (`photoName`) y el contador «n de N» (`gallery.viewer.counter`), para que se anuncien juntos. «Anterior», «Siguiente» (y las flechas del teclado) dan la vuelta en los extremos: los botones nunca se deshabilitan. Los botones miden 48×48 con nombre (`iconButton.previousPhoto`, `nextPhoto` y `close`): bajo `md`, anterior y siguiente abajo (zona del pulgar) y cerrar arriba a la derecha; desde `md`, anterior y siguiente centrados a los lados. Sin animaciones. Mientras está abierto bloquea el desplazamiento del `body` (`overflow: hidden`) y lo restaura al cerrar o desmontar (A6). Solo pinta el `<img>` si `isSafeImageUrl` ([06](06-utilidades-hooks-config.md)) acepta la URL de la foto; si no, deja la caja vacía y no pide la imagen (S7).
 
 ### FileDropdown
 Selector de la versión de datos para "Administrar datos": un `<select>` nativo (B22 resuelto: se alcanza con Tab y se maneja con el teclado del navegador). Se crea con `forwardRef`.
@@ -248,7 +254,7 @@ Gestión de términos que no se escriben en cursiva. `<section aria-labelledby>`
 El campo lleva etiqueta visible (`noLatinTermsPlaceholder`, sin placeholder). El nombre de cada fila lleva las mismas clases que en `ImageGalleryManager` (`min-w-0 break-words text-base font-normal`), y su `InfoButton` lleva `topic`.
 
 ### ImageGalleryManager
-Gestión de las imágenes de la galería. Cada fila lleva una miniatura (`Thumbnail` local: `img` de 48×48 con `src` la URL prefirmada de `GET /list-images`, `alt=""`, `loading="lazy"`, `object-cover`; con `onError` —la URL caduca a la hora— se oculta el `img` y queda una caja de 48 px con borde `sage`. Antes de pedir la imagen, `isSafeImageUrl` (local) analiza la URL con `new URL` dentro de un `try/catch` y solo acepta `https:` (y `http:` únicamente para `localhost` y `127.0.0.1`); si no es válida muestra la misma caja vacía **sin pedir la imagen** (seguridad.md S7); `key={image.url}` reinicia el fallo con una URL nueva). Mismo patrón que `TermsManager` (`<h2>`, `InfoButton`, avisos con `useToast`, lista `<ul aria-label>` con `imagesListLabel`, borrar con confirmación, papelera con nombre `deleteImage`).
+Gestión de las imágenes de la galería. Cada fila lleva una miniatura (`Thumbnail` local: `img` de 48×48 con `src` la URL prefirmada de `GET /list-images`, `alt=""`, `loading="lazy"`, `object-cover`; con `onError` —la URL caduca a la hora— se oculta el `img` y queda una caja de 48 px con borde `sage`. Antes de pedir la imagen, `isSafeImageUrl` (utilidad compartida con `VegetationGallery` y `GalleryViewer`, [06](06-utilidades-hooks-config.md)) solo acepta `https:` (y `http:` únicamente para `localhost` y `127.0.0.1`); si no es válida muestra la misma caja vacía **sin pedir la imagen** (seguridad.md S7); `key={image.url}` reinicia el fallo con una URL nueva). Mismo patrón que `TermsManager` (`<h2>`, `InfoButton`, avisos con `useToast`, lista `<ul aria-label>` con `imagesListLabel`, borrar con confirmación, papelera con nombre `deleteImage`).
 
 | Estado / función | Descripción |
 |---|---|
@@ -298,27 +304,31 @@ QR del MFA dibujado en el navegador con `qrcode-generator`, como SVG en línea. 
 
 ### ContactForm
 Formulario de contacto (nombre, email, asunto y mensaje).
-**Prop:** `onLoad(bool)`. **Función:** `handleSubmit(e)` hace `POST /send-email`; el éxito se avisa con `notifySuccess` (`role="status"`) y el error se muestra en `InlineError` (`formError`) encima de «Enviar», que se limpia al enviar: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Ya no usa `DialogAdvice` ni `useDialog`. Deuda: placeholders `sage` y borde `brand` en sus campos. Los campos limitan la longitud con `maxLength` (nombre 100, correo 254, asunto 150, mensaje 2000). El botón se desactiva si falta algún campo. No valida el formato del email más allá de `type="email"`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias). Los cuatro campos llevan `focus-ring`. El botón de enviar es `type="submit"`; un `type="submit"` con `loading` ignora el envío mientras dura (el `onSubmit` no actúa).
+**Prop:** `onLoad(bool)`. Es un `<form noValidate>`: la validación es propia y no la del navegador. `validateContact` ([06](06-utilidades-hooks-config.md)) calcula los errores en cada render; cada campo muestra el suyo (`InlineError` con `aria-invalid` y `aria-describedby`) solo después de salir de él (`onBlur`) o de intentar enviar, y el error desaparece al corregirlo. El mensaje exige 20 caracteres como mínimo tras `trim` (el límite propio del backend es **(por confirmar)**) y el correo, un formato `nombre@dominio`. Los campos son `TextInput` con `hint` (máximos: nombre 100, correo 254, asunto 150 y mensaje 2000 con `maxLength`), `autoComplete`, `required` y, el mensaje, `multiline`.
+**Botón «Enviar»:** local al formulario (no es `ButtonPrincipal`): un `<button type="submit">` con `aria-disabled` y `aria-describedby` hacia la ayuda mientras el formulario no es válido, y `BUTTON_INACTIVE_CLASS` (borde discontinuo `moss`, sin relleno, `cursor-not-allowed`); válido, `BUTTON_PRINCIPAL_CLASS`. Se usa `aria-disabled` y no `disabled` porque un botón `disabled` bloquea el Enter implícito: pulsarlo o dar Enter **no envía**, pero muestra los cuatro errores y lleva el foco al primer campo inválido (para el usuario sigue deshabilitado: lo anuncia, se ve inactivo y no envía). Encima, una lista «Para enviar, falta:» (`home.contactForm.submitHelpTitle`) con una frase por cada fallo.
+**Anuncio de errores (vuelta 1, 12/11/2026):** tras un envío inválido los errores se pintan **sin** `role` (`announceError={false}` en `TextInput`, que pasa `announce={false}` a `InlineError`) y un único `<p role="status" class="sr-only">` anuncia «Hay N errores en el formulario» (`home.contactForm.errorSummary_one` y `_other`), de modo que el lector no repite cuatro alertas. Cuando el usuario edita un campo con error y sale de él, ese campo vuelve a `role="alert"`. El texto real y el plural no se prueban con i18next real (B59).
+**Doble envío:** un ref (`sending`) hace que `handleSubmit` salga sin hacer nada mientras `POST /send-email` está en curso.
+**Envío:** `handleSubmit(e)` hace `POST /send-email` solo con datos válidos; el éxito se avisa con `notifySuccess` (`role="status"`) y el error se muestra en `InlineError` (`formError`) encima de «Enviar», que se limpia al enviar: `429` usa `dialogAdvice.errorEmailRateLimit`, `400` `errorEmailInvalid` y el resto `errorEmailMessage`. Ya no usa `DialogAdvice` ni `useDialog`. Las cuatro etiquetas se asocian a sus campos con `htmlFor` e `id` derivados de `useId` (únicos entre instancias). Contrato con el backend: sin cambios (ver [para-backend](integracion/para-backend.md)).
 
 ### EmailContactGrid
-Lee `home.emailsData`, una cadena con el formato `Nombre / email / Nombre / email ...`, la divide por `/` en pares `{ name, email }` y los muestra en dos columnas con enlaces `mailto:`.
+Lee `home.emailsData`, una cadena con el formato `Nombre / email / Nombre / email ...`, la divide por `/` en pares `{ name, email }` y los muestra en una columna (dos desde `sm`) con enlaces `mailto:` de 44 px, subrayados y con `break-all` solo donde hace falta; texto de 16 px y el nombre en `font-bold text-ink` (antes `font-semibold`).
 
 ### TextInput
-Campo de texto con etiqueta visible. Props: `label` (obligatoria, con `htmlFor`), `id` (por defecto de `useId`), `placeholderText`, `value`, `onChange`, `invalid`, `describedBy` e `inputRef`. Es un campo controlado: muestra siempre `value`. `h-12 rounded-xl border-brand-dark`, placeholder `moss` y `focus-ring-inset`. `aria-invalid` y `aria-describedby` solo se ponen cuando se pasan.
+Campo de texto con etiqueta visible. Props: `label` (obligatoria, con `htmlFor`), `id` (por defecto de `useId`), `placeholderText`, `value`, `onChange`, `onBlur`, `invalid`, `describedBy`, `inputRef`, `announceError` (por defecto `true`; `false` pinta el error sin `role`), `type`, `maxLength`, `autoComplete`, `required`, `multiline` (pinta un `<textarea>` de `min-h-32 py-stack-md` en lugar de un `<input>` de `h-12`), `hint` y `error`. Es un campo controlado: muestra siempre `value`. `rounded-xl`, borde `brand-dark`, placeholder `moss` y `focus-ring-inset`. `hint` es una línea de ayuda en `text-sm text-moss` (con su `id`, enlazada por `aria-describedby`); `error` pinta un `InlineError` (con su `id`) y activa el borde y el anillo `danger` y `aria-invalid`, igual que `invalid` (que usan las páginas privadas). Los `aria-describedby` se combinan (`describedBy`, ayuda y error).
 
 ---
 
 ## Elementos básicos
 
 ### ButtonPrincipal
-Botón primario (relleno `brand`, texto `ink`, hover `brand-dark`).
+Botón primario (relleno `brand`, texto `ink`, hover `brand-dark`). Exporta las clases `BUTTON_PRINCIPAL_CLASS` y `BUTTON_INACTIVE_CLASS` para los `Link` con aspecto de botón (los CTA de `Home`) y para el botón de envío de `ContactForm`.
 
 | Prop | Descripción |
 |---|---|
 | `text` | Texto |
 | `onClick` | Acción |
 | `icon` | Si está presente, pinta un botón cuadrado de 48×48 (`text-brand-dark`, hover `bg-brand text-ink`) con el icono de Material Symbols y sin texto |
-| `className`, `disabled` | Estilo extra y estado desactivado (`opacity-50 cursor-not-allowed`, exento de contraste) |
+| `className`, `disabled` | Estilo extra y estado desactivado. Con texto, `disabled` usa `BUTTON_INACTIVE_CLASS`: la misma forma, borde discontinuo `moss`, sin relleno, `text-moss` y `cursor-not-allowed`, sin `hover` ni `opacity-50` (también en las privadas). **Deuda:** la rama de icono sigue con `opacity-50` (p. ej. «anterior» de `Pagination`), sin medir su contraste |
 | `ariaLabel` | Nombre accesible; solo se aplica en la rama `icon`. La ligadura lleva `aria-hidden="true"` |
 | `type` | `"button"` por defecto; quien envíe un formulario pasa `type="submit"` |
 | `loading` | `aria-busy` y `aria-disabled` (no `disabled`, para no perder el foco), el clic se ignora y se muestra el icono `progress_activity` |
@@ -327,7 +337,7 @@ Botón primario (relleno `brand`, texto `ink`, hover `brand-dark`).
 Con texto: `min-h-12 min-w-[84px] max-w-full`, sin `truncate`. Desaparecen `dropdownOptions`, `onOptionSelect` y el modo desplegable. Las dos ramas llevan `focus-ring`.
 
 ### ButtonAlternative
-Botón secundario: `border-2 border-brand-dark bg-surface text-brand-deep`, hover `bg-brand text-ink`, mismo tamaño y tipografía que `ButtonPrincipal`. Props: `text`, `onClick`, `className`, `type` (`"button"` por defecto), `disabled`, `loading` y `...rest`. Ya no tiene modo desplegable ni chevrons.
+Botón secundario: `border-2 border-brand-dark bg-surface text-brand-deep`, hover `bg-brand text-ink`, mismo tamaño y tipografía que `ButtonPrincipal`; exporta `BUTTON_ALTERNATIVE_CLASS` (el CTA «Galería» de `Home`). Deshabilitado conserva `opacity-50 cursor-not-allowed` (deuda de contraste de estados desactivados). Props: `text`, `onClick`, `className`, `type` (`"button"` por defecto), `disabled`, `loading` y `...rest`. Ya no tiene modo desplegable ni chevrons.
 
 ### DialogAdvice
 Modal de aviso o confirmación, animado.
@@ -337,6 +347,7 @@ Modal de aviso o confirmación, animado.
 | `dialogTitle`, `dialogMessage` | Contenido |
 | `dialogDetails` | `{ title, content }` opcional, en un `<details>` plegable |
 | `showActions` | `true` → botones Confirmar y Cancelar; `false` → solo Cerrar |
+| `variant` | Variante de `noticeStyles` del icono y el borde (por defecto `info`). Las confirmaciones de `FileUpload` (campos vacíos, «¿continuar?», que no es un borrado), `ImageGalleryManager`, `TermsManager` y `DataManagement` pasan `variant="warning"`: icono y borde naranja `warning`, también en las páginas privadas (cambio visible previsto, 12/11/2026) |
 | `confirmText` | Texto del botón de confirmar (por defecto `dialogAdvice.confirmButton`; el borrado usa `dialogAdvice.deleteButton`, «Eliminar») |
 | `onConfirm`, `onClose` | Acciones. Clic en el fondo = `onClose` |
 
@@ -348,10 +359,10 @@ Se usa junto con el hook `useDialog` dentro de `<AnimatePresence>`. Desde esta i
 Proveedor de avisos (`src/components/ToastProvider.js`; el contexto y el hook están en [`useToast`](06-utilidades-hooks-config.md#usetoast-srchooksusetoastjs)). Envuelve `App` y monta **siempre** dos regiones dentro de un contenedor `fixed top-20 z-[55]`: `role="status"` (éxitos) y `role="alert"` (errores). Cada aviso lleva icono `aria-hidden`, texto y un botón de cerrar de 44×44 (`feedback.close`). El éxito se cierra solo a los 8 s y el contador se para con el ratón encima o el foco dentro y reinicia al salir (WCAG 2.2.1); los errores no tienen temporizador y se quedan hasta cerrarlos. Sin animación y nunca mueve el foco. Al estar las regiones siempre montadas, los tests no deben usar `getByRole('alert' \| 'status')` sin filtro: comprueban el texto y su región con `closest` o `within`.
 
 ### InlineError
-`InlineError({ id, children })`: un `<p role="alert">` con borde y texto `danger` y el icono `error` en `aria-hidden`. El campo se asocia con `aria-invalid` y `aria-describedby={id}` y el foco va al campo solo cuando la validación falla.
+`InlineError({ id, announce = true, children })`: un `<p>` con `role="alert"` (con `announce={false}` sin `role`, para que lo lea el foco por `aria-describedby` o un resumen aparte y no se anuncie dos veces) con `NOTICE_BASE` y la variante `error` de `noticeStyles` (borde y texto `danger`, sobre `surface`) y el icono `error` en `aria-hidden`; sin prop de variante. El campo se asocia con `aria-invalid` y `aria-describedby={id}` y el foco va al campo solo cuando la validación falla.
 
 ### InfoButton
-Icono `info` (`text-moss`) que muestra un tooltip al pasar el ratón, al enfocar o al pulsar (el clic lo muestra; no alterna). Props: `tooltipText` y `topic` (opcional). Con `topic` el `aria-label` es `iconButton.infoAbout` («Información: {{topic}}»), con el título o la etiqueta visible de al lado (así una página con varios «i» no repite el nombre); sin `topic` se queda en `iconButton.info` (`Explore`). `adjustTooltipPosition()` (en `useLayoutEffect` y en `resize` mientras se ve) mide el tooltip y lo desplaza en horizontal para que quede entre 16 px y `innerWidth − 16`; si su borde inferior pasa de `innerHeight` (menos 72 px bajo 768 px, por la barra inferior) y cabe encima, lo coloca encima. El botón es `type="button"`, de 44×44 (`h-11 w-11 shrink-0`), con `aria-describedby` hacia el tooltip y `focus-ring`; el icono `info` va en un `<span aria-hidden="true">`. El `id`, el `role="tooltip"` y `hidden` están en una envoltura transparente (`top-full pt-2`, o `bottom-full pb-2` encima; sin `mt-2`; `w-max max-w-[min(28rem,calc(100vw-2rem))]`, sin `min-w-*`) y la caja visible (borde `sage`, `bg-surface`, sombra) es un `<span>` interior: el hueco con el botón forma parte del tooltip y no dispara `onMouseLeave`. Escape lo oculta mientras se ve (WCAG 1.4.13). Medido en local con API simulada (11/11/2026): 7 usos con `aria-label` distinto («Information: Choose the dataset», «…Non-Latinisms Exception», «…Gallery management», «…Select files»), de 44×44 px, y el tooltip dentro del viewport a 1440, 768 y 390 px (a 390 px: `left` 31 y `right` 374 con `clientWidth` 375).
+Icono `info` (`text-moss`) que muestra un tooltip al pasar el ratón, al enfocar o al pulsar (el clic lo muestra; no alterna). La caja del tooltip usa `NOTICE_BASE` y la variante `info` (borde `moss`, sobre `surface`, con el icono `info` delante del texto) más `text-left text-sm shadow-lg`. Props: `tooltipText` y `topic` (opcional). Con `topic` el `aria-label` es `iconButton.infoAbout` («Información: {{topic}}»), con el título o la etiqueta visible de al lado (así una página con varios «i» no repite el nombre); sin `topic` se queda en `iconButton.info` (`Explore`). `adjustTooltipPosition()` (en `useLayoutEffect` y en `resize` mientras se ve) mide el tooltip y lo desplaza en horizontal para que quede entre 16 px y `innerWidth − 16`; si su borde inferior pasa de `innerHeight` (menos 72 px bajo 768 px, por la barra inferior) y cabe encima, lo coloca encima. El botón es `type="button"`, de 44×44 (`h-11 w-11 shrink-0`), con `aria-describedby` hacia el tooltip y `focus-ring`; el icono `info` va en un `<span aria-hidden="true">`. El `id`, el `role="tooltip"` y `hidden` están en una envoltura transparente (`top-full pt-2`, o `bottom-full pb-2` encima; sin `mt-2`; `w-max max-w-[min(28rem,calc(100vw-2rem))]`, sin `min-w-*`) y la caja visible (borde `sage`, `bg-surface`, sombra) es un `<span>` interior: el hueco con el botón forma parte del tooltip y no dispara `onMouseLeave`. Escape lo oculta mientras se ve (WCAG 1.4.13). Medido en local con API simulada (11/11/2026): 7 usos con `aria-label` distinto («Information: Choose the dataset», «…Non-Latinisms Exception», «…Gallery management», «…Select files»), de 44×44 px, y el tooltip dentro del viewport a 1440, 768 y 390 px (a 390 px: `left` 31 y `right` 374 con `clientWidth` 375).
 
 ### LoadSpinner
 Props `label` e `inline` (falso por defecto). Por defecto, capa a pantalla completa semitransparente con un círculo girando (`animate-spin`) en `role="status"` y un texto `sr-only` (`label` o `feedback.loading`). Con `inline` es un `div role="status"` de línea que quien lo usa deja **siempre montado** con `label` vacío en reposo (sin spinner); con texto, muestra el círculo y el texto. No es un skeleton.
@@ -360,7 +371,7 @@ Props `label` e `inline` (falso por defecto). Por defecto, capa a pantalla compl
 Interruptor sobre un checkbox con estilos de `styled-components`. Props: `checked` y `onChange`.
 
 ### ScrollIndicator
-Flecha fija que rebota en la parte inferior. Al pulsarla baja una pantalla (`scrollBy`) y se oculta al llegar al final (hook `UseAtBottom`). Lleva `aria-label` `iconButton.scrollDown`, la ligadura en `aria-hidden` y `focus-ring`.
+Flecha del hero de `Home`: ya no es fija ni rebota. Prop `targetId`: al pulsarla lleva a esa sección con `scrollIntoView` (`behavior: 'auto'` si el sistema pide movimiento reducido, `useReducedMotion()`) y **enfoca el destino** (`focus({ preventScroll: true })`): la sección `home-descripcion` lleva `tabIndex={-1}` y `.focus-heading`, así el siguiente Tab continúa desde allí. Va **en el flujo** del hero (`flex justify-center`), sin `fixed` ni `absolute` y sin el hook `UseAtBottom` (retirado). Botón de 48×48 con icono `text-surface`, `aria-label` `iconButton.scrollDown`, la ligadura en `aria-hidden` y `focus-ring`.
 
 ### ImageComponent
 Imagen o fondo a partir de una URL directa o de una clave de S3.
@@ -369,8 +380,15 @@ Imagen o fondo a partir de una URL directa o de una clave de S3.
 |---|---|
 | `directUrl` | URL que se usa tal cual (lo habitual, con `assetUrl`) |
 | `imageKey` | Si no hay `directUrl`, pide `GET /get-image?imageKey=` (con `encodeURIComponent`) y usa `imageUrl`. Sin `imageKey` no llama a la API |
-| `isBackground` | Pinta un `div` con fondo, capa oscura al 70 %, `background-attachment: fixed` y `min-height: 95vh` |
+| `isBackground` | Pinta un `div` con fondo y un velo uniforme `ink` al 70 % (`rgba(12, 24, 17, 0.7)`: un estilo en línea no admite clases; `theme.test.js` comprueba que es `ink` al 0,7). Ya no lleva `background-attachment: fixed` ni `min-height` propia: la altura la da quien lo usa (el hero de `Home`, `min-h-[calc(100svh-4rem)]`) |
 | `className`, `children` | Estilo y contenido (solo en modo fondo) |
+| `alt`, `width`, `height`, `loading` | Solo en modo imagen (`<img>`): `alt` vacío por defecto (decorativa; antes `alt="Imagen"`), y la caja reservada y la carga diferida las decide quien lo usa (`About` no usa `lazy`: está en la primera pantalla) |
+
+### EmptyState
+`EmptyState({ title, children, action, role })`: estado vacío o de error de una página. Un `<div max-w-prose>` con el título en `<h2 text-xl font-bold text-brand-deep>`, la causa en un párrafo `text-base text-ink-soft` y, como mucho, una acción debajo. Solo admite `role="alert"` (el estado de error, que sí es un aviso); los casos vacíos van sin rol y cualquier otro valor se ignora. Lo usan `Explore` (error, sin datos y sin resultados con «Quitar filtros») y `VegetationGallery` (error con «Reintentar» y vacío). Sin ilustraciones.
+
+### LogoLink
+`LogoLink({ href, src, alt })`: logo institucional como enlace externo (`target="_blank"`, `rel="noopener noreferrer"`, `focus-ring`, caja `h-16 w-32` con la imagen `object-contain`, `width`/`height` reservados y `loading="lazy"`). El nombre accesible sale del `alt` (`institutions.<id>`) y un `<span class="sr-only">` añade «(se abre en una pestaña nueva)» (`a11y.opensInNewTab`). Lo usan `Footer` y `Home`; los datos de cada logo, `config/institutions.js`. Todas las direcciones son `https`.
 
 ---
 

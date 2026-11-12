@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from 'react';
 import api from '../services/api';
 
-const ImageComponent = ({ imageKey, directUrl, isBackground = false, className = '', children }) => {
+const ImageComponent = ({ imageKey, directUrl, isBackground = false, className = '', alt = '', width, height, loading, children }) => {
   const [imageUrl, setImageUrl] = useState(directUrl || '');
 
   useEffect(() => {
@@ -20,11 +20,10 @@ const ImageComponent = ({ imageKey, directUrl, isBackground = false, className =
       <div
         className={`${className} relative`}
         style={{
+          // `ink` (#0C1811) al 70 %: un estilo en línea no admite clases.
           backgroundImage: `linear-gradient(rgba(12, 24, 17, 0.7), rgba(12, 24, 17, 0.7)), url(${imageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          minHeight: '95vh',
         }}
       >
         {children}
@@ -32,7 +31,7 @@ const ImageComponent = ({ imageKey, directUrl, isBackground = false, className =
     );
   }
 
-  return <img src={imageUrl} alt="Imagen" className={className} />;
+  return <img src={imageUrl} alt={alt} width={width} height={height} loading={loading} className={className} />;
 };
 
 export default ImageComponent;

@@ -1,20 +1,19 @@
-import { React, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { React, useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'motion/react';
 import ContactForm from '../components/ContactForm.js';
-import ButtonPrincipal from '../components/ButtonPrincipal.js';
+import { BUTTON_PRINCIPAL_CLASS } from '../components/ButtonPrincipal.js';
+import { BUTTON_ALTERNATIVE_CLASS } from '../components/ButtonAlternative.js';
 import EmailContactGrid from '../components/EmailContactGrid.js';
 import LoadSpinner from '../components/LoadSpinner.js';
+import LogoLink from '../components/LogoLink.js';
 import ScrollIndicator from '../components/ScrollIndicator.js';
 import ImageComponent from '../components/ImageComponent.js';
 import ASSETS, { assetUrl } from '../config/assets';
+import { UNIVERSITIES, ENTITIES } from '../config/institutions';
 
-const Home = () => {
-  const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const umaCollaborators = [
+const COLLABORATORS = {
+  uma: [
     'Jaime F. Pereña Ortiz',
     'Á, Enrique Salvo Tierra',
     'Noelia Hidalgo Triana',
@@ -25,225 +24,125 @@ const Home = () => {
     'Ángel Ruiz Valero',
     'Pablo Cozano',
     'Begoña Galindo',
-    'Ángel Valencia'
-  ];
+    'Ángel Valencia',
+  ],
+  ual: ['Juan F. Mota Poveda'],
+  ugr: ['Francisco Valle Tendero', 'Juan Lorite Moreno'],
+  uhu: ['Pablo Hidalgo Fernández'],
+  uja: ['José Antonio Carreira de la Fuente'],
+};
 
-  const anotherUniverities = [
-    { key: ASSETS.LOGOS.UAL, url: 'https://www.ual.es', collaborators: ['Juan F. Mota Poveda']},
-    { key: ASSETS.LOGOS.UGR, url: 'https://www.ugr.es', collaborators: ['Francisco Valle Tendero', 'Juan Lorite Moreno']},
-    { key: ASSETS.LOGOS.UHU, url: 'https://www.uhu.es', collaborators: ['Pablo Hidalgo Fernández']},
-    { key: ASSETS.LOGOS.UJA, url: 'https://www.ujaen.es', collaborators: ['José Antonio Carreira de la Fuente']},
-  ];
+const SECTION = 'page-container py-section md:py-section-lg';
+const H2 = 'text-2xl md:text-4xl font-bold leading-tight text-brand-deep';
+const H3 = 'text-xl md:text-2xl font-bold leading-tight text-brand-deep';
+const GRID = 'mt-stack-lg grid gap-stack-lg sm:grid-cols-2 lg:grid-cols-4';
 
-  const anotherEntities = [
-    { key: ASSETS.LOGOS.EFYVE,    url: 'http://www.efyve.com' },
-    { key: ASSETS.LOGOS.GEOSPACE, url: 'https://3dgeospace.com' },
-    { key: ASSETS.LOGOS.MAFO,     url: 'https://malaguenaforestal.com' },
-  ];
+const Home = () => {
+  const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+
+  // Enlace del pie a /#contacto: `key` repite el desplazamiento si se pulsa dos veces el mismo enlace.
+  useEffect(() => {
+    if (!location.hash) return;
+    const target = document.getElementById(location.hash.slice(1));
+    target?.scrollIntoView();
+    // El foco pasa al encabezado de la sección (tabIndex -1): el siguiente Tab continúa desde ahí.
+    target?.querySelector('h2[tabindex="-1"]')?.focus({ preventScroll: true });
+  }, [location.key, location.hash]);
 
   const handleOnLoad = (state) => {
     setIsLoading(state);
-  }
-
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0 },
   };
+
+  const [leader, ...otherUniversities] = UNIVERSITIES;
+
+  const names = (id) =>
+    COLLABORATORS[id]?.length > 0 && (
+      <ul className="mt-stack-sm">
+        {COLLABORATORS[id].map((name) => (
+          <li key={name} className="text-base text-ink-soft">{name}</li>
+        ))}
+      </ul>
+    );
+
+  const logo = ({ id, url, asset }) => (
+    <LogoLink href={url} src={assetUrl(asset)} alt={t(`institutions.${id}`)} />
+  );
 
   return (
     <>
-      <ImageComponent directUrl={assetUrl(ASSETS.BANNER)} isBackground={true} className="flex items-center justify-left px-2">
-        <div className="flex flex-col gap-5 text-left">
-          <h1 className="text-[#F9FBFA] text-4xl font-black sm:text-6xl sm:font-black">
+      <ImageComponent
+        directUrl={assetUrl(ASSETS.BANNER)}
+        isBackground={true}
+        className="relative flex min-h-[calc(100svh-4rem)] flex-col"
+      >
+        <div className="page-container flex flex-1 flex-col justify-center gap-stack-lg pt-section pb-stack-lg">
+          <h1 className="max-w-3xl text-4xl md:text-5xl font-bold leading-tight text-surface">
             {t('home.title')}
           </h1>
-          <h2 className="text-[#F9FBFA] text-sm font-normal leading-normal sm:text-2xl sm:font-normal sm:leading-normal">
+          <p className="max-w-prose text-lg md:text-2xl text-surface">
             {t('home.subtitle')}
-          </h2>
-          <Link to="/explorar">
-            <ButtonPrincipal text={t('home.searchButton')} />
-          </Link>
-        </div>
-        </ImageComponent>
-
-      <div className="overflow-hidden">
-        <div
-          className="min-h-[50vh] px-4 py-4 flex items-center justify-center bg-[#0C1811]"
-        >
-          <motion.p
-          className="text-[#F9FBFA] text-2xl font-bold leading-tight text-center mx-10 py-2 sm:text-4xl sm:mx-40"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-            {t('home.descriptionContent')}
-          </motion.p>
-        </div>
-      </div>
-
-      <div className="container mx-auto py-8">
-        <motion.h2 
-          className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight text-center mt-12" 
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-            {t('home.projectLeaderTitle')}
-        </motion.h2>
-        <motion.div 
-          className="gap-8 mt-4 justify-items-center items-center"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-          <div className="flex flex-col items-center justify-center p-4">
-            <a
-              href="https://www.uma.es"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <ImageComponent
-                directUrl={assetUrl(ASSETS.LOGOS.UMA)}
-                className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
-              />
-            </a>
-            {umaCollaborators && umaCollaborators.length > 0 && (
-              <div className="mt-2 text-center">
-                {umaCollaborators.map((name, idx) => (
-                  <p key={idx} className="text-sm text-gray-700">{name}</p>
-                ))}
-              </div>
-            )}
+          </p>
+          <div className="flex flex-wrap gap-stack">
+            <Link to="/explorar" className={BUTTON_PRINCIPAL_CLASS}>{t('home.exploreButton')}</Link>
+            <Link to="/galeria" className={BUTTON_ALTERNATIVE_CLASS}>{t('home.galleryButton')}</Link>
           </div>
-        </motion.div>
+        </div>
+        <div className="flex justify-center pb-stack">
+          <ScrollIndicator targetId="home-descripcion" />
+        </div>
+      </ImageComponent>
 
-        <motion.h3
-          className="text-brand-deep text-xl sm:text-2xl font-bold leading-tight text-center mt-12" 
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-            {t('home.otherUniversitiesTitle')}
-        </motion.h3>
-        <motion.div className="flex w-full flex-wrap justify-center gap-6 mt-4"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-          {anotherUniverities.map(({ key, url, collaborators }, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
-            >
-              <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-                <ImageComponent
-                  directUrl={assetUrl(key)}
-                  className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
-                />
-              </a>
-              {collaborators && collaborators.length > 0 && (
-              <div className="mt-2 text-center">
-                {collaborators.map((name, idx) => (
-                  <p key={idx} className="text-sm text-gray-700">{name}</p>
-                ))}
-              </div>
-              )}
+      <section id="home-descripcion" tabIndex={-1} className="focus-heading bg-ink py-section md:py-section-lg">
+        <p className="page-container text-center text-2xl md:text-4xl font-bold leading-tight text-surface">
+          {t('home.descriptionContent')}
+        </p>
+      </section>
+
+      <section className={SECTION}>
+        <h2 className={H2}>{t('home.projectLeaderTitle')}</h2>
+        <div className="mt-stack-lg">
+          {logo(leader)}
+          {names(leader.id)}
+        </div>
+
+        <h3 className={`${H3} mt-section`}>{t('home.otherUniversitiesTitle')}</h3>
+        <div className={GRID}>
+          {otherUniversities.map((university) => (
+            <div key={university.id}>
+              {logo(university)}
+              {names(university.id)}
             </div>
           ))}
-        </motion.div>
-
-        <motion.h3
-          className="text-brand-deep text-xl sm:text-2xl font-bold leading-tight text-center mt-12"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-            {t('home.collaboratingEntitiesTitle')}
-        </motion.h3>
-
-        <motion.div className="flex w-full flex-wrap justify-center gap-6"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-          {anotherEntities.map(({ key, url, collaborators }, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center max-h-24 justify-center w-1/2 sm:w-full md:w-1/4 p-4 mt-8"
-            >
-              <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-                <ImageComponent
-                  directUrl={assetUrl(key)}
-                  className="object-contain mix-blend-multiply max-w-[150px] sm:max-w-[200px]"
-                />
-              </a>
-              {collaborators && collaborators.length > 0 && (
-              <div className="mt-2 text-center">
-                {collaborators.map((name, idx) => (
-                  <p key={idx} className="text-sm text-gray-700">{name}</p>
-                ))}
-              </div>
-              )}
-            </div>
-          ))}
-        </motion.div>
-      </div>
-
-      <div className="overflow-hidden">
-        <div
-          className="min-h-[80vh] px-4 py-8 flex flex-col items-center justify-center bg-[#F9FBFA]"
-        >
-          <motion.h2 
-          className="text-brand-deep text-2xl sm:text-4xl font-bold leading-tight"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-            {t('home.contactTitle')}
-          </motion.h2>
-          <motion.div className="flex w-full flex-wrap py-8"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}>
-            <div className="basis-full md:basis-1/2">
-              <ContactForm onLoad={handleOnLoad}/>
-            </div>
-            <div className="basis-full md:basis-1/2 p-2 grid grid-cols-1 gap-2">
-              <div className="border-t border-t-[#14281D] py-5">
-                <h3 className="text-brand-deep text-xl sm:text-2xl font-bold leading-tight">
-                  {t('home.emailTitle')}
-                </h3>
-                <span className="text-[#0C1811] text-sm font-normal leading-normal whitespace-pre-line">
-                  {t('home.emailContact')}
-                </span>
-                <EmailContactGrid/>
-              </div>
-
-              <div className="border-t border-b border-t-[#14281D] border-b-[#14281D] py-5">
-                <h3 className="text-brand-deep text-xl sm:text-2xl font-bold leading-tight">
-                  {t('home.locationLabel')}
-                </h3>
-                <span className="text-[#0C1811] text-sm font-normal leading-normal whitespace-pre-line">
-                  {t('home.locationContent')}
-                </span>
-              </div>
-            </div>
-          </motion.div>
-          </div>
-          <ScrollIndicator />
         </div>
-        {isLoading && (<LoadSpinner/>)}
+
+        <h3 className={`${H3} mt-section`}>{t('home.collaboratingEntitiesTitle')}</h3>
+        <div className={GRID}>
+          {ENTITIES.map((entity) => (
+            <div key={entity.id}>{logo(entity)}</div>
+          ))}
+        </div>
+      </section>
+
+      <section id="contacto" className={SECTION}>
+        <h2 tabIndex={-1} className={`focus-heading ${H2}`}>{t('home.contactTitle')}</h2>
+        <div className="mt-stack-lg grid gap-stack-xl md:grid-cols-2">
+          <ContactForm onLoad={handleOnLoad} />
+          <div className="flex flex-col gap-stack-lg">
+            <div className="border-t border-ink-soft pt-stack-lg">
+              <h3 className={H3}>{t('home.emailTitle')}</h3>
+              <p className="mt-stack-sm text-base text-ink whitespace-pre-line">{t('home.emailContact')}</p>
+              <EmailContactGrid />
+            </div>
+            <div className="border-t border-b border-ink-soft pt-stack-lg pb-stack-lg">
+              <h3 className={H3}>{t('home.locationLabel')}</h3>
+              <p className="mt-stack-sm text-base text-ink whitespace-pre-line">{t('home.locationContent')}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      {isLoading && (<LoadSpinner/>)}
     </>
   );
 };

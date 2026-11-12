@@ -4,6 +4,15 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 
+// Solo el recuento interpola: así se comprueban las cifras sin depender del idioma.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key, opts) => (key === 'explore.resultsInfo' ? `${key} ${opts.currentResults}/${opts.totalResults}` : key),
+    i18n: { language: 'es', changeLanguage: vi.fn() },
+  }),
+  Trans: ({ i18nKey }) => i18nKey,
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}));
 vi.mock('./services/api', () => ({
   default: {
     get: vi.fn(async () => []),
@@ -27,15 +36,24 @@ vi.mock('./components/ProtectedRoute', () => {
 });
 
 // Registra las funciones que App pasa a Filter en cada render: si cambian de identidad, los efectos de Filter se repiten.
+// Al montarse (y al remontarse con otra key) emula a Filter: avisa con `filtered` (o con todos los datos).
 const filterCallbacks = [];
-vi.mock('./components/Filter', () => ({
-  default: ({ onFilterChange, onSpeciesSelect }) => {
+const filterMock = { mounts: 0, filtered: null };
+vi.mock('./components/Filter', () => {
+  const FilterMock = ({ data, onFilterChange, onSpeciesSelect }) => {
     filterCallbacks.push({ onFilterChange, onSpeciesSelect });
+    useEffect(() => {
+      filterMock.mounts += 1;
+      onFilterChange(filterMock.filtered ?? data);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     return null;
-  },
-}));
+  };
+  return { default: FilterMock };
+});
 
 import App from './App';
+import api from './services/api';
 
 let navigateTo;
 const NavigatorProbe = () => {
@@ -62,6 +80,10 @@ const renderApp = async (path) => {
 describe('App', () => {
   beforeEach(() => {
     filterCallbacks.length = 0;
+    filterMock.mounts = 0;
+    filterMock.filtered = null;
+    api.get.mockReset();
+    api.get.mockImplementation(async () => []);
     protectedMock.status = 'ok';
     protectedMock.mounts = 0;
     vi.stubGlobal(
@@ -87,6 +109,13 @@ describe('App', () => {
 
     expect(document.activeElement).toHaveTextContent('skipLink');
     expect(document.activeElement.getAttribute('href')).toBe('#contenido');
+  });
+
+  it('el enlace de salto con foco mide al menos 44 px (WCAG 2.5.8)', async () => {
+    await renderApp('/');
+
+    const enlace = screen.getByText('skipLink');
+    expect(enlace).toHaveClass('focus:inline-flex', 'focus:min-h-11', 'focus:min-w-11', 'focus:items-center');
   });
 
   it('hay un único main#contenido, un contentinfo y un banner', async () => {
@@ -242,5 +271,120 @@ describe('App', () => {
     expect(filterCallbacks.length).toBeGreaterThan(1);
     expect(new Set(filterCallbacks.map((c) => c.onFilterChange)).size).toBe(1);
     expect(new Set(filterCallbacks.map((c) => c.onSpeciesSelect)).size).toBe(1);
+  });
+
+  describe('scroll al cambiar de ruta', () => {
+    beforeEach(() => {
+      Element.prototype.scrollIntoView = vi.fn();
+    });
+
+    it('al cambiar de ruta sin hash sube al principio', async () => {
+      await renderApp('/');
+      window.scrollTo.mockClear();
+
+      await goTo('/cookies', 'ok');
+
+      expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+    });
+
+    it('con #contacto no sube al principio: lo deja a Home, que lleva la sección a la vista', async () => {
+      await renderApp('/cookies');
+      window.scrollTo.mockClear();
+
+      await goTo('/#contacto', 'ok');
+
+      expect(window.scrollTo).not.toHaveBeenCalled();
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+      expect(Element.prototype.scrollIntoView.mock.contexts.at(-1)).toBe(document.getElementById('contacto'));
+    });
+
+    it('al abrir directamente /#contacto tampoco sube al principio', async () => {
+      await renderApp('/#contacto');
+
+      expect(window.scrollTo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('/explorar', () => {
+    const pending = () => new Promise(() => {});
+    const rows = [{ 'Especies Características': ['Pinus pinea'] }];
+
+    it('mientras carga ya hay un h1 y un nodo status con el texto de carga', async () => {
+      api.get.mockImplementation((url) => (url === '/get-merged-data' ? pending() : Promise.resolve([])));
+      await renderApp('/explorar');
+
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('explore.title');
+      const status = screen.getByRole('heading', { level: 1 }).nextElementSibling;
+      expect(status).toHaveAttribute('role', 'status');
+      expect(status).toHaveTextContent('feedback.loading');
+    });
+
+    it('si falla la carga, «Reintentar» vuelve a pedir /get-merged-data y /list-terms', async () => {
+      const user = userEvent.setup();
+      api.get.mockImplementation((url) =>
+        url === '/get-merged-data' ? Promise.reject(new Error('caído')) : Promise.resolve([])
+      );
+      await renderApp('/explorar');
+      expect(screen.getByText('explore.empty.errorTitle')).toBeInTheDocument();
+      const callsBefore = api.get.mock.calls.filter(([url]) => url === '/get-merged-data').length;
+
+      api.get.mockImplementation(async (url) => (url === '/get-merged-data' ? rows : []));
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: 'feedback.retry' }));
+      });
+
+      const urls = api.get.mock.calls.map(([url]) => url);
+      expect(urls.filter((url) => url === '/get-merged-data')).toHaveLength(callsBefore + 1);
+      expect(urls.filter((url) => url === '/list-terms')).toHaveLength(2);
+      expect(screen.queryByText('explore.empty.errorTitle')).toBeNull();
+      expect(screen.getByText('Pinus pinea')).toBeInTheDocument();
+    });
+
+    it('el recuento muestra el total real tras cargar y tras reintentar', async () => {
+      const user = userEvent.setup();
+      const dos = [{ 'Especies Características': ['Pinus pinea', 'Quercus ilex'] }];
+      const tres = [{ 'Especies Características': ['Pinus pinea', 'Quercus ilex', 'Juniperus communis'] }];
+      api.get.mockImplementation((url) =>
+        url === '/get-merged-data' ? Promise.reject(new Error('caído')) : Promise.resolve([])
+      );
+      await renderApp('/explorar');
+
+      api.get.mockImplementation(async (url) => (url === '/get-merged-data' ? dos : []));
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: 'feedback.retry' }));
+      });
+      expect(screen.getByText('explore.resultsInfo 2/2')).toBeInTheDocument();
+
+      // Una segunda carga (otra versión de datos) reinicia el total.
+      api.get.mockImplementation(async (url) => (url === '/get-merged-data' ? tres : []));
+      await act(async () => {
+        await navigateTo('/');
+      });
+      await act(async () => {
+        await navigateTo('/explorar');
+      });
+      expect(screen.getByText('explore.resultsInfo 3/3')).toBeInTheDocument();
+    });
+
+    it('«Quitar filtros» remonta Filter y se vuelven a ver todos los datos', async () => {
+      const user = userEvent.setup();
+      api.get.mockImplementation(async (url) => (url === '/get-merged-data' ? rows : []));
+      filterMock.filtered = [];
+      await renderApp('/explorar');
+      expect(screen.getByText('explore.empty.noResultsTitle')).toBeInTheDocument();
+      expect(filterMock.mounts).toBe(1);
+
+      filterMock.filtered = null;
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: 'explore.empty.clearFilters' }));
+      });
+
+      expect(filterMock.mounts).toBe(2);
+      // El botón se desmontó: el foco está en el h1 y no en <body>.
+      expect(document.activeElement).toBe(screen.getByRole('heading', { level: 1 }));
+      expect(screen.getByText('Pinus pinea')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'explore.empty.clearFilters' })).toBeNull();
+    });
   });
 });

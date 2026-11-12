@@ -186,6 +186,7 @@ const TermsManager = () => {
       <AnimatePresence>
         {dialog.visible && (
           <DialogAdvice
+            variant="warning"
             dialogTitle={dialog.title}
             dialogMessage={dialog.message}
             showActions

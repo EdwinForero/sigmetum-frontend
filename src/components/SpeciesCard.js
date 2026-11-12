@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DialogSpecies from './DialogSpecies';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { highlightTerms } from '../utilities/highlightTerms.js';
 
 const SpeciesCard = ({ 
@@ -11,30 +11,37 @@ const SpeciesCard = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
+  const handleKeyDown = (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    openDialog();
+  };
 
   const textParts = highlightTerms(species["Especies Características"], noItalicTerms);
 
   return (
     <>
-      <motion.div
+      <div
+        role="button"
+        aria-label={species["Especies Características"]}
+        tabIndex={0}
         onClick={openDialog}
-        initial={{ backgroundColor: '#F9FBFA' }}
-        whileHover={{ backgroundColor: '#99BBA8', transition: { duration: 0.3 } }}
-        className="cursor-pointer flex items-center gap-2 rounded-lg min-h-[72px] py-2 border border-[#99BBA8]"
+        onKeyDown={handleKeyDown}
+        className="focus-ring cursor-pointer flex items-center gap-2 rounded-lg min-h-[72px] py-2 border border-sage bg-surface hover:bg-sage transition-colors motion-reduce:transition-none"
       >
         <div className="flex flex-col justify-center">
-          <p className="text-[#0C1811] text-base font-medium leading-normal whitespace-normal overflow-hidden text-ellipsis px-2">
+          <p className="text-ink text-base font-normal leading-normal whitespace-normal overflow-hidden text-ellipsis px-2">
             {textParts.map((part, index) => (
               <span
                 key={index}
-                className={part.isItalic ? 'italic' : ''}
+                className={part.isItalic ? 'font-primary italic' : ''}
               >
                 {part.text}
               </span>
             ))}
           </p>
         </div>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {isDialogOpen && (

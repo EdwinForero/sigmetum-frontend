@@ -9,18 +9,32 @@
   "footer": {
     "homeOption": "Home",
     "exploreOption": "Explore",
+    "galleryOption": "Gallery",
     "aboutUsOption": "About us",
     "copyright": "{{currentYear}} SIGMETUM-A. All rights reserved.",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "institutionsTitle": "Institutions",
+    "contactTitle": "Contact",
+    "contactFormLink": "Write to us using the form",
+    "linksTitle": "Links"
   },
   "gallery": {
     "title": "Gallery",
-    "noDataFoundPlaceholder": "No data available."
+    "noDataFoundPlaceholder": "No data available.",
+    "loading": "Loading photos…",
+    "openPhoto": "Open photo {{name}}",
+    "errorTitle": "The photos could not be loaded",
+    "errorCause": "The connection to the server failed. Check your connection and try again.",
+    "emptyTitle": "The gallery is empty",
+    "viewer": {
+      "counter": "{{current}} of {{total}}"
+    }
   },
   "home": {
-    "title": "SIGMETUM-A: EXPLORING ANDALUSIAN VEGETATION",
+    "title": "SIGMETUM-A: exploring Andalusian vegetation",
     "subtitle": "Discover the wealth of plant landscapes in Andalusia, exploring in an interactive way.",
-    "searchButton": "Search",
+    "exploreButton": "Explore",
+    "galleryButton": "Gallery",
     "descriptionLabel": "Description",
     "descriptionContent": "SIGMETUM-A is an interactive database through which you can discover the different types of vegetation in Andalusia by means of geological, biogeographical and bioclimatic criteria, which will lead you to identify the Vegetation Series of any regional territory, as well as its climax formation (mature stage of each Series) and its characteristic species.",
     "contactTitle": "Contact us",
@@ -34,14 +48,34 @@
     "collaboratingEntitiesTitle": "Collaborating entities",
     "contactForm": {
       "nameLabel": "Name",
-      "namePlaceholder": "Name",
+      "namePlaceholder": "E.g. Jane Smith",
+      "nameHint": "Maximum 100 characters.",
       "emailLabel": "E-mail",
-      "emailPlaceholder": "E-mail",
+      "emailPlaceholder": "name@domain.com",
+      "emailHint": "Maximum 254 characters.",
       "subjectLabel": "Subject",
-      "subjectPlaceholder": "Subject",
+      "subjectPlaceholder": "E.g. Question about the vegetation series",
+      "subjectHint": "Maximum 150 characters.",
       "messageLabel": "Message",
-      "messagePlaceholder": "Message",
+      "messagePlaceholder": "Describe your question in as much detail as you can.",
+      "messageHint": "Minimum {{min}} and maximum 2000 characters.",
+      "allRequired": "All fields are required.",
+      "errorSummary_one": "There is {{count}} error in the form.",
+      "errorSummary_other": "There are {{count}} errors in the form.",
+      "submitHelpTitle": "To send, you still need to:",
+      "missingName": "Enter your name.",
+      "missingEmail": "Enter your e-mail.",
+      "invalidEmail": "Check the e-mail: it must look like name@domain.com.",
+      "missingSubject": "Enter the subject.",
+      "shortMessage": "Write a message of at least {{min}} characters.",
       "sendButton": "Send"
+    }
+  },
+  "form": {
+    "errors": {
+      "required": "This field is required.",
+      "email": "Enter a valid e-mail, for example name@domain.com.",
+      "minLength": "The message must be at least {{count}} characters long."
     }
   },
   "notFound": {
@@ -51,8 +85,15 @@
   },
   "explore": {
     "title": "Species record",
-    "noDataFoundPlaceholder": "No data available.",
-    "errorLoadPlaceholder": "Error loading data. Please reload the page.",
+    "empty": {
+      "errorTitle": "The data could not be loaded",
+      "errorCause": "The connection to the server failed. Check your connection and try again.",
+      "noDataTitle": "There are no species to show yet",
+      "noDataCause": "This version of SIGMETUM-A has no published data. Please try again later.",
+      "noResultsTitle": "No species match the filters",
+      "noResultsCause": "The filters you chose have no results in common. Remove them to see all species.",
+      "clearFilters": "Remove filters"
+    },
     "downloadExcelButton": "Download results",
     "downloadExcelButtonTooltip": "By clicking this button, you can download an Excel file containing the filtered results based on the options you have previously selected.",
     "downloadGlossaryButton": "Download glossary",
@@ -269,7 +310,7 @@
     "subtitleAboutCookies": "What Are Cookies and What Are They Used For?",
     "descriptionAboutCookies": "A cookie is a simple text file that a website stores on your device to remember information such as your preferences or browsing data. Each cookie is unique to your browser and includes data like an anonymous identifier and the website’s name. Cookies enhance your browsing experience by remembering your preferences or enabling functionalities such as a shopping cart.\n\nWhile our website can function without cookies, disabling them may limit certain features and functionalities.",
     "subtitleAboutPixel": "What Is a Pixel?",
-    "descriptionAboutPixel": "A pixel is a small piece of code that enables cookies to be downloaded onto your device. Pixels are often used by third parties to deliver personalized ads based on your browsing activity.\n\nFor more information about cookies and pixels, visit the website: <a>Information Commissioner’s Office (ICO)</a>.",
+    "descriptionAboutPixel": "A pixel is a small piece of code that enables cookies to be downloaded onto your device. Pixels are often used by third parties to deliver personalized ads based on your browsing activity.\n\nFor more information about cookies and pixels, visit the website of the Information Commissioner’s Office (ICO) in the “More information” section at the end of this page.",
     "subtitleTypeCookies": "Types of Cookies on Our Website",
     "descriptionTypeCookies": "• <strong>First-party cookies</strong>: Set directly by our website to enable basic functionality or improve your experience.\n\n• <strong>Third-party cookies</strong>: Set by external partners (e.g., advertisers or social media platforms) to collect data that is sent to these third parties.",
     "subtitleCookiesUse": "How We Use Cookies",
@@ -284,13 +325,16 @@
     "subtitleFourthCookiesCategory": "4. Targeted Advertising",
     "descriptionFourthCookiesCategory": "Used by advertising partners to show you relevant ads on other websites based on your interests.",
     "subtitleCookiesManagement": "How to manage cookies",
-    "descriptionCookiesManagement": "You can update your preferences for the cookies on our website through your profile. Please note that our websites will work without cookies, but you will lose some features and functionality if you choose to disable them.\n\nIf you wish to restrict or block web browser cookies which are set on your device then you can do this through your browser settings. Here is how to do this for the most popular browsers, but if yours is not listed you should be able to find this in your browser’s Help section or on  <a>aboutcookies.org</a>:",
-    "browserChrome": "• <a>Chrome</a>.",
-    "browserInternetExplorer": "• <a>Internet Explorer</a>.",
-    "browserSafari": "• <a>Safari</a>.",
-    "browserMicrosoftEdge": "• <a>Microsoft Edge</a>.",
-    "browserFirefox": "• <a>Firefox</a>.",
-    "browserOpera": "• <a>Opera</a>.",
+    "descriptionCookiesManagement": "You can update your preferences for the cookies on our website through your profile. Please note that our websites will work without cookies, but you will lose some features and functionality if you choose to disable them.\n\nIf you wish to restrict or block web browser cookies which are set on your device then you can do this through your browser settings. Here is how to do this for the most popular browsers, but if yours is not listed you should be able to find this in your browser’s Help section or on  aboutcookies.org:",
+    "browserChrome": "Chrome",
+    "browserInternetExplorer": "Internet Explorer",
+    "browserSafari": "Safari",
+    "browserMicrosoftEdge": "Microsoft Edge",
+    "browserFirefox": "Firefox",
+    "browserOpera": "Opera",
+    "moreInfoTitle": "More information",
+    "linkIco": "Information Commissioner’s Office (ICO)",
+    "linkAboutCookies": "aboutcookies.org",
     "banner": {
       "title": "Cookie policy",
       "description": "We use cookies to recognize your device, optimize your experience, personalize content, display relevant advertising and ensure security. We do not store personal data without your consent or when it is not strictly necessary for the services you use. For more info, please click <a>here</a>.",
@@ -312,6 +356,19 @@
       }
     }
   },
+  "a11y": {
+    "opensInNewTab": "(opens in a new tab)"
+  },
+  "institutions": {
+    "uma": "University of Malaga",
+    "ual": "University of Almeria",
+    "ugr": "University of Granada",
+    "uhu": "University of Huelva",
+    "uja": "University of Jaen",
+    "efyve": "EFYVE",
+    "geospace": "3DGeoSpace",
+    "mafo": "Malagueña Forestal"
+  },
   "iconButton": {
     "menu": "Menu",
     "close": "Close",
@@ -319,7 +376,9 @@
     "nextPage": "Next page",
     "info": "Information",
     "infoAbout": "Information: {{topic}}",
-    "scrollDown": "Scroll down"
+    "scrollDown": "Scroll down",
+    "previousPhoto": "Previous photo",
+    "nextPhoto": "Next photo"
   },
   "language": {
     "spanish": "Español",

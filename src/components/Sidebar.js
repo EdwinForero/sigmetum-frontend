@@ -7,7 +7,7 @@ import api from '../services/api';
 
 const itemBase =
   'focus-ring-inset flex h-full w-full flex-col items-center justify-center gap-0.5 px-0.5 text-center text-xs leading-tight break-words hyphens-auto text-ink hover:bg-brand md:min-h-[72px] md:rounded-lg md:text-sm';
-const itemInactive = 'font-medium border-transparent';
+const itemInactive = 'font-normal border-transparent';
 const itemActive = 'bg-brand font-bold border-ink border-t-4 md:border-t-0 md:border-l-4';
 
 const NavItem = ({ icon, label, children }) => (

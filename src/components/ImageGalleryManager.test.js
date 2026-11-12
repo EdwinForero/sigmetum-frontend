@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ImageGalleryManager from './ImageGalleryManager';
 import ToastProvider from './ToastProvider';
@@ -267,6 +267,16 @@ describe('ImageGalleryManager', () => {
         await waitFor(() => expect(container.querySelectorAll('li img')).toHaveLength(2));
         expect(container.querySelector('li img')).toHaveAttribute('src', expect.stringContaining('firma=2'));
       });
+    });
+
+    it('la confirmación de borrado sale con el icono de advertencia, no el de información', async () => {
+      const { user } = await renderManager();
+
+      await user.click((await screen.findAllByRole('button', { name: `${NS}.deleteImage` }))[0]);
+
+      const dialogo = await screen.findByRole('dialog');
+      expect(within(dialogo).getByText('warning')).toHaveClass('text-warning');
+      expect(within(dialogo).queryByText('info')).toBeNull();
     });
 
     it('borrar pide confirmación: Cancelar no borra y Confirmar borra una sola vez con foco al título', async () => {

@@ -1,12 +1,16 @@
 import React from 'react';
+import { NOTICE_BASE, noticeVariant } from '../utilities/noticeStyles';
 
-const InlineError = ({ id, children }) => (
+const { box, icon, iconClass } = noticeVariant('error');
+
+// announce={false} pinta el aviso sin role: lo leerá el foco (aria-describedby) o un resumen aparte, sin anuncio doble.
+const InlineError = ({ id, announce = true, children }) => (
   <p
     id={id}
-    role="alert"
-    className="my-2 flex items-start gap-2 rounded-lg border border-danger p-3 font-bold text-danger"
+    role={announce ? 'alert' : undefined}
+    className={`my-2 font-bold ${NOTICE_BASE} ${box}`}
   >
-    <span className="material-symbols-outlined" aria-hidden="true">error</span>
+    <span className={`material-symbols-outlined ${iconClass}`} aria-hidden="true">{icon}</span>
     <span>{children}</span>
   </p>
 );
