@@ -3,6 +3,16 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CookieBanner from './CookieBanner';
 
+// El simulacro global de Trans no pinta los componentes: este lo hace para poder ver el enlace «aquí» del banner.
+vi.mock('react-i18next', async () => {
+  const { cloneElement } = await import('react');
+  return {
+    useTranslation: () => ({ t: (key) => key, i18n: { language: 'es', changeLanguage: vi.fn() } }),
+    Trans: ({ i18nKey, components }) => (components?.a ? cloneElement(components.a, {}, i18nKey) : i18nKey),
+    initReactI18next: { type: '3rdParty', init: () => {} },
+  };
+});
+
 let writes;
 let cookieJar;
 
@@ -146,6 +156,16 @@ describe('CookieBanner', () => {
     expect(botones).not.toHaveClass('flex-col');
     expect(banner.querySelector('p')).toHaveClass('text-xs', 'sm:text-sm');
     expect(screen.getByRole('button', { name: 'cookies.banner.acceptAllButton' })).toHaveClass('!px-3', '!text-sm');
+  });
+
+  it('el enlace a /cookies del banner mide 24×24 como mínimo (WCAG 2.5.8), con foco visible y subrayado', () => {
+    setProtocol('https:');
+    render(<CookieBanner aboveBottomBar />);
+
+    const enlace = screen.getByRole('link', { name: 'cookies.banner.description' });
+    expect(enlace).toHaveAttribute('href', '/cookies');
+    expect(enlace).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(enlace).toHaveClass('focus-ring', 'inline-flex', 'min-h-6', 'min-w-6', 'items-center', 'justify-center', 'rounded', 'underline');
   });
 
   it('el banner es una barra compacta sobre surface con borde moss, sin gris ni hexadecimales', () => {

@@ -6,7 +6,7 @@ export const API = 'http://api.e2e.test/api/v1';
 export const ASSETS = 'https://assets.e2e.test';
 
 // Rutas públicas y anchos de la suite (criterio 35).
-export const ROUTES = ['/', '/explorar', '/galeria', '/sobre-nosotros', '/cookies'];
+export const ROUTES = ['/', '/explore', '/gallery', '/about-us', '/cookies'];
 export const WIDTHS = [390, 768, 1024, 1440];
 
 const CORS = {

@@ -61,7 +61,7 @@ describe('Navbar', () => {
     const desktop = (name) => screen.getAllByRole('link', { name })[0];
 
     it('el activo lleva barra inferior brand-dark de 4 px y negrita; no es un bloque bg-brand', () => {
-      renderNavbar('/explorar');
+      renderNavbar('/explore');
 
       const activo = desktop('navbar.exploreOption');
       expect(activo).toHaveAttribute('aria-current', 'page');
@@ -70,7 +70,7 @@ describe('Navbar', () => {
     });
 
     it('el inactivo es del mismo alto (misma borde), sin negrita, con hover moss y fondo sage-soft', () => {
-      renderNavbar('/explorar');
+      renderNavbar('/explore');
 
       const inactivo = desktop('navbar.homeOption');
       expect(inactivo).not.toHaveAttribute('aria-current');
@@ -83,7 +83,7 @@ describe('Navbar', () => {
 
     it('el activo del panel móvil va en negrita con subrayado grueso brand-dark y fondo sage-soft, sin franja lateral', async () => {
       const user = userEvent.setup();
-      renderNavbar('/galeria');
+      renderNavbar('/gallery');
       await user.click(screen.getByRole('button', { name: 'iconButton.menu' }));
 
       const panel = document.getElementById('navbar-menu-panel');
@@ -99,8 +99,8 @@ describe('Navbar', () => {
     });
   });
 
-  it('en /explorar el enlace activo tiene aria-current="page"', () => {
-    renderNavbar('/explorar');
+  it('en /explore el enlace activo tiene aria-current="page"', () => {
+    renderNavbar('/explore');
 
     const current = screen
       .getAllByRole('link', { name: 'navbar.exploreOption' })

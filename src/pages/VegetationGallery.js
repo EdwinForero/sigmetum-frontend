@@ -5,6 +5,7 @@ import ButtonPrincipal from '../components/ButtonPrincipal';
 import EmptyState from '../components/EmptyState';
 import GalleryViewer from '../components/GalleryViewer';
 import LoadSpinner from '../components/LoadSpinner';
+import Reveal from '../components/Reveal';
 import photoName from '../utilities/photoName';
 import isSafeImageUrl from '../utilities/isSafeImageUrl';
 import { galleryColumns, splitInColumns } from '../utilities/galleryLayout';
@@ -28,6 +29,10 @@ const VegetationGallery = () => {
   const [isError, setIsError] = useState(false);
   const [columns, setColumns] = useState(1);
   const [viewerIndex, setViewerIndex] = useState(null);
+  // Las celdas solo se animan en la primera carga y la primera medición: al cambiar de columnas se remontan y
+  // al reintentar llegan de golpe, y ninguna de las dos veces puede quedarse oculta.
+  const [revealCells, setRevealCells] = useState(true);
+  const measuredRef = useRef(false);
   const gridRef = useRef(null);
   const requestRef = useRef(0);
   const columnsRef = useRef(columns);
@@ -63,7 +68,10 @@ const VegetationGallery = () => {
   // Las columnas salen del ancho de la rejilla (a sangre, sin el tope de .page-container), no del de la ventana.
   const measureColumns = useCallback(() => {
     const next = galleryColumns(gridRef.current?.clientWidth ?? 0);
+    const firstMeasure = !measuredRef.current;
+    measuredRef.current = true;
     if (next === columnsRef.current) return;
+    if (!firstMeasure) setRevealCells(false);
     // Al cambiar de columna las fotos se remontan: se guarda cuál tenía el foco para devolvérselo.
     focusedPhotoRef.current = document.activeElement?.dataset?.photo ?? null;
     columnsRef.current = next;
@@ -75,7 +83,15 @@ const VegetationGallery = () => {
     measureColumns();
   }, [measureColumns]);
 
+  // La rejilla puede cambiar de ancho sin que cambie la ventana (barra lateral, zoom, scrollbar): se observa ella.
+  // Sin ResizeObserver se mantiene el resize de la ventana. Ambas vías pasan por measureColumns, que apaga revealCells.
   useEffect(() => {
+    const grid = gridRef.current;
+    if (grid && typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => measureColumns());
+      observer.observe(grid);
+      return () => observer.disconnect();
+    }
     window.addEventListener('resize', measureColumns);
     return () => window.removeEventListener('resize', measureColumns);
   }, [measureColumns]);
@@ -104,6 +120,11 @@ const VegetationGallery = () => {
 
   const closeViewer = useCallback(() => setViewerIndex(null), []);
 
+  const retry = () => {
+    setRevealCells(false);
+    loadImages();
+  };
+
   // Estados de error y vacío: van dentro de .page-container, como el título.
   const renderNotice = () => {
     if (isLoading) return null;
@@ -112,7 +133,7 @@ const VegetationGallery = () => {
         <EmptyState
           role="alert"
           title={t('gallery.errorTitle')}
-          action={<ButtonPrincipal onClick={loadImages} text={t('feedback.retry')} />}
+          action={<ButtonPrincipal onClick={retry} text={t('feedback.retry')} />}
         >
           {t('gallery.errorCause')}
         </EmptyState>
@@ -157,7 +178,7 @@ const VegetationGallery = () => {
               const key = keys[index];
               const safe = isSafeImageUrl(image.url);
               return (
-                <li key={key}>
+                <Reveal as="li" key={key} index={c} disabled={!revealCells}>
                   <figure>
                     <button
                       type="button"
@@ -190,7 +211,7 @@ const VegetationGallery = () => {
                     </button>
                     <figcaption className="mt-stack-sm line-clamp-2 text-sm text-ink">{name}</figcaption>
                   </figure>
-                </li>
+                </Reveal>
               );
             })}
           </ul>

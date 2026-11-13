@@ -37,7 +37,7 @@ for (const viewport of VIEWPORTS) {
 
     test('el esqueleto mide más de 0 px antes de la primera foto y el orden del DOM es el de los datos', async ({ page, mock }) => {
       mock.listImagesDelay = 3000;
-      await page.goto('/galeria');
+      await page.goto('/gallery');
       const skeleton = page.locator('main [aria-hidden="true"].aspect-\\[4\\/3\\]');
       await expect(skeleton).toHaveCount(6);
       for (const box of await skeleton.all()) {
@@ -56,7 +56,7 @@ for (const viewport of VIEWPORTS) {
     });
 
     test('columna y orden estables tras cada carga, y solo se mueven las celdas de abajo de la misma columna', async ({ page }) => {
-      await page.goto('/galeria');
+      await page.goto('/gallery');
       await expect(page.locator('[data-photo]')).toHaveCount(6);
       // Cada carga de imagen deja una instantánea con el nombre de la foto que acaba de cargar.
       await page.evaluate(() => {
@@ -108,7 +108,7 @@ for (const viewport of VIEWPORTS) {
 
     test('CLS de la galería es como mucho 0,25', async ({ page }) => {
       await trackLayoutShift(page);
-      await page.goto('/galeria');
+      await page.goto('/gallery');
       await expect(page.locator('[data-photo]')).toHaveCount(6);
       await expect
         .poll(async () => {
@@ -127,7 +127,7 @@ test.describe('visor (criterio 30)', () => {
   test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
 
   const openViewer = async (page, index = 0) => {
-    await page.goto('/galeria');
+    await page.goto('/gallery');
     const photo = page.locator('[data-photo]').nth(index);
     await expect(photo).toBeVisible();
     await photo.click();
@@ -251,7 +251,7 @@ for (const { width, height, gutter, h1Left } of GRID_VIEWPORTS) {
 
     test('con 24 fotos: pistas y huecos suman clientWidth menos dos márgenes, celdas de 200 px como máximo y título en su sitio', async ({ page, mock }, testInfo) => {
       mock.photos = MANY_PHOTOS;
-      await page.goto('/galeria');
+      await page.goto('/gallery');
       await waitForPhotos(page, 24);
 
       const m = await measureGrid(page);
@@ -280,7 +280,7 @@ test.describe('rejilla con pocas fotos', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
   test('con 6 fotos a 1440 px ninguna celda pasa de 200 px', async ({ page }) => {
-    await page.goto('/galeria');
+    await page.goto('/gallery');
     await expect(page.locator('[data-photo]')).toHaveCount(6);
 
     const m = await measureGrid(page);
@@ -289,7 +289,7 @@ test.describe('rejilla con pocas fotos', () => {
 
   test('desequilibrio de alturas de las columnas con 24 fotos a 1440 px (se adjunta)', async ({ page, mock }, testInfo) => {
     mock.photos = MANY_PHOTOS;
-    await page.goto('/galeria');
+    await page.goto('/gallery');
     await waitForPhotos(page, 24);
 
     const { listHeights } = await measureGrid(page);
@@ -309,7 +309,7 @@ test.describe('velo con el nombre de la foto', () => {
   const veilOpacity = (page, index) => veilOf(page, index).evaluate((node) => Number(getComputedStyle(node).opacity));
 
   test('opacidad 0 en reposo, mayor que 0 con el ratón encima y con el foco de teclado (:focus-visible)', async ({ page }) => {
-    await page.goto('/galeria');
+    await page.goto('/gallery');
     const first = page.locator('[data-photo]').first();
     await expect(first).toBeVisible();
 
@@ -331,7 +331,7 @@ test.describe('velo con el nombre de la foto', () => {
   });
 
   test('sin movimiento reducido la transición dura 0,15 s', async ({ page }) => {
-    await page.goto('/galeria');
+    await page.goto('/gallery');
     await expect(veilOf(page, 0)).toHaveCount(1);
     expect(await veilOf(page, 0).evaluate((node) => getComputedStyle(node).transitionDuration)).toBe('0.15s');
   });
@@ -340,7 +340,7 @@ test.describe('velo con el nombre de la foto', () => {
     test.use({ reducedMotion: 'reduce' });
 
     test('transition-duration es 0 s', async ({ page }) => {
-      await page.goto('/galeria');
+      await page.goto('/gallery');
       await expect(veilOf(page, 0)).toHaveCount(1);
       expect(await veilOf(page, 0).evaluate((node) => getComputedStyle(node).transitionDuration)).toBe('0s');
     });

@@ -50,9 +50,9 @@ Solo aparecen los campos que el frontend **lee**. Lo demás de la respuesta se i
 
 | Endpoint | El frontend envía | El frontend lee | Quién lo llama |
 |---|---|---|---|
-| `GET /get-merged-data` | — | `data`: array de registros | `App`, al entrar en `/explorar` |
+| `GET /get-merged-data` | — | `data`: array de registros | `App`, al entrar en `/explore` |
 | `GET /list-files` | — | `data`: `{ [provincia]: [{ key, name }] }` | `FileDropdown` |
-| `GET /get-data/<key>` | — | `data`: array de registros | `FileDropdown`, al elegir una versión. **Ver discrepancia D1** |
+| `GET /get-data/<key>` | token solo si la clave es `.xlsx` (`api.getAuth`) | `data`: array de registros | `FileDropdown`, al elegir una versión. 200 con las filas convertidas, 401 sin token o con token inválido, 422 si el `.xlsx` está corrupto (`The stored file is not a readable Excel workbook`), **503 `Authentication service unavailable` si el backend no alcanza el JWKS de Cognito** (se reintenta como en el resto de métodos `*Auth`); la respuesta `.xlsx` autenticada lleva `Cache-Control: no-store` (12/11/2026); el activo `data/active/<provincia>.json` sigue público (**D1 resuelta en el código**) |
 | `POST /upload` | `multipart`, campo `file` (el selector solo acepta `.xlsx`) | Con `400`: `data.emptyFields[].rowIndex` y `data.draftKey` (opaco: solo se reenvía). Con `200`: solo el estado, pero `api.js` exige `success: true` (el backend lo devuelve en `routes/data.js`). **No lee `processedData`** | `FileUpload` (`api.postFormAuth`) |
 | `POST /upload/confirm` | `{ confirmed, draftKey }` | Solo el estado (con `success: true`, como arriba). Con `404` (confirmar o cancelar): aviso "el borrador ya no existe" | `FileUpload` (`api.postAuth`) |
 | `POST /update-file` | `{ fileName }` (la `key` de la versión) | Solo el estado | `DataManagement` |
@@ -120,7 +120,7 @@ Son casos en los que lo que hace el frontend y lo que hace el backend **no encaj
 
 | Id | Qué pasa | Dónde | Qué hay que hacer |
 |---|---|---|---|
-| **D1** | **Abrir una versión en "Administrar datos" falla (por confirmar).** `/list-files` devuelve claves de Excel (`data/Malaga/2026-01-15_v1.xlsx`), el frontend las pide a `GET /get-data/<key>` y el backend hace `JSON.parse` del fichero, que es un `.xlsx` binario. Resultado esperado: error 500 y el aviso de "no se pudo cargar el archivo" | `FileDropdown.handleVersionSelect`, `getFileFromS3` | **Backend:** un endpoint que convierta un Excel de versión en registros (con `convertExcelToJson`), limitado a claves `data/<provincia>/AAAA-MM-DD_vN.xlsx`. **Frontend:** llamar a ese endpoint. **Importante:** el backend propone cerrar `/get-data` (su doc 07, sección seguridad). No lo cierres antes de tener el endpoint nuevo |
+| **D1** | **Resuelta en el código (12/11/2026, por confirmar contra el backend desplegado).** `GET /get-data/<key>` con una clave `.xlsx` convierte la primera hoja con `convertExcelToJson` y devuelve las mismas filas que el JSON activo: **200 con token (con `Cache-Control: no-store`), 401 sin token o con token inválido, 422 si el archivo está corrupto y 503 si el backend no alcanza el JWKS de Cognito**; el activo `.json` sigue público (`tokenAuth` solo en la rama `.xlsx`). Antes: 500 (`JSON.parse` de un `.xlsx`). Nadie lo usaba con éxito | `FileDropdown.handleVersionSelect` con `api.getAuth` (`api.js` sin cambios) | **Orden de despliegue: backend primero.** Un frontend viejo contra el backend nuevo recibe 401 en vez de 500 (mismo aviso de error); un frontend nuevo contra un backend viejo sigue dando 500. El backend propone cerrar `/get-data` (su doc 07, sección seguridad): ya está cerrado para las versiones. Por confirmar tras desplegar: Jaén V1 y V2 y Málaga con la clave codificada |
 | **D9** | Las URLs prefirmadas de la galería caducan a la hora. El frontend las pide al entrar en la página, así que una pestaña abierta más de una hora empieza a mostrar imágenes rotas | `VegetationGallery` | Informativo. Si molesta, subir `expiresIn` o refrescar desde el frontend |
 
 **Hallazgos de la prueba en preproducción atendidos solo en el frontend (30/10/2026):** F13 (favicon), F14 (título por página, `lang` de `<html>` y clave de traducción de la galería vacía) y F15 (avisos de React Router) figuran en `sigmetum-backend/docs/integracion/para-frontend.md` y se corrigen en el frontend, **sin ningún cambio de contrato con la API**: no cambia ninguna llamada, cabecera ni respuesta. F16 es de infraestructura; ver [para-infra.md](para-infra.md#3-variables-de-entorno-del-frontend). Detalle en el historial de [09](../09-estado-actual-y-deuda-tecnica.md#historial-de-iteraciones).
@@ -140,12 +140,12 @@ Son casos en los que lo que hace el frontend y lo que hace el backend **no encaj
 | El origen permitido por CORS | Nada en el código, pero hay que asegurar que `ALLOWED_ORIGIN` coincide con el dominio del frontend de cada entorno |
 | Las rutas de destinatarios (`/list-recipients`, `/add-recipient`, `/delete-recipient`), sus límites (1 a 5), el limitador o la forma `{ email }` | `components/ContactRecipientsManager.js` y `utilities/validateRecipientEmail.js` (copia de la regla de correo del backend, `validateContactMessage.js`) |
 | Añades un endpoint protegido | Un método nuevo en `services/api.js` si necesita un verbo distinto |
-| Cierras o restringes `/get-data` | `FileDropdown` (ver D1) |
+| Cierras o restringes `/get-data` | `FileDropdown` (la restricción ya está hecha para `.xlsx`, con token; D1 resuelta) |
 | Límites de tamaño o tipo de fichero en `/upload` o `/upload-image` | Mensajes de error y `accept` de los formularios |
 
 ## 7b. Destinatarios del formulario de contacto (BL1, 12/11/2026)
 
-**El contrato cambia** (rutas nuevas protegidas y nuevo destino de `POST /send-email`). El backend va en otra PR y **se despliega primero**: un frontend nuevo contra un backend viejo da `404` en `GET /list-recipients` y el panel muestra el error de carga con «Reintentar» (las otras dos secciones de `/administrar-contenido` siguen funcionando; no se pierde nada).
+**El contrato cambia** (rutas nuevas protegidas y nuevo destino de `POST /send-email`). El backend va en otra PR y **se despliega primero**: un frontend nuevo contra un backend viejo da `404` en `GET /list-recipients` y el panel muestra el error de carga con «Reintentar» (las otras dos páginas de gestión, `/manage-terms` y `/manage-gallery`, siguen funcionando; no se pierde nada; `/administrar-contenido` redirige ahora a `/manage-terms` y el panel de destinatarios vive en `/manage-recipients`).
 
 | Ruta | Cuerpo | Respuesta | Notas |
 |---|---|---|---|
@@ -163,7 +163,7 @@ Son casos en los que lo que hace el frontend y lo que hace el backend **no encaj
 
 | Frontend | API | Comentario |
 |---|---|---|
-| `feature/sigmetum_front_v2` | `/api/v1`, backend `feature/sigmetum_v2` (`2864327`) | Tiene las discrepancias D1 y D9 de arriba (D2 a D8 resueltas el 30/10/2026) |
+| `feature/sigmetum_front_v2` | `/api/v1`, backend `feature/sigmetum_v2` (`2864327`) | Tiene la discrepancia D9 de arriba (D1 resuelta el 12/11/2026, por confirmar con el backend desplegado) (D2 a D8 resueltas el 30/10/2026) |
 | Anterior a la migración a `/api/v1` | Sin prefijo, respuestas sin envoltorio | **Incompatible** con la API actual |
 
 Cuando se introduzcan cambios incompatibles en la API, conviene subir el prefijo (`/api/v2`) y mantener el anterior hasta que el frontend se actualice, en lugar de cambiar `/api/v1` en caliente.

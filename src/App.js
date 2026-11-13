@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useId } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -8,7 +8,9 @@ import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Cookies from './pages/Cookies';
 import DataManagement from './pages/DataManagement';
-import ContentManagement from './pages/ContentManagement';
+import TermsManagement from './pages/TermsManagement';
+import GalleryManagement from './pages/GalleryManagement';
+import RecipientsManagement from './pages/RecipientsManagement';
 import FilesUpload from './pages/FilesUpload';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -21,6 +23,7 @@ import VegetationGallery from './pages/VegetationGallery';
 import { useTranslation } from 'react-i18next';
 import api from './services/api';
 import useDocumentTitle from './hooks/useDocumentTitle';
+import { LEGACY_REDIRECTS, PRIVATE_PATHS } from './config/routes';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -38,8 +41,8 @@ function App() {
   const { t } = useTranslation();
   // React Router acepta la barra final: se quita para comparar rutas.
   const path = location.pathname.replace(/\/+$/, '') || '/';
-  const isPrivateRoute = ['/cargar-archivos', '/administrar-datos', '/administrar-contenido'].includes(path);
-  const showSideMenu = path === '/explorar' || (isPrivateRoute && privateSessionOk);
+  const isPrivateRoute = PRIVATE_PATHS.includes(path);
+  const showSideMenu = path === '/explore' || (isPrivateRoute && privateSessionOk);
 
   // Nada privado (barra incluida) hasta que ProtectedRoute confirma la sesión; 'checking' no cambia el estado.
   const handlePrivateStatus = useCallback((status) => {
@@ -70,7 +73,7 @@ function App() {
     }
   }, []);
 
-  // Misma carga para la entrada en /explorar y para «Reintentar»: sin endpoints nuevos.
+  // Misma carga para la entrada en /explore y para «Reintentar»: sin endpoints nuevos.
   const loadExplore = useCallback(() => {
     setIsLoading(true);
     setExploreError(false);
@@ -86,9 +89,9 @@ function App() {
   }, [path, location.hash]);
 
   useEffect(() => {
-    if (path === '/explorar') {
+    if (path === '/explore') {
       loadExplore();
-    } else if (path === '/administrar-datos') {
+    } else if (path === '/manage-data') {
       setFilteredData([]);
     } else {
       setIsLoading(true);
@@ -118,9 +121,11 @@ function App() {
 
   const menuOptions = [
     { id: 'filter', name: t('privateNav.filters'), component: <Filter key={filterResetKey} data={mergedData} onSpeciesSelect={handleOnSpeciesSelect} onFilterChange={handleFilterChange} titleId={filterTitleId} />, titleId: filterTitleId, icon: 'filter_alt' },
-    { id: 'dataManagement', name: t('privateNav.data'), icon: 'database', link: '/administrar-datos' },
-    { id: 'contentManagement', name: t('privateNav.content'), icon: 'settings', link: '/administrar-contenido' },
-    { id: 'uploadFiles', name: t('privateNav.upload'), icon: 'upload', link: '/cargar-archivos' },
+    { id: 'dataManagement', name: t('privateNav.data'), icon: 'database', link: '/manage-data' },
+    { id: 'manageTerms', name: t('privateNav.terms'), icon: 'text_fields', link: '/manage-terms' },
+    { id: 'manageGallery', name: t('privateNav.gallery'), icon: 'photo_library', link: '/manage-gallery' },
+    { id: 'manageRecipients', name: t('privateNav.recipients'), icon: 'contact_mail', link: '/manage-recipients' },
+    { id: 'uploadFiles', name: t('privateNav.upload'), icon: 'upload', link: '/upload-files' },
   ];
 
   return (
@@ -144,7 +149,7 @@ function App() {
               <Routes>
                 <Route exact path="/" element={<Home />} />
                 <Route
-                  path="/explorar"
+                  path="/explore"
                   element={
                     <Explore
                       data={mergedData}
@@ -158,13 +163,19 @@ function App() {
                     />
                   }
                 />
-                <Route path="/sobre-nosotros" element={<About />} />
+                <Route path="/about-us" element={<About />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/galeria" element={<VegetationGallery />} />
+                <Route path="/gallery" element={<VegetationGallery />} />
                 <Route path="/cookies" element={<Cookies />} />
-                <Route path="/cargar-archivos" element={<ProtectedRoute key="cargar-archivos" onStatusChange={handlePrivateStatus} element={<FilesUpload />} />} />
-                <Route path="/administrar-contenido" element={<ProtectedRoute key="administrar-contenido" onStatusChange={handlePrivateStatus} element={<ContentManagement />} />} />
-                <Route path="/administrar-datos" element={<ProtectedRoute key="administrar-datos" onStatusChange={handlePrivateStatus} element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
+                <Route path="/upload-files" element={<ProtectedRoute key="upload-files" onStatusChange={handlePrivateStatus} element={<FilesUpload />} />} />
+                <Route path="/manage-data" element={<ProtectedRoute key="manage-data" onStatusChange={handlePrivateStatus} element={<DataManagement onFileDropdownSelect={handleFileDropdownSelect} filteredSpecies={filteredData} />} />} />
+                <Route path="/manage-terms" element={<ProtectedRoute key="manage-terms" onStatusChange={handlePrivateStatus} element={<TermsManagement />} />} />
+                <Route path="/manage-gallery" element={<ProtectedRoute key="manage-gallery" onStatusChange={handlePrivateStatus} element={<GalleryManagement />} />} />
+                <Route path="/manage-recipients" element={<ProtectedRoute key="manage-recipients" onStatusChange={handlePrivateStatus} element={<RecipientsManagement />} />} />
+                {/* URL antiguas: solo de cliente, `to` sale siempre de la tabla constante y no se conserva ni «?» ni «#» (S4). */}
+                {Object.entries(LEGACY_REDIRECTS).map(([from, to]) => (
+                  <Route key={from} path={from} element={<Navigate replace to={to} />} />
+                ))}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

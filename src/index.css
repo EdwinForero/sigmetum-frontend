@@ -44,6 +44,33 @@
     outline: 2px solid #0C1811;
     outline-offset: -2px;
   }
+  /* Aparición por scroll (Reveal). Solo el estado oculto declara transform: el final no deja ninguno. */
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(theme('spacing.stack-md'));
+  }
+  .reveal-in {
+    transition-property: opacity, transform;
+    transition-duration: theme('transitionDuration.reveal');
+    transition-timing-function: theme('transitionTimingFunction.reveal');
+  }
+}
+
+/* Fuera de @layer para que nunca se purguen y ganen a .reveal-hidden: contenido visible y sin movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-hidden {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-in {
+    transition: none;
+  }
+}
+@media print {
+  .reveal-hidden {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Iconos: ocultos hasta que carga la fuente (watchIconFont); si falla, una caja y no el texto de la ligadura. */

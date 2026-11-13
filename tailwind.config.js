@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+import { REVEAL } from './src/config/reveal.js';
 
 export default {
   content: [
@@ -34,6 +35,19 @@ export default {
         'stack-xl': '2rem',
         section: '3rem',
         'section-lg': '4rem',
+      },
+      transitionDuration: {
+        reveal: `${REVEAL.durationMs}ms`,
+      },
+      transitionTimingFunction: {
+        reveal: REVEAL.easing,
+      },
+      // Fundido de entrada de las páginas privadas (A12): sin fill-mode, el estado final es el natural.
+      keyframes: {
+        'page-fade': { from: { opacity: '0' }, to: { opacity: '1' } },
+      },
+      animation: {
+        'page-fade': `page-fade ${REVEAL.durationMs}ms ${REVEAL.easing}`,
       },
       fontFamily: {
         primary: ['Amaranth', 'sans-serif'],

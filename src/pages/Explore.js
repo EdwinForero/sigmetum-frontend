@@ -4,6 +4,7 @@ import ButtonPrincipal from '../components/ButtonPrincipal';
 import ButtonAlternative from '../components/ButtonAlternative';
 import EmptyState from '../components/EmptyState';
 import LoadSpinner from '../components/LoadSpinner';
+import Reveal from '../components/Reveal';
 import SpeciesCard from '../components/SpeciesCard';
 import { downloadXLSX } from '../utilities/CSVfunctions';
 import { useTranslation } from 'react-i18next';
@@ -85,6 +86,15 @@ const Explore = ({
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = uniqueSpecies.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Las tarjetas solo se animan en la primera lista con datos. Es estado derivado en el render (ni ref ni efecto):
+  // una ref se apagaría con cualquier render posterior y un efecto dejaría un fotograma con las tarjetas ocultas.
+  // Cubre paginar, filtrar, selectedSpecies e itemsPerPage: todos cambian currentItems.
+  const listKey = JSON.stringify(currentItems);
+  const [firstListKey, setFirstListKey] = useState(null);
+  const [revealCards, setRevealCards] = useState(true);
+  if (firstListKey === null && currentItems.length > 0) setFirstListKey(listKey);
+  else if (revealCards && firstListKey !== null && listKey !== firstListKey) setRevealCards(false);
 
   const totalPages = Math.ceil(uniqueSpecies.length / itemsPerPage);
 
@@ -171,38 +181,44 @@ const Explore = ({
     }
     return (
       <>
-        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2">
-          <span className="text-moss text-lg">
-            {t("explore.resultsInfo", { currentResults, totalResults })}
-          </span>
+        <div className="flex flex-col gap-stack">
+          <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2">
+            <span className="text-moss text-lg">
+              {t("explore.resultsInfo", { currentResults, totalResults })}
+            </span>
 
-          <div className="flex-grow text-center sm:w-auto">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+            <div className="flex-grow text-center sm:w-auto">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
           </div>
 
-          <ButtonPrincipal
-            onClick={handleDownload}
-            text={t('explore.downloadGlossaryButton')}
-          />
+          <div className="flex flex-wrap items-center justify-center gap-stack">
+            <div className="flex items-center gap-stack-sm">
+              <ButtonPrincipal
+                onClick={handleDownload}
+                text={t('explore.downloadGlossaryButton')}
+              />
+              <InfoButton
+                tooltipText={t('explore.downloadGlossaryButtonTooltip')}
+              />
+            </div>
 
-          <InfoButton
-            tooltipText={t('explore.downloadGlossaryButtonTooltip')}
-          />
-
-          <ButtonPrincipal
-            onClick={() => {
-              downloadXLSX(filteredSpecies);
-            }}
-            text={t('explore.downloadExcelButton')}
-          />
-
-          <InfoButton
-            tooltipText={t('explore.downloadExcelButtonTooltip')}
-          />
+            <div className="flex items-center gap-stack-sm">
+              <ButtonPrincipal
+                onClick={() => {
+                  downloadXLSX(filteredSpecies);
+                }}
+                text={t('explore.downloadExcelButton')}
+              />
+              <InfoButton
+                tooltipText={t('explore.downloadExcelButtonTooltip')}
+              />
+            </div>
+          </div>
         </div>
 
         <AnimatePresence initial={false} mode="wait" custom={pageDirection}>
@@ -214,18 +230,19 @@ const Explore = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.3 }}
-            className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 py-4"
+            className="grid gap-stack grid-cols-1 md:grid-cols-2 lg:grid-cols-4 py-stack"
           >
-            {currentItems.map((species) => (
-              <SpeciesCard
-                key={species}
-                data={data}
-                noItalicTerms={noItalicTerms}
-                species={{
-                  ...filteredSpecies,
-                  "Especies Características": species,
-                }}
-              />
+            {currentItems.map((species, i) => (
+              <Reveal key={species} className="grid" index={i % 4} disabled={!revealCards}>
+                <SpeciesCard
+                  data={data}
+                  noItalicTerms={noItalicTerms}
+                  species={{
+                    ...filteredSpecies,
+                    "Especies Características": species,
+                  }}
+                />
+              </Reveal>
             ))}
           </motion.div>
         </AnimatePresence>

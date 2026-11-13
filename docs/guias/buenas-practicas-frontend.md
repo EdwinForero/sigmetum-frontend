@@ -27,7 +27,7 @@ La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta l
 | Una página por ruta en `src/pages`; componentes reutilizables en `src/components`; un componente por archivo con exportación por defecto | Es la estructura actual y `docs:check` espera una sección por página y componente | `npm run docs:check` |
 | Lógica sin interfaz (formato, ordenación, conversión) en `src/utilities` como **funciones puras** | Se prueban sin montar nada. Ejemplo: `highlightTerms` | Revisión y tests |
 | Componentes en `PascalCase`; hooks como `useXxx`; utilidades en `camelCase` (`highlightTerms.js`). No imitar `CSVfunctions.js`, que rompe la convención (`UseAtBottom.js` se retiró el 12/11/2026) | Coherencia y búsqueda | Revisión |
-| Código y commits en inglés; rutas y textos de usuario en español | Convención del proyecto | Revisión |
+| Código, commits y rutas de la SPA en inglés (kebab-case, definidas en `src/config/routes.js`); textos de usuario en español con `t()` | Convención del proyecto | Revisión |
 | El test va junto al archivo: `Componente.test.js` | Se encuentra y se mantiene | `docs:check` exige que figure en la tabla de cobertura |
 
 ## 3. Componentes y estado
@@ -92,6 +92,7 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 - Anima `transform` y `opacity`; evita animar dimensiones.
 - Una animación nueva **respeta `prefers-reduced-motion`** (`useReducedMotion` o `<MotionConfig reducedMotion="user">`). `App` ya envuelve todo en `MotionConfig reducedMotion="user"` (B19 resuelto); en CSS, `motion-reduce:transition-none`. No uses `background-attachment: fixed` ni rebotes infinitos.
 - Nada de animaciones infinitas salvo indicadores de carga.
+- **Aparición por scroll (12/11/2026):** una sola definición, `Reveal` con los valores de `src/config/reveal.js` (450 ms, 12 px, escalonado de 60 ms y seis como máximo, una sola vez, `threshold: 0`); el contenido es visible por defecto y no se anima la primera pantalla, un destino de ancla o foco, ni se anida. El estado final no deja `transform` ni `will-change`. No se repite al paginar o filtrar (`disabled`). Las páginas privadas solo llevan el fundido `animate-page-fade motion-reduce:animate-none` (opacidad, sin `fill-mode`: con `forwards` o `both` atrapa a los diálogos `fixed`).
 
 ## 10. Rendimiento
 

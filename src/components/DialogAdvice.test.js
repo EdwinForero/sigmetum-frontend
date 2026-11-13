@@ -174,6 +174,13 @@ describe('DialogAdvice', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('el título es un h2 (A7: la página ya tiene su h1)', () => {
+    renderSimple();
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Aviso' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 3 })).toBeNull();
+  });
+
   it('el título usa brand-deep (contraste sobre el fondo claro)', () => {
     renderSimple();
 

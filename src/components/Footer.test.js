@@ -61,9 +61,9 @@ describe('Footer', () => {
     const lista = container.querySelector('ul');
     expect([...lista.querySelectorAll('a')].map((a) => [a.getAttribute('href'), a.textContent])).toEqual([
       ['/', 'footer.homeOption'],
-      ['/explorar', 'footer.exploreOption'],
-      ['/galeria', 'footer.galleryOption'],
-      ['/sobre-nosotros', 'footer.aboutUsOption'],
+      ['/explore', 'footer.exploreOption'],
+      ['/gallery', 'footer.galleryOption'],
+      ['/about-us', 'footer.aboutUsOption'],
       ['/cookies', 'footer.cookies'],
     ]);
     expect(screen.getByText(/footer\.copyright/)).toBeInTheDocument();

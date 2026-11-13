@@ -14,7 +14,7 @@ Ordenado por impacto. Cada punto se explica más abajo.
 |---|---|---|---|
 | **I1** | Amplify define `VITE_API_URL`, pero el frontend lee `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL` | La web compilada llama a `http://localhost:8000` y no funciona | **Resuelto** en rama `feature/testing` de infra |
 | **I2** | El bucket bloqueaba el acceso público y no había CloudFront | Las imágenes y el PDF daban 403 | **Resuelto** (CloudFront con OAC, `infra:C2`) |
-| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explorar` da 404 | **Resuelto en el código** de la rama `feature/testing` de infra (`custom_rule` en `modules/amplify/main.tf`, verificado el 30/10/2026). **Falta aplicarlo** en el Amplify de preproducción, que sigue devolviendo `301` y luego `404` (F16 de `sigmetum-backend/docs/integracion/para-frontend.md`, por confirmar) |
+| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explore` da 404 | **Resuelto en el código** de la rama `feature/testing` de infra (`custom_rule` en `modules/amplify/main.tf`, verificado el 30/10/2026). **Falta aplicarlo** en el Amplify de preproducción, que sigue devolviendo `301` y luego `404` (F16 de `sigmetum-backend/docs/integracion/para-frontend.md`, por confirmar) |
 | **I4** | En `dev`, `backend_url` era `http://…` y Amplify sirve el frontend por HTTPS | Contenido mixto | **Resuelto** (CloudFront delante de Beanstalk en `dev`, `infra:C4`: `backend_url` es `https://`) |
 | **I5** | `ALLOWED_ORIGIN` y las claves del login antiguo en `app_env_vars` | El backend no arrancaba | **Ya no aplica en esos términos:** las claves del login antiguo (`ADMIN_*`, `JWT_*`) se retiraron con el corte a Cognito y `ALLOWED_ORIGIN` está en las plantillas (se rellena tras conocer la URL de Amplify). Sigue abierto, y es del backend, el SMTP |
 | **I6** | El health check de Beanstalk apunta a `/`, pero el backend solo responde en `/healthcheck` | El entorno puede figurar como no saludable (por confirmar) | **Resuelto** en rama `feature/testing` de infra |
@@ -151,7 +151,7 @@ Los datos (`data/…`) y las imágenes de la galería (`gallery/…`) **no** se 
 
 ### Reescritura de la SPA (I3)
 
-El frontend es una SPA con enrutado en el navegador (`/explorar`, `/login`, `/sobre-nosotros`...). Sin esta regla, abrir o recargar una de esas URLs da 404.
+El frontend es una SPA con enrutado en el navegador (`/explore`, `/login`, `/about-us`, `/manage-terms`...). Sin esta regla, abrir o recargar una de esas URLs da 404. **La regla no cambia con las rutas en inglés** (es un catch-all sin lista de rutas; verificado en `sigmetum-infra/modules/amplify/main.tf:87-92`), y el callback de Cognito `/auth/callback` y el cierre de sesión `/` tampoco cambian. Desde el 12/11/2026 las URL españolas antiguas (`/explorar`, `/galeria`, `/sobre-nosotros`, `/cargar-archivos`, `/administrar-datos`, `/administrar-contenido`) **redirigen solo en el cliente (sin 301)**: un 301 para QR, favoritos externos o buscadores sería una regla de infra, y los documentos de `sigmetum-infra` que citan `/explorar` como ejemplo los actualiza el usuario (por confirmar si hay QR o enlaces externos).
 
 ```hcl
 custom_rule {
@@ -202,9 +202,9 @@ El frontend no incluye secretos. Los tokens de sesión (acceso y refresco de Cog
 ## 8. Comprobación tras desplegar
 
 1. `https://<dominio>/` carga la portada con logos y banner, sin errores en la consola del navegador. La pestaña muestra el favicon (solo si `VITE_S3_URL` estaba definida al compilar y CloudFront lo sirve) y un título distinto en cada página.
-2. Abrir directamente `https://<dominio>/explorar` y recargar: no da 404.
+2. Abrir directamente `https://<dominio>/explore` y recargar: no da 404.
 3. En la pestaña Red, las llamadas van a `VITE_BASE_URL` (no a `localhost`), por HTTPS y sin errores de CORS.
-4. `/explorar` muestra especies (la API y los datos de `data/active/` funcionan).
+4. `/explore` muestra especies (la API y los datos de `data/active/` funcionan).
 5. `/login` muestra el formulario de correo y contraseña. Con un usuario del pool, el acceso por SRP funciona: en la pestaña Red solo aparecen `POST` a `cognito-idp.<región>.amazonaws.com` (`InitiateAuth`, `RespondToAuthChallenge`...) con `200` y sin errores de CORS ni de CSP, y la contraseña no aparece en ningún cuerpo. En el primer acceso salen, por este orden **(por confirmar)**, el reto de contraseña nueva, el registro de la aplicación de autenticación (clave y código de seis dígitos; comprobar que la sesión del reto no caduca mientras se registra) y el código TOTP; después entra en «Cargar archivos» y las llamadas protegidas llevan `Authorization: Bearer` con el token de acceso. Tras un código erróneo se comprueba si Cognito invalida la `Session` (el frontend vuelve al primer paso con otro aviso). El botón «Cerrar sesión» borra la sesión, lanza `RevokeToken` (hasta 3 s) y vuelve a `/`. Con `localhost` el backend de `dev` rechaza el origen, así que el flujo completo solo se prueba desde el dominio de Amplify. **(por confirmar en `dev`)**
 6. El botón "Descargar glosario" abre el PDF.
 7. El backend responde `200 ok` en `https://<backend>/healthcheck`, y el estado del entorno de Beanstalk es saludable.

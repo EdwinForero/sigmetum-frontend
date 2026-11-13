@@ -24,6 +24,24 @@ describe('About', () => {
     expect(screen.getByText('aboutUs.ourWorkTeam')).toHaveClass('max-w-prose', 'text-lg', 'text-ink-soft');
   });
 
+  it('desde lg la primera sección es de tres columnas: el párrafo ocupa dos y la imagen las tres', () => {
+    const { container } = render(<About />);
+
+    const section = container.querySelector('section');
+    expect(section).toHaveClass('page-container', 'lg:grid', 'lg:grid-cols-3', 'lg:gap-x-stack-xl');
+    expect(screen.getByText('aboutUs.ourWorkTeam')).toHaveClass('lg:col-span-2', 'lg:mt-0', 'max-w-prose');
+    expect(container.querySelector('img')).toHaveClass('lg:col-span-3');
+  });
+
+  it('conserva el ritmo vertical entre h1, párrafo e imagen en todos los anchos', () => {
+    const { container } = render(<About />);
+
+    expect(container.querySelector('section')).toHaveClass('lg:gap-y-stack-lg');
+    const parrafo = screen.getByText('aboutUs.ourWorkTeam');
+    expect(parrafo).toHaveClass('mt-stack-lg', 'lg:mt-0');
+    expect(container.querySelector('img')).toHaveClass('mt-stack-xl', 'lg:mt-0');
+  });
+
   it('la imagen es decorativa, reserva su caja y no es diferida (primera pantalla)', () => {
     const { container } = render(<About />);
 
@@ -46,6 +64,17 @@ describe('About', () => {
       expect(tarjeta).toHaveClass('rounded-lg', 'border', 'border-sage', 'bg-sage-soft', 'p-stack-lg');
     }
     expect(container.innerHTML).not.toMatch(/text-justify|min-h-|iconButton\.scrollDown/);
+  });
+
+  it('solo las tarjetas aparecen por scroll (li con Reveal); la primera sección y la imagen, no', () => {
+    const { container } = render(<About />);
+
+    const animados = container.querySelectorAll('[data-reveal]');
+    expect(animados).toHaveLength(3);
+    for (const el of animados) expect(el.tagName).toBe('LI');
+    expect(container.querySelectorAll('[data-reveal] [data-reveal]')).toHaveLength(0);
+    expect(container.querySelector('section')).not.toHaveAttribute('data-reveal');
+    expect(container.querySelector('section').querySelector('[data-reveal]')).toBeNull();
   });
 
   it('el código no usa hex, motion ni ScrollIndicator', () => {

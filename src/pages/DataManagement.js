@@ -79,7 +79,7 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6 animate-page-fade motion-reduce:animate-none">
       <h1
         ref={headingRef}
         tabIndex={-1}

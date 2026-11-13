@@ -148,12 +148,21 @@ describe('traducciones', () => {
   });
 
   it('incluye los textos exactos de la barra privada, la navegación principal y el enlace de salto', () => {
-    const keys = ['skipLink', 'navbar.label', 'privateNav.label', 'privateNav.data', 'privateNav.content', 'privateNav.upload', 'privateNav.filters'];
+    const keys = ['skipLink', 'navbar.label', 'privateNav.label', 'privateNav.data', 'privateNav.terms', 'privateNav.gallery', 'privateNav.recipients', 'privateNav.upload', 'privateNav.filters'];
 
     expect({ es: keys.map((key) => spanish[key]), en: keys.map((key) => english[key]) }).toEqual({
-      es: ['Saltar al contenido', 'Principal', 'Gestión', 'Datos', 'Contenido', 'Cargar', 'Filtros'],
-      en: ['Skip to content', 'Main', 'Management', 'Data', 'Content', 'Upload', 'Filters'],
+      es: ['Saltar al contenido', 'Principal', 'Gestión', 'Datos', 'Términos', 'Galería', 'Correos', 'Cargar', 'Filtros'],
+      en: ['Skip to content', 'Main', 'Management', 'Data', 'Terms', 'Gallery', 'Emails', 'Upload', 'Filters'],
     });
+  });
+
+  it('se retiraron las claves huérfanas de la barra y de la página Administrar contenido', () => {
+    const orphans = ['privateNav.content', 'contentManagement.title', 'contentManagement.description'];
+
+    expect({
+      es: orphans.filter((key) => key in spanish),
+      en: orphans.filter((key) => key in english),
+    }).toEqual({ es: [], en: [] });
   });
 
   it('el botón de subir archivos tiene singular y plural y se retiraron las claves sustituidas', () => {
@@ -204,7 +213,7 @@ describe('traducciones', () => {
     const keys = [
       'title', 'tooltip', 'label', 'add', 'counter', 'empty', 'errorLoad', 'maxReached', 'lastRecipient',
       'removeRecipient', 'confirmDelete', 'successAdded', 'successRemoved', 'errorAdd', 'errorRemove',
-      'loading', 'listLabel', 'errors.duplicate',
+      'loading', 'loadingHint', 'listLabel', 'errors.duplicate',
     ].map((key) => `contactRecipients.${key}`);
 
     expect(keys.filter((key) => !(key in spanish) || !(key in english))).toEqual([]);
@@ -218,6 +227,12 @@ describe('traducciones', () => {
     expect(spanish['contactRecipients.counter']).toContain('{{max}}');
     expect(spanish['contactRecipients.removeRecipient']).toContain('{{name}}');
     expect(spanish['contactRecipients.maxReached']).toContain('{{max}}');
+  });
+
+  it('el tooltip del panel de destinatarios trata de tú, como el resto de textos nuevos', () => {
+    expect(spanish['contactRecipients.tooltip']).toContain('puedes registrar');
+    expect(spanish['contactRecipients.tooltip']).not.toMatch(/ puede /);
+    expect(spanish['contactRecipients.tooltip']).toContain('{{max}}');
   });
 
   it('ninguna traducción está vacía', () => {

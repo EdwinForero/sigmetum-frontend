@@ -144,16 +144,16 @@ const TermsManager = () => {
   };
 
   return (
-    <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-3">
+    <div className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
-        <h2
+        <h1
           id={headingId}
           ref={headingRef}
           tabIndex={-1}
-          className="focus-heading text-lg font-bold leading-tight tracking-[-0.015em] text-ink"
+          className="focus-heading py-4 text-[32px] font-bold leading-tight text-brand-deep"
         >
           {t('contentManagement.noLatinTermsTitle')}
-        </h2>
+        </h1>
         <InfoButton
           topic={t('contentManagement.noLatinTermsTitle')}
           tooltipText={t('contentManagement.noLatinTermsTooltip')}
@@ -196,7 +196,7 @@ const TermsManager = () => {
           />
         )}
       </AnimatePresence>
-    </section>
+    </div>
   );
 };
 

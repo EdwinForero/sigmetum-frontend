@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
+import { act, createEvent, render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FileUpload from './FileUpload';
 import ToastProvider from './ToastProvider';
@@ -525,13 +525,13 @@ describe('FileUpload: zona de arrastre', () => {
     expect(screen.getByText(`${FS}.dropZoneHint`)).toBeInTheDocument();
   });
 
-  it('soltar algo sin archivos conserva el error de la tarjeta y el anuncio', () => {
+  it('soltar algo sin archivos conserva el error de la tarjeta y el anuncio', async () => {
     const { container } = renderUpload();
     const caja = zona(container);
     fireEvent.drop(caja, { dataTransfer: { files: [xlsx(), csv()] } });
     const region = container.querySelector('p.sr-only[role="status"]');
+    await waitFor(() => expect(region).not.toBeEmptyDOMElement());
     const anuncio = region.textContent;
-    expect(anuncio).not.toBe('');
     expect(screen.getByText(`${FS}.dropRejected`)).toBeInTheDocument();
 
     fireEvent.drop(caja, { dataTransfer: { files: [] } });
@@ -550,14 +550,14 @@ describe('FileUpload: zona de arrastre', () => {
     expect(screen.getByText(`${FS}.dropZoneActive`)).toHaveClass('font-bold');
   });
 
-  it('la región status siempre montada anuncia lo añadido', () => {
+  it('la región status siempre montada anuncia lo añadido', async () => {
     const { container } = renderUpload();
     const region = container.querySelector('p.sr-only[role="status"]');
     expect(region).toBeInTheDocument();
     expect(region).toBeEmptyDOMElement();
 
     fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx'), xlsx('b.xlsx')] } });
-    expect(region).toHaveTextContent(`${FS}.filesAdded`);
+    await waitFor(() => expect(region).toHaveTextContent(`${FS}.filesAdded`));
   });
 
   it('el icono de la zona está oculto a los lectores de pantalla', () => {
@@ -587,5 +587,146 @@ describe('FileUpload: zona de arrastre', () => {
     renderUpload();
     const botones = screen.getAllByRole('button');
     expect(botones[0]).toHaveTextContent(`${FS}.selectFilesButton`);
+  });
+});
+
+describe('FileUpload: T7 (soltar fuera de la zona, duplicados en un drop y anuncios repetidos)', () => {
+  const xlsx = (name = 'datos.xlsx') =>
+    new File(['d'], name, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const zona = (container) => container.querySelector('[data-testid="dropZone"]');
+  const estado = (container) => container.querySelector('p.sr-only[role="status"]');
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('B49: un archivo soltado fuera de la zona no lo abre el navegador', () => {
+    const lanzar = (tipo, objetivo = document.body) => {
+      const evento = createEvent[tipo](objetivo, { dataTransfer: { files: [xlsx()], types: ['Files'] } });
+      fireEvent(objetivo, evento);
+      return evento;
+    };
+
+    it('dragover y drop sobre el documento llevan preventDefault mientras la página está montada', () => {
+      renderUpload();
+
+      expect(lanzar('dragOver').defaultPrevented).toBe(true);
+      expect(lanzar('drop').defaultPrevented).toBe(true);
+    });
+
+    it('un arrastre de texto o de un enlace (sin archivos) no se cancela', () => {
+      renderUpload();
+      const texto = (tipo, dataTransfer) => {
+        const evento = createEvent[tipo](document.body, { dataTransfer });
+        fireEvent(document.body, evento);
+        return evento.defaultPrevented;
+      };
+
+      expect(texto('dragOver', { files: [], types: ['text/plain'] })).toBe(false);
+      expect(texto('drop', { files: [], types: ['text/uri-list', 'text/plain'] })).toBe(false);
+      expect(texto('dragOver', { files: [], types: ['text/html'] })).toBe(false);
+    });
+
+    it('un arrastre sin dataTransfer.types no se cancela', () => {
+      renderUpload();
+      const evento = createEvent.dragOver(document.body);
+      fireEvent(document.body, evento);
+
+      expect(evento.defaultPrevented).toBe(false);
+    });
+
+    it('soltar fuera de la zona no añade archivos', () => {
+      renderUpload();
+      lanzar('drop');
+
+      expect(screen.queryByText('datos.xlsx')).not.toBeInTheDocument();
+    });
+
+    it('al desmontar se quitan los dos listeners (otras páginas recuperan el comportamiento del navegador)', () => {
+      const { unmount } = renderUpload();
+      unmount();
+
+      expect(lanzar('dragOver').defaultPrevented).toBe(false);
+      expect(lanzar('drop').defaultPrevented).toBe(false);
+    });
+  });
+
+  describe('B52: duplicados dentro del mismo drop', () => {
+    it('dos archivos con el mismo nombre y tamaño en un drop se añaden una sola vez', () => {
+      const { container } = renderUpload();
+
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx'), xlsx('a.xlsx')] } });
+
+      expect(screen.getAllByText('a.xlsx')).toHaveLength(1);
+    });
+
+    it('mismo nombre y distinto tamaño sí son dos archivos', () => {
+      const { container } = renderUpload();
+      const grande = new File(['dd'], 'a.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx'), grande] } });
+
+      expect(screen.getAllByText('a.xlsx')).toHaveLength(2);
+    });
+
+    it('el input también quita los duplicados del mismo envío', () => {
+      const { container } = renderUpload();
+
+      fireEvent.change(container.querySelector('#fileInput'), { target: { files: [xlsx('b.xlsx'), xlsx('b.xlsx')] } });
+
+      expect(screen.getAllByText('b.xlsx')).toHaveLength(1);
+    });
+  });
+
+  describe('B53: un anuncio idéntico se repite', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    it('cada drop vacía la región y escribe el texto 100 ms después: dos drops iguales la hacen pasar por vacío dos veces', () => {
+      const { container } = renderUpload();
+      const region = estado(container);
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx')] } });
+      expect(region).toBeEmptyDOMElement();
+      act(() => vi.advanceTimersByTime(100));
+      expect(region).toHaveTextContent(`${FS}.filesAdded`);
+
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('b.xlsx')] } });
+      expect(region).toBeEmptyDOMElement();
+      act(() => vi.advanceTimersByTime(100));
+      expect(region).toHaveTextContent(`${FS}.filesAdded`);
+    });
+
+    it('un segundo anuncio dentro de los 100 ms cancela el temporizador del primero (queda uno solo)', () => {
+      const { container } = renderUpload();
+
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx')] } });
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('b.xlsx')] } });
+
+      expect(vi.getTimerCount()).toBe(1);
+      act(() => vi.advanceTimersByTime(100));
+      expect(estado(container)).toHaveTextContent(`${FS}.filesAdded`);
+    });
+
+    it('un drop sin archivos nuevos vacía la región y no deja temporizador', () => {
+      const { container } = renderUpload();
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx')] } });
+      act(() => vi.advanceTimersByTime(100));
+
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx')] } });
+
+      expect(estado(container)).toBeEmptyDOMElement();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('al desmontar con un anuncio pendiente se limpia el temporizador', () => {
+      const { container, unmount } = renderUpload();
+      fireEvent.drop(zona(container), { dataTransfer: { files: [xlsx('a.xlsx')] } });
+      expect(vi.getTimerCount()).toBe(1);
+
+      unmount();
+
+      expect(vi.getTimerCount()).toBe(0);
+    });
   });
 });

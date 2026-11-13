@@ -200,6 +200,61 @@ describe('VegetationGallery', () => {
       remove.mockRestore();
     });
 
+    describe('con ResizeObserver', () => {
+      let observers;
+
+      beforeEach(() => {
+        observers = [];
+        vi.stubGlobal('ResizeObserver', class {
+          constructor(callback) { this.callback = callback; this.observe = vi.fn(); this.disconnect = vi.fn(); observers.push(this); }
+        });
+      });
+
+      afterEach(() => vi.unstubAllGlobals());
+
+      it('observa la rejilla y recalcula las columnas al avisar el observador, sin evento resize de la ventana', async () => {
+        const { container } = await renderGallery(makeImages(12));
+        expect(columnsOf(container)).toHaveLength(3);
+        expect(observers).toHaveLength(1);
+        expect(observers[0].observe).toHaveBeenCalledTimes(1);
+        expect(observers[0].observe.mock.calls[0][0]).toBe(container.querySelector('ul').parentElement.parentElement);
+
+        gridWidth = 1361;
+        await act(async () => observers[0].callback([]));
+
+        expect(columnsOf(container)).toHaveLength(7);
+      });
+
+      it('con el observador no se escucha resize de la ventana y al desmontar se desconecta', async () => {
+        const add = vi.spyOn(window, 'addEventListener');
+        const { unmount } = await renderGallery(makeImages(12));
+
+        expect(add.mock.calls.some(([type]) => type === 'resize')).toBe(false);
+        unmount();
+
+        expect(observers[0].disconnect).toHaveBeenCalledTimes(1);
+        add.mockRestore();
+      });
+
+      it('al cambiar las columnas por el observador ninguna celda queda oculta (revealCells pasa a false)', async () => {
+        vi.stubGlobal('IntersectionObserver', class {
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        });
+        vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 5000, bottom: 5100, height: 100 });
+        const { container } = await renderGallery(makeImages(6), 600);
+        expect(container.querySelectorAll('.reveal-hidden')).toHaveLength(6);
+
+        gridWidth = 1000;
+        await act(async () => observers[0].callback([]));
+
+        expect(container.querySelectorAll('li')).toHaveLength(6);
+        expect(container.querySelectorAll('.reveal-hidden')).toHaveLength(0);
+        vi.restoreAllMocks();
+      });
+    });
+
     it('el reparto es en bloques contiguos equilibrados: 7 fotos en 3 columnas dan [3, 2, 2]', async () => {
       const { container } = await renderGallery(makeImages(7), 600);
 
@@ -364,6 +419,96 @@ describe('VegetationGallery', () => {
       await user.click(screen.getByRole('button', { name: 'iconButton.close' }));
 
       expect(document.activeElement).toBe(button);
+    });
+  });
+
+  describe('aparición por scroll (Reveal)', () => {
+    let observadores;
+
+    beforeEach(() => {
+      observadores = [];
+      vi.stubGlobal('IntersectionObserver', class {
+        constructor(callback) { this.callback = callback; observadores.push(this); }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      });
+      vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 5000, bottom: 5100, height: 100 });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    const ocultas = (container) => container.querySelectorAll('.reveal-hidden').length;
+
+    it('cada <li> es un Reveal y empieza oculto; el esqueleto y el visor no se animan', async () => {
+      api.get.mockReturnValue(new Promise(() => {}));
+      const esqueleto = render(<VegetationGallery />);
+      expect(esqueleto.container.querySelectorAll('[data-reveal]')).toHaveLength(0);
+      esqueleto.unmount();
+
+      const user = userEvent.setup();
+      const { container } = await renderGallery(makeImages(6), 600);
+      const celdas = container.querySelectorAll('li');
+      expect(celdas).toHaveLength(6);
+      for (const celda of celdas) expect(celda).toHaveAttribute('data-reveal');
+      expect(container.querySelectorAll('[data-reveal] [data-reveal]')).toHaveLength(0);
+      expect(ocultas(container)).toBe(6);
+
+      await user.click(screen.getByRole('button', opener('foto numero 1')));
+      expect(screen.getByRole('dialog').closest('[data-reveal]')).toBeNull();
+      expect(screen.getByRole('dialog').querySelector('[data-reveal]')).toBeNull();
+    });
+
+    it('el retraso de cada celda sale de su columna', async () => {
+      const { container } = await renderGallery(makeImages(6), 600);
+      const celdas = [...container.querySelectorAll('li')];
+
+      act(() => observadores[0].callback(celdas.map((target) => ({ target, isIntersecting: true }))));
+
+      const columnas = columnsOf(container);
+      expect(columnas.length).toBeGreaterThan(1);
+      columnas.forEach((columna, c) => {
+        for (const li of columna.querySelectorAll('li')) expect(li.style.transitionDelay).toBe(`${Math.min(c, 5) * 60}ms`);
+      });
+    });
+
+    it('al cambiar las columnas tras la primera medición ninguna celda queda oculta', async () => {
+      const { container } = await renderGallery(makeImages(6), 600);
+      expect(ocultas(container)).toBe(6);
+      const antes = columnsOf(container).length;
+
+      await setWidth(1000);
+
+      expect(columnsOf(container).length).not.toBe(antes);
+      expect(container.querySelectorAll('li')).toHaveLength(6);
+      expect(ocultas(container)).toBe(0);
+    });
+
+    it('al pulsar «Reintentar» las celdas nuevas no se animan', async () => {
+      const user = userEvent.setup();
+      api.get.mockRejectedValueOnce(new Error('caído'));
+      const { container } = render(<VegetationGallery />);
+      await act(async () => {});
+
+      api.get.mockResolvedValueOnce(makeImages(4));
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: 'feedback.retry' }));
+      });
+
+      expect(container.querySelectorAll('li')).toHaveLength(4);
+      expect(ocultas(container)).toBe(0);
+    });
+
+    it('un re-render sin cambio de columnas (abrir el visor) no apaga la animación de las celdas aún ocultas', async () => {
+      const user = userEvent.setup();
+      const { container } = await renderGallery(makeImages(6), 600);
+
+      await user.click(screen.getByRole('button', opener('foto numero 1')));
+
+      expect(ocultas(container)).toBe(5);
     });
   });
 
