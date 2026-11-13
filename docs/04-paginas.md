@@ -17,10 +17,10 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 | `handleFileDropdownSelect(data)` | La llama `DataManagement` al elegir una versión: fija `filteredData` y quita el spinner |
 | `handleFilterChange(filtered)` | Igual, para `filteredSpecies` en el explorador |
 | `handleOnSpeciesSelect(set)` | Guarda las especies elegidas en el filtro |
-| `menuOptions` | Opciones de la barra de gestión: `filter` (solo en `/explorar`; en `/administrar-datos` ya no hay panel de filtros) abre un `Filter` en un panel de filtros (diálogo modal con `aria-labelledby` hacia el `<h2>` de `Filter`, `titleId`); `dataManagement`, `contentManagement` y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con las claves `privateNav.*` (`filters`, `data`, `content`, `upload`) y es la etiqueta visible de cada ítem |
-| `showSideMenu` | `true` en `/explorar` y, en las tres rutas protegidas, solo cuando `privateSessionOk` (sesión confirmada por `ProtectedRoute`, que avisa con `onStatusChange`): muestra la barra de gestión y reserva el espacio de la barra inferior (`pb-nav md:pb-0`; desde `md` la barra es `sticky` y no necesita margen) |
+| `menuOptions` | Opciones de la barra de gestión: `filter` (solo en `/explore`; en `/manage-data` ya no hay panel de filtros) abre un `Filter` en un panel de filtros (diálogo modal con `aria-labelledby` hacia el `<h2>` de `Filter`, `titleId`); `dataManagement`, `manageTerms` (`text_fields`), `manageGallery` (`photo_library`), `manageRecipients` (`contact_mail`) y `uploadFiles` son enlaces. El `name` de cada opción sale de `t()` con las claves `privateNav.*` (`filters`, `data`, `terms`, `gallery`, `recipients`, `upload`) y es la etiqueta visible de cada ítem |
+| `showSideMenu` | `true` en `/explore` y, en las tres rutas protegidas, solo cuando `privateSessionOk` (sesión confirmada por `ProtectedRoute`, que avisa con `onStatusChange`): muestra la barra de gestión y reserva el espacio de la barra inferior (`pb-nav md:pb-0`; desde `md` la barra es `sticky` y no necesita margen) |
 | `privateSessionOk` | Estado: `ok` lo pone a `true`; `denied` y `unavailable`, a `false`; `checking` no lo cambia; salir de las rutas privadas, a `false`. Cada `ProtectedRoute` lleva `key` propia, así que cambiar de ruta privada revalida con `/auth` |
-| `loadExplore()` | Carga de `/explorar` (limpia filtros y selección y pide `get-merged-data` y `list-terms` en paralelo); la usa el efecto de la ruta y el «Reintentar» de `Explore` (`onRetry`) |
+| `loadExplore()` | Carga de `/explore` (limpia filtros y selección y pide `get-merged-data` y `list-terms` en paralelo); la usa el efecto de la ruta y el «Reintentar» de `Explore` (`onRetry`) |
 | `handleClearFilters()` | Incrementa `filterResetKey`: el `Filter` se remonta y borra su selección («Quitar filtros» de `Explore`, `onClearFilters`) |
 | `isPrivateRoute` | `true` en las tres rutas protegidas: es el valor de `showLogout` de `Sidebar` (el botón «Cerrar sesión» vive en la barra) |
 
@@ -35,21 +35,25 @@ No es una página, pero orquesta todas: define el layout, las rutas y el estado 
 | Ruta | Clave del título |
 |---|---|
 | `/` | `navbar.homeOption` |
-| `/explorar` | `navbar.exploreOption` |
-| `/galeria` | `gallery.title` |
-| `/sobre-nosotros` | `aboutUs.title` |
+| `/explore` | `navbar.exploreOption` |
+| `/gallery` | `gallery.title` |
+| `/about-us` | `aboutUs.title` |
 | `/cookies` | `cookies.title` |
 | `/login` | `login.title` |
-| `/cargar-archivos` | `uploadFiles.title` |
-| `/administrar-datos` | `dataManagement.title` |
-| `/administrar-contenido` | `contentManagement.title` |
+| `/upload-files` | `uploadFiles.title` |
+| `/manage-data` | `dataManagement.title` |
+| `/manage-terms` | `contentManagement.noLatinTermsTitle` |
+| `/manage-gallery` | `contentManagement.galleryManagementTitle` |
+| `/manage-recipients` | `contactRecipients.title` |
 | Cualquier otra (404) | `notFound.title` |
 
-El título sigue al `pathname`, no a lo que pinta `ProtectedRoute`: si una ruta protegida redirige a `/login`, el título pasa a ser el de `/login`. La comparación de rutas ignora mayúsculas y la barra final, como el enrutador.
+Una ruta antigua (`LEGACY_REDIRECTS`) se resuelve primero a su destino, de modo que durante la redirección no se ve el título del 404. El título sigue al `pathname`, no a lo que pinta `ProtectedRoute`: si una ruta protegida redirige a `/login`, el título pasa a ser el de `/login`. La comparación de rutas ignora mayúsculas y la barra final, como el enrutador.
 
 ---
 
 ## Home (`/`)
+
+Entidades centradas: los `h2` y `h3` van con `text-center`, el bloque del líder es `flex flex-col items-center` (nombres `sm:columns-2 lg:columns-3`) y universidades y entidades son `flex flex-col items-center text-center` (entidades en `sm:grid-cols-3`). Universidades, entidades, los `h3` y el bloque del líder van en `Reveal`; el hero, `#home-descripcion` y `#contacto` no (son destinos de ancla o foco).
 
 Portada del proyecto. Todo con tokens y el contenedor común `.page-container`; sin animaciones de revelado por scroll ni parallax.
 
@@ -68,9 +72,11 @@ Medido el 12/11/2026 (local, API simulada; las imágenes de S3 salen rotas en lo
 
 ---
 
-## Explore (`/explorar`)
+## Explore (`/explore`)
 
-Explorador público de especies características. Abre con `<h1>` (`text-3xl`, `brand-deep`) y contenedor `.page-container`; el contenedor usa `min-w-0` (sin `whitespace-nowrap`) y la barra de herramientas `flex-wrap gap-2`, de modo que a 768 y 1024 px no desborda y «Descargar glosario» cabe entero. `App` normaliza la ruta quitando la barra final (`/administrar-datos/` también muestra la barra de gestión) y memoriza con `useCallback` los cuatro callbacks de `Filter`.
+La barra de herramientas es `flex flex-col gap-stack` con dos filas: recuento y paginación, y las descargas (cada botón agrupado con su «i» en `flex items-center gap-stack-sm`); la rejilla usa `gap-stack py-stack` y cada tarjeta va en `<Reveal className="grid" index={i % 4} disabled={!revealCards}>`. `revealCards` es estado derivado en el render (la clave JSON de `currentItems` de la primera lista con datos): pasa a `false` al paginar, filtrar, elegir especie o cambiar `itemsPerPage`, y no vuelve a animarse. Las tarjetas no se animan de nuevo con ningún render posterior.
+
+Explorador público de especies características. Abre con `<h1>` (`text-3xl`, `brand-deep`) y contenedor `.page-container`; el contenedor usa `min-w-0` (sin `whitespace-nowrap`) y la barra de herramientas `flex-wrap gap-2`, de modo que a 768 y 1024 px no desborda y «Descargar glosario» cabe entero. `App` normaliza la ruta quitando la barra final (`/manage-data/` también muestra la barra de gestión) y memoriza con `useCallback` los cuatro callbacks de `Filter`.
 
 **Props (desde `App`):**
 
@@ -101,7 +107,9 @@ Explorador público de especies características. Abre con `<h1>` (`text-3xl`, `
 
 ---
 
-## VegetationGallery (`/galeria`)
+## VegetationGallery (`/gallery`)
+
+Cada celda es `Reveal as="li" index={c} disabled={!revealCells}`: solo se anima en la primera carga (`revealCells` pasa a `false` al cambiar las columnas tras la primera medición, por `resize` o `ResizeObserver` sobre la rejilla, y al pulsar «Reintentar»); esqueleto y visor no se animan. CLS de 0,029 a 390 px sin explicar (B72 en [09](09-estado-actual-y-deuda-tecnica.md)).
 
 Galería en columnas con visor. `<h1>` y un `LoadSpinner inline` siempre montado (`gallery.loading` mientras carga) y los estados de error y vacío van dentro de `.page-container`; la rejilla **rompe el contenedor**: entra a sangre con solo el margen lateral (`px-gutter`, `md:px-gutter-md`, `lg:px-gutter-lg`) y llena el viewport, y el `<h1>` conserva su posición común.
 
@@ -123,13 +131,15 @@ Cubierto por `VegetationGallery.test.js` y por la suite E2E (orden del DOM igual
 
 ---
 
-## About (`/sobre-nosotros`)
+## About (`/about-us`)
 
-Página estática con `.page-container`: `<h1>` (`brand-deep`), texto del equipo (`max-w-prose`), la imagen de S3 (`assets/about/about-us.jpg`, decorativa con `alt=""`, caja 12:5 reservada con `width`/`height` y **sin** `loading="lazy"`, por estar en la primera pantalla) y tres tarjetas iguales (propósito, misión y valores: `<ul>` de tres `<li>` con `bg-sage-soft`, `border-sage` y un `<h2>` en `forest`, contraste 10,78:1). Ya no lleva `ScrollIndicator` ni animaciones.
+Página estática con `.page-container`. Desde `lg` la primera `section` es una rejilla de tres columnas (`lg:grid-cols-3`): el `<h1>` ocupa las tres, el párrafo `lg:col-span-2` (con `max-w-prose`; la tercera columna queda vacía, ver B71 en [09](09-estado-actual-y-deuda-tecnica.md)) y la imagen las tres, sin `lazy`; las tarjetas son `Reveal as="li"` escalonadas. `<h1>` (`brand-deep`), texto del equipo (`max-w-prose`), la imagen de S3 (`assets/about/about-us.jpg`, decorativa con `alt=""`, caja 12:5 reservada con `width`/`height` y **sin** `loading="lazy"`, por estar en la primera pantalla) y tres tarjetas iguales (propósito, misión y valores: `<ul>` de tres `<li>` con `bg-sage-soft`, `border-sage` y un `<h2>` en `forest`, contraste 10,78:1). Ya no lleva `ScrollIndicator` ni animaciones.
 
 ---
 
 ## Cookies (`/cookies`)
+
+Cada `section` va en `Reveal as="section"`; con `hash`, `scrollY` en 0 al llegar desde el pie y movimiento reducido, todo queda visible.
 
 Política de cookies estática, en un `<article>` con `.page-container`. Todos los textos vienen de `cookies.*` en las traducciones. Usa `<Trans>` solo para las negritas; los enlaces externos (ICO, aboutcookies.org y la ayuda de Chrome, Internet Explorer, Safari, Edge, Firefox y Opera) van en una lista «Más información» fuera de los párrafos, cada uno con `rel="noopener noreferrer"`, objetivo de 44 px y aviso de pestaña nueva. Texto a la izquierda, sin justificar, con medida de lectura (`max-w-prose`); los separadores son `border-moss`.
 
@@ -141,13 +151,15 @@ Contenedor centrado que renderiza `LoginForm`: formulario de correo y contraseñ
 
 ---
 
-## FilesUpload (`/cargar-archivos`) · protegida
+## FilesUpload (`/upload-files`) · protegida
 
 Contenedor `max-w-3xl` con `<h1>`, descripción y `FileUpload`, que ya no recibe `onLoad`: el progreso y los errores se muestran en la propia tarjeta (ver [05](05-componentes.md#fileupload)). Sin estado propio.
 
 ---
 
-## DataManagement (`/administrar-datos`) · protegida
+## DataManagement (`/manage-data`) · protegida
+
+Las cinco privadas llevan en su contenedor `animate-page-fade motion-reduce:animate-none` (solo opacidad, sin `fill-mode`, una vez por navegación). `FileDropdown` pide cada versión con `api.getAuth` (`/get-data/<clave>`): 401 sin sesión, 422 si el `.xlsx` está corrupto (se muestra el error con «Reintentar»).
 
 Gestión de versiones de los datos por provincia.
 
@@ -166,12 +178,20 @@ Gestión de versiones de los datos por provincia.
 
 ---
 
-## ContentManagement (`/administrar-contenido`) · protegida
+## TermsManagement (`/manage-terms`) · protegida
 
-Contenedor `max-w-6xl` con `<h1>`, descripción y una rejilla de una columna (dos desde `lg`) con `TermsManager` (términos que no van en cursiva) e `ImageGalleryManager` (imágenes de la galería), cada uno con su `<h2>`, y debajo, en un contenedor `lg:col-span-2` con `max-w-3xl`, `ContactRecipientsManager` (destinatarios de las dudas de contacto, con su `<h2>`). Si el panel de destinatarios falla, los otros dos siguen funcionando.
+`/administrar-contenido` ya no es una página: redirige (solo en el cliente) a `/manage-terms`. Contenedor `<div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6 animate-page-fade motion-reduce:animate-none">` más `TermsManager` (términos que no van en cursiva), a ancho completo y sin rejilla. El `<h1>` es el del propio gestor (clase del `<h1>` de `DataManagement`, `id`, `tabIndex={-1}` e `InfoButton`), así que hay un solo `<h1>` y ningún `<h2>`; queda en la misma `x` que el de `/manage-data` y `/upload-files`. Los gestores usan `div` en lugar de `section` (no repiten el nombre de la página como región). El foco tras borrar sigue yendo al título.
+
+## GalleryManagement (`/manage-gallery`) · protegida
+
+Mismo contenedor y mismas reglas con `ImageGalleryManager` (imágenes de la galería): `<h1>` del gestor, sin `<h2>`, sin rejilla.
+
+## RecipientsManagement (`/manage-recipients`) · protegida
+
+Mismo contenedor y mismas reglas con `ContactRecipientsManager` (destinatarios de las dudas de contacto, máximo 5): `<h1>` del gestor, sin `<h2>`, sin rejilla. Si falla la carga, el gestor muestra su error con «Reintentar» y las otras dos páginas no se ven afectadas.
 
 ---
 
 ## NotFound (`*`)
 
-Página 404 con botón de vuelta al inicio (títulos en `brand-deep`; conserva su `max-w-[960px]`, sin `px-40`). Su título de pestaña es `notFound.title` ("Página no encontrada" / "Page not found"). Además, `VegetationGallery` sin datos muestra `gallery.noDataFoundPlaceholder` (sin texto por defecto en el código).
+Página 404 con el sistema común de ancho: un `Reveal` con `page-container py-section text-center`, `<h1>` «404» (clases del `<h1>` de `Cookies`), párrafo `mx-auto mt-stack max-w-prose text-ink` y un `<Link to="/">` con `BUTTON_PRINCIPAL_CLASS` (sin `<button>` dentro de un enlace; sin colores ni anchos en píxeles). Su título de pestaña es `notFound.title` ("Página no encontrada" / "Page not found"), y tiene su propio test (`NotFound.test.js`). Además, `VegetationGallery` sin datos muestra `gallery.noDataFoundPlaceholder` (sin texto por defecto en el código).

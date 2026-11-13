@@ -6,7 +6,7 @@ const FilesUpload = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6">
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6 animate-page-fade motion-reduce:animate-none">
       <h1 className="py-4 text-[32px] font-bold leading-tight text-brand-deep">
         {t('uploadFiles.title')}
       </h1>

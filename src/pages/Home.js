@@ -9,6 +9,7 @@ import LoadSpinner from '../components/LoadSpinner.js';
 import LogoLink from '../components/LogoLink.js';
 import ScrollIndicator from '../components/ScrollIndicator.js';
 import ImageComponent from '../components/ImageComponent.js';
+import Reveal from '../components/Reveal.js';
 import ASSETS, { assetUrl } from '../config/assets';
 import { UNIVERSITIES, ENTITIES } from '../config/institutions';
 
@@ -32,10 +33,14 @@ const COLLABORATORS = {
   uja: ['José Antonio Carreira de la Fuente'],
 };
 
+// Solo la lista larga (UMA, 11 nombres) se reparte en columnas; las demás van en una, sin partir nombres.
+const COLLABORATOR_COLUMNS = ['uma'];
 const SECTION = 'page-container py-section md:py-section-lg';
 const H2 = 'text-2xl md:text-4xl font-bold leading-tight text-brand-deep';
 const H3 = 'text-xl md:text-2xl font-bold leading-tight text-brand-deep';
 const GRID = 'mt-stack-lg grid gap-stack-lg sm:grid-cols-2 lg:grid-cols-4';
+const ENTITIES_GRID = 'mt-stack-lg grid gap-stack-lg sm:grid-cols-3';
+const ITEM = 'flex flex-col items-center gap-stack-sm text-center';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -60,9 +65,9 @@ const Home = () => {
 
   const names = (id) =>
     COLLABORATORS[id]?.length > 0 && (
-      <ul className="mt-stack-sm">
+      <ul className={`w-full text-center ${COLLABORATOR_COLUMNS.includes(id) ? 'sm:columns-2 lg:columns-3 gap-x-stack-xl' : ''}`}>
         {COLLABORATORS[id].map((name) => (
-          <li key={name} className="text-base text-ink-soft">{name}</li>
+          <li key={name} className="break-inside-avoid text-base text-ink-soft">{name}</li>
         ))}
       </ul>
     );
@@ -86,8 +91,8 @@ const Home = () => {
             {t('home.subtitle')}
           </p>
           <div className="flex flex-wrap gap-stack">
-            <Link to="/explorar" className={BUTTON_PRINCIPAL_CLASS}>{t('home.exploreButton')}</Link>
-            <Link to="/galeria" className={BUTTON_ALTERNATIVE_CLASS}>{t('home.galleryButton')}</Link>
+            <Link to="/explore" className={BUTTON_PRINCIPAL_CLASS}>{t('home.exploreButton')}</Link>
+            <Link to="/gallery" className={BUTTON_ALTERNATIVE_CLASS}>{t('home.galleryButton')}</Link>
           </div>
         </div>
         <div className="flex justify-center pb-stack">
@@ -102,26 +107,26 @@ const Home = () => {
       </section>
 
       <section className={SECTION}>
-        <h2 className={H2}>{t('home.projectLeaderTitle')}</h2>
-        <div className="mt-stack-lg">
+        <h2 className={`${H2} text-center`}>{t('home.projectLeaderTitle')}</h2>
+        <Reveal className="mt-stack-lg flex flex-col items-center gap-stack-sm">
           {logo(leader)}
           {names(leader.id)}
-        </div>
+        </Reveal>
 
-        <h3 className={`${H3} mt-section`}>{t('home.otherUniversitiesTitle')}</h3>
+        <Reveal as="h3" className={`${H3} mt-section text-center`}>{t('home.otherUniversitiesTitle')}</Reveal>
         <div className={GRID}>
-          {otherUniversities.map((university) => (
-            <div key={university.id}>
+          {otherUniversities.map((university, i) => (
+            <Reveal key={university.id} index={i} className={ITEM}>
               {logo(university)}
               {names(university.id)}
-            </div>
+            </Reveal>
           ))}
         </div>
 
-        <h3 className={`${H3} mt-section`}>{t('home.collaboratingEntitiesTitle')}</h3>
-        <div className={GRID}>
-          {ENTITIES.map((entity) => (
-            <div key={entity.id}>{logo(entity)}</div>
+        <Reveal as="h3" className={`${H3} mt-section text-center`}>{t('home.collaboratingEntitiesTitle')}</Reveal>
+        <div className={ENTITIES_GRID}>
+          {ENTITIES.map((entity, i) => (
+            <Reveal key={entity.id} index={i} className={ITEM}>{logo(entity)}</Reveal>
           ))}
         </div>
       </section>

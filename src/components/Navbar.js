@@ -39,9 +39,9 @@ const Navbar = () => {
 
   const menuItems = [
     { label: t('navbar.homeOption'), path: '/' },
-    { label: t('navbar.exploreOption'), path: '/explorar' },
-    { label: t('navbar.galleryOption'), path: '/galeria' },
-    { label: t('navbar.aboutUsOption'), path: '/sobre-nosotros' },
+    { label: t('navbar.exploreOption'), path: '/explore' },
+    { label: t('navbar.galleryOption'), path: '/gallery' },
+    { label: t('navbar.aboutUsOption'), path: '/about-us' },
   ];
 
   // Activo: barra inferior de 4 px y negrita (no solo color). Todos los ítems tienen el mismo borde, así el texto no salta.

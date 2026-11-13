@@ -31,20 +31,25 @@ const ContactRecipientsManager = () => {
   const { notifySuccess, notifyError } = useToast();
   const headingId = useId();
   const errorId = useId();
+  const loadErrorId = useId();
   const maxHintId = useId();
+  const loadingHintId = useId();
   const lastHintId = useId();
   const inputRef = useRef(null);
   const headingRef = useRef(null);
   const removing = useRef(false);
+  const requestRef = useRef(0);
   const [email, setEmail] = useState('');
   const [recipients, setRecipients] = useState([]);
-  const [isLoadingList, setIsLoadingList] = useState(false);
+  const [isLoadingList, setIsLoadingList] = useState(true);
   const [isError, setIsError] = useState(false);
   const [busy, setBusy] = useState(null);
   const [fieldError, setFieldError] = useState(null);
+  const [announceField, setAnnounceField] = useState(true);
   const [focusRequest, setFocusRequest] = useState(0);
   const { dialog, showDialog, closeDialog } = useDialog();
 
+  const listReady = !isLoadingList && !isError;
   const atMax = recipients.length >= RECIPIENTS_MAX;
   const atMin = recipients.length <= RECIPIENTS_MIN;
 
@@ -56,16 +61,20 @@ const ContactRecipientsManager = () => {
   }, [focusRequest]);
 
   const fetchRecipients = async () => {
+    // Solo la última petición escribe: una respuesta vieja que llega tarde no pisa la lista nueva.
+    const request = (requestRef.current += 1);
+    const isCurrent = () => request === requestRef.current;
     setIsLoadingList(true);
     setIsError(false);
     try {
       const data = await api.getAuth('/list-recipients');
       // Si no es una lista, filter lanza y se muestra el error de carga (no una lista vacía).
-      setRecipients(data.filter((item) => typeof item?.email === 'string'));
+      const list = data.filter((item) => typeof item?.email === 'string');
+      if (isCurrent()) setRecipients(list);
     } catch {
-      setIsError(true);
+      if (isCurrent()) setIsError(true);
     } finally {
-      setIsLoadingList(false);
+      if (isCurrent()) setIsLoadingList(false);
     }
   };
 
@@ -75,12 +84,15 @@ const ContactRecipientsManager = () => {
   };
 
   const rejectField = (key) => {
+    // Con Enter el foco ya está en el campo y nadie leería el error: se anuncia. Con el clic, el foco vuelve al campo y lo lee aria-describedby.
+    setAnnounceField(document.activeElement === inputRef.current);
     setFieldError(key);
     inputRef.current?.focus();
   };
 
-  const handleAdd = async () => {
-    if (recipients.length >= RECIPIENTS_MAX) return;
+  const handleAdd = async (event) => {
+    event?.preventDefault();
+    if (!listReady || recipients.length >= RECIPIENTS_MAX) return;
     const problem = validateRecipientEmail(email, recipients);
     if (problem) {
       rejectField(problem);
@@ -131,11 +143,16 @@ const ContactRecipientsManager = () => {
     );
   };
 
+  let describedBy;
+  if (atMax) describedBy = maxHintId;
+  else if (isLoadingList) describedBy = loadingHintId;
+  else if (isError) describedBy = loadErrorId;
+
   const renderList = () => {
     if (isError) {
       return (
         <div>
-          <InlineError>{t('contactRecipients.errorLoad')}</InlineError>
+          <InlineError id={loadErrorId}>{t('contactRecipients.errorLoad')}</InlineError>
           <ButtonAlternative text={t('feedback.retry')} onClick={fetchRecipients} />
         </div>
       );
@@ -168,16 +185,16 @@ const ContactRecipientsManager = () => {
   };
 
   return (
-    <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-3">
+    <div className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
-        <h2
+        <h1
           id={headingId}
           ref={headingRef}
           tabIndex={-1}
-          className="focus-heading text-lg font-bold leading-tight tracking-[-0.015em] text-ink"
+          className="focus-heading py-4 text-[32px] font-bold leading-tight text-brand-deep"
         >
           {t('contactRecipients.title')}
-        </h2>
+        </h1>
         <InfoButton
           topic={t('contactRecipients.title')}
           tooltipText={t('contactRecipients.tooltip', { max: RECIPIENTS_MAX })}
@@ -190,7 +207,7 @@ const ContactRecipientsManager = () => {
       </div>
 
       <div>
-        <div className="flex flex-wrap items-end gap-stack">
+        <form noValidate onSubmit={handleAdd} className="flex flex-wrap items-end gap-stack">
           <div className="min-w-0 flex-1 basis-64">
             <TextInput
               label={t('contactRecipients.label')}
@@ -205,15 +222,16 @@ const ContactRecipientsManager = () => {
           </div>
           <ButtonPrincipal
             text={t('contactRecipients.add')}
+            type="submit"
             className="mb-stack-sm"
-            onClick={handleAdd}
             loading={busy === 'add'}
             disabled={busy === 'remove'}
-            inactive={atMax}
-            aria-describedby={atMax ? maxHintId : undefined}
+            inactive={atMax || !listReady}
+            aria-describedby={describedBy}
           />
-        </div>
-        {fieldError && <InlineError id={errorId}>{t(FIELD_ERRORS[fieldError])}</InlineError>}
+        </form>
+        {fieldError && <InlineError id={errorId} announce={announceField}>{t(FIELD_ERRORS[fieldError])}</InlineError>}
+        {isLoadingList && <p id={loadingHintId} className={HINT_CLASS}>{t('contactRecipients.loadingHint')}</p>}
         {atMax && <p id={maxHintId} className={HINT_CLASS}>{t('contactRecipients.maxReached', { max: RECIPIENTS_MAX })}</p>}
       </div>
 
@@ -235,7 +253,7 @@ const ContactRecipientsManager = () => {
           />
         )}
       </AnimatePresence>
-    </section>
+    </div>
   );
 };
 

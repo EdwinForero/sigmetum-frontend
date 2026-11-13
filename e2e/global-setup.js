@@ -7,7 +7,7 @@ export default async function globalSetup() {
   const browser = await chromium.launch();
   const page = await browser.newPage();
   await installRoutes(page, { calls: [], listImagesDelay: 0, sendEmailStatus: 200 });
-  for (const route of ['/', '/explorar', '/galeria', '/sobre-nosotros', '/cookies']) {
+  for (const route of ['/', '/explore', '/gallery', '/about-us', '/cookies']) {
     await page.goto(`http://localhost:3100${route}`, { waitUntil: 'load' });
     await page.waitForTimeout(1500);
   }

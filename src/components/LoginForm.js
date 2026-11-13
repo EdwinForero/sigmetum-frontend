@@ -65,7 +65,7 @@ const PasswordField = ({ id, label, inputRef, describedBy, visible, onToggle, to
 const LoginForm = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const login = useCognitoLogin({ onAuthenticated: () => navigate('/cargar-archivos', { replace: true }) });
+  const login = useCognitoLogin({ onAuthenticated: () => navigate('/upload-files', { replace: true }) });
   const { step, busy, error } = login;
 
   const [email, setEmail] = useState('');

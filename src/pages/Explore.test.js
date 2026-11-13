@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Explore from './Explore';
 import ToastProvider from '../components/ToastProvider';
@@ -175,6 +175,23 @@ describe('Explore', () => {
     expect(toolbar.className).not.toMatch(/\bw-\[\d+px\]|\bmin-w-\[\d+px\]/);
   });
 
+  it('la barra va en dos filas: recuento con paginación y, aparte, las descargas con su «i»', () => {
+    renderExplore();
+
+    const bar = screen.getByText(/^explore.resultsInfo/).parentElement.parentElement;
+    expect(bar).toHaveClass('flex', 'flex-col', 'gap-stack');
+    const [filaPaginacion, filaDescargas] = bar.children;
+    const paginacion = screen.getByText(/^explore.resultsInfo/).parentElement;
+    expect(paginacion).toBe(filaPaginacion);
+    expect(filaDescargas.contains(paginacion)).toBe(false);
+    for (const name of ['explore.downloadGlossaryButton', 'explore.downloadExcelButton']) {
+      const grupo = screen.getByRole('button', { name }).parentElement;
+      expect(grupo).toHaveClass('flex', 'items-center', 'gap-stack-sm');
+      expect(filaDescargas.contains(grupo)).toBe(true);
+      expect(grupo.children).toHaveLength(2);
+    }
+  });
+
   it('el título es verde oscuro de marca (brand-deep)', () => {
     renderExplore();
 
@@ -193,5 +210,107 @@ describe('Explore', () => {
     const aviso = await screen.findByText('dialogAdvice.errorDownloadFile');
     expect(aviso.closest('[role=alert]')).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  describe('aparición de las tarjetas (Reveal)', () => {
+    const muchas = (n, prefijo = 'Especie') => [
+      { 'Especies Características': Array.from({ length: n }, (_, i) => `${prefijo} ${String(i).padStart(2, '0')}`) },
+    ];
+    const originalWidth = window.innerWidth;
+
+    beforeEach(() => {
+      // IntersectionObserver que nunca avisa y todo por debajo del pliegue: las tarjetas empiezan ocultas.
+      vi.stubGlobal('IntersectionObserver', class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      });
+      vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 5000, bottom: 5100, height: 100 });
+      window.innerWidth = 1024;
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+      window.innerWidth = originalWidth;
+    });
+
+    const ocultas = () => document.querySelectorAll('.reveal-hidden').length;
+
+    it('cada tarjeta va en un Reveal con grid (se estira a la altura de la fila)', () => {
+      renderExplore({ data: muchas(8), filteredSpecies: muchas(8) });
+
+      const tarjetas = screen.getAllByTestId('species');
+      expect(tarjetas).toHaveLength(8);
+      for (const tarjeta of tarjetas) {
+        expect(tarjeta.parentElement).toHaveAttribute('data-reveal');
+        expect(tarjeta.parentElement).toHaveClass('grid');
+      }
+      expect(ocultas()).toBe(8);
+    });
+
+    it('cambiar selectedSpecies no deja ninguna tarjeta oculta', () => {
+      const lista = muchas(8);
+      const { rerender } = renderExplore({ data: lista, filteredSpecies: lista });
+      expect(ocultas()).toBe(8);
+
+      rerender(ui({ data: lista, filteredSpecies: lista, selectedSpecies: new Set(['Especie 01', 'Especie 02']) }));
+
+      expect(screen.getAllByTestId('species')).toHaveLength(2);
+      expect(ocultas()).toBe(0);
+    });
+
+    it('un re-render sin cambio de lista (p. ej. isLoading del padre) no apaga la animación de la primera lista', () => {
+      const lista = muchas(8);
+      const { rerender } = renderExplore({ data: lista, filteredSpecies: lista });
+
+      rerender(ui({ data: lista, filteredSpecies: lista, isLoading: false }));
+
+      expect(ocultas()).toBe(8);
+    });
+
+    it('cambiar el ancho (itemsPerPage) no deja ninguna tarjeta oculta', async () => {
+      const lista = muchas(30);
+      renderExplore({ data: lista, filteredSpecies: lista });
+      expect(screen.getAllByTestId('species')).toHaveLength(16);
+
+      window.innerWidth = 1300;
+      await act(async () => {
+        fireEvent(window, new Event('resize'));
+      });
+
+      expect(screen.getAllByTestId('species')).toHaveLength(24);
+      expect(ocultas()).toBe(0);
+    });
+
+    it('tras paginar nada queda oculto', async () => {
+      const user = userEvent.setup();
+      const lista = muchas(30);
+      renderExplore({ data: lista, filteredSpecies: lista });
+      expect(ocultas()).toBe(16);
+
+      await user.click(screen.getByRole('button', { name: 'iconButton.nextPage' }));
+
+      await waitFor(() => expect(screen.getAllByTestId('species')[0]).toHaveTextContent('Especie 16'));
+      expect(ocultas()).toBe(0);
+    });
+
+    it('tras filtrar (otra lista de especies) nada queda oculto', () => {
+      const lista = muchas(8);
+      const { rerender } = renderExplore({ data: lista, filteredSpecies: lista });
+
+      rerender(ui({ data: lista, filteredSpecies: muchas(3, 'Otra') }));
+
+      expect(screen.getAllByTestId('species')).toHaveLength(3);
+      expect(ocultas()).toBe(0);
+    });
+
+    it('la primera lista con datos se anima aunque antes estuviera cargando sin datos', () => {
+      const { rerender } = renderExplore({ data: null, filteredSpecies: [], isLoading: true });
+
+      rerender(ui({ data: muchas(5), filteredSpecies: muchas(5) }));
+
+      expect(ocultas()).toBe(5);
+    });
   });
 });

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ButtonAlternative from './ButtonAlternative';
 import ButtonPrincipal from './ButtonPrincipal';
 import DialogAdvice from './DialogAdvice';
@@ -41,6 +41,36 @@ const FileUploadForm = () => {
   const uploadingRef = useRef(false);
   // dragenter/dragleave se disparan también al cruzar hijos: se cuenta la profundidad.
   const dragDepth = useRef(0);
+  // Temporizador del anuncio pendiente (ver announce).
+  const announceTimer = useRef(null);
+
+  // Un archivo soltado fuera de la zona lo abriría el navegador y sacaría al usuario de la página.
+  useEffect(() => {
+    // Solo los arrastres de archivos: los de texto o enlaces conservan su comportamiento.
+    const preventDefault = (event) => {
+      if (event.dataTransfer?.types?.includes('Files')) event.preventDefault();
+    };
+    window.addEventListener('dragover', preventDefault);
+    window.addEventListener('drop', preventDefault);
+    return () => {
+      window.removeEventListener('dragover', preventDefault);
+      window.removeEventListener('drop', preventDefault);
+    };
+  }, []);
+
+  useEffect(() => () => clearTimeout(announceTimer.current), []);
+
+  // La región de estado sigue montada: se vacía y se escribe el texto 100 ms después, para que un anuncio
+  // idéntico al anterior vuelva a leerse (si el texto no cambia, el lector de pantalla no dice nada).
+  const announce = (text) => {
+    clearTimeout(announceTimer.current);
+    setAnnouncement('');
+    if (!text) return;
+    announceTimer.current = setTimeout(() => {
+      announceTimer.current = null;
+      setAnnouncement(text);
+    }, 100);
+  };
 
   const updateEntry = (id, patch) => {
     setEntries((current) => current.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)));
@@ -51,12 +81,13 @@ const FileUploadForm = () => {
     const selectedFiles = Array.from(fileList);
     const accepted = selectedFiles.filter((file) => file.name.toLowerCase().endsWith('.xlsx'));
 
+    const known = entries.map((entry) => entry.file);
     const newEntries = accepted
-      .filter(
-        (newFile) => !entries.some(
-          (existing) => existing.file.name === newFile.name && existing.file.size === newFile.size
-        )
-      )
+      .filter((newFile) => {
+        const duplicate = known.some((file) => file.name === newFile.name && file.size === newFile.size);
+        known.push(newFile);
+        return !duplicate;
+      })
       .map((file) => {
         nextId.current += 1;
         return { id: nextId.current, file, status: 'pending', errorKey: null };
@@ -64,7 +95,7 @@ const FileUploadForm = () => {
 
     setEntries((prevEntries) => [...prevEntries, ...newEntries]);
     setCardError(accepted.length < selectedFiles.length ? DROP_REJECTED : null);
-    setAnnouncement(newEntries.length > 0 ? t('uploadFiles.fileUploadForm.filesAdded', { count: newEntries.length }) : '');
+    announce(newEntries.length > 0 ? t('uploadFiles.fileUploadForm.filesAdded', { count: newEntries.length }) : '');
   };
 
   const handleFileSelect = (event) => {

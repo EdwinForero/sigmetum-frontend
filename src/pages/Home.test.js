@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import Home from './Home';
@@ -48,8 +48,8 @@ describe('Home', () => {
 
       const explorar = screen.getByRole('link', { name: 'home.exploreButton' });
       const galeria = screen.getByRole('link', { name: 'home.galleryButton' });
-      expect(explorar).toHaveAttribute('href', '/explorar');
-      expect(galeria).toHaveAttribute('href', '/galeria');
+      expect(explorar).toHaveAttribute('href', '/explore');
+      expect(galeria).toHaveAttribute('href', '/gallery');
       expect(explorar.querySelector('button')).toBeNull();
       expect(galeria.querySelector('button')).toBeNull();
       expect(explorar).toHaveClass('bg-brand');
@@ -103,13 +103,27 @@ describe('Home', () => {
       expect(nombre).toHaveClass('text-base', 'text-ink-soft');
     });
 
-    it('los encabezados van a la izquierda dentro de .page-container', () => {
+    it('los encabezados y los bloques de entidades van centrados dentro de .page-container', () => {
       renderHome();
 
       const titulo = screen.getByRole('heading', { level: 2, name: 'home.projectLeaderTitle' });
-      expect(titulo).not.toHaveClass('text-center');
+      expect(titulo).toHaveClass('text-center');
       expect(titulo.closest('.page-container')).not.toBeNull();
-      expect(screen.getByRole('heading', { level: 3, name: 'home.otherUniversitiesTitle' })).not.toHaveClass('text-center');
+      for (const name of ['home.otherUniversitiesTitle', 'home.collaboratingEntitiesTitle']) {
+        expect(screen.getByRole('heading', { level: 3, name })).toHaveClass('text-center');
+      }
+      const lider = screen.getByRole('link', { name: /institutions\.uma/ }).parentElement;
+      expect(lider).toHaveClass('flex', 'flex-col', 'items-center', 'gap-stack-sm');
+      const nombres = screen.getByText('Noelia Hidalgo Triana').parentElement;
+      expect(nombres).toHaveClass('w-full', 'text-center', 'sm:columns-2', 'lg:columns-3', 'gap-x-stack-xl');
+      const otra = screen.getByText('Juan F. Mota Poveda').parentElement;
+      expect(otra.className).not.toMatch(/columns-/);
+      expect(otra).toHaveClass('w-full', 'text-center');
+      const universidad = screen.getByRole('link', { name: /institutions\.ual/ }).parentElement;
+      expect(universidad).toHaveClass('flex', 'flex-col', 'items-center', 'gap-stack-sm', 'text-center');
+      const entidad = screen.getAllByRole('link').filter((l) => l.getAttribute('target') === '_blank').at(-1).parentElement;
+      expect(entidad).toHaveClass('flex', 'flex-col', 'items-center', 'text-center');
+      expect(entidad.parentElement).toHaveClass('sm:grid-cols-3');
     });
   });
 
@@ -232,6 +246,53 @@ describe('Home', () => {
 
     expect(container.querySelectorAll('.bg-brand')).toHaveLength(1);
     expect(container.querySelector('[style*="opacity"]')).toBeNull();
+  });
+
+  describe('aparición por scroll (Reveal)', () => {
+    it('anima el bloque del líder, los dos h3, las 4 universidades y las 3 entidades, sin anidar', () => {
+      const { container } = renderHome();
+
+      const animados = container.querySelectorAll('[data-reveal]');
+      expect(animados).toHaveLength(10);
+      expect(container.querySelectorAll('[data-reveal] [data-reveal]')).toHaveLength(0);
+      for (const name of ['home.otherUniversitiesTitle', 'home.collaboratingEntitiesTitle']) {
+        expect(screen.getByRole('heading', { level: 3, name })).toHaveAttribute('data-reveal');
+      }
+      expect(screen.getByRole('link', { name: /institutions\.uma/ }).parentElement).toHaveAttribute('data-reveal');
+    });
+
+    it('nada en el hero, en #home-descripcion ni en #contacto (destinos de ancla y foco)', () => {
+      const { container } = renderHome();
+
+      for (const zona of [container.querySelector(HERO), container.querySelector('#home-descripcion'), container.querySelector('#contacto')]) {
+        expect(zona).not.toBeNull();
+        expect(zona).not.toHaveAttribute('data-reveal');
+        expect(zona.querySelector('[data-reveal]')).toBeNull();
+      }
+      expect(screen.getByRole('heading', { level: 2, name: 'home.projectLeaderTitle' })).not.toHaveAttribute('data-reveal');
+    });
+
+    it('las universidades y las entidades se escalonan por su índice', () => {
+      const instancias = [];
+      vi.stubGlobal('IntersectionObserver', class {
+        constructor(callback) { this.callback = callback; instancias.push(this); }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      });
+      vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 5000, bottom: 5100, height: 100 });
+      try {
+        const { container } = renderHome();
+        const animados = [...container.querySelectorAll('[data-reveal]')];
+        act(() => instancias[0].callback(animados.map((target) => ({ target, isIntersecting: true }))));
+
+        const retraso = (id) => screen.getByRole('link', { name: new RegExp(`institutions\\.${id}`) }).parentElement.style.transitionDelay;
+        expect(['ual', 'ugr', 'uhu', 'uja'].map(retraso)).toEqual(['0ms', '60ms', '120ms', '180ms']);
+      } finally {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+      }
+    });
   });
 
   it('el código no usa hex, grises de Tailwind, font-black ni motion', () => {

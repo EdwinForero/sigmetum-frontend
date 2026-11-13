@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import FileDropdown from './FileDropdown';
 import api from '../services/api';
 
-vi.mock('../services/api', () => ({ default: { get: vi.fn() } }));
+vi.mock('../services/api', () => ({ default: { get: vi.fn(), getAuth: vi.fn() } }));
 
 const FILES = {
   Almería: [
@@ -62,8 +62,12 @@ describe('FileDropdown como <select> nativo', () => {
     vi.clearAllMocks();
     onFileSelect = vi.fn();
     onLoad = vi.fn();
+    // /list-files es público (get); las versiones .xlsx exigen token (getAuth).
     api.get.mockImplementation(async (path) => {
       if (path === '/list-files') return FILES;
+      throw new Error(`ruta inesperada ${path}`);
+    });
+    api.getAuth.mockImplementation(async (path) => {
       if (path.startsWith('/get-data/')) return [{ especie: 'a' }];
       throw new Error(`ruta inesperada ${path}`);
     });
@@ -114,7 +118,8 @@ describe('FileDropdown como <select> nativo', () => {
     await waitFor(() =>
       expect(onFileSelect).toHaveBeenCalledWith([{ especie: 'a' }], KEY_A, 'Almería 10/11/2026 · V1')
     );
-    expect(api.get).toHaveBeenCalledWith(`/get-data/${KEY_A}`);
+    expect(api.getAuth).toHaveBeenCalledWith(`/get-data/${KEY_A}`);
+    expect(api.get.mock.calls.some(([path]) => path.startsWith('/get-data/'))).toBe(false);
     expect(onLoad).toHaveBeenNthCalledWith(1, true);
     expect(onLoad).toHaveBeenLastCalledWith(false);
   });
@@ -122,7 +127,7 @@ describe('FileDropdown como <select> nativo', () => {
   it('durante la carga de la versión se ve el texto de estado y el selector muestra la elegida', async () => {
     const user = userEvent.setup();
     const datos = deferred();
-    api.get.mockImplementation((path) => (path === '/list-files' ? Promise.resolve(FILES) : datos.promise));
+    api.getAuth.mockImplementation(() => datos.promise);
     await renderDropdown();
 
     await user.selectOptions(combobox(), KEY_A);
@@ -137,10 +142,7 @@ describe('FileDropdown como <select> nativo', () => {
 
   it('si la carga de la versión falla, vuelve a la opción vacía y avisa en línea con alert', async () => {
     const user = userEvent.setup();
-    api.get.mockImplementation(async (path) => {
-      if (path === '/list-files') return FILES;
-      throw new Error('500');
-    });
+    api.getAuth.mockRejectedValue(new Error('500'));
     await renderDropdown();
 
     await user.selectOptions(combobox(), KEY_A);
@@ -156,8 +158,7 @@ describe('FileDropdown como <select> nativo', () => {
   it('«Reintentar» repite la petición de la misma clave y quita el error si sale bien', async () => {
     const user = userEvent.setup();
     let fallos = 1;
-    api.get.mockImplementation(async (path) => {
-      if (path === '/list-files') return FILES;
+    api.getAuth.mockImplementation(async () => {
       if (fallos-- > 0) throw new Error('500');
       return [{ especie: 'a' }];
     });
@@ -170,16 +171,14 @@ describe('FileDropdown como <select> nativo', () => {
     await waitFor(() =>
       expect(onFileSelect).toHaveBeenLastCalledWith([{ especie: 'a' }], KEY_B, 'Granada 02/01/2026 · V1')
     );
-    expect(api.get.mock.calls.filter(([path]) => path === `/get-data/${KEY_B}`)).toHaveLength(2);
+    expect(api.getAuth.mock.calls.filter(([path]) => path === `/get-data/${KEY_B}`)).toHaveLength(2);
     expect(screen.queryByText('dialogAdvice.errorLoadFile')).not.toBeInTheDocument();
   });
 
   it('descarta la respuesta tardía de una clave anterior (A pedida, B pedida, B llega antes que A)', async () => {
     const user = userEvent.setup();
     const pedidas = { [KEY_A]: deferred(), [KEY_B]: deferred() };
-    api.get.mockImplementation((path) =>
-      path === '/list-files' ? Promise.resolve(FILES) : pedidas[path.replace('/get-data/', '')].promise
-    );
+    api.getAuth.mockImplementation((path) => pedidas[path.replace('/get-data/', '')].promise);
     await renderDropdown();
 
     await user.selectOptions(combobox(), KEY_A);
@@ -196,9 +195,7 @@ describe('FileDropdown como <select> nativo', () => {
   it('descarta la respuesta de A aunque llegue antes que la de B, y no apaga la carga de B', async () => {
     const user = userEvent.setup();
     const pedidas = { [KEY_A]: deferred(), [KEY_B]: deferred() };
-    api.get.mockImplementation((path) =>
-      path === '/list-files' ? Promise.resolve(FILES) : pedidas[path.replace('/get-data/', '')].promise
-    );
+    api.getAuth.mockImplementation((path) => pedidas[path.replace('/get-data/', '')].promise);
     await renderDropdown();
 
     await user.selectOptions(combobox(), KEY_A);
@@ -218,9 +215,7 @@ describe('FileDropdown como <select> nativo', () => {
   it('un fallo tardío de una clave anterior no marca error', async () => {
     const user = userEvent.setup();
     const pedidas = { [KEY_A]: deferred(), [KEY_B]: deferred() };
-    api.get.mockImplementation((path) =>
-      path === '/list-files' ? Promise.resolve(FILES) : pedidas[path.replace('/get-data/', '')].promise
-    );
+    api.getAuth.mockImplementation((path) => pedidas[path.replace('/get-data/', '')].promise);
     await renderDropdown();
 
     await user.selectOptions(combobox(), KEY_A);
@@ -240,7 +235,7 @@ describe('FileDropdown como <select> nativo', () => {
     await user.selectOptions(combobox(), '');
 
     expect(onFileSelect).toHaveBeenCalledWith([], null, null);
-    expect(api.get.mock.calls.some(([path]) => path.startsWith('/get-data/'))).toBe(false);
+    expect(api.getAuth).not.toHaveBeenCalled();
   });
 
   it('si la lista falla, muestra errorLoadData con alert y «Reintentar» vuelve a pedirla', async () => {
@@ -258,12 +253,12 @@ describe('FileDropdown como <select> nativo', () => {
     expect(screen.getAllByRole('option')).toHaveLength(4);
   });
 
-  it('si no hay versiones, explica qué hacer con un enlace a /cargar-archivos', async () => {
+  it('si no hay versiones, explica qué hacer con un enlace a /upload-files', async () => {
     api.get.mockResolvedValue({});
     await renderDropdown();
 
     const enlace = screen.getByRole('link', { name: `${NS}.emptyStateLink` });
-    expect(enlace).toHaveAttribute('href', '/cargar-archivos');
+    expect(enlace).toHaveAttribute('href', '/upload-files');
     expect(enlace.closest('p')).toHaveTextContent(`${NS}.emptyState ${NS}.emptyStateLink`);
   });
 

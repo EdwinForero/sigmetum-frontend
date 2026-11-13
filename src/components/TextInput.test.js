@@ -208,6 +208,40 @@ describe('TextInput', () => {
     expect(screen.getByLabelText('Fijo')).toHaveFocus();
   });
 
+  it('con readOnly el control lleva el atributo y escribir no cambia el valor, en input y en textarea', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <>
+        <TextInput label="Uno" value="fijo" onChange={onChange} readOnly />
+        <TextInput label="Dos" value="largo" onChange={onChange} readOnly multiline />
+      </>
+    );
+
+    for (const [nombre, valor] of [['Uno', 'fijo'], ['Dos', 'largo']]) {
+      const control = screen.getByLabelText(nombre);
+      expect(control).toHaveAttribute('readonly');
+      await user.type(control, 'abc');
+      expect(control).toHaveValue(valor);
+    }
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('sin readOnly el control no lleva el atributo y se puede enfocar con Tab aunque lo lleve', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <TextInput label="Abierto" value="" onChange={() => {}} />
+        <TextInput label="Fijo" value="x" onChange={() => {}} readOnly />
+      </>
+    );
+
+    expect(screen.getByLabelText('Abierto')).not.toHaveAttribute('readonly');
+    await user.tab();
+    await user.tab();
+    expect(screen.getByLabelText('Fijo')).toHaveFocus();
+  });
+
   it('por defecto es type=text', () => {
     render(<TextInput label="Uno" value="" onChange={() => {}} />);
 

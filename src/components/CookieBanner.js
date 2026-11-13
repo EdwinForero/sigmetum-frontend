@@ -104,10 +104,12 @@ const CookieBanner = ({ aboveBottomBar = false }) => {
               i18nKey="cookies.banner.description"
               components={{
                 a: (
+                  // Enlace dentro de la frase: objetivo mínimo de 24×24 (WCAG 2.5.8), no los 44 px de los botones.
+                  // Hallazgo (sin cambiar): <a href> recarga la página entera; un Link de react-router no lo haría.
                   <a
                     href="/cookies"
                     rel="noopener noreferrer"
-                    className="underline"
+                    className="focus-ring inline-flex min-h-6 min-w-6 items-center justify-center rounded underline"
                   />
                 ),
               }}

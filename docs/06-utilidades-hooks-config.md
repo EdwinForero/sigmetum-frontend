@@ -29,6 +29,12 @@ Catálogo de claves de S3 de los recursos estáticos y la función `assetUrl`.
 
 `assetUrl(key)` → `` `${env.S3_URL}/${key}` ``. Para añadir un recurso: súbelo a esa ruta del bucket, añade la clave aquí y úsalo con `assetUrl(ASSETS.X)`. `ASSETS.LOGO` es además la **única fuente** de la clave del favicon (ver abajo): no se copia en ningún otro sitio.
 
+### `routes.js` (`src/config/routes.js`)
+Rutas de la SPA en inglés y kebab-case. `PRIVATE_PATHS` (`/upload-files`, `/manage-data`, `/manage-terms`, `/manage-gallery`, `/manage-recipients`) la usa `App` para `isPrivateRoute`; `LEGACY_REDIRECTS` (`/explorar`, `/galeria`, `/sobre-nosotros`, `/cargar-archivos`, `/administrar-datos` y `/administrar-contenido` hacia su ruta nueva; la última a `/manage-terms`) la usan `App` (una `<Route>` con `<Navigate replace to={to} />` por entrada) y `useDocumentTitle`. El destino sale siempre de esta tabla constante y no se conservan `?` ni `#` (S4). Las rutas españolas solo deben aparecer aquí y en los tests de redirección (`git grep --untracked -nE` o `rg -n`).
+
+### `reveal.js` (`src/config/reveal.js`)
+Valores únicos de la animación de aparición: `REVEAL = { durationMs: 450, distancePx: 12, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', staggerMs: 60, maxStaggered: 6, threshold: 0, rootMargin: '0px 0px -10% 0px' }` y `staggerDelay(i)` (`min(i, 5) × 60` ms). Es un módulo **puro** (sin JSX ni `import.meta.env`): `tailwind.config.js` lo importa desde Node como `./src/config/reveal.js` (con la extensión) para `transitionDuration.reveal`, `transitionTimingFunction.reveal` y la animación `page-fade`. Lo consume `Reveal` ([05](05-componentes.md#reveal)).
+
 ### `institutions.js` (`src/config/institutions.js`)
 Datos de los logos institucionales, compartidos por `Footer` y `Home`: `UNIVERSITIES` (UMA, UAL, UGR, UHU y UJA; la primera es la líder del proyecto) y `ENTITIES` (EFYVE, 3D Geospace y Malagueña Forestal). Cada elemento es `{ id, url, asset }`: `url` es el enlace externo (todas `https://`; EFYVE responde 200 con `https`, comprobado el 12/11/2026, y su entrada de `KNOWN_DEBT` en `scripts/quality-check.mjs` se retiró), `asset` la clave de `ASSETS.LOGOS` y el nombre accesible sale de `institutions.<id>` en las traducciones. Los nombres de los colaboradores siguen fijos en `Home.js`.
 
@@ -138,7 +144,7 @@ Pone `document.title` con el formato `` `${t(clave)} · SIGMETUM-A` `` según la
 | Exporta | Descripción |
 |---|---|
 | `PAGE_TITLE_KEYS` | Mapa ruta → clave de traducción (tabla en [04](04-paginas.md#título-de-página-por-ruta)) |
-| `titleKeyFor(pathname)` | Resuelve la clave con `matchPath` (sin distinguir mayúsculas y con o sin barra final); si ninguna ruta coincide, `notFound.title` |
+| `titleKeyFor(pathname)` | Resuelve primero una ruta antigua de `LEGACY_REDIRECTS` a su destino (durante la redirección no se ve el título del 404) y después la clave con `matchPath` (sin distinguir mayúsculas y con o sin barra final); si ninguna ruta coincide, `notFound.title`. `/manage-terms`, `/manage-gallery` y `/manage-recipients` usan `contentManagement.noLatinTermsTitle`, `contentManagement.galleryManagementTitle` y `contactRecipients.title` |
 | `useDocumentTitle()` (por defecto) | Efecto con dependencias `[t, key]`: se recalcula al navegar y al cambiar de idioma (en react-i18next `t` cambia de identidad con el idioma) |
 
 Al añadir una ruta en `App.js` hay que añadirla a `PAGE_TITLE_KEYS`: un test lee `App.js` y falla si falta alguna.

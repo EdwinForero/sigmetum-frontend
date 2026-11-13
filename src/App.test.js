@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useEffect } from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, useNavigate } from 'react-router-dom';
+import { MemoryRouter, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { LEGACY_REDIRECTS } from './config/routes';
 
 // Solo el recuento interpola: así se comprueban las cifras sin depender del idioma.
 vi.mock('react-i18next', () => ({
@@ -25,11 +26,12 @@ vi.mock('./services/api', () => ({
   },
 }));
 // Estado que controla el test; el mock avisa a App en un efecto (nunca durante el render) y cuenta sus montajes.
-const protectedMock = { status: 'ok', mounts: 0 };
+const protectedMock = { status: 'ok', mounts: 0, redirectWhenDenied: false };
 vi.mock('./components/ProtectedRoute', () => {
   const ProtectedRouteMock = ({ element, onStatusChange }) => {
     useEffect(() => { protectedMock.mounts += 1; }, []);
     useEffect(() => { onStatusChange?.(protectedMock.status); }, [onStatusChange]);
+    if (protectedMock.redirectWhenDenied && protectedMock.status === 'denied') return <Navigate to="/login" replace />;
     return protectedMock.status === 'ok' ? element : null;
   };
   return { default: ProtectedRouteMock };
@@ -56,8 +58,10 @@ import App from './App';
 import api from './services/api';
 
 let navigateTo;
+let currentLocation;
 const NavigatorProbe = () => {
   navigateTo = useNavigate();
+  currentLocation = useLocation();
   return null;
 };
 
@@ -86,6 +90,8 @@ describe('App', () => {
     api.get.mockImplementation(async () => []);
     protectedMock.status = 'ok';
     protectedMock.mounts = 0;
+    protectedMock.redirectWhenDenied = false;
+    document.title = '';
     vi.stubGlobal(
       'IntersectionObserver',
       class {
@@ -142,7 +148,7 @@ describe('App', () => {
   });
 
   it('en ruta privada la raíz reserva el espacio de la barra y en /login no', async () => {
-    const { container, unmount } = await renderApp('/administrar-datos');
+    const { container, unmount } = await renderApp('/manage-data');
     expect(container.querySelector('.App')).toHaveClass('pb-nav', 'md:pb-0');
     expect(container.querySelector('.App')).not.toHaveClass('md:pl-28');
     unmount();
@@ -153,22 +159,22 @@ describe('App', () => {
   });
 
   it('en una ruta privada hay dos navegaciones con nombres distintos y Cerrar sesión', async () => {
-    await renderApp('/administrar-datos');
+    await renderApp('/manage-data');
 
     expect(screen.getByRole('navigation', { name: 'navbar.label' })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
   });
 
-  it('en /explorar no hay Cerrar sesión', async () => {
-    await renderApp('/explorar');
+  it('en /explore no hay Cerrar sesión', async () => {
+    await renderApp('/explore');
 
     expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
   });
 
   it.each(['checking', 'denied', 'unavailable'])('en una ruta privada con la sesión en %s no hay barra, Cerrar sesión ni pb-nav', async (status) => {
     protectedMock.status = status;
-    const { container } = await renderApp('/administrar-datos');
+    const { container } = await renderApp('/manage-data');
 
     expect(screen.queryByRole('navigation', { name: 'privateNav.label' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
@@ -176,7 +182,7 @@ describe('App', () => {
   });
 
   it('con la sesión en ok sí hay barra, Cerrar sesión y pb-nav', async () => {
-    const { container } = await renderApp('/administrar-datos');
+    const { container } = await renderApp('/manage-data');
 
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
@@ -184,11 +190,11 @@ describe('App', () => {
   });
 
   it('al salir de las rutas privadas y volver a entrar sin confirmar, la barra no reaparece', async () => {
-    const { container } = await renderApp('/administrar-datos');
+    const { container } = await renderApp('/manage-data');
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
 
-    await goTo('/explorar', 'ok');
-    await goTo('/cargar-archivos', 'checking');
+    await goTo('/explore', 'ok');
+    await goTo('/upload-files', 'checking');
 
     expect(screen.queryByRole('navigation', { name: 'privateNav.label' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
@@ -196,10 +202,10 @@ describe('App', () => {
   });
 
   it('entre dos rutas privadas la barra se queda durante la revalidación y se vuelve a montar la ruta', async () => {
-    await renderApp('/administrar-datos');
+    await renderApp('/manage-data');
     expect(protectedMock.mounts).toBe(1);
 
-    await goTo('/cargar-archivos', 'checking');
+    await goTo('/upload-files', 'checking');
 
     expect(protectedMock.mounts).toBe(2);
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
@@ -208,7 +214,7 @@ describe('App', () => {
 
   it('el orden de Tab es: enlace de salto, cabecera, barra, contenido, pie y banner', async () => {
     const user = userEvent.setup();
-    await renderApp('/administrar-datos');
+    await renderApp('/manage-data');
     const order = [];
     const stops = [];
     for (let i = 0; i < 60; i += 1) {
@@ -235,30 +241,30 @@ describe('App', () => {
   });
 
   it('en ruta privada el banner de cookies queda sobre la barra (bottom-nav)', async () => {
-    await renderApp('/administrar-datos');
+    await renderApp('/manage-data');
 
     expect(screen.getByRole('region', { name: 'cookies.banner.title' })).toHaveClass('bottom-nav');
   });
 
   it('con la ruta privada con barra final también hay barra lateral y Cerrar sesión', async () => {
-    const { container } = await renderApp('/administrar-datos/');
+    const { container } = await renderApp('/manage-data/');
 
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
     expect(container.querySelector('.App')).toHaveClass('pb-nav');
   });
 
-  it('/administrar-datos no tiene el botón de filtros y /explorar sí', async () => {
-    const { unmount } = await renderApp('/administrar-datos');
+  it('/manage-data no tiene el botón de filtros y /explore sí', async () => {
+    const { unmount } = await renderApp('/manage-data');
     expect(screen.queryByRole('button', { name: 'privateNav.filters' })).toBeNull();
     unmount();
 
-    await renderApp('/explorar');
+    await renderApp('/explore');
     expect(screen.getByRole('button', { name: 'privateNav.filters' })).toBeInTheDocument();
   });
 
-  it('con /explorar/ (barra final) la barra lateral ofrece Filtros y no las opciones privadas', async () => {
-    await renderApp('/explorar/');
+  it('con /explore/ (barra final) la barra lateral ofrece Filtros y no las opciones privadas', async () => {
+    await renderApp('/explore/');
 
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
@@ -266,11 +272,107 @@ describe('App', () => {
   });
 
   it('las funciones que App pasa a Filter mantienen su identidad entre renders', async () => {
-    await renderApp('/explorar');
+    await renderApp('/explore');
 
     expect(filterCallbacks.length).toBeGreaterThan(1);
     expect(new Set(filterCallbacks.map((c) => c.onFilterChange)).size).toBe(1);
     expect(new Set(filterCallbacks.map((c) => c.onSpeciesSelect)).size).toBe(1);
+  });
+
+  describe('rutas en inglés y redirecciones de las URL antiguas', () => {
+    const SUFFIX = ' · SIGMETUM-A';
+    const TITLES = {
+      '/explore': 'navbar.exploreOption',
+      '/gallery': 'gallery.title',
+      '/about-us': 'aboutUs.title',
+      '/upload-files': 'uploadFiles.title',
+      '/manage-data': 'dataManagement.title',
+      '/manage-terms': 'contentManagement.noLatinTermsTitle',
+    };
+
+    it.each(Object.entries(LEGACY_REDIRECTS).flatMap(([from, to]) => [[from, to], [`${from}/`, to]]))(
+      '%s redirige a %s y se ve el título de la ruta nueva',
+      async (from, to) => {
+        await renderApp(from);
+
+        expect(currentLocation.pathname).toBe(to);
+        expect(document.title).toBe(`${TITLES[to]}${SUFFIX}`);
+      }
+    );
+
+    it.each([
+      ['/explorar?q=1', '/explore'],
+      ['/galeria#x', '/gallery'],
+      ['/sobre-nosotros/?a=1#x', '/about-us'],
+      ['/explorar?//evil.example', '/explore'],
+      ['/galeria#//evil', '/gallery'],
+    ])('%s acaba en %s sin conservar ni «?» ni «#» (S4)', async (from, to) => {
+      await renderApp(from);
+
+      expect(currentLocation.pathname).toBe(to);
+      expect(currentLocation.search).toBe('');
+      expect(currentLocation.hash).toBe('');
+    });
+
+    it('la redirección sustituye la entrada del historial: atrás vuelve a / y no a la URL antigua', async () => {
+      const { unmount } = render(
+        <MemoryRouter initialEntries={['/', '/explorar']} initialIndex={1}>
+          <NavigatorProbe />
+          <App />
+        </MemoryRouter>
+      );
+      await act(async () => {});
+      expect(currentLocation.pathname).toBe('/explore');
+
+      await act(async () => { navigateTo(-1); });
+
+      expect(currentLocation.pathname).toBe('/');
+      unmount();
+    });
+
+    it.each(['/cargar-archivos', '/administrar-datos', '/administrar-contenido'])(
+      'la privada antigua %s sin sesión acaba en /login, sin barra de gestión',
+      async (from) => {
+        protectedMock.status = 'denied';
+        protectedMock.redirectWhenDenied = true;
+        await renderApp(from);
+
+        expect(currentLocation.pathname).toBe('/login');
+        expect(screen.queryByRole('navigation', { name: 'privateNav.label' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
+      }
+    );
+
+    it('recargar directamente una ruta nueva la sirve sin redirigir', async () => {
+      await renderApp('/manage-terms');
+
+      expect(currentLocation.pathname).toBe('/manage-terms');
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('contentManagement.noLatinTermsTitle');
+    });
+
+    it.each([
+      ['/manage-data', 'dataManagement.title'],
+      ['/manage-terms', 'contentManagement.noLatinTermsTitle'],
+      ['/manage-gallery', 'contentManagement.galleryManagementTitle'],
+      ['/manage-recipients', 'contactRecipients.title'],
+    ])('%s es privada: muestra su h1 y la barra de gestión con la sesión en ok', async (path, title) => {
+      await renderApp(path);
+
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(title);
+      expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
+    });
+
+    it.each(['/manage-gallery', '/manage-recipients', '/manage-terms'])(
+      '%s no pinta nada privado hasta que la sesión está confirmada',
+      async (path) => {
+        protectedMock.status = 'checking';
+        await renderApp(path);
+
+        expect(screen.queryByRole('navigation', { name: 'privateNav.label' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'login.logOutButton' })).toBeNull();
+      }
+    );
   });
 
   describe('scroll al cambiar de ruta', () => {
@@ -305,13 +407,13 @@ describe('App', () => {
     });
   });
 
-  describe('/explorar', () => {
+  describe('/explore', () => {
     const pending = () => new Promise(() => {});
     const rows = [{ 'Especies Características': ['Pinus pinea'] }];
 
     it('mientras carga ya hay un h1 y un nodo status con el texto de carga', async () => {
       api.get.mockImplementation((url) => (url === '/get-merged-data' ? pending() : Promise.resolve([])));
-      await renderApp('/explorar');
+      await renderApp('/explore');
 
       expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('explore.title');
@@ -325,7 +427,7 @@ describe('App', () => {
       api.get.mockImplementation((url) =>
         url === '/get-merged-data' ? Promise.reject(new Error('caído')) : Promise.resolve([])
       );
-      await renderApp('/explorar');
+      await renderApp('/explore');
       expect(screen.getByText('explore.empty.errorTitle')).toBeInTheDocument();
       const callsBefore = api.get.mock.calls.filter(([url]) => url === '/get-merged-data').length;
 
@@ -348,7 +450,7 @@ describe('App', () => {
       api.get.mockImplementation((url) =>
         url === '/get-merged-data' ? Promise.reject(new Error('caído')) : Promise.resolve([])
       );
-      await renderApp('/explorar');
+      await renderApp('/explore');
 
       api.get.mockImplementation(async (url) => (url === '/get-merged-data' ? dos : []));
       await act(async () => {
@@ -362,7 +464,7 @@ describe('App', () => {
         await navigateTo('/');
       });
       await act(async () => {
-        await navigateTo('/explorar');
+        await navigateTo('/explore');
       });
       expect(screen.getByText('explore.resultsInfo 3/3')).toBeInTheDocument();
     });
@@ -371,7 +473,7 @@ describe('App', () => {
       const user = userEvent.setup();
       api.get.mockImplementation(async (url) => (url === '/get-merged-data' ? rows : []));
       filterMock.filtered = [];
-      await renderApp('/explorar');
+      await renderApp('/explore');
       expect(screen.getByText('explore.empty.noResultsTitle')).toBeInTheDocument();
       expect(filterMock.mounts).toBe(1);
 

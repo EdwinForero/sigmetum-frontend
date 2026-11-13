@@ -282,8 +282,6 @@
     }
   },
   "contentManagement": {
-    "title": "Content management",
-    "description": "On this page, you can manage the content displayed in certain sections of the website.",
     "noLatinTermsTitle": "Non-Latinisms Exception",
     "noLatinTermsTooltip": "In this section you can add or remove terms that you do not want to appear in italics on the 'explore' page.",
     "noLatinTermsPlaceholder": "Term",
@@ -322,6 +320,7 @@
     "errorAdd": "The recipient could not be added. Please try again later.",
     "errorRemove": "The recipient could not be removed. Please try again later.",
     "loading": "Loading recipients…",
+    "loadingHint": "Loading the list…",
     "listLabel": "Recipient list",
     "errors": {
       "duplicate": "That e-mail is already on the list."
@@ -417,7 +416,9 @@
   "privateNav": {
     "label": "Management",
     "data": "Data",
-    "content": "Content",
+    "terms": "Terms",
+    "gallery": "Gallery",
+    "recipients": "Emails",
     "upload": "Upload",
     "filters": "Filters"
   }

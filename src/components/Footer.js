@@ -37,9 +37,9 @@ const Footer = () => {
           <h2 className={H2}>{t('footer.linksTitle')}</h2>
           <ul className="mt-stack grid grid-cols-2 gap-x-stack md:grid-cols-1">
             <li><Link to="/" className={linkClass}>{t('footer.homeOption')}</Link></li>
-            <li><Link to="/explorar" className={linkClass}>{t('footer.exploreOption')}</Link></li>
-            <li><Link to="/galeria" className={linkClass}>{t('footer.galleryOption')}</Link></li>
-            <li><Link to="/sobre-nosotros" className={linkClass}>{t('footer.aboutUsOption')}</Link></li>
+            <li><Link to="/explore" className={linkClass}>{t('footer.exploreOption')}</Link></li>
+            <li><Link to="/gallery" className={linkClass}>{t('footer.galleryOption')}</Link></li>
+            <li><Link to="/about-us" className={linkClass}>{t('footer.aboutUsOption')}</Link></li>
             <li><Link to="/cookies" className={linkClass}>{t('footer.cookies')}</Link></li>
           </ul>
         </div>

@@ -50,6 +50,20 @@ describe('Header', () => {
     expect(enlace.closest('header')).toHaveClass('h-16');
   });
 
+  it('el contenido va dentro del ancho común (.page-container) y el header no lleva relleno lateral', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>
+    );
+
+    const header = container.querySelector('header');
+    expect(header.className).not.toMatch(/(^|\s)(min-\[\d+px\]:|max-\[\d+px\]:)?px-/);
+    const inner = header.firstElementChild;
+    expect(inner).toHaveClass('page-container', 'flex', 'h-full', 'items-center', 'max-[359px]:px-stack-sm');
+    expect(inner.contains(screen.getByRole('link', { name: 'SIGMETUM-A' }))).toBe(true);
+  });
+
   describe('sombra con scroll', () => {
     const setScrollY = (value) => {
       Object.defineProperty(window, 'scrollY', { value, configurable: true, writable: true });
@@ -105,12 +119,12 @@ describe('Header', () => {
   });
 
   describe('a 320 px', () => {
-    it('usa el relleno reducido bajo 360 px y el gutter desde 360 px', () => {
+    it('conserva el relleno reducido de 8 px bajo 360 px y el gutter común desde 360 px', () => {
       render(<MemoryRouter><Header /></MemoryRouter>);
 
-      const header = screen.getByRole('banner');
-      expect(header).toHaveClass('px-stack-sm', 'min-[360px]:px-gutter');
-      expect(header.className).not.toMatch(/(^|\s)(px-2|sm:px-4)(\s|$)/);
+      const interior = screen.getByRole('banner').firstElementChild;
+      expect(interior).toHaveClass('page-container', 'max-[359px]:px-stack-sm');
+      expect(interior.className).not.toMatch(/(^|\s)(px-2|sm:px-4)(\s|$)/);
     });
 
     it('el nombre se oculta visualmente bajo 360 px pero el enlace conserva su nombre accesible', () => {

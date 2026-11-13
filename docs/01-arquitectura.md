@@ -65,24 +65,28 @@ CookieBanner (sticky al final de la raíz, hasta que se acepta)
 Bajo md, Sidebar es una barra inferior fija (h-nav)
 ```
 
-La barra de gestión (`Sidebar`) aparece solo en `/explorar`, `/cargar-archivos`, `/administrar-datos` y `/administrar-contenido`: bajo `md` es una barra inferior fija y desde `md` una columna `sticky` de `w-28` (`md:top-16`, alto `100dvh - 4rem`, hija de la fila flex junto a `main`, ya no `fixed`: no deja hueco bajo ella ni pasa por encima del pie); la raíz reserva solo el espacio de la barra inferior con `pb-nav md:pb-0` (ya no `md:pl-28`) y aparece solo con la sesión confirmada en las rutas privadas (`privateSessionOk`, ver más abajo); el banner de cookies, que es `sticky` y ocupa su sitio en el flujo, se coloca encima de la barra (`bottom-nav md:bottom-0`). Hay un solo `<header>`, dos `<nav>` con nombre (`navbar.label`, «Principal», y `privateNav.label`, «Gestión»), un solo `<main>` y un solo `<footer>`. En las capas, la cabecera es `z-50`, la barra `z-40`, los avisos `z-[55]` y el panel de filtros con su fondo `z-[60]`, por encima de todo.
+La barra de gestión (`Sidebar`) aparece solo en `/explore` y en las cinco rutas privadas (`/upload-files`, `/manage-data`, `/manage-terms`, `/manage-gallery` y `/manage-recipients`): bajo `md` es una barra inferior fija y desde `md` una columna `sticky` de `w-28` (`md:top-16`, alto `100dvh - 4rem`, hija de la fila flex junto a `main`, ya no `fixed`: no deja hueco bajo ella ni pasa por encima del pie); la raíz reserva solo el espacio de la barra inferior con `pb-nav md:pb-0` (ya no `md:pl-28`) y aparece solo con la sesión confirmada en las rutas privadas (`privateSessionOk`, ver más abajo); el banner de cookies, que es `sticky` y ocupa su sitio en el flujo, se coloca encima de la barra (`bottom-nav md:bottom-0`). Hay un solo `<header>`, dos `<nav>` con nombre (`navbar.label`, «Principal», y `privateNav.label`, «Gestión»), un solo `<main>` y un solo `<footer>`. En las capas, la cabecera es `z-50`, la barra `z-40`, los avisos `z-[55]` y el panel de filtros con su fondo `z-[60]`, por encima de todo.
 
 ## Rutas
 
 | Ruta | Página | Acceso | Descripción |
 |---|---|---|---|
 | `/` | `Home` | Pública | Portada, universidades y entidades colaboradoras, formulario de contacto |
-| `/explorar` | `Explore` | Pública | Listado paginado de especies características con filtros |
-| `/galeria` | `VegetationGallery` | Pública | Galería de fotos de vegetación |
-| `/sobre-nosotros` | `About` | Pública | Propósito, misión y valores del proyecto |
+| `/explore` | `Explore` | Pública | Listado paginado de especies características con filtros |
+| `/gallery` | `VegetationGallery` | Pública | Galería de fotos de vegetación |
+| `/about-us` | `About` | Pública | Propósito, misión y valores del proyecto |
 | `/cookies` | `Cookies` | Pública | Política de cookies |
 | `/login` | `Login` | Pública | Acceso de administradores: formulario propio (correo y contraseña, con los retos de Cognito) |
-| `/cargar-archivos` | `FilesUpload` | **Protegida** | Subida de Excel de datos por provincia |
-| `/administrar-datos` | `DataManagement` | **Protegida** | Consulta, descarga, activación y borrado de versiones |
-| `/administrar-contenido` | `ContentManagement` | **Protegida** | Términos no latinos, imágenes de la galería y destinatarios de las dudas de contacto |
+| `/upload-files` | `FilesUpload` | **Protegida** | Subida de Excel de datos por provincia |
+| `/manage-data` | `DataManagement` | **Protegida** | Consulta, descarga, activación y borrado de versiones |
+| `/manage-terms` | `TermsManagement` | **Protegida** | Términos no latinos (excepción de cursiva) |
+| `/manage-gallery` | `GalleryManagement` | **Protegida** | Imágenes de la galería |
+| `/manage-recipients` | `RecipientsManagement` | **Protegida** | Destinatarios de las dudas de contacto |
 | `*` | `NotFound` | Pública | Página 404 |
 
-Las rutas protegidas se envuelven en `<ProtectedRoute element={...} />`, que valida la sesión contra `GET /auth` en cada entrada y pinta solo la página. Cada una lleva `key` propia (`cargar-archivos`, `administrar-contenido`, `administrar-datos`) y `onStatusChange`: React Router reutilizaba la misma instancia al pasar de una ruta privada a otra y no revalidaba, así que ahora cambiar de ruta privada monta una `ProtectedRoute` nueva y vuelve a llamar a `/auth` (volver a pulsar la ruta actual no revalida). Mientras valida (`checking`) no pinta nada (antes, un spinner «Loading…»; solo un `status` oculto para lectores de pantalla tras «Reintentar»). `App` guarda `privateSessionOk`: pasa a `true` con `ok`, a `false` con `denied` y `unavailable` y al salir de las rutas privadas, y `checking` no lo cambia, de modo que entre dos páginas privadas la barra se queda mientras se revalida y el contenido nuevo no se pinta hasta tener `ok` (decisión del usuario; nada privado, barra incluida, hasta confirmar la sesión en la primera entrada). Si la revalidación entre páginas privadas acaba en `unavailable`, la barra desaparece (ver B47 en [09](09-estado-actual-y-deuda-tecnica.md)). (el botón de cierre de sesión está en la barra de gestión y `ProtectedRoute` lo conserva únicamente en el aviso de servicio no disponible; ver [05-componentes.md](05-componentes.md#protectedroute)).
+Las rutas de la SPA están en inglés y en kebab-case (`src/config/routes.js`: `PRIVATE_PATHS` y `LEGACY_REDIRECTS`). Las seis URL españolas antiguas (`/explorar`, `/galeria`, `/sobre-nosotros`, `/cargar-archivos`, `/administrar-datos` y `/administrar-contenido`, esta última hacia `/manage-terms`) son rutas de `App` con `<Navigate replace to={to} />`: el destino sale siempre de la tabla constante, **no se conservan `?` ni `#`** (S4 intacta, ver [seguridad](guias/seguridad.md)) y son redirecciones solo de cliente (no hay 301: ver [para-infra.md](integracion/para-infra.md)). Una ruta privada antigua sin sesión acaba en `/login` y el título de la pestaña ya es el de la ruta nueva. `/` , `/login` y `/cookies` no cambian.
+
+Las rutas protegidas se envuelven en `<ProtectedRoute element={...} />`, que valida la sesión contra `GET /auth` en cada entrada y pinta solo la página. Cada una lleva `key` propia (`upload-files`, `manage-data`, `manage-terms`, `manage-gallery`, `manage-recipients`) y `onStatusChange`: React Router reutilizaba la misma instancia al pasar de una ruta privada a otra y no revalidaba, así que ahora cambiar de ruta privada monta una `ProtectedRoute` nueva y vuelve a llamar a `/auth` (volver a pulsar la ruta actual no revalida). Mientras valida (`checking`) no pinta nada (antes, un spinner «Loading…»; solo un `status` oculto para lectores de pantalla tras «Reintentar»). `App` guarda `privateSessionOk`: pasa a `true` con `ok`, a `false` con `denied` y `unavailable` y al salir de las rutas privadas, y `checking` no lo cambia, de modo que entre dos páginas privadas la barra se queda mientras se revalida y el contenido nuevo no se pinta hasta tener `ok` (decisión del usuario; nada privado, barra incluida, hasta confirmar la sesión en la primera entrada). Si la revalidación entre páginas privadas acaba en `unavailable`, la barra desaparece (ver B47 en [09](09-estado-actual-y-deuda-tecnica.md)). (el botón de cierre de sesión está en la barra de gestión y `ProtectedRoute` lo conserva únicamente en el aviso de servicio no disponible; ver [05-componentes.md](05-componentes.md#protectedroute)).
 
 ## Estado global y flujo de datos
 
@@ -95,7 +99,7 @@ No hay Redux ni Context: el estado de datos compartido vive en `App` y se pasa p
 | `selectedSpecies` | `Set<string> \| undefined` | Especies marcadas en el filtro "Especies Características" |
 | `noItalicTerms` | `Array<{ term }>` | Términos que no se escriben en cursiva (`GET /list-terms`) |
 | `filteredData` | `Array<Registro>` | Registros de la versión elegida en "Administrar datos" (los fija `handleFileDropdownSelect`) |
-| `privateSessionOk` | `boolean` | `ProtectedRoute` confirmó la sesión en una ruta privada; gobierna la barra de gestión fuera de `/explorar` |
+| `privateSessionOk` | `boolean` | `ProtectedRoute` confirmó la sesión en una ruta privada; gobierna la barra de gestión fuera de `/explore` |
 | `isLoading`, `exploreError` | `boolean` | Carga y error del explorador. Van como props de `Explore` (`isLoading`, `hasError`), que pinta el estado; `App` ya no sustituye la página por un `LoadSpinner` |
 | `filterResetKey` | `number` | `key` del `Filter`: `handleClearFilters` la incrementa y el `Filter` remontado borra su selección (botón «Quitar filtros» de `Explore`) |
 
@@ -107,8 +111,8 @@ Un **registro** es una fila del Excel convertida a JSON por el backend. Las clav
 
 El `useEffect` de `App` sobre `location.pathname`:
 
-- **`/explorar`**: `loadExplore()` activa la carga, limpia filtros y selección y descarga en paralelo `get-merged-data` y `list-terms`; al terminar, la quita. La misma función es el «Reintentar» de `Explore` (`onRetry`): repite las mismas llamadas, sin endpoints nuevos.
-- **`/administrar-datos`**: vacía `filteredData`. Los datos se cargan cuando el usuario elige una versión en `FileDropdown`.
+- **`/explore`**: `loadExplore()` activa la carga, limpia filtros y selección y descarga en paralelo `get-merged-data` y `list-terms`; al terminar, la quita. La misma función es el «Reintentar» de `Explore` (`onRetry`): repite las mismas llamadas, sin endpoints nuevos.
+- **`/manage-data`**: vacía `filteredData`. Los datos se cargan cuando el usuario elige una versión en `FileDropdown`.
 - **Cualquier otra ruta**: libera `mergedData` y todos los filtros para no mantener en memoria el conjunto completo.
 
 Un efecto aparte, sobre `[path, location.hash]`, hace `window.scrollTo(0, 0)` solo si la URL no lleva `#ancla` (con `/#contacto`, el enlace del pie, `Home` lleva su sección a la vista).
@@ -122,7 +126,7 @@ sequenceDiagram
     participant F as Filter (Sidebar)
     participant E as Explore
     participant API as Backend
-    U->>A: navega a /explorar
+    U->>A: navega a /explore
     A->>API: GET /get-merged-data y GET /list-terms
     API-->>A: registros y términos
     A->>E: data, filteredSpecies, noItalicTerms
@@ -167,7 +171,7 @@ Al cancelar (botón "Cancelar" o clic fuera del diálogo), el frontend envía `c
 Login con formulario propio y SRP (`USER_SRP_AUTH`) contra `cognito-idp` (cliente público, sin secreto). La contraseña solo se usa para el cálculo local y nunca viaja. El almacén de la sesión está en `services/session.js`; todas las peticiones a Cognito, en `services/api.js`.
 
 1. `/login`: `LoginForm` pinta el formulario y `useCognitoLogin` lleva los pasos `credentials`, `newPassword`, `mfaSetup` y `totp`. `api.signIn` hace `InitiateAuth` (`USER_SRP_AUTH`), calcula la prueba con `services/srp.js` y responde `PASSWORD_VERIFIER`.
-2. Retos posibles: `NEW_PASSWORD_REQUIRED` (primer acceso: contraseña nueva), `MFA_SETUP` (registro de la aplicación de autenticación: `AssociateSoftwareToken`, `VerifySoftwareToken`) y `SOFTWARE_TOKEN_MFA` (código de seis dígitos). Con el resultado final `api` guarda el token de acceso y el de refresco en `localStorage` (`token` y `refreshToken`; el de identidad nunca) y `LoginForm` navega a `/cargar-archivos`.
+2. Retos posibles: `NEW_PASSWORD_REQUIRED` (primer acceso: contraseña nueva), `MFA_SETUP` (registro de la aplicación de autenticación: `AssociateSoftwareToken`, `VerifySoftwareToken`) y `SOFTWARE_TOKEN_MFA` (código de seis dígitos). Con el resultado final `api` guarda el token de acceso y el de refresco en `localStorage` (`token` y `refreshToken`; el de identidad nunca) y `LoginForm` navega a `/upload-files`.
 3. Las llamadas protegidas añaden `Authorization: Bearer <token de acceso>` (`api.getAuth`, `postAuth`, `postFormAuth`, `deleteAuth`).
 4. `401`: una renovación con el token de refresco (`InitiateAuth`, `REFRESH_TOKEN_AUTH`) y un reintento; si Cognito rechaza el refresco, se borra la sesión y se va a `/login`; si no está disponible, se conserva. `503` de autenticación: dos reintentos (1 s y 3 s) sin borrar nada (ver [03-api.md](03-api.md#ante-un-401)).
 5. `ProtectedRoute` llama a `GET /auth` al montar cada ruta protegida y, al tener `key` propia, también al cambiar de una ruta privada a otra (en el estado `ok` devuelve solo la página): sin token o con `401` va a `/login`; con cualquier otro error (red, `403`, `5xx`) muestra un aviso de servicio no disponible con botón «Reintentar» y «Cerrar sesión», sin borrar la sesión.

@@ -3,6 +3,9 @@ import { test, expect, ROUTES, WIDTHS, trackLayoutShift, scrollThrough } from '.
 // Criterios 35 y 43 a 48 de la spec «pulido de páginas públicas»: cada ruta pública a 390, 768, 1024 y
 // 1440 px (en `es`; en `en` solo a 390 y 768, donde el texto más largo rompe antes) con la API simulada.
 
+// Ruta sin página: el 404 también anima su bloque de contenido.
+const NOT_FOUND = '/no-existe';
+
 const HEIGHT = { 390: 844, 768: 1024, 1024: 768, 1440: 900 };
 
 // Mide la página en el navegador. Se ejecuta con `page.evaluate`: no puede usar nada del módulo.
@@ -20,7 +23,7 @@ const measure = () => {
     const rect = el.getBoundingClientRect();
     return rect.width > 1 && rect.height > 1;
   };
-  // La barra inferior de Sidebar (fija, ancho completo, en /explorar) queda fuera de la comprobación de márgenes.
+  // La barra inferior de Sidebar (fija, ancho completo, en /explore) queda fuera de la comprobación de márgenes.
   const inBottomBar = (el) => {
     const nav = el.closest('nav');
     return Boolean(nav) && getComputedStyle(nav).position === 'fixed' && nav.getBoundingClientRect().top > 0;
@@ -126,6 +129,13 @@ const open = async (page, route) => {
   await page.waitForTimeout(1000);
 };
 
+// Recorre la página, espera a que acaben las transiciones de aparición (450 ms más el escalonado de 300 ms) y vuelve arriba.
+const settleReveals = async (page) => {
+  await scrollThrough(page);
+  await page.waitForTimeout(1000);
+  await page.evaluate(() => window.scrollTo(0, 0));
+};
+
 const CASES = WIDTHS.flatMap((width) =>
   ['es', 'en'].filter((lang) => lang === 'es' || width <= 768).map((lang) => ({ width, lang }))
 );
@@ -137,6 +147,8 @@ for (const { width, lang } of CASES) {
     for (const route of ROUTES) {
       test(`${route}: sin desbordamiento, estructura, objetivos, opacidad, márgenes y solapes`, async ({ page }, testInfo) => {
         await open(page, route);
+        // La opacidad se mide tras recorrer la página: las apariciones por scroll (Reveal) ya han terminado (F3.5).
+        await settleReveals(page);
         await page.screenshot({ path: testInfo.outputPath(`captura-${lang}-${width}.png`), fullPage: true });
         const m = await page.evaluate(measure);
 
@@ -152,7 +164,7 @@ for (const { width, lang } of CASES) {
   });
 }
 
-// Criterio 44: a 1024 y 1440 px la `x` del <h1> es la misma en todas las páginas. En /explorar la barra
+// Criterio 44: a 1024 y 1440 px la `x` del <h1> es la misma en todas las páginas. En /explore la barra
 // lateral fija (112 px, fuera de alcance) desplaza la columna, así que se mide respecto al <main>
 // y se anota como excepción (pregunta 1 de la puerta 2).
 for (const width of [1024, 1440]) {
@@ -167,10 +179,10 @@ for (const width of [1024, 1440]) {
       }));
     }
     testInfo.annotations.push({ type: 'x del h1', description: JSON.stringify(xs) });
-    const regular = ROUTES.filter((route) => route !== '/explorar').map((route) => xs[route].h1);
+    const regular = ROUTES.filter((route) => route !== '/explore').map((route) => xs[route].h1);
     expect(new Set(regular).size, `x del <h1> por ruta: ${JSON.stringify(xs)}`).toBe(1);
-    // Respecto al <main>, /explorar no se sale del contenedor: x >= 0 y dentro del ancho.
-    expect(xs['/explorar'].h1 - xs['/explorar'].main).toBeGreaterThanOrEqual(0);
+    // Respecto al <main>, /explore no se sale del contenedor: x >= 0 y dentro del ancho.
+    expect(xs['/explore'].h1 - xs['/explore'].main).toBeGreaterThanOrEqual(0);
   });
 }
 
@@ -190,14 +202,14 @@ for (const [width, columns] of [[390, 2], [768, 1], [1024, 1]]) {
 test.describe('menú móvil', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('en /galeria el ítem activo tiene aria-current, subrayado y grosor de 4 px', async ({ page }) => {
-    await open(page, '/galeria');
+  test('en /gallery el ítem activo tiene aria-current, subrayado y grosor de 4 px', async ({ page }) => {
+    await open(page, '/gallery');
     await page.locator('#navbar-menu-button').click();
     const panel = page.locator('#navbar-menu-panel');
     await expect(panel).toBeVisible();
     const active = panel.locator('a[aria-current="page"]');
     await expect(active).toHaveCount(1);
-    await expect(active).toHaveAttribute('href', '/galeria');
+    await expect(active).toHaveAttribute('href', '/gallery');
     const style = await active.evaluate((el) => {
       const { textDecorationLine, textDecorationThickness } = getComputedStyle(el);
       return { textDecorationLine, textDecorationThickness };
@@ -239,6 +251,180 @@ test.describe('movimiento reducido', () => {
   }
 });
 
+// F3.5 (A4): con movimiento reducido, tras recorrer la página nada de lo que aparece por scroll queda a medias:
+// ningún [data-reveal] con opacidad menor de 1 ni transform, y ni él ni el contenedor con animate-page-fade animan.
+// A4 se limita a [data-reveal] y a animate-page-fade (desviación documentada: no es un barrido de toda la página).
+test.describe('movimiento reducido: apariciones', () => {
+  test.use({ reducedMotion: 'reduce', viewport: { width: 390, height: 844 } });
+
+  for (const route of [...ROUTES, NOT_FOUND]) {
+    test(`${route}: tras scrollThrough ningún [data-reveal] con opacidad < 1 ni transform y sin animación de aparición`, async ({ page }) => {
+      await open(page, route);
+      await scrollThrough(page);
+      await page.waitForTimeout(300);
+      const result = await page.evaluate(() => {
+        const targets = [...document.querySelectorAll('[data-reveal], .animate-page-fade')];
+        const bad = (el) => {
+          const style = getComputedStyle(el);
+          return {
+            el: el.tagName.toLowerCase(),
+            opacity: Number(style.opacity),
+            transform: style.transform,
+            animations: el.getAnimations().length,
+            hidden: el.classList.contains('reveal-hidden'),
+          };
+        };
+        return {
+          count: document.querySelectorAll('[data-reveal]').length,
+          bad: targets.map(bad).filter((r) => r.opacity < 1 || r.transform !== 'none' || r.animations > 0 || r.hidden),
+        };
+      });
+      expect(result.bad).toEqual([]);
+      expect(result.count, 'hay elementos [data-reveal] que medir').toBeGreaterThan(0);
+    });
+  }
+});
+
+// F3.5: ningún Reveal anidado en ninguna ruta pública (ni en el 404) una vez recorrida la página.
+test.describe('Reveal no se anida', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  for (const route of [...ROUTES, NOT_FOUND]) {
+    test(`${route}: [data-reveal] [data-reveal] no devuelve nada`, async ({ page }) => {
+      await open(page, route);
+      await scrollThrough(page);
+      const nested = await page.evaluate(() => document.querySelectorAll('[data-reveal] [data-reveal]').length);
+      expect(nested).toBe(0);
+    });
+  }
+});
+
+// F3.5 (A5): CLS con las apariciones animadas por debajo de 0,01 a 390, 1440 y 2560 px en todas las rutas públicas.
+// Si la línea base sin animaciones (movimiento reducido) ya es de 0,01 o más, lo que se exige es la diferencia:
+// las apariciones no pueden sumar 0,01 sobre ella. (Hoy solo /gallery a 390 px: 0,029 con y sin animaciones.)
+const CLS_LIMIT = 0.01;
+const measureCls = async (page, route) => {
+  await page.goto(route);
+  await expect(page.locator('h1')).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  await scrollThrough(page);
+  await page.waitForTimeout(1000);
+  return page.evaluate(() => window.__cls);
+};
+
+for (const width of [390, 1440, 2560]) {
+  for (const route of [...ROUTES, NOT_FOUND]) {
+    test(`CLS de ${route} a ${width} px es menor de 0,01 (o no suma 0,01 sobre su línea base sin animaciones)`, async ({ page }, testInfo) => {
+      await page.setViewportSize({ width, height: width === 2560 ? 1440 : HEIGHT[width] });
+      await trackLayoutShift(page);
+      const cls = await measureCls(page, route);
+      if (cls < CLS_LIMIT) return;
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      const base = await measureCls(page, route);
+      testInfo.annotations.push({ type: 'línea base', description: `CLS ${cls} con animaciones y ${base} sin ellas` });
+      expect(cls - base, `CLS ${cls} con animaciones y ${base} sin ellas`).toBeLessThan(CLS_LIMIT);
+    });
+  }
+}
+
+// F3.5: en /explore, con las tarjetas ya reveladas, una tarjeta de la segunda fila abre su ficha con Enter:
+// el contenedor fixed inset-0 cubre la ventana (±1 px; un transform residual del Reveal lo desplazaría) y
+// la tarjeta no deja transform. La de la segunda fila está en la primera pantalla (visible desde el principio); la última
+// (a 390 px, y a 1440 px con una ventana baja) queda bajo el pliegue y es una que de verdad se ha revelado por scroll.
+for (const [width, height, which] of [[390, 844, 'segunda fila'], [1440, 900, 'segunda fila'], [390, 844, 'última'], [1440, 500, 'última']]) {
+  test(`/explore a ${width}x${height} px: la ficha de la tarjeta de la ${which} cubre la ventana y la tarjeta no tiene transform`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await open(page, '/explore');
+    await scrollThrough(page);
+    await page.waitForTimeout(1000);
+    const cards = page.locator('[data-reveal] > [role="button"]');
+    const second = await cards.evaluateAll((els) => {
+      const tops = els.map((el) => Math.round(el.getBoundingClientRect().top + window.scrollY));
+      return tops.findIndex((top) => top > tops[0] + 1);
+    });
+    expect(second, 'hay una segunda fila de tarjetas').toBeGreaterThan(0);
+    const index = which === 'última' ? (await cards.count()) - 1 : second;
+    if (which === 'última') await expect(cards.nth(index).locator('..'), 'la tarjeta se reveló por scroll').toHaveClass(/reveal-in/);
+    await cards.nth(index).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.waitForTimeout(600);
+    const m = await page.evaluate((index) => {
+      const wrapper = document.querySelectorAll('[data-reveal] > [role="button"]')[index].parentElement;
+      const container = document.querySelector('[role="dialog"]').closest('.fixed');
+      const box = (el) => {
+        const rect = el.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      };
+      // Sonda: un fixed inset-0 sin ningún ancestro con transform. Mide el viewport de diseño, que es innerWidth menos
+      // la reserva de la barra de desplazamiento (html lleva scrollbar-gutter: stable: 15 px en Chromium de escritorio).
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;inset:0;visibility:hidden;pointer-events:none';
+      document.body.append(probe);
+      const reference = box(probe);
+      probe.remove();
+      return {
+        rect: box(container),
+        reference,
+        inner: { width: window.innerWidth, height: window.innerHeight },
+        wrapperTransform: getComputedStyle(wrapper).transform,
+        cardTransform: getComputedStyle(wrapper.firstElementChild).transform,
+      };
+    }, index);
+    const near = (a, b) => Math.abs(a - b) <= 1;
+    const same = (a, b) => near(a.x, b.x) && near(a.y, b.y) && near(a.width, b.width) && near(a.height, b.height);
+    // El contenedor mide {0, 0, innerWidth, innerHeight} salvo la reserva de la barra (como mucho 17 px de ancho).
+    expect(m.reference.x === 0 && m.reference.y === 0 && near(m.reference.height, m.inner.height), JSON.stringify(m)).toBe(true);
+    expect(m.inner.width - m.reference.width, JSON.stringify(m)).toBeLessThanOrEqual(17);
+    expect(same(m.rect, m.reference), JSON.stringify(m)).toBe(true);
+    expect(m.wrapperTransform).toBe('none');
+    expect(m.cardTransform).toBe('none');
+  });
+}
+
+// F3.5: al llegar a /cookies desde el pie (la página venía scrollada abajo) el <h1> y la primera sección están a
+// opacidad 1 y la página arriba: App sube el scroll después del primer render y Reveal no oculta la primera pantalla.
+test('al llegar a /cookies desde un enlace del pie el <h1> y la primera sección tienen opacidad 1 y scrollY 0', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, '/about-us');
+  await scrollThrough(page);
+  await page.locator('footer a[href="/cookies"]').click();
+  await expect(page).toHaveURL(/\/cookies$/);
+  await expect(page.locator('h1')).toBeVisible();
+  await page.waitForTimeout(100);
+  const m = await page.evaluate(() => {
+    const opacity = (el) => {
+      let value = 1;
+      for (let node = el; node; node = node.parentElement) value *= Number(getComputedStyle(node).opacity);
+      return value;
+    };
+    return { scrollY: window.scrollY, h1: opacity(document.querySelector('h1')), section: opacity(document.querySelector('main section')) };
+  });
+  expect(m).toEqual({ scrollY: 0, h1: 1, section: 1 });
+});
+
+// F3.5: al imprimir nada queda oculto: ningún [data-reveal] con opacidad menor de 1, aunque esté bajo el pliegue.
+test.describe('impresión', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  for (const route of [...ROUTES, NOT_FOUND]) {
+    test(`${route}: con emulateMedia print ningún [data-reveal] con opacidad < 1`, async ({ page }) => {
+      await open(page, route);
+      if (route === '/') {
+        const hidden = await page.locator('[data-reveal].reveal-hidden').count();
+        expect(hidden, 'antes de imprimir hay elementos ocultos por debajo del pliegue').toBeGreaterThan(0);
+      }
+      await page.emulateMedia({ media: 'print' });
+      const faded = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-reveal]')]
+          .map((el) => ({ el: el.tagName.toLowerCase(), opacity: Number(getComputedStyle(el).opacity), transform: getComputedStyle(el).transform }))
+          .filter((r) => r.opacity < 1 || r.transform !== 'none')
+      );
+      expect(faded).toEqual([]);
+    });
+  }
+});
+
 // Criterio 5: CLS de Home. Se recorre la página para que carguen las imágenes diferidas.
 for (const width of [390, 1440]) {
   test(`CLS de Home a ${width} px es como mucho 0,1`, async ({ page }) => {
@@ -254,8 +440,8 @@ for (const width of [390, 1440]) {
   });
 }
 
-test('/explorar: el recuento muestra el total real tras cargar (30 de 30), no 0', async ({ page }) => {
-  await page.goto('/explorar');
+test('/explore: el recuento muestra el total real tras cargar (30 de 30), no 0', async ({ page }) => {
+  await page.goto('/explore');
   await expect(page.getByText(/Mostrando \d+ de 30 resultados/)).toBeVisible();
 });
 
@@ -272,3 +458,103 @@ test.describe('banner de cookies', () => {
     expect(cookies.find((cookie) => cookie.name === 'cookieConsent')?.value).toBe('accepted');
   });
 });
+
+// D1 y D2 (F2.1): a 1440 px la cabecera sigue el ancho común. El logo empieza donde el <h1> y donde el
+// contenedor del pie; el borde derecho de la navegación coincide con el del contenido del pie (±1 px).
+test.describe('cabecera en el ancho común', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  for (const route of ['/', '/about-us']) {
+    test(`${route}: logo, <h1> y pie comparten borde izquierdo y la navegación el derecho`, async ({ page }) => {
+      await open(page, route);
+      const m = await page.evaluate(() => {
+        const edges = (el) => {
+          const rect = el.getBoundingClientRect();
+          const style = getComputedStyle(el);
+          return { left: rect.left + parseFloat(style.paddingLeft), right: rect.right - parseFloat(style.paddingRight) };
+        };
+        const footer = edges(document.querySelector('footer .page-container'));
+        return {
+          logo: document.querySelector('header a[aria-label="SIGMETUM-A"]').getBoundingClientRect().left,
+          h1: document.querySelector('h1').getBoundingClientRect().left,
+          footerLeft: footer.left,
+          navRight: document.querySelector('header nav').getBoundingClientRect().right,
+          footerRight: footer.right,
+        };
+      });
+      expect(Math.abs(m.logo - m.h1), JSON.stringify(m)).toBeLessThanOrEqual(1);
+      expect(Math.abs(m.logo - m.footerLeft), JSON.stringify(m)).toBeLessThanOrEqual(1);
+      expect(Math.abs(m.navRight - m.footerRight), JSON.stringify(m)).toBeLessThanOrEqual(1);
+    });
+  }
+});
+
+// E1 (F2.2): las entidades de Home van centradas. Los encabezados y el bloque del líder quedan en el centro
+// del contenido; cada grupo de bloques (universidades, entidades) está centrado y cada logo en su bloque (±1 px).
+for (const width of [390, 768, 1024, 1440, 2560]) {
+  test(`Home: los bloques de entidades están centrados a ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: width >= 1440 ? 1080 : HEIGHT[width] ?? 900 });
+    await open(page, '/');
+    const m = await page.evaluate(() => {
+      const section = document.querySelector('#home-descripcion + section');
+      const content = section.getBoundingClientRect();
+      const style = getComputedStyle(section);
+      const centre = (rect) => (rect.left + rect.right) / 2;
+      const pageCentre = (content.left + parseFloat(style.paddingLeft) + content.right - parseFloat(style.paddingRight)) / 2;
+      const group = (grid) => {
+        const rects = [...grid.children].map((el) => el.getBoundingClientRect());
+        return {
+          centre: (Math.min(...rects.map((r) => r.left)) + Math.max(...rects.map((r) => r.right))) / 2,
+          logos: [...grid.children].map((el) => ({
+            block: centre(el.getBoundingClientRect()),
+            logo: centre(el.querySelector('a').getBoundingClientRect()),
+          })),
+        };
+      };
+      const [leader, universities, entities] = [...section.children].filter((el) => el.tagName === 'DIV');
+      const leaderLogo = leader.querySelector('a');
+      return {
+        pageCentre,
+        // El centro del texto (no el de la caja, que es un bloque a todo el ancho).
+        headings: [...section.querySelectorAll('h2, h3')].map((h) => {
+          const range = document.createRange();
+          range.selectNodeContents(h);
+          const rects = [...range.getClientRects()];
+          return (Math.min(...rects.map((r) => r.left)) + Math.max(...rects.map((r) => r.right))) / 2;
+        }),
+        leader: centre(leaderLogo.getBoundingClientRect()),
+        groups: [group(universities), group(entities)],
+      };
+    });
+    // Ningún nombre de «Otras universidades» se reparte en columnas: cada <li> ocupa todo el ancho de su lista (un nombre largo sí puede ajustarse en dos líneas).
+    const listas = await page.evaluate(() =>
+      [...document.querySelectorAll('#home-descripcion + section ul')].slice(1).flatMap((ul) => [...ul.children]).map((li) => ({
+        text: li.textContent,
+        width: li.getBoundingClientRect().width,
+        listWidth: li.parentElement.getBoundingClientRect().width,
+      }))
+    );
+    for (const li of listas) {
+      expect(li.width, `«${li.text}» en una columna estrecha`).toBeGreaterThanOrEqual(li.listWidth - 1);
+    }
+    const near = (a, b, what) => expect(Math.abs(a - b), `${what}: ${a} frente a ${m.pageCentre} (${JSON.stringify(m)})`).toBeLessThanOrEqual(1);
+    m.headings.forEach((c) => near(c, m.pageCentre, 'encabezado'));
+    near(m.leader, m.pageCentre, 'logo del líder');
+    for (const g of m.groups) {
+      near(g.centre, m.pageCentre, 'grupo');
+      g.logos.forEach(({ block, logo }) => near(logo, block, 'logo en su bloque'));
+    }
+  });
+}
+
+// Sobre nosotros: separación vertical entre el <h1> y el párrafo en todos los anchos (también con rejilla desde lg).
+for (const width of [390, 1024, 1440]) {
+  test(`/about-us: el párrafo queda a 16 px o más bajo el <h1> a ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: HEIGHT[width] });
+    await open(page, '/about-us');
+    const gap = await page.evaluate(
+      () => document.querySelector('section p').getBoundingClientRect().top - document.querySelector('h1').getBoundingClientRect().bottom
+    );
+    expect(gap).toBeGreaterThanOrEqual(16);
+  });
+}

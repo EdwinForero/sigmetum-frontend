@@ -6,7 +6,7 @@ import DataManagement from './DataManagement';
 import ToastProvider from '../components/ToastProvider';
 import api from '../services/api';
 
-vi.mock('../services/api', () => ({ default: { get: vi.fn(), postAuth: vi.fn() } }));
+vi.mock('../services/api', () => ({ default: { get: vi.fn(), getAuth: vi.fn(), postAuth: vi.fn() } }));
 // Este test comprueba el nombre de la versión en la confirmación: el `t` simulado devuelve la clave con sus valores.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -60,7 +60,8 @@ describe('DataManagement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     onFileDropdownSelect = vi.fn();
-    api.get.mockImplementation(async (path) => (path === '/list-files' ? FILES : [{ especie: 'a' }]));
+    api.get.mockImplementation(async () => FILES);
+    api.getAuth.mockImplementation(async () => [{ especie: 'a' }]);
     api.postAuth.mockResolvedValue({});
   });
 
@@ -105,7 +106,7 @@ describe('DataManagement', () => {
   it('mientras carga la versión se ve el texto en línea, sin superposición ni min-h-screen', async () => {
     const user = userEvent.setup();
     const datos = deferred();
-    api.get.mockImplementation((path) => (path === '/list-files' ? Promise.resolve(FILES) : datos.promise));
+    api.getAuth.mockImplementation(() => datos.promise);
     await renderPage();
 
     await user.selectOptions(combobox(), KEY);
@@ -132,7 +133,7 @@ describe('DataManagement', () => {
   it('usa el mismo contenedor que las otras páginas privadas', async () => {
     await renderPage();
 
-    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6');
+    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6', 'animate-page-fade', 'motion-reduce:animate-none');
   });
 
   it('sin versiones se ve el vacío, no la tabla ni su placeholder', async () => {
@@ -311,13 +312,8 @@ describe('DataManagement', () => {
       const user = userEvent.setup();
       const datos = deferred();
       const OTRA = 'Almería/2026-11-11_v2.xlsx';
-      api.get.mockImplementation((path) =>
-        path === '/list-files'
-          ? Promise.resolve({ Almería: [...FILES.Almería, { key: OTRA, name: '2026-11-11_v2.xlsx' }] })
-          : path.endsWith(OTRA)
-            ? datos.promise
-            : Promise.resolve([{ especie: 'a' }])
-      );
+      api.get.mockImplementation(async () => ({ Almería: [...FILES.Almería, { key: OTRA, name: '2026-11-11_v2.xlsx' }] }));
+      api.getAuth.mockImplementation((path) => (path.endsWith(OTRA) ? datos.promise : Promise.resolve([{ especie: 'a' }])));
       await renderPage();
       await chooseVersion(user);
 

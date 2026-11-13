@@ -7,7 +7,8 @@ import { beforeEach, describe, it, expect, vi } from 'vitest';
 import i18n from '../i18n';
 import es from '../languages/es/translation.json';
 import en from '../languages/en/translation.json';
-import useDocumentTitle, { PAGE_TITLE_KEYS } from './useDocumentTitle';
+import useDocumentTitle, { PAGE_TITLE_KEYS, titleKeyFor } from './useDocumentTitle';
+import { LEGACY_REDIRECTS } from '../config/routes';
 
 // Usa i18n real (no la mock global de t, que devuelve la clave): hace falta para probar el cambio de idioma.
 vi.mock('react-i18next', async (importOriginal) => await importOriginal());
@@ -29,14 +30,16 @@ const renderAt = (ruta) =>
 
 const EXPECTED = [
   ['/', 'navbar.homeOption'],
-  ['/explorar', 'navbar.exploreOption'],
-  ['/sobre-nosotros', 'aboutUs.title'],
+  ['/explore', 'navbar.exploreOption'],
+  ['/about-us', 'aboutUs.title'],
   ['/login', 'login.title'],
-  ['/galeria', 'gallery.title'],
+  ['/gallery', 'gallery.title'],
   ['/cookies', 'cookies.title'],
-  ['/cargar-archivos', 'uploadFiles.title'],
-  ['/administrar-contenido', 'contentManagement.title'],
-  ['/administrar-datos', 'dataManagement.title'],
+  ['/upload-files', 'uploadFiles.title'],
+  ['/manage-data', 'dataManagement.title'],
+  ['/manage-terms', 'contentManagement.noLatinTermsTitle'],
+  ['/manage-gallery', 'contentManagement.galleryManagementTitle'],
+  ['/manage-recipients', 'contactRecipients.title'],
 ];
 
 describe('useDocumentTitle', () => {
@@ -54,6 +57,23 @@ describe('useDocumentTitle', () => {
     expect(document.title).toBe(`${get(es, clave)}${SUFFIX}`);
   });
 
+  it.each(Object.entries(LEGACY_REDIRECTS))(
+    'la ruta antigua %s resuelve el título de su destino %s (también con barra final y en mayúsculas)',
+    (antigua, nueva) => {
+      expect(titleKeyFor(antigua)).toBe(titleKeyFor(nueva));
+      expect(titleKeyFor(`${antigua}/`)).toBe(titleKeyFor(nueva));
+      expect(titleKeyFor(antigua.toUpperCase())).toBe(titleKeyFor(nueva));
+      expect(titleKeyFor(antigua)).not.toBe('notFound.title');
+    }
+  );
+
+  it('/administrar-contenido/ muestra el título de /manage-terms mientras redirige', () => {
+    expect(titleKeyFor('/administrar-contenido/')).toBe('contentManagement.noLatinTermsTitle');
+    renderAt('/administrar-contenido/');
+
+    expect(document.title).toBe(`${es.contentManagement.noLatinTermsTitle}${SUFFIX}`);
+  });
+
   it('una ruta desconocida usa notFound.title', () => {
     renderAt('/ruta-que-no-existe');
 
@@ -61,13 +81,13 @@ describe('useDocumentTitle', () => {
   });
 
   it('tolera mayúsculas y barra final', () => {
-    renderAt('/Explorar/');
+    renderAt('/Explore/');
 
     expect(document.title).toBe(`${es.navbar.exploreOption}${SUFFIX}`);
   });
 
   it('cambia con el idioma sin remontar', async () => {
-    renderAt('/explorar');
+    renderAt('/explore');
     expect(document.title).toBe(`${es.navbar.exploreOption}${SUFFIX}`);
 
     await act(() => i18n.changeLanguage('en'));
@@ -77,10 +97,10 @@ describe('useDocumentTitle', () => {
 
   it('una ruta protegida que redirige a /login muestra el título de login', () => {
     render(
-      <MemoryRouter initialEntries={['/cargar-archivos']}>
+      <MemoryRouter initialEntries={['/upload-files']}>
         <Probe />
         <Routes>
-          <Route path="/cargar-archivos" element={<Navigate to="/login" replace />} />
+          <Route path="/upload-files" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={null} />
         </Routes>
       </MemoryRouter>

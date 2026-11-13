@@ -6,7 +6,7 @@ import useDialogFocus from '../hooks/useDialogFocus';
 import api from '../services/api';
 
 const itemBase =
-  'focus-ring-inset flex h-full w-full flex-col items-center justify-center gap-0.5 px-0.5 text-center text-xs leading-tight break-words hyphens-auto text-ink hover:bg-brand md:min-h-[72px] md:rounded-lg md:text-sm';
+  'focus-ring-inset flex h-full w-full flex-col items-center justify-center gap-0.5 px-0 text-center text-[11px] leading-tight min-[360px]:px-0.5 min-[360px]:text-xs break-words hyphens-auto text-ink hover:bg-brand md:min-h-[72px] md:rounded-lg md:text-sm';
 const itemInactive = 'font-normal border-transparent';
 const itemActive = 'bg-brand font-bold border-ink border-t-4 md:border-t-0 md:border-l-4';
 
@@ -26,20 +26,12 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
   const panelId = useId();
   const location = useLocation();
 
-  const exclusions = {
-    '/explorar': ['dataManagement', 'uploadFiles', 'contentManagement'],
-    '/cargar-archivos': ['filter'],
-    '/administrar-datos': ['filter'],
-    '/administrar-contenido': ['filter'],
-  };
-
   const path = location.pathname.replace(/\/+$/, '') || '/';
 
+  // En /explore solo van las opciones que abren un panel (sin `link`); en el resto, solo los enlaces.
   const filteredMenuOptions = menuOptions.filter((option) => {
-    const excludedOptions = exclusions[path] || [];
-    if (excludedOptions.includes(option.id)) return false;
-    if (path === '/explorar' && option.id === 'filter' && !exploreData) return false;
-    return true;
+    if (path === '/explore') return !option.link && (option.id !== 'filter' || Boolean(exploreData));
+    return Boolean(option.link);
   });
 
   const close = () => setIsOpen(false);
@@ -72,7 +64,7 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
     <>
       <nav
         aria-label={t('privateNav.label')}
-        className="fixed inset-x-0 bottom-0 z-40 h-nav border-t-2 border-brand bg-surface md:sticky md:inset-x-auto md:bottom-auto md:top-16 md:h-[calc(100dvh-4rem)] md:w-28 md:shrink-0 md:self-start md:border-r-2 md:border-t-0 md:p-2"
+        className="fixed inset-x-0 bottom-0 z-40 h-nav border-t-2 border-brand bg-surface md:sticky md:inset-x-auto md:bottom-auto md:top-16 md:h-[calc(100dvh-4rem)] md:w-28 md:shrink-0 md:self-start md:overflow-y-auto md:border-r-2 md:border-t-0 md:p-2"
       >
         <ul className="flex h-full md:flex-col md:gap-1">
           {filteredMenuOptions.map((option) => (

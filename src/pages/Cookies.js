@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
+import Reveal from '../components/Reveal.js';
 
 const H2 = 'text-2xl md:text-4xl font-bold leading-tight text-brand-deep';
 const H3 = 'mt-stack-xl text-xl md:text-3xl font-bold leading-tight text-brand-deep';
@@ -29,15 +30,15 @@ const Cookies = () => {
         {t('cookies.title')}
       </h1>
 
-      <section className="mt-stack-xl">
+      <Reveal as="section" className="mt-stack-xl">
         <h2 className={H2}>{t('cookies.subtitleAboutCookies')}</h2>
         <p className={P}>{t('cookies.descriptionAboutCookies')}</p>
 
         <h2 className={`${H2} mt-stack-xl`}>{t('cookies.subtitleAboutPixel')}</h2>
         <p className={P}>{t('cookies.descriptionAboutPixel')}</p>
-      </section>
+      </Reveal>
 
-      <section className={BLOCK}>
+      <Reveal as="section" className={BLOCK}>
         <h2 className={H2}>{t('cookies.subtitleTypeCookies')}</h2>
         <p className={P}>
           <Trans
@@ -48,9 +49,9 @@ const Cookies = () => {
 
         <h2 className={`${H2} mt-stack-xl`}>{t('cookies.subtitleCookiesUse')}</h2>
         <p className={P}>{t('cookies.descriptionCookiesUse')}</p>
-      </section>
+      </Reveal>
 
-      <section className={BLOCK}>
+      <Reveal as="section" className={BLOCK}>
         <h2 className={H2}>{t('cookies.subtitleCookiesCategories')}</h2>
         {CATEGORIES.map((category) => (
           <React.Fragment key={category}>
@@ -58,9 +59,9 @@ const Cookies = () => {
             <p className={P}>{t(`cookies.description${category}CookiesCategory`)}</p>
           </React.Fragment>
         ))}
-      </section>
+      </Reveal>
 
-      <section className={BLOCK}>
+      <Reveal as="section" className={BLOCK}>
         <h2 className={H2}>{t('cookies.subtitleCookiesManagement')}</h2>
         <p className={P}>{t('cookies.descriptionCookiesManagement')}</p>
 
@@ -81,7 +82,7 @@ const Cookies = () => {
             </li>
           ))}
         </ul>
-      </section>
+      </Reveal>
     </article>
   );
 };

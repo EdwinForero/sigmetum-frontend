@@ -51,12 +51,23 @@ describe('TermsManager', () => {
     expect(items[1]).toContain('var.');
   });
 
-  it('el botón de añadir tiene el texto «Añadir término» y la sección tiene nombre', async () => {
+  it('el botón de añadir tiene el texto «Añadir término» y la lista tiene nombre', async () => {
     await renderManager();
 
     expect(botonAnadir()).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: `${NS}.noLatinTermsTitle` })).toBeInTheDocument();
     expect(screen.getByRole('list', { name: `${NS}.termsListLabel` })).toBeInTheDocument();
+  });
+
+  it('el título es el único h1, enfocable, y no hay región con ese nombre ni h2', async () => {
+    await renderManager();
+
+    const h1 = screen.getAllByRole('heading', { level: 1 });
+    expect(h1).toHaveLength(1);
+    expect(h1[0]).toHaveTextContent(`${NS}.noLatinTermsTitle`);
+    expect(h1[0]).toHaveAttribute('tabindex', '-1');
+    expect(h1[0]).toHaveClass('focus-heading', 'text-[32px]', 'font-bold', 'leading-tight', 'text-brand-deep');
+    expect(screen.queryAllByRole('heading', { level: 2 })).toHaveLength(0);
+    expect(screen.queryByRole('region', { name: `${NS}.noLatinTermsTitle` })).toBeNull();
   });
 
   it('las papeleras tienen nombre accesible y anillo de foco', async () => {

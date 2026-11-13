@@ -282,8 +282,6 @@
     }
   },
   "contentManagement": {
-    "title": "Administrar contenido",
-    "description": "En esta página, puede gestionar el contenido que se muestra en ciertas secciones del sitio web.",
     "noLatinTermsTitle": "Excepción de no latinismos",
     "noLatinTermsTooltip": "En esta sección puede incluir o eliminar los términos que desee que no aparezcan en cursiva en la página 'explorar'.",
     "noLatinTermsPlaceholder": "Término",
@@ -307,7 +305,7 @@
   },
   "contactRecipients": {
     "title": "Destinatarios de las dudas de contacto",
-    "tooltip": "En esta sección puede registrar hasta {{max}} correos que reciben las dudas del formulario de contacto. Siempre debe quedar al menos uno.",
+    "tooltip": "En esta sección puedes registrar hasta {{max}} correos que reciben las dudas del formulario de contacto. Siempre debe quedar al menos uno.",
     "label": "Correo del destinatario",
     "add": "Añadir destinatario",
     "counter": "{{count}} de {{max}} destinatarios",
@@ -322,6 +320,7 @@
     "errorAdd": "No se pudo añadir el destinatario. Inténtalo de nuevo más tarde.",
     "errorRemove": "No se pudo quitar el destinatario. Inténtalo de nuevo más tarde.",
     "loading": "Cargando destinatarios…",
+    "loadingHint": "Cargando la lista…",
     "listLabel": "Lista de destinatarios",
     "errors": {
       "duplicate": "Ese correo ya está en la lista."
@@ -417,7 +416,9 @@
   "privateNav": {
     "label": "Gestión",
     "data": "Datos",
-    "content": "Contenido",
+    "terms": "Términos",
+    "gallery": "Galería",
+    "recipients": "Correos",
     "upload": "Cargar",
     "filters": "Filtros"
   }

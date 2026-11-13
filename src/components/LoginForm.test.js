@@ -56,7 +56,7 @@ describe('LoginForm', () => {
           <MemoryRouter initialEntries={['/login']}>
             <Routes>
               <Route path="/login" element={<LoginForm />} />
-              <Route path="/cargar-archivos" element={<p>pagina-archivos</p>} />
+              <Route path="/upload-files" element={<p>pagina-archivos</p>} />
             </Routes>
           </MemoryRouter>
         ),

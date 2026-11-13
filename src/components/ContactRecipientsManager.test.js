@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import ContactRecipientsManager from './ContactRecipientsManager';
 import ToastProvider from './ToastProvider';
 import api from '../services/api';
@@ -57,14 +58,15 @@ describe('ContactRecipientsManager', () => {
   });
 
   describe('estructura y carga', () => {
-    it('es una región con nombre, tiene un único h2 enfocable y pide la lista con la sesión', async () => {
+    it('tiene un único h1 enfocable (sin región ni h2) y pide la lista con la sesión', async () => {
       await renderManager();
 
-      expect(screen.getByRole('region', { name: `${NS}.title` })).toBeInTheDocument();
-      const h2 = screen.getAllByRole('heading', { level: 2 });
-      expect(h2).toHaveLength(1);
-      expect(h2[0]).toHaveAttribute('tabindex', '-1');
-      expect(h2[0]).toHaveClass('focus-heading');
+      expect(screen.queryByRole('region', { name: `${NS}.title` })).toBeNull();
+      expect(screen.queryAllByRole('heading', { level: 2 })).toHaveLength(0);
+      const h1 = screen.getAllByRole('heading', { level: 1 });
+      expect(h1).toHaveLength(1);
+      expect(h1[0]).toHaveAttribute('tabindex', '-1');
+      expect(h1[0]).toHaveClass('focus-heading', 'text-[32px]', 'font-bold', 'leading-tight', 'text-brand-deep');
       expect(api.getAuth).toHaveBeenCalledTimes(1);
       expect(api.getAuth).toHaveBeenCalledWith('/list-recipients');
     });
@@ -175,7 +177,7 @@ describe('ContactRecipientsManager', () => {
       ['solo espacios', '   ', 'form.errors.required'],
       ['con formato no válido', 'sin-arroba', 'form.errors.email'],
       ['duplicado con otras mayúsculas y espacios', '  ANA@x.es ', `${NS}.errors.duplicate`],
-    ])('con un correo %s da el error en el campo, le da el foco y no llama a la API ni abre diálogo ni toast', async (_caso, texto, clave) => {
+    ])('con un correo %s, al pulsar «Añadir», da el error en el campo sin alerta, le da el foco y no llama a la API ni abre diálogo ni toast', async (_caso, texto, clave) => {
       const user = userEvent.setup();
       await renderManager();
 
@@ -184,13 +186,42 @@ describe('ContactRecipientsManager', () => {
 
       const mensaje = await screen.findByText(clave);
       const error = mensaje.closest('p');
-      expect(error).toHaveAttribute('role', 'alert');
+      expect(error).not.toHaveAttribute('role');
       expect(campo()).toHaveAttribute('aria-invalid', 'true');
       expect(campo()).toHaveAttribute('aria-describedby', error.id);
       expect(campo()).toHaveFocus();
       expect(api.postAuth).not.toHaveBeenCalled();
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       expect(screen.queryByText(`${NS}.errorAdd`)).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['vacío', '', 'form.errors.required'],
+      ['con formato no válido', 'sin-arroba', 'form.errors.email'],
+      ['duplicado', 'ana@x.es', `${NS}.errors.duplicate`],
+    ])('con Enter y un correo %s el error se anuncia (role="alert"), el foco sigue en el campo y no se llama a la API', async (_caso, texto, clave) => {
+      const user = userEvent.setup();
+      await renderManager();
+
+      await user.type(campo(), `${texto}{Enter}`);
+
+      const error = (await screen.findByText(clave)).closest('p');
+      expect(error).toHaveAttribute('role', 'alert');
+      expect(campo()).toHaveAttribute('aria-describedby', error.id);
+      expect(campo()).toHaveFocus();
+      expect(api.postAuth).not.toHaveBeenCalled();
+    });
+
+    it('un error anunciado con Enter y repetido con el clic deja de anunciarse (la decisión se toma en cada rechazo)', async () => {
+      const user = userEvent.setup();
+      await renderManager();
+
+      await user.type(campo(), 'sin-arroba{Enter}');
+      expect((await screen.findByText('form.errors.email')).closest('p')).toHaveAttribute('role', 'alert');
+      await user.click(botonAnadir());
+
+      expect(screen.getByText('form.errors.email').closest('p')).not.toHaveAttribute('role');
+      expect(campo()).toHaveFocus();
     });
 
     it('el error se limpia al escribir', async () => {
@@ -221,6 +252,27 @@ describe('ContactRecipientsManager', () => {
       expect(api.postAuth).toHaveBeenCalledWith('/add-recipient', { email: 'nuevo@x.es' });
       expect(campo()).toHaveValue('');
       await waitFor(() => expect(api.getAuth).toHaveBeenCalledTimes(2));
+    });
+
+    it('la fila es un formulario sin validación del navegador y «Añadir» es su botón de envío', async () => {
+      await renderManager();
+
+      const formulario = campo().closest('form');
+      expect(formulario).not.toBeNull();
+      expect(formulario).toHaveAttribute('novalidate');
+      expect(botonAnadir()).toHaveAttribute('type', 'submit');
+      expect(formulario).toContainElement(botonAnadir());
+    });
+
+    it('Enter con un correo válido envía una sola vez', async () => {
+      const user = userEvent.setup();
+      await renderManager();
+
+      await user.type(campo(), 'nuevo@x.es{Enter}');
+
+      await screen.findByText(`${NS}.successAdded`);
+      expect(api.postAuth).toHaveBeenCalledTimes(1);
+      expect(api.postAuth).toHaveBeenCalledWith('/add-recipient', { email: 'nuevo@x.es' });
     });
 
     it.each([[429], [400], [500]])('si el servidor responde %i da un aviso persistente en alert y conserva lo escrito', async (status) => {
@@ -283,6 +335,146 @@ describe('ContactRecipientsManager', () => {
       await user.keyboard('{Enter}');
       expect(api.postAuth).not.toHaveBeenCalled();
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('con 5, Enter dentro del campo tampoco envía', async () => {
+      const user = userEvent.setup();
+      await renderManager(FIVE);
+
+      await user.type(campo(), 'f@x.es{Enter}');
+
+      expect(api.postAuth).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('lista no lista', () => {
+    it('con la lista pendiente «Añadir» es inactivo y ni el clic ni Enter llaman a postAuth', async () => {
+      api.getAuth.mockReturnValue(deferred().promise);
+      const user = userEvent.setup();
+      render(
+        <ToastProvider>
+          <ContactRecipientsManager />
+        </ToastProvider>
+      );
+
+      await user.type(campo(), 'nuevo@x.es');
+      expect(botonAnadir()).toHaveAttribute('aria-disabled', 'true');
+      await user.click(botonAnadir());
+      await user.type(campo(), '{Enter}');
+
+      expect(api.postAuth).not.toHaveBeenCalled();
+    });
+
+    it('desde el primer render «Añadir» ya es inactivo (la carga empieza en true)', () => {
+      api.getAuth.mockReturnValue(deferred().promise);
+      render(
+        <ToastProvider>
+          <ContactRecipientsManager />
+        </ToastProvider>
+      );
+
+      expect(botonAnadir()).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('con error de carga «Añadir» es inactivo, se describe con el aviso de carga y no llama a postAuth', async () => {
+      api.getAuth.mockRejectedValue(httpFailure(500));
+      const user = userEvent.setup();
+      render(
+        <ToastProvider>
+          <ContactRecipientsManager />
+        </ToastProvider>
+      );
+      const aviso = (await screen.findByText(`${NS}.errorLoad`)).closest('p');
+
+      await user.type(campo(), 'nuevo@x.es{Enter}');
+      await user.click(botonAnadir());
+
+      expect(botonAnadir()).toHaveAttribute('aria-disabled', 'true');
+      expect(botonAnadir()).toHaveAttribute('aria-describedby', aviso.id);
+      expect(botonAnadir()).toHaveAccessibleDescription(`${NS}.errorLoad`);
+      expect(api.postAuth).not.toHaveBeenCalled();
+    });
+
+    it('mientras carga la lista «Añadir» es inactivo y se describe con «Cargando la lista»; al cargar, el aviso desaparece', async () => {
+      const lista = deferred();
+      api.getAuth.mockReturnValue(lista.promise);
+      render(
+        <ToastProvider>
+          <ContactRecipientsManager />
+        </ToastProvider>
+      );
+      const aviso = screen.getByText(`${NS}.loadingHint`);
+
+      expect(botonAnadir()).toHaveAttribute('aria-disabled', 'true');
+      expect(botonAnadir()).toHaveAttribute('aria-describedby', aviso.id);
+      expect(botonAnadir()).toHaveAccessibleDescription(`${NS}.loadingHint`);
+
+      lista.resolve(LIST);
+      await screen.findByText(LIST[0].email);
+
+      expect(screen.queryByText(`${NS}.loadingHint`)).not.toBeInTheDocument();
+      expect(botonAnadir()).not.toHaveAttribute('aria-describedby');
+    });
+
+    it('un envío del formulario con la lista pendiente no llama a postAuth (handleAdd se protege solo)', async () => {
+      api.getAuth.mockReturnValue(deferred().promise);
+      const user = userEvent.setup();
+      render(
+        <ToastProvider>
+          <ContactRecipientsManager />
+        </ToastProvider>
+      );
+      await user.type(campo(), 'nuevo@x.es');
+
+      fireEvent.submit(campo().closest('form'));
+
+      expect(api.postAuth).not.toHaveBeenCalled();
+      expect(screen.queryByText('form.errors.email')).not.toBeInTheDocument();
+    });
+
+    it('en el HTML inicial, antes de cualquier efecto, «Añadir» ya sale inactivo (isLoadingList empieza en true)', () => {
+      api.getAuth.mockReturnValue(deferred().promise);
+      const html = renderToString(
+        <ToastProvider>
+          <ContactRecipientsManager />
+        </ToastProvider>
+      );
+
+      expect(html).toMatch(/<button[^>]*aria-disabled="true"[^>]*>(?:(?!<\/button>).)*contactRecipients\.add/);
+    });
+
+    it('tras cargar bien, «Añadir» vuelve a estar activo', async () => {
+      await renderManager();
+
+      expect(botonAnadir()).not.toHaveAttribute('aria-disabled');
+    });
+  });
+
+  describe('peticiones solapadas', () => {
+    it('si dos cargas se resuelven en orden inverso, queda la lista de la última petición', async () => {
+      const user = userEvent.setup();
+      await renderManager();
+      const segunda = deferred();
+      const tercera = deferred();
+      api.getAuth.mockReturnValueOnce(segunda.promise).mockReturnValueOnce(tercera.promise);
+
+      await user.type(campo(), 'nuevo@x.es{Enter}');
+      await waitFor(() => expect(api.getAuth).toHaveBeenCalledTimes(2));
+      await user.click(quitar('ana@x.es'));
+      await user.click(await screen.findByRole('button', { name: 'dialogAdvice.deleteButton' }));
+      await waitFor(() => expect(api.getAuth).toHaveBeenCalledTimes(3));
+
+      await act(async () => {
+        tercera.resolve([{ email: 'nueva@x.es' }, { email: 'otra@x.es' }]);
+      });
+      await screen.findByText('nueva@x.es');
+      await act(async () => {
+        segunda.resolve([{ email: 'vieja@x.es' }, { email: 'ana@x.es' }, { email: 'Luis@x.es' }]);
+      });
+
+      expect(screen.getByText('nueva@x.es')).toBeInTheDocument();
+      expect(screen.queryByText('vieja@x.es')).not.toBeInTheDocument();
+      expect(botonAnadir()).not.toHaveAttribute('aria-disabled');
     });
   });
 

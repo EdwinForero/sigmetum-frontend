@@ -56,9 +56,9 @@ const DialogAdvice = ({
         tabIndex={-1}
       >
         <div className="flex justify-center px-4 py-2 mx-auto">
-          <h3 id={titleId} className="text-brand-deep text-4xl mb-4 font-bold">
+          <h2 id={titleId} className="text-brand-deep text-4xl mb-4 font-bold">
             {dialogTitle}
-          </h3>
+          </h2>
         </div>
 
         <div className="p-4 grid grid-cols-1 gap-4 max-h-[300px] overflow-y-auto flex-grow mb-10">

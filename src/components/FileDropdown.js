@@ -60,7 +60,7 @@ const FileDropdown = forwardRef(function FileDropdown({
     onLoad(true);
     let data;
     try {
-      data = await api.get(`/get-data/${key}`);
+      data = await api.getAuth(`/get-data/${key}`);
     } catch {
       if (pendingRef.current !== key) return;
       setFailedKey(key);
@@ -152,7 +152,7 @@ const FileDropdown = forwardRef(function FileDropdown({
       {isEmpty && (
         <p id={emptyId} className="py-2 text-ink">
           {t('dataManagement.fileSelectDropdwon.emptyState')}{' '}
-          <Link to="/cargar-archivos" className="focus-ring rounded font-bold text-brand-deep underline">
+          <Link to="/upload-files" className="focus-ring rounded font-bold text-brand-deep underline">
             {t('dataManagement.fileSelectDropdwon.emptyStateLink')}
           </Link>
         </p>

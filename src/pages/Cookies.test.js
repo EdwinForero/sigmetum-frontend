@@ -20,6 +20,17 @@ describe('Cookies', () => {
     expect(container.innerHTML).not.toMatch(/text-center|text-justify|iconButton\.scrollDown/);
   });
 
+  it('cada una de las cuatro section aparece por scroll, sin anidar y sin animar el h1', () => {
+    const { container } = render(<Cookies />);
+
+    const secciones = container.querySelectorAll('section');
+    expect(secciones).toHaveLength(4);
+    for (const seccion of secciones) expect(seccion).toHaveAttribute('data-reveal');
+    expect(container.querySelectorAll('[data-reveal]')).toHaveLength(4);
+    expect(container.querySelectorAll('[data-reveal] [data-reveal]')).toHaveLength(0);
+    expect(screen.getByRole('heading', { level: 1 })).not.toHaveAttribute('data-reveal');
+  });
+
   it('ningún enlace va dentro de un párrafo', () => {
     const { container } = render(<Cookies />);
 
