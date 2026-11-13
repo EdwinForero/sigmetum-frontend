@@ -23,7 +23,7 @@ import VegetationGallery from './pages/VegetationGallery';
 import { useTranslation } from 'react-i18next';
 import api from './services/api';
 import useDocumentTitle from './hooks/useDocumentTitle';
-import { LEGACY_REDIRECTS, PRIVATE_PATHS } from './config/routes';
+import { LEGACY_REDIRECTS, PRIVATE_PATHS, normalizePath } from './config/routes';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,8 +39,7 @@ function App() {
   const location = useLocation();
   useDocumentTitle();
   const { t } = useTranslation();
-  // React Router acepta la barra final: se quita para comparar rutas.
-  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const path = normalizePath(location.pathname);
   const isPrivateRoute = PRIVATE_PATHS.includes(path);
   const showSideMenu = path === '/explore' || (isPrivateRoute && privateSessionOk);
 

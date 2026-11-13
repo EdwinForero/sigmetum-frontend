@@ -10,7 +10,7 @@ sigmetum-frontend/
 │   ├── App.js               # Layout, rutas y estado global de datos
 │   ├── i18n.js              # Configuración de i18next (ES por defecto, EN)
 │   ├── index.css            # Directivas de Tailwind y tipografías base
-│   ├── App.css              # Solo .App { text-align: center }
+│   ├── App.css              # Solo .App { text-align: center }; existe pero no se importa en ningún sitio (residual)
 │   ├── config/
 │   │   ├── env.js           # Lectura centralizada de variables VITE_*
 │   │   └── assets.js        # Claves de S3 de los recursos estáticos y assetUrl()
@@ -64,6 +64,8 @@ Antes del render se importa `./i18n`, que inicializa i18next con detección auto
 CookieBanner (sticky al final de la raíz, hasta que se acepta)
 Bajo md, Sidebar es una barra inferior fija (h-nav)
 ```
+
+La comparación de rutas de `App` y de `Sidebar` usa `normalizePath` (`src/config/routes.js`): quita las barras finales y pasa a minúsculas, como el enrutador, así que `/EXPLORE` y `/Explore` se pintan igual que `/explore` (datos y barra con «Filtros») y `/MANAGE-DATA` igual que `/manage-data`. Solo se compara: la URL del navegador conserva las mayúsculas y no se redirige (un dato del usuario no pasa a `<Navigate>`; S6). Fuera de alcance: `/%45xplore`.
 
 La barra de gestión (`Sidebar`) aparece solo en `/explore` y en las cinco rutas privadas (`/upload-files`, `/manage-data`, `/manage-terms`, `/manage-gallery` y `/manage-recipients`): bajo `md` es una barra inferior fija y desde `md` una columna `sticky` de `w-28` (`md:top-16`, alto `100dvh - 4rem`, hija de la fila flex junto a `main`, ya no `fixed`: no deja hueco bajo ella ni pasa por encima del pie); la raíz reserva solo el espacio de la barra inferior con `pb-nav md:pb-0` (ya no `md:pl-28`) y aparece solo con la sesión confirmada en las rutas privadas (`privateSessionOk`, ver más abajo); el banner de cookies, que es `sticky` y ocupa su sitio en el flujo, se coloca encima de la barra (`bottom-nav md:bottom-0`). Hay un solo `<header>`, dos `<nav>` con nombre (`navbar.label`, «Principal», y `privateNav.label`, «Gestión»), un solo `<main>` y un solo `<footer>`. En las capas, la cabecera es `z-50`, la barra `z-40`, los avisos `z-[55]` y el panel de filtros con su fondo `z-[60]`, por encima de todo.
 

@@ -8,10 +8,14 @@ import { assetUrl } from '../config/assets';
 vi.mock('../components/SpeciesCard', () => ({
   default: ({ species }) => <div data-testid="species">{species['Especies Características']}</div>,
 }));
-// Solo el recuento interpola: así se comprueban las cifras sin depender del idioma.
+// Solo el recuento y el nombre de las «i» (infoAbout) interpolan: así se comprueban sin depender del idioma.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key, opts) => (key === 'explore.resultsInfo' ? `${key} ${opts.currentResults}/${opts.totalResults}` : key),
+    t: (key, opts) => {
+      if (key === 'explore.resultsInfo') return `${key} ${opts.currentResults}/${opts.totalResults}`;
+      if (key === 'iconButton.infoAbout') return `${key} ${opts.topic}`;
+      return key;
+    },
     i18n: { language: 'es', changeLanguage: vi.fn() },
   }),
 }));
@@ -190,6 +194,15 @@ describe('Explore', () => {
       expect(filaDescargas.contains(grupo)).toBe(true);
       expect(grupo.children).toHaveLength(2);
     }
+  });
+
+  it('las dos «i» de las descargas tienen nombres distintos, con el botón al que explican', () => {
+    renderExplore();
+
+    const glosario = screen.getByRole('button', { name: 'iconButton.infoAbout explore.downloadGlossaryButton' });
+    const resultados = screen.getByRole('button', { name: 'iconButton.infoAbout explore.downloadExcelButton' });
+    expect(glosario).not.toBe(resultados);
+    expect(screen.queryByRole('button', { name: 'iconButton.info' })).toBeNull();
   });
 
   it('el título es verde oscuro de marca (brand-deep)', () => {

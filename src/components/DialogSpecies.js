@@ -1,4 +1,5 @@
 import React, { useId } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useIsPresent } from 'motion/react';
 import ButtonPrincipal from '../components/ButtonPrincipal.js';
 import SpeciesAttribute from '../components/SpeciesAttribute.js';
@@ -57,7 +58,9 @@ const Dialog = ({
       .join(", "),
   };
 
-  return (
+  // En un portal: dentro de la tarjeta, el transform del Reveal (y el x de la paginación) haría de bloque
+  // contenedor del fixed y el fondo no cubriría la ventana.
+  return createPortal(
     <motion.div
       className="fixed overflow-hidden inset-0 z-50 flex overflow-auto items-center justify-center bg-ink/70"
       initial={{ opacity: 0 }}
@@ -123,7 +126,8 @@ const Dialog = ({
           )}
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 };
 

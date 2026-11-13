@@ -22,6 +22,7 @@ describe('validateRecipientEmail', () => {
     ['nombre+tag@sub.dominio.es'],
     ['  ana@example.com  '],
     ['a@b.co'],
+    ['josé@x.es'],
     [`${'a'.repeat(241)}@example.com`],
   ])('acepta %s', (valor) => {
     expect(validateRecipientEmail(valor, [])).toBeNull();
@@ -44,6 +45,9 @@ describe('validateRecipientEmail', () => {
     ['a<b>@example.com', 'email'],
     ['a\u0085b@example.com', 'email'],
     ['a\u2028b@example.com', 'email'],
+    ['ana\u200b@x.es', 'email'],
+    ['ana\u200e@x.es', 'email'],
+    ['ana@exa\u202emple.com', 'email'],
     [`${'a'.repeat(243)}@example.com`, 'email'],
   ])('rechaza %j con %s', (valor, esperado) => {
     expect(validateRecipientEmail(valor, [])).toBe(esperado);

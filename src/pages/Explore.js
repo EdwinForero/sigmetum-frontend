@@ -203,6 +203,7 @@ const Explore = ({
                 text={t('explore.downloadGlossaryButton')}
               />
               <InfoButton
+                topic={t('explore.downloadGlossaryButton')}
                 tooltipText={t('explore.downloadGlossaryButtonTooltip')}
               />
             </div>
@@ -215,6 +216,7 @@ const Explore = ({
                 text={t('explore.downloadExcelButton')}
               />
               <InfoButton
+                topic={t('explore.downloadExcelButton')}
                 tooltipText={t('explore.downloadExcelButtonTooltip')}
               />
             </div>

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import CookieBanner from './CookieBanner';
 
 // El simulacro global de Trans no pinta los componentes: este lo hace para poder ver el enlace «aquí» del banner.
@@ -15,6 +16,18 @@ vi.mock('react-i18next', async () => {
 
 let writes;
 let cookieJar;
+
+// El enlace «aquí» es un Link: necesita un Router. El banner va fuera de Routes, como en App, y /cookies pinta una marca.
+const renderBanner = (props = {}) =>
+  render(
+    <MemoryRouter initialEntries={['/']}>
+      <Routes>
+        <Route path="/" element={<p>pagina-inicio</p>} />
+        <Route path="/cookies" element={<p>pagina-cookies</p>} />
+      </Routes>
+      <CookieBanner {...props} />
+    </MemoryRouter>
+  );
 
 const setProtocol = (protocol) => vi.stubGlobal('location', { protocol });
 
@@ -57,7 +70,7 @@ describe('CookieBanner', () => {
   it('aceptar todo en https escribe las cookies con SameSite=Lax y Secure', async () => {
     setProtocol('https:');
     const user = userEvent.setup();
-    render(<CookieBanner />);
+    renderBanner();
 
     await user.click(screen.getByText('cookies.banner.acceptAllButton'));
 
@@ -67,7 +80,7 @@ describe('CookieBanner', () => {
   it('aceptar todo en http escribe SameSite=Lax sin Secure', async () => {
     setProtocol('http:');
     const user = userEvent.setup();
-    render(<CookieBanner />);
+    renderBanner();
 
     await user.click(screen.getByText('cookies.banner.acceptAllButton'));
 
@@ -77,7 +90,7 @@ describe('CookieBanner', () => {
   it('aplicar desde el modal en https escribe SameSite=Lax y Secure, con todo en false', async () => {
     setProtocol('https:');
     const user = userEvent.setup();
-    render(<CookieBanner />);
+    renderBanner();
 
     await user.click(screen.getByText('cookies.banner.cookiesConfigurationButton'));
     await user.click(screen.getByText('cookies.modal.applyButton'));
@@ -99,7 +112,7 @@ describe('CookieBanner', () => {
   it('aplicar desde el modal en http escribe SameSite=Lax sin Secure', async () => {
     setProtocol('http:');
     const user = userEvent.setup();
-    render(<CookieBanner />);
+    renderBanner();
 
     await user.click(screen.getByText('cookies.banner.cookiesConfigurationButton'));
     await user.click(screen.getByText('cookies.modal.applyButton'));
@@ -110,7 +123,7 @@ describe('CookieBanner', () => {
   it('guarda cookiePreferences como JSON sin codificar', async () => {
     setProtocol('https:');
     const user = userEvent.setup();
-    render(<CookieBanner />);
+    renderBanner();
 
     await user.click(screen.getByText('cookies.banner.acceptAllButton'));
 
@@ -130,7 +143,7 @@ describe('CookieBanner', () => {
   it('no muestra el banner ni escribe cookies si ya se aceptó', () => {
     cookieJar = 'cookieConsent=accepted';
     setProtocol('https:');
-    render(<CookieBanner />);
+    renderBanner();
 
     expect(screen.queryByText('cookies.banner.acceptAllButton')).toBeNull();
     expect(writes).toHaveLength(0);
@@ -138,7 +151,7 @@ describe('CookieBanner', () => {
 
   it('con aboveBottomBar el banner es sticky sobre la barra y sin fixed', () => {
     setProtocol('https:');
-    render(<CookieBanner aboveBottomBar />);
+    renderBanner({ aboveBottomBar: true });
 
     const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
     expect(banner).toHaveClass('sticky', 'bottom-nav', 'md:bottom-0', 'z-40');
@@ -147,7 +160,7 @@ describe('CookieBanner', () => {
 
   it('en móvil el banner es compacto: padding y tipografía menores, botones en una fila y enlace a /cookies', () => {
     setProtocol('https:');
-    render(<CookieBanner aboveBottomBar />);
+    renderBanner({ aboveBottomBar: true });
 
     const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
     expect(banner).toHaveClass('p-3', 'sm:p-4');
@@ -160,7 +173,7 @@ describe('CookieBanner', () => {
 
   it('el enlace a /cookies del banner mide 24×24 como mínimo (WCAG 2.5.8), con foco visible y subrayado', () => {
     setProtocol('https:');
-    render(<CookieBanner aboveBottomBar />);
+    renderBanner({ aboveBottomBar: true });
 
     const enlace = screen.getByRole('link', { name: 'cookies.banner.description' });
     expect(enlace).toHaveAttribute('href', '/cookies');
@@ -168,9 +181,23 @@ describe('CookieBanner', () => {
     expect(enlace).toHaveClass('focus-ring', 'inline-flex', 'min-h-6', 'min-w-6', 'items-center', 'justify-center', 'rounded', 'underline');
   });
 
+  it('pulsar «aquí» navega en cliente a /cookies (sin recargar) y el banner sigue montado', () => {
+    setProtocol('https:');
+    renderBanner();
+    expect(screen.getByText('pagina-inicio')).toBeInTheDocument();
+
+    const enlace = screen.getByRole('link', { name: 'cookies.banner.description' });
+    // Un <a href> recargaría la página: el Link cancela la navegación del navegador (preventDefault).
+    expect(fireEvent.click(enlace)).toBe(false);
+
+    expect(screen.getByText('pagina-cookies')).toBeInTheDocument();
+    expect(screen.queryByText('pagina-inicio')).toBeNull();
+    expect(screen.getByRole('region', { name: 'cookies.banner.title' })).toBeInTheDocument();
+  });
+
   it('el banner es una barra compacta sobre surface con borde moss, sin gris ni hexadecimales', () => {
     setProtocol('https:');
-    render(<CookieBanner />);
+    renderBanner();
 
     const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
     expect(banner).toHaveClass('border-t', 'border-moss', 'bg-surface', 'text-ink');
@@ -179,7 +206,7 @@ describe('CookieBanner', () => {
 
   it('el título es un h2 con el icono info oculto a lectores en su fila', () => {
     setProtocol('https:');
-    render(<CookieBanner />);
+    renderBanner();
 
     const titulo = screen.getByRole('heading', { level: 2, name: 'cookies.banner.title' });
     expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
@@ -191,7 +218,7 @@ describe('CookieBanner', () => {
   it('el modal usa los tokens ink, surface y sage, sin bg-black ni hexadecimales', async () => {
     setProtocol('https:');
     const user = userEvent.setup();
-    render(<CookieBanner />);
+    renderBanner();
 
     await user.click(screen.getByText('cookies.banner.cookiesConfigurationButton'));
 
@@ -206,7 +233,7 @@ describe('CookieBanner', () => {
 
   it('sin aboveBottomBar el banner usa bottom-0', () => {
     setProtocol('https:');
-    render(<CookieBanner />);
+    renderBanner();
 
     const banner = screen.getByRole('region', { name: 'cookies.banner.title' });
     expect(banner).toHaveClass('sticky', 'bottom-0');
@@ -217,7 +244,7 @@ describe('CookieBanner', () => {
   it('el modal de configuración queda fuera de la sección sticky del banner', async () => {
     setProtocol('https:');
     const user = userEvent.setup();
-    render(<CookieBanner />);
+    renderBanner();
 
     await user.click(screen.getByText('cookies.banner.cookiesConfigurationButton'));
 

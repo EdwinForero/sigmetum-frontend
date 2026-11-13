@@ -103,7 +103,7 @@ Escala de valores computados admitidos: {4, 8, 12, 16, 24, 32, 48, 64} px. El c�
 | `gutter`, `gutter-md`, `gutter-lg` | 16, 24 y 32 px | Margen lateral de la página (`.page-container` en `index.css`: `mx-auto w-full max-w-6xl px-gutter md:px-gutter-md lg:px-gutter-lg`) |
 | `stack-xs`, `stack-sm`, `stack-md`, `stack`, `stack-lg`, `stack-xl` | 4, 8, 12, 16, 24 y 32 px | Separación vertical dentro de un bloque (`stack-lg` entre título y contenido, `stack` dentro de tarjetas) |
 | `section`, `section-lg` | 48 y 64 px | Ritmo entre secciones (`py-section` en móvil, `md:py-section-lg` desde `md`) |
-| `nav` | 72 px (4,5 rem) | Barra inferior de gestión |
+| `nav` | 72 px (4,5 rem; sale de `NAV_HEIGHT_PX` en `src/config/layout.js`, que importa `tailwind.config.js`) | Barra inferior de gestión |
 
 #### Tamaños y pesos de letra (páginas públicas)
 

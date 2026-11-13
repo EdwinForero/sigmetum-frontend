@@ -1,7 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, act, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SpeciesCard from './SpeciesCard';
+import Reveal from './Reveal.js';
 
 const ESPECIE = 'Quercus ilex';
 const data = [{ 'Especies Características': ESPECIE, Provincia: 'Málaga' }];
@@ -56,5 +57,64 @@ describe('SpeciesCard', () => {
 
     await user.keyboard(' ');
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  describe('dentro de un Reveal ya revelado', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+
+    const renderRevelada = () => {
+      const instancias = [];
+      class FakeIntersectionObserver {
+        constructor(callback) {
+          this.callback = callback;
+          this.observe = vi.fn();
+          this.unobserve = vi.fn();
+          this.disconnect = vi.fn();
+          instancias.push(this);
+        }
+      }
+      vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
+      vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 2000, bottom: 2100, height: 100 });
+      const view = render(
+        <Reveal>
+          <SpeciesCard data={data} species={{ 'Especies Características': ESPECIE }} noItalicTerms={[]} />
+        </Reveal>
+      );
+      const envoltura = view.container.querySelector('[data-reveal]');
+      expect(envoltura).toHaveClass('reveal-hidden');
+      act(() => instancias[0].callback([{ target: envoltura, isIntersecting: true }]));
+      expect(envoltura).toHaveClass('reveal-in');
+      return { ...view, envoltura };
+    };
+
+    it('el diálogo se pinta en document.body, fuera de la envoltura con transform, que sigue revelada (B76)', async () => {
+      const user = userEvent.setup();
+      const { envoltura } = renderRevelada();
+
+      await user.click(screen.getByRole('button', { name: ESPECIE }));
+
+      const dialog = await screen.findByRole('dialog');
+      expect(envoltura.contains(dialog)).toBe(false);
+      expect(dialog.closest('[data-reveal]')).toBeNull();
+      expect(dialog.parentElement.parentElement).toBe(document.body);
+      expect(envoltura).toHaveClass('reveal-in');
+    });
+
+    it('con el portal, el foco entra en el diálogo, Escape lo cierra y el foco vuelve a la tarjeta', async () => {
+      const user = userEvent.setup();
+      renderRevelada();
+      const card = screen.getByRole('button', { name: ESPECIE });
+
+      await user.click(card);
+      const dialog = await screen.findByRole('dialog');
+      expect(dialog).toHaveFocus();
+
+      await user.keyboard('{Escape}');
+      await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+      expect(card).toHaveFocus();
+    });
   });
 });

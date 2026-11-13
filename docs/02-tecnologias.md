@@ -4,7 +4,7 @@
 
 | Paquete | Versión declarada | Para qué se usa | Dónde |
 |---|---|---|---|
-| `react`, `react-dom` | ^18.3.1 | Librería de UI | Toda la app |
+| `react`, `react-dom` | ^18.3.1 | Librería de UI | Toda la app (`react-dom`: `createPortal` en `DialogSpecies`, el primer portal) |
 | `react-router-dom` | ^6.27.0 | Enrutado (`Routes`, `Route`, `Link`, `Navigate`, `useLocation`, `useNavigate`) | `index.js`, `App.js`, páginas y navegación |
 | `motion` | ^11.12.0 | Animaciones. Se importa desde `motion/react` | Componentes y páginas animados |
 | `i18next` | ^23.16.8 | Motor de traducciones | `i18n.js` |
@@ -53,7 +53,7 @@ Notas:
 | `package.json` | `"type": "module"`, `engines.node` (`>=22`, la versión del build de Amplify) y los scripts (ver [08](08-guia-desarrollo.md#scripts)). `package-lock.json` refleja `engines` en su entrada raíz |
 | `.nvmrc` | `22`: `nvm use` elige la versión de Node de desarrollo. Amplify no lo lee (su `build_spec` ejecuta `nvm install 22 && nvm use 22`) |
 
-`eslint.config.js` (configuración plana de ESLint 9): los errores bloquean, y las reglas de accesibilidad y de calidad son avisos con un **tope que no puede crecer** (`--max-warnings` en el script `lint`). El tope baja siempre al recuento real (el valor está en [09](09-estado-actual-y-deuda-tecnica.md#métricas)); en el pulido de las páginas públicas bajó al corregir avisos, y `package.json` suma además `@playwright/test` y el script `e2e`. `index.html` carga las dos hojas de Google Fonts con `<link rel="stylesheet">` (sin `preload` ni `onload` en línea). `scripts/quality-check.mjs` añade patrones prohibidos, búsqueda de secretos y `npm audit`. Ver [08](08-guia-desarrollo.md#scripts).
+`eslint.config.js` (configuración plana de ESLint 9): los errores bloquean, y las reglas de accesibilidad y de calidad son avisos con un **tope que no puede crecer** (`--max-warnings` en el script `lint`). El tope baja siempre al recuento real (el valor está en [09](09-estado-actual-y-deuda-tecnica.md#métricas)); en el pulido de las páginas públicas bajó al corregir avisos y el 13/11/2026 bajó de 18 a 16 al pasar el enlace «aquí» del banner de cookies a `Link` (dos avisos menos: `anchor-has-content` y `control-has-associated-label`), y `package.json` suma además `@playwright/test` y el script `e2e`. `index.html` carga las dos hojas de Google Fonts con `<link rel="stylesheet">` (sin `preload` ni `onload` en línea). `scripts/quality-check.mjs` añade patrones prohibidos, búsqueda de secretos y `npm audit`. Ver [08](08-guia-desarrollo.md#scripts).
 
 ## Recursos externos cargados en `index.html`
 

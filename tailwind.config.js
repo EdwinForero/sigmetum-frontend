@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import { REVEAL } from './src/config/reveal.js';
+import { NAV_HEIGHT_PX } from './src/config/layout.js';
 
 export default {
   content: [
@@ -23,7 +24,7 @@ export default {
         warning: '#8A5300',
       },
       spacing: {
-        nav: '4.5rem',
+        nav: `${NAV_HEIGHT_PX / 16}rem`,
         gutter: '1rem',
         'gutter-md': '1.5rem',
         'gutter-lg': '2rem',

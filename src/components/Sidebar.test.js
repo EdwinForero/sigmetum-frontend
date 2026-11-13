@@ -82,6 +82,13 @@ describe('Sidebar', () => {
     expect(screen.getAllByRole('link').filter((a) => a.hasAttribute('aria-current'))).toHaveLength(1);
   });
 
+  it.each(['/EXPLORE', '/Explore'])('en %s también solo aparece Filtros, sin enlaces de gestión', (path) => {
+    renderSidebar(path);
+
+    expect(screen.getByRole('button', { name: 'Filtros' })).toBeInTheDocument();
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+  });
+
   it('en /explore solo aparece Filtros, sin ningún enlace de gestión', () => {
     renderSidebar('/explore');
 

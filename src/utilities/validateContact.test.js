@@ -38,6 +38,10 @@ describe('validateContact', () => {
     ['a@b', 'form.errors.email'],
     ['a b@c.es', 'form.errors.email'],
     ['@b.es', 'form.errors.email'],
+    ['ana\u200B@x.es', 'form.errors.email'],
+    ['ana\u200E@x.es', 'form.errors.email'],
+    ['ana@exa\u202Emple.com', 'form.errors.email'],
+    ['josé@x.es', undefined],
     ['a@b.es', undefined],
     ['  a@b.es  ', undefined],
   ])('el correo %j da %s', (email, key) => {

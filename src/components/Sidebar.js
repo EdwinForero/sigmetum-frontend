@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
 import useDialogFocus from '../hooks/useDialogFocus';
 import api from '../services/api';
+import { normalizePath } from '../config/routes';
 
 const itemBase =
   'focus-ring-inset flex h-full w-full flex-col items-center justify-center gap-0.5 px-0 text-center text-[11px] leading-tight min-[360px]:px-0.5 min-[360px]:text-xs break-words hyphens-auto text-ink hover:bg-brand md:min-h-[72px] md:rounded-lg md:text-sm';
@@ -26,7 +27,7 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
   const panelId = useId();
   const location = useLocation();
 
-  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const path = normalizePath(location.pathname);
 
   // En /explore solo van las opciones que abren un panel (sin `link`); en el resto, solo los enlaces.
   const filteredMenuOptions = menuOptions.filter((option) => {

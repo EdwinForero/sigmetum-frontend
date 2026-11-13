@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { NOTICE_BASE, noticeVariant } from "../utilities/noticeStyles";
+import { NAV_HEIGHT_PX } from "../config/layout";
 
 const { box, icon, iconClass } = noticeVariant("info");
 
 const VIEWPORT_MARGIN = 16;
-const BOTTOM_BAR_HEIGHT = 72;
 const BOTTOM_BAR_BREAKPOINT = 768;
 
 const InfoButton = ({ tooltipText, topic }) => {
@@ -40,7 +40,7 @@ const InfoButton = ({ tooltipText, topic }) => {
     setShift(nextShift);
 
     const anchor = anchorElement.getBoundingClientRect();
-    const reserved = window.innerWidth < BOTTOM_BAR_BREAKPOINT ? BOTTOM_BAR_HEIGHT : 0;
+    const reserved = window.innerWidth < BOTTOM_BAR_BREAKPOINT ? NAV_HEIGHT_PX : 0;
     const overflowsBelow = anchor.bottom + rect.height > window.innerHeight - reserved;
     const fitsAbove = anchor.top - rect.height >= 0;
     setIsAbove(overflowsBelow && fitsAbove);

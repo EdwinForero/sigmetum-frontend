@@ -46,6 +46,8 @@ const ContactRecipientsManager = () => {
   const [busy, setBusy] = useState(null);
   const [fieldError, setFieldError] = useState(null);
   const [announceField, setAnnounceField] = useState(true);
+  // Cuenta los rechazos: es la `key` del error, que se vuelve a montar en cada uno para que el lector lo anuncie otra vez (A5).
+  const [rejection, setRejection] = useState(0);
   const [focusRequest, setFocusRequest] = useState(0);
   const { dialog, showDialog, closeDialog } = useDialog();
 
@@ -87,6 +89,7 @@ const ContactRecipientsManager = () => {
     // Con Enter el foco ya está en el campo y nadie leería el error: se anuncia. Con el clic, el foco vuelve al campo y lo lee aria-describedby.
     setAnnounceField(document.activeElement === inputRef.current);
     setFieldError(key);
+    setRejection((n) => n + 1);
     inputRef.current?.focus();
   };
 
@@ -230,7 +233,7 @@ const ContactRecipientsManager = () => {
             aria-describedby={describedBy}
           />
         </form>
-        {fieldError && <InlineError id={errorId} announce={announceField}>{t(FIELD_ERRORS[fieldError])}</InlineError>}
+        {fieldError && <InlineError key={rejection} id={errorId} announce={announceField}>{t(FIELD_ERRORS[fieldError])}</InlineError>}
         {isLoadingList && <p id={loadingHintId} className={HINT_CLASS}>{t('contactRecipients.loadingHint')}</p>}
         {atMax && <p id={maxHintId} className={HINT_CLASS}>{t('contactRecipients.maxReached', { max: RECIPIENTS_MAX })}</p>}
       </div>

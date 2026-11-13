@@ -7,6 +7,10 @@ export const PRIVATE_PATHS = [
   '/manage-recipients',
 ];
 
+// React Router no distingue mayúsculas y acepta la barra final: se normaliza para comparar rutas (App y Sidebar).
+// Solo se compara; no se redirige ni se pasa el dato del usuario a ningún enlace (S6).
+export const normalizePath = (pathname) => pathname.replace(/\/+$/, '').toLowerCase() || '/';
+
 // URL antigua -> ruta actual. Solo de cliente (sin 301). El destino sale siempre de esta tabla constante (S4).
 export const LEGACY_REDIRECTS = {
   '/explorar': '/explore',
