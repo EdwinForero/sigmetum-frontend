@@ -12,8 +12,7 @@ import Pagination from '../components/Pagination';
 import InfoButton from '../components/InfoButton';
 import useToast from '../hooks/useToast';
 import ASSETS, { assetUrl } from '../config/assets';
-//import ImageCarousel from '../components/ImageCarrousel';
-//import ScrollIndicator from '../components/ScrollIndicator';
+import { PAGE, H1 } from '../utilities/contentStyles';
 
 const Explore = ({
   data,
@@ -254,29 +253,17 @@ const Explore = ({
 
   return (
     <>
-      <div className="page-container min-w-0 py-stack-xl">
+      <div className={`${PAGE} min-w-0`}>
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="focus-heading text-brand-deep text-3xl font-bold leading-tight mb-stack-lg"
+          className={`focus-heading ${H1}`}
         >
           {t('explore.title')}
         </h1>
         <LoadSpinner inline label={isLoading ? t('feedback.loading') : undefined} />
         {renderContent()}
       </div>
-
-      {/*
-      <motion.h2
-        className="text-[#15B659] text-center my-4 text-2xl sm:text-4xl font-bold leading-tight"
-        >
-          {t('explore.vegetationCaroselTitle')}
-      </motion.h2>
-      <div className="relative overflow-hidden w-full h-[300px] my-4 flex justify-center items-center">
-        <ImageCarousel/>
-      </div>
-      */}
-
     </>
   );
 };

@@ -74,3 +74,16 @@ test.describe('rutas privadas antiguas sin sesión', () => {
     });
   }
 });
+
+// B83: React Router decodifica el «%» de la ruta; la SPA debe pintar lo mismo que con la ruta sin codificar.
+test('/%45xplore se pinta como /explore: recuento, botón Filtros y el mismo título', async ({ page }) => {
+  await page.goto('/explore');
+  await expect(page.getByText(/Mostrando \d+ de 30 resultados/)).toBeVisible();
+  const expected = await page.title();
+
+  await page.goto('/%45xplore');
+
+  await expect(page.getByText(/Mostrando \d+ de 30 resultados/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Filtros' })).toBeVisible();
+  expect(await page.title()).toBe(expected);
+});

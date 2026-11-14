@@ -8,6 +8,7 @@ import { highlightTerms } from '../utilities/highlightTerms.js';
 import { ipniUrl } from '../utilities/ipniUrl.js';
 import { useTranslation } from 'react-i18next';
 import useDialogFocus from '../hooks/useDialogFocus.js';
+import { SURFACE_TITLE } from '../utilities/contentStyles';
 
 const contieneEspecie = (valor, nombre) =>
   Array.isArray(valor) ? valor.includes(nombre) : valor === nombre;
@@ -83,7 +84,7 @@ const Dialog = ({
         tabIndex={-1}
       >
         <div className="flex justify-center px-4 py-2 mx-auto w-full">
-          <div id={titleId} className="text-moss text-4xl mb-4 font-bold text-center break-words whitespace-normal">
+          <div id={titleId} className={`${SURFACE_TITLE} mb-4 text-center break-words whitespace-normal`}>
             {textParts.map((part, index) => (
                 <h2
                   key={index}
@@ -95,7 +96,7 @@ const Dialog = ({
           </div>
         </div>
 
-        <div className="p-4 grid grid-cols-1 gap-4 overflow-y-auto flex-grow mb-10">
+        <div className="p-4 grid grid-cols-1 gap-4 overflow-y-auto flex-grow mb-stack-xl">
             {Object.entries(uniqueAttributes).map(([key, value]) => (
                 <SpeciesAttribute
                     key={key}

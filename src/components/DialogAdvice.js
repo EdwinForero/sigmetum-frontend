@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { motion, useIsPresent } from "motion/react";
 import useDialogFocus from "../hooks/useDialogFocus";
 import { NOTICE_BASE, noticeVariant } from "../utilities/noticeStyles";
+import { SURFACE_TITLE } from "../utilities/contentStyles";
 
 const DialogAdvice = ({ 
   onClose, 
@@ -56,12 +57,12 @@ const DialogAdvice = ({
         tabIndex={-1}
       >
         <div className="flex justify-center px-4 py-2 mx-auto">
-          <h2 id={titleId} className="text-brand-deep text-4xl mb-4 font-bold">
+          <h2 id={titleId} className={`${SURFACE_TITLE} mb-4`}>
             {dialogTitle}
           </h2>
         </div>
 
-        <div className="p-4 grid grid-cols-1 gap-4 max-h-[300px] overflow-y-auto flex-grow mb-10">
+        <div className="p-4 grid grid-cols-1 gap-4 max-h-[300px] overflow-y-auto flex-grow mb-stack-xl">
           <div className={`${NOTICE_BASE} ${box}`}>
             <span className={`material-symbols-outlined ${iconClass}`} aria-hidden="true">{icon}</span>
             <p className="py-2 text-xl whitespace-pre-wrap [overflow-wrap:anywhere]">{dialogMessage}</p>

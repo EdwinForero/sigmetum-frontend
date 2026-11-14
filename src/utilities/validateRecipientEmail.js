@@ -14,19 +14,20 @@ const FORMAT_CHARS = /\p{Cf}/u;
 
 export const normalizeEmail = (value) => value.trim().toLowerCase();
 
+// Mismo nombre y misma regla que isValidEmailAddress del servidor. Recibe la dirección ya recortada.
+// La usan este módulo y validateContact: una sola copia de la regla en el cliente.
+export const isValidEmailAddress = (trimmed) =>
+  trimmed.length <= EMAIL_MAX_LENGTH &&
+  !CONTROL_CHARS.test(trimmed) &&
+  !FORMAT_CHARS.test(trimmed) &&
+  RECIPIENT_EMAIL_PATTERN.test(trimmed);
+
 // Devuelve null (válido) o 'required' | 'email' | 'duplicate'. `list` es la lista del servidor,
 // con la forma [{ email }]. No muta nada.
 const validateRecipientEmail = (value, list = []) => {
   const address = typeof value === 'string' ? value.trim() : '';
   if (!address) return 'required';
-  if (
-    address.length > EMAIL_MAX_LENGTH ||
-    CONTROL_CHARS.test(address) ||
-    FORMAT_CHARS.test(address) ||
-    !RECIPIENT_EMAIL_PATTERN.test(address)
-  ) {
-    return 'email';
-  }
+  if (!isValidEmailAddress(address)) return 'email';
   const normalized = normalizeEmail(address);
   const isDuplicate = list.some((item) => typeof item?.email === 'string' && normalizeEmail(item.email) === normalized);
   return isDuplicate ? 'duplicate' : null;

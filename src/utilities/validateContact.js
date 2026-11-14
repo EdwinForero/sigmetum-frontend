@@ -1,9 +1,9 @@
+import { isValidEmailAddress } from './validateRecipientEmail';
+
 export const MESSAGE_MIN_LENGTH = 20;
 
-// Expresión fija, sin entrada del usuario. La validación en cliente no sustituye a la del servidor.
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Igual que el servidor: un correo con caracteres de formato (categoría Cf: invisibles, de dirección) no vale.
-const FORMAT_CHARS = /\p{Cf}/u;
+// La regla del correo es la del servidor (una sola copia, en validateRecipientEmail). La validación en cliente
+// no sustituye a la del servidor.
 
 const REQUIRED = { key: 'form.errors.required' };
 
@@ -17,7 +17,7 @@ const validateContact = ({ username, email, subject, message }) => {
 
   if (!name) errors.username = REQUIRED;
   if (!address) errors.email = REQUIRED;
-  else if (!EMAIL_PATTERN.test(address) || FORMAT_CHARS.test(address)) errors.email = { key: 'form.errors.email' };
+  else if (!isValidEmailAddress(address)) errors.email = { key: 'form.errors.email' };
   if (!topic) errors.subject = REQUIRED;
   if (!body) errors.message = REQUIRED;
   else if (body.length < MESSAGE_MIN_LENGTH) {

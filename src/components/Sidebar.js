@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
 import useDialogFocus from '../hooks/useDialogFocus';
@@ -71,13 +71,13 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
           {filteredMenuOptions.map((option) => (
             <li key={option.id} className="h-full min-w-0 flex-1 md:h-auto md:flex-none">
               {option.link ? (
-                <NavLink
+                <Link
                   to={option.link}
-                  end
-                  className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
+                  aria-current={path === option.link ? 'page' : undefined}
+                  className={`${itemBase} ${path === option.link ? itemActive : itemInactive}`}
                 >
                   <NavItem icon={option.icon} label={option.name} />
-                </NavLink>
+                </Link>
               ) : (
                 <button
                   type="button"

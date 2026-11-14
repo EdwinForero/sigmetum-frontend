@@ -86,6 +86,14 @@ describe('useDocumentTitle', () => {
     expect(document.title).toBe(`${es.navbar.exploreOption}${SUFFIX}`);
   });
 
+  it.each([
+    ['/%45xplore', 'navbar.exploreOption'],
+    ['/manage-d%61ta', 'dataManagement.title'],
+    ['/%E0%A4%A', 'notFound.title'],
+  ])('la ruta codificada %s usa la clave %s', (ruta, clave) => {
+    expect(titleKeyFor(ruta)).toBe(clave);
+  });
+
   it('cambia con el idioma sin remontar', async () => {
     renderAt('/explore');
     expect(document.title).toBe(`${es.navbar.exploreOption}${SUFFIX}`);

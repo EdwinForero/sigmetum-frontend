@@ -40,7 +40,8 @@ describe('EmptyState', () => {
   it('usa la jerarquía del sistema de diseño: título xl en negrita brand-deep y frase base ink-soft', () => {
     const { container } = render(<EmptyState title="Sin datos">Causa.</EmptyState>);
 
-    expect(container.firstChild).toHaveClass('max-w-prose', 'mt-stack-lg');
+    expect(container.firstChild).toHaveClass('max-w-prose');
+    expect(container.firstChild).not.toHaveClass('mt-stack-lg');
     expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-xl', 'font-bold', 'text-brand-deep');
     expect(screen.getByText('Causa.')).toHaveClass('text-base', 'text-ink-soft');
     expect(container.innerHTML).not.toMatch(/#[0-9A-Fa-f]{3,8}\b|(gray|blue|red|green|yellow)-\d/);

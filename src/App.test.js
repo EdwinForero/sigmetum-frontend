@@ -166,7 +166,7 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
   });
 
-  it.each(['/EXPLORE', '/Explore'])('%s se pinta como /explore: barra con Filtros, sin enlaces privados y carga los datos', async (ruta) => {
+  it.each(['/EXPLORE', '/Explore', '/%45xplore'])('%s se pinta como /explore: barra con Filtros, sin enlaces privados y carga los datos', async (ruta) => {
     await renderApp(ruta);
 
     expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();

@@ -12,7 +12,7 @@ const Table = ({
 
   if (!data || data.length === 0) {
     return (
-    <p className="text-[#0C1811] text-lg font-semibold">
+    <p className="text-ink text-lg font-semibold">
       {t('dataManagement.table.noDataFoundPlaceholder')}
     </p>
     );
@@ -43,12 +43,12 @@ const Table = ({
       <table className="w-full">
         {label && <caption className="sr-only">{label}</caption>}
         <thead>
-          <tr className="bg-[#15B659]">
+          <tr className="bg-brand">
             {columnNames.map((col) => (
               <th
                 key={col}
                 scope="col"
-                className="px-4 py-2 text-left text-base font-bold text-ink border-b border-[#99BBA8]"
+                className="px-4 py-2 text-left text-base font-bold text-ink border-b border-sage"
               >
                 {t(`attributes.${col}`, col)}
               </th>
@@ -57,11 +57,11 @@ const Table = ({
         </thead>
         <tbody>
           {currentRows.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-[#99BBA8]">
+            <tr key={rowIndex} className="hover:bg-sage">
               {columnNames.map((col) => (
                 <td
                   key={col}
-                  className="px-4 py-2 text-sm text-[#0C1811] border-b border-[#99BBA8]"
+                  className="px-4 py-2 text-sm text-ink border-b border-sage"
                 >
                   {Array.isArray(row[col]) ? (
                             row[col].map((item, index) => (

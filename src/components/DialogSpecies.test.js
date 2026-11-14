@@ -267,13 +267,13 @@ describe('DialogSpecies', () => {
     expect(screen.getByRole('main')).toHaveFocus();
   });
 
-  it('usa tokens: fondo bg-ink/70, caja bg-surface y título text-moss, sin hex', () => {
+  it('usa tokens: fondo bg-ink/70, caja bg-surface y título text-brand-deep de 24 px, sin hex', () => {
     renderDialog([fila('Provincia exacta', ESPECIE)]);
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveClass('bg-surface');
     expect(dialog.parentElement).toHaveClass('bg-ink/70');
-    expect(document.getElementById(dialog.getAttribute('aria-labelledby'))).toHaveClass('text-moss');
+    expect(document.getElementById(dialog.getAttribute('aria-labelledby'))).toHaveClass('text-brand-deep', 'text-2xl');
     const propias = [dialog.parentElement.className, dialog.className, dialog.querySelector('a').className].join(' ');
     expect(propias).not.toMatch(/\[#[0-9A-Fa-f]{3,8}\]|gray-\d/);
   });

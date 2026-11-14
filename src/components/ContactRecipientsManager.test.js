@@ -66,7 +66,7 @@ describe('ContactRecipientsManager', () => {
       const h1 = screen.getAllByRole('heading', { level: 1 });
       expect(h1).toHaveLength(1);
       expect(h1[0]).toHaveAttribute('tabindex', '-1');
-      expect(h1[0]).toHaveClass('focus-heading', 'text-[32px]', 'font-bold', 'leading-tight', 'text-brand-deep');
+      expect(h1[0]).toHaveClass('focus-heading', 'text-3xl', 'font-bold', 'leading-tight', 'text-brand-deep');
       expect(api.getAuth).toHaveBeenCalledTimes(1);
       expect(api.getAuth).toHaveBeenCalledWith('/list-recipients');
     });

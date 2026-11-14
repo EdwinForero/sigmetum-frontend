@@ -1,7 +1,7 @@
 import ContactRecipientsManager from '../components/ContactRecipientsManager';
 
 const RecipientsManagement = () => (
-  <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6 animate-page-fade motion-reduce:animate-none">
+  <div className="page-container pt-stack pb-stack-lg animate-page-fade motion-reduce:animate-none">
     <ContactRecipientsManager />
   </div>
 );

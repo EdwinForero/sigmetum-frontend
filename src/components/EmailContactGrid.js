@@ -17,7 +17,7 @@ const EmailContactGrid = () => {
       .filter(entry => entry.name && entry.email);
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack text-base font-normal mt-stack-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack text-base font-normal mt-stack">
         {emailList.map((item, index) => (
           <div key={index} className="flex flex-col space-y-1">
             <span className="text-ink font-bold">{item.name}</span>

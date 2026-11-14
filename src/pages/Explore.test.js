@@ -205,10 +205,20 @@ describe('Explore', () => {
     expect(screen.queryByRole('button', { name: 'iconButton.info' })).toBeNull();
   });
 
-  it('el título es verde oscuro de marca (brand-deep)', () => {
+  it('el título es verde oscuro de marca (brand-deep) y usa la escala pública de h1 (36/48), sin margen propio', () => {
     renderExplore();
 
-    expect(screen.getByRole('heading', { level: 1, name: 'explore.title' })).toHaveClass('text-brand-deep');
+    const h1 = screen.getByRole('heading', { level: 1, name: 'explore.title' });
+    expect(h1).toHaveClass('text-brand-deep', 'text-4xl', 'md:text-5xl', 'font-bold', 'leading-tight');
+    expect(h1.className).not.toMatch(/text-3xl|(^| )mb-/);
+  });
+
+  it('el contenedor usa el relleno de página (32/48 arriba, 48/64 abajo) y el hueco bajo el h1 es solo la fila de estado', () => {
+    renderExplore();
+
+    const container = screen.getByRole('heading', { level: 1, name: 'explore.title' }).parentElement;
+    expect(container).toHaveClass('page-container', 'pt-stack-xl', 'md:pt-section', 'pb-section', 'md:pb-section-lg');
+    expect(container.className).not.toMatch(/(^| )py-stack-xl/);
   });
 
   it('si la descarga del glosario falla avisa con un error persistente, sin diálogo', async () => {

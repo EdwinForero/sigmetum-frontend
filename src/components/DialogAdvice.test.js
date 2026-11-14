@@ -181,10 +181,10 @@ describe('DialogAdvice', () => {
     expect(screen.queryByRole('heading', { level: 3 })).toBeNull();
   });
 
-  it('el título usa brand-deep (contraste sobre el fondo claro)', () => {
+  it('el título usa brand-deep (contraste sobre el fondo claro) y mide 24 px', () => {
     renderSimple();
 
-    expect(screen.getByRole('heading', { name: 'Aviso' })).toHaveClass('text-brand-deep');
+    expect(screen.getByRole('heading', { name: 'Aviso' })).toHaveClass('text-brand-deep', 'text-2xl');
   });
 
   it('el fondo y la caja usan los tokens ink/70 y surface, sin hexadecimales', () => {

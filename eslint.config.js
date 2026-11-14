@@ -26,6 +26,8 @@ export default [
       ...react.configs.flat.recommended.rules,
       ...react.configs.flat['jsx-runtime'].rules,
       ...warnAll(jsxA11y.flatConfigs.recommended.rules),
+      // Un ul sin marcador (preflight) pierde su semántica de lista en Safari con VoiceOver: se le añade role="list".
+      'jsx-a11y/no-redundant-roles': ['warn', { ul: ['list'] }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react/prop-types': 'off',

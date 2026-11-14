@@ -547,14 +547,17 @@ for (const width of [390, 768, 1024, 1440, 2560]) {
   });
 }
 
-// Sobre nosotros: separación vertical entre el <h1> y el párrafo en todos los anchos (también con rejilla desde lg).
+// Sobre nosotros: el primer bloque (imagen o párrafo, el que quede más arriba) queda a 24 px del <h1> en todos
+// los anchos, también con la rejilla de dos columnas desde lg.
 for (const width of [390, 1024, 1440]) {
-  test(`/about-us: el párrafo queda a 16 px o más bajo el <h1> a ${width} px`, async ({ page }) => {
+  test(`/about-us: el primer bloque queda a 24 px del <h1> a ${width} px`, async ({ page }) => {
     await page.setViewportSize({ width, height: HEIGHT[width] });
     await open(page, '/about-us');
-    const gap = await page.evaluate(
-      () => document.querySelector('section p').getBoundingClientRect().top - document.querySelector('h1').getBoundingClientRect().bottom
-    );
+    const gap = await page.evaluate(() => {
+      const top = (selector) => document.querySelector(selector).getBoundingClientRect().top;
+      return Math.min(top('section img'), top('section p')) - document.querySelector('h1').getBoundingClientRect().bottom;
+    });
+    expect(Math.abs(gap - 24)).toBeLessThanOrEqual(1);
     expect(gap).toBeGreaterThanOrEqual(16);
   });
 }

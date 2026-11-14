@@ -127,29 +127,53 @@ describe('Home', () => {
     });
   });
 
+  describe('ritmo vertical', () => {
+    it('la sección de entidades no lleva relleno inferior: el de #contacto es el único entre ambas', () => {
+      renderHome();
+
+      const entidades = document.getElementById('home-descripcion').nextElementSibling;
+      expect(entidades.tagName).toBe('SECTION');
+      expect(entidades).toHaveClass('page-container', 'pt-section', 'md:pt-section-lg');
+      expect(entidades.className).not.toMatch(/(^|\s)(md:)?(py|pb)-/);
+      expect(entidades.nextElementSibling).toBe(document.getElementById('contacto'));
+    });
+
+    it('los h3 de colaboradores van a 32 px del bloque anterior y a 16 px de su contenido', () => {
+      renderHome();
+
+      for (const name of ['home.otherUniversitiesTitle', 'home.collaboratingEntitiesTitle']) {
+        const h3 = screen.getByRole('heading', { level: 3, name });
+        expect(h3).toHaveClass('mt-stack-xl');
+        expect(h3.className).not.toMatch(/mt-section/);
+        expect(h3.nextElementSibling).toHaveClass('mt-stack', 'grid');
+      }
+    });
+  });
+
   describe('contacto', () => {
     it('es la sección #contacto con rejilla de dos columnas desde md', () => {
       renderHome();
 
       const contacto = document.getElementById('contacto');
       expect(contacto.tagName).toBe('SECTION');
-      expect(contacto).toHaveClass('page-container');
+      expect(contacto).toHaveClass('page-container', 'py-section', 'md:py-section-lg');
       expect(contacto.querySelector('.grid')).toHaveClass('gap-stack-xl', 'md:grid-cols-2');
       expect(within(contacto).getByRole('form', { name: 'contacto' })).toBeInTheDocument();
     });
 
-    it('cada bloque de la columna usa h3 y párrafos de 16 px, con filete ink-soft', () => {
+    it('cada bloque de la columna usa h3 y párrafos de 16 px, con filete moss', () => {
       renderHome();
 
       for (const title of ['home.emailTitle', 'home.locationLabel']) {
         const h3 = screen.getByRole('heading', { level: 3, name: title });
         expect(h3).toHaveClass('text-xl', 'md:text-2xl', 'font-bold', 'text-brand-deep');
-        expect(h3.parentElement).toHaveClass('border-t', 'border-ink-soft', 'pt-stack-lg');
+        expect(h3.parentElement).toHaveClass('border-t', 'border-moss', 'pt-stack-lg');
       }
       const ubicacion = screen.getByText('home.locationContent');
       expect(ubicacion.tagName).toBe('P');
-      expect(ubicacion).toHaveClass('mt-stack-sm', 'text-base', 'text-ink', 'whitespace-pre-line');
-      expect(ubicacion.parentElement).toHaveClass('border-b', 'pb-stack-lg');
+      expect(ubicacion).toHaveClass('mt-stack', 'text-base', 'text-ink', 'whitespace-pre-line');
+      expect(ubicacion.parentElement).toHaveClass('border-b', 'border-moss', 'pb-stack-lg');
+      expect(ubicacion.parentElement.className).not.toMatch(/ink-soft/);
     });
   });
 

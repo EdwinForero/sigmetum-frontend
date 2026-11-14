@@ -1,11 +1,7 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import Reveal from '../components/Reveal.js';
-
-const H2 = 'text-2xl md:text-4xl font-bold leading-tight text-brand-deep';
-const H3 = 'mt-stack-xl text-xl md:text-3xl font-bold leading-tight text-brand-deep';
-const P = 'mt-stack max-w-prose text-base md:text-lg text-ink-soft whitespace-pre-line';
-const BLOCK = 'mt-section border-t border-moss pt-section';
+import { PAGE, PROSE, H1, H2, H3, BULLETS, RULED, RULED_SECTION } from '../utilities/contentStyles.js';
 
 // Enlaces externos de «Más información»: fuera de los párrafos, cada uno con su objetivo de 44 px.
 const MORE_INFO = [
@@ -20,69 +16,100 @@ const MORE_INFO = [
 ];
 
 const CATEGORIES = ['First', 'Second', 'Third', 'Fourth'];
+const TYPES = ['typeFirstParty', 'typeThirdParty'];
+const USES = ['useNavigation', 'useSettings', 'useAnalytics', 'useTraffic', 'useAdvertising'];
 
 const Cookies = () => {
   const { t } = useTranslation();
 
   return (
-    <article className="page-container pt-stack-xl md:pt-section pb-section">
-      <h1 className="text-4xl md:text-5xl font-bold leading-tight text-brand-deep">
-        {t('cookies.title')}
-      </h1>
+    <article className={PAGE}>
+      <div className={PROSE}>
+        <h1 className={H1}>{t('cookies.title')}</h1>
 
-      <Reveal as="section" className="mt-stack-xl">
-        <h2 className={H2}>{t('cookies.subtitleAboutCookies')}</h2>
-        <p className={P}>{t('cookies.descriptionAboutCookies')}</p>
+        <div className={`mt-stack-lg ${RULED}`}>
+          <Reveal as="section" className={RULED_SECTION}>
+            <h2 className={H2}>{t('cookies.subtitleAboutCookies')}</h2>
+            <div className="mt-stack-lg space-y-stack">
+              <p>{t('cookies.descriptionAboutCookies')}</p>
+              <p>{t('cookies.descriptionAboutCookiesNote')}</p>
+            </div>
+          </Reveal>
 
-        <h2 className={`${H2} mt-stack-xl`}>{t('cookies.subtitleAboutPixel')}</h2>
-        <p className={P}>{t('cookies.descriptionAboutPixel')}</p>
-      </Reveal>
+          <Reveal as="section" className={RULED_SECTION}>
+            <h2 className={H2}>{t('cookies.subtitleAboutPixel')}</h2>
+            <div className="mt-stack-lg space-y-stack">
+              <p>{t('cookies.descriptionAboutPixel')}</p>
+              <p>{t('cookies.descriptionAboutPixelMoreInfo')}</p>
+            </div>
+          </Reveal>
 
-      <Reveal as="section" className={BLOCK}>
-        <h2 className={H2}>{t('cookies.subtitleTypeCookies')}</h2>
-        <p className={P}>
-          <Trans
-            i18nKey="cookies.descriptionTypeCookies"
-            components={{ strong: <strong className="font-bold" /> }}
-          />
-        </p>
+          <Reveal as="section" className={RULED_SECTION}>
+            <h2 className={H2}>{t('cookies.subtitleTypeCookies')}</h2>
+            <ul className={`mt-stack-lg ${BULLETS}`}>
+              {TYPES.map((type) => (
+                <li key={type}>
+                  <Trans
+                    i18nKey={`cookies.${type}`}
+                    components={{ strong: <strong className="font-bold" /> }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </Reveal>
 
-        <h2 className={`${H2} mt-stack-xl`}>{t('cookies.subtitleCookiesUse')}</h2>
-        <p className={P}>{t('cookies.descriptionCookiesUse')}</p>
-      </Reveal>
+          <Reveal as="section" className={RULED_SECTION}>
+            <h2 className={H2}>{t('cookies.subtitleCookiesUse')}</h2>
+            <div className="mt-stack-lg space-y-stack">
+              <p>{t('cookies.usesIntro')}</p>
+              <ul className={BULLETS}>
+                {USES.map((use) => (
+                  <li key={use}>{t(`cookies.${use}`)}</li>
+                ))}
+              </ul>
+              <p>{t('cookies.usesClosing')}</p>
+            </div>
+          </Reveal>
 
-      <Reveal as="section" className={BLOCK}>
-        <h2 className={H2}>{t('cookies.subtitleCookiesCategories')}</h2>
-        {CATEGORIES.map((category) => (
-          <React.Fragment key={category}>
-            <h3 className={H3}>{t(`cookies.subtitle${category}CookiesCategory`)}</h3>
-            <p className={P}>{t(`cookies.description${category}CookiesCategory`)}</p>
-          </React.Fragment>
-        ))}
-      </Reveal>
+          <Reveal as="section" className={RULED_SECTION}>
+            <h2 className={H2}>{t('cookies.subtitleCookiesCategories')}</h2>
+            <ul role="list" className="mt-stack-lg space-y-stack-xl">
+              {CATEGORIES.map((category) => (
+                <li key={category}>
+                  <h3 className={H3}>{t(`cookies.subtitle${category}CookiesCategory`)}</h3>
+                  <p className="mt-stack">{t(`cookies.description${category}CookiesCategory`)}</p>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
 
-      <Reveal as="section" className={BLOCK}>
-        <h2 className={H2}>{t('cookies.subtitleCookiesManagement')}</h2>
-        <p className={P}>{t('cookies.descriptionCookiesManagement')}</p>
+          <Reveal as="section" className={RULED_SECTION}>
+            <h2 className={H2}>{t('cookies.subtitleCookiesManagement')}</h2>
+            <div className="mt-stack-lg space-y-stack">
+              <p>{t('cookies.descriptionCookiesManagement')}</p>
+              <p>{t('cookies.descriptionCookiesManagementBrowser')}</p>
+            </div>
 
-        <h3 className={H3}>{t('cookies.moreInfoTitle')}</h3>
-        <ul className="mt-stack">
-          {MORE_INFO.map(({ key, href }) => (
-            <li key={key}>
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="focus-ring inline-flex min-h-11 items-center gap-stack-sm text-brand-deep underline"
-              >
-                <span>{t(`cookies.${key}`)}</span>
-                <span className="material-symbols-outlined" aria-hidden="true">open_in_new</span>
-                <span className="sr-only">{t('a11y.opensInNewTab')}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </Reveal>
+            <h3 className={`${H3} mt-stack-xl`}>{t('cookies.moreInfoTitle')}</h3>
+            <ul role="list" className="mt-stack">
+              {MORE_INFO.map(({ key, href }) => (
+                <li key={key}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="focus-ring inline-flex min-h-11 items-center gap-stack-sm text-brand-deep underline"
+                  >
+                    <span>{t(`cookies.${key}`)}</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                    <span className="sr-only">{t('a11y.opensInNewTab')}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
+      </div>
     </article>
   );
 };

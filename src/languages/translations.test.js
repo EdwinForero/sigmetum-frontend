@@ -275,4 +275,101 @@ describe('traducciones', () => {
       expect(dictionary).not.toHaveProperty(['explore.errorLoadPlaceholder']);
     }
   });
+
+  describe('textos de la política de cookies', () => {
+    const cookiesOf = (dictionary) =>
+      Object.fromEntries(Object.entries(dictionary).filter(([key]) => key.startsWith('cookies.')));
+    const NEW_KEYS = [
+      'typeFirstParty', 'typeThirdParty', 'usesIntro', 'useNavigation', 'useSettings', 'useAnalytics', 'useTraffic',
+      'useAdvertising', 'usesClosing', 'descriptionAboutCookiesNote', 'descriptionAboutPixelMoreInfo',
+      'descriptionCookiesManagementBrowser',
+    ].map((key) => `cookies.${key}`);
+    const REMOVED_KEYS = ['cookies.descriptionTypeCookies', 'cookies.descriptionCookiesUse'];
+    const CATEGORY_TITLES = ['First', 'Second', 'Third', 'Fourth'].map((name) => `cookies.subtitle${name}CookiesCategory`);
+
+    it('las claves nuevas existen en es y en y las retiradas ya no', () => {
+      expect({
+        es: NEW_KEYS.filter((key) => !(key in spanish)),
+        en: NEW_KEYS.filter((key) => !(key in english)),
+      }).toEqual({ es: [], en: [] });
+      expect({
+        es: REMOVED_KEYS.filter((key) => key in spanish),
+        en: REMOVED_KEYS.filter((key) => key in english),
+      }).toEqual({ es: [], en: [] });
+    });
+
+    it('ninguna clave cookies.* lleva viñetas, saltos de línea ni dos espacios seguidos, y solo el banner lleva <a>', () => {
+      for (const [name, dictionary] of [['es', spanish], ['en', english]]) {
+        const entries = Object.entries(cookiesOf(dictionary));
+        expect(entries.length, name).toBeGreaterThan(30);
+        expect(entries.filter(([, value]) => /•|\n/.test(value)).map(([key]) => key), `${name}: viñetas o saltos`).toEqual([]);
+        expect(entries.filter(([, value]) => / {2}/.test(value)).map(([key]) => key), `${name}: dos espacios`).toEqual([]);
+        expect(entries.filter(([, value]) => /<a[ >]/.test(value)).map(([key]) => key), `${name}: enlaces`).toEqual(['cookies.banner.description']);
+      }
+    });
+
+    it('los títulos de categoría no llevan numeración escrita', () => {
+      for (const dictionary of [spanish, english]) {
+        for (const key of CATEGORY_TITLES) expect(dictionary[key]).not.toMatch(/^\s*\d+\s*[.)]/);
+      }
+    });
+
+    it('es y en tienen el mismo número de <strong> en cada clave de cookies', () => {
+      const strong = (text) => (String(text).match(/<strong>/g) || []).length;
+      const mismatched = Object.keys(cookiesOf(spanish)).filter((key) => strong(spanish[key]) !== strong(english[key]));
+
+      expect(mismatched).toEqual([]);
+      expect(['cookies.typeFirstParty', 'cookies.typeThirdParty'].map((key) => strong(spanish[key]))).toEqual([1, 1]);
+    });
+
+    it('los textos de las claves nuevas y los títulos de categoría son los acordados (el texto legal se copia literal)', () => {
+      const pick = (dictionary) =>
+        Object.fromEntries(
+          ['descriptionAboutCookies', 'descriptionAboutCookiesNote', 'descriptionAboutPixel', 'descriptionAboutPixelMoreInfo', 'typeFirstParty', 'typeThirdParty', 'usesIntro', 'useNavigation', 'useSettings', 'useAnalytics', 'useTraffic', 'useAdvertising', 'usesClosing', 'descriptionCookiesManagement', 'descriptionCookiesManagementBrowser', 'subtitleFirstCookiesCategory', 'subtitleSecondCookiesCategory', 'subtitleThirdCookiesCategory', 'subtitleFourthCookiesCategory'].map((key) => [key, dictionary[`cookies.${key}`]])
+        );
+
+      expect(pick(spanish)).toEqual({
+        descriptionAboutCookies: 'Una cookie es un archivo de texto simple que un sitio web almacena en tu dispositivo para recordar información, como tus preferencias o datos de navegación. Cada cookie es única para tu navegador e incluye datos como un identificador anónimo y el nombre del sitio. Las cookies mejoran la experiencia de navegación al recordar tus preferencias o permitir funcionalidades como un carrito de compras.',
+        descriptionAboutCookiesNote: 'Si bien nuestro sitio funciona sin cookies, desactivarlas podría limitar ciertas características y funcionalidades.',
+        descriptionAboutPixel: 'Un píxel es un fragmento de código que permite que se descarguen cookies en tu dispositivo. A menudo son usados por terceros para mostrar publicidad personalizada basada en tu actividad de navegación.',
+        descriptionAboutPixelMoreInfo: 'Para más información sobre cookies y píxeles, consulta el sitio web de la Information Commissioner’s Office (ICO) en la sección «Más información», al final de esta página.',
+        typeFirstParty: '<strong>First party</strong>: Estas cookies son configuradas directamente por nuestro sitio para funcionalidades básicas o mejorar tu experiencia.',
+        typeThirdParty: '<strong>Third party</strong>: Configuradas por socios externos (como anunciantes y redes sociales), estas cookies recopilan datos que luego son enviados a dichos terceros.',
+        usesIntro: 'En nuestro sitio usamos cookies para:',
+        useNavigation: 'Facilitar la navegación y permitir funciones esenciales, como la gestión de preferencias.',
+        useSettings: 'Recordar configuraciones personales, como idioma o región.',
+        useAnalytics: 'Analizar cómo usas el sitio para mejorar su diseño y funcionalidad.',
+        useTraffic: 'Monitorear el tráfico del sitio y la actividad de los usuarios.',
+        useAdvertising: 'Mostrarte publicidad relevante basada en tus intereses.',
+        usesClosing: 'No vendemos los datos recopilados por las cookies de first party, pero algunos terceros pueden acceder a la información de sus cookies.',
+        descriptionCookiesManagement: 'Puede actualizar sus preferencias sobre las cookies de nuestro sitio web a través de su perfil. Tenga en cuenta que nuestros sitios web funcionarán sin cookies, pero perderá algunas características y funcionalidades si decide desactivarlas.',
+        descriptionCookiesManagementBrowser: 'Si desea restringir o bloquear las cookies del navegador web que se instalan en su dispositivo, puede hacerlo a través de la configuración de su navegador. A continuación, le indicamos cómo hacerlo para los navegadores más populares, pero si el suyo no aparece en la lista, podrá encontrar información al respecto en la sección de Ayuda de su navegador o en aboutcookies.org:',
+        subtitleFirstCookiesCategory: 'Estrictamente Necesarias',
+        subtitleSecondCookiesCategory: 'Funcionales',
+        subtitleThirdCookiesCategory: 'De Rendimiento',
+        subtitleFourthCookiesCategory: 'De Publicidad Dirigida',
+      });
+      expect(pick(english)).toEqual({
+        descriptionAboutCookies: 'A cookie is a simple text file that a website stores on your device to remember information such as your preferences or browsing data. Each cookie is unique to your browser and includes data like an anonymous identifier and the website’s name. Cookies enhance your browsing experience by remembering your preferences or enabling functionalities such as a shopping cart.',
+        descriptionAboutCookiesNote: 'While our website can function without cookies, disabling them may limit certain features and functionalities.',
+        descriptionAboutPixel: 'A pixel is a small piece of code that enables cookies to be downloaded onto your device. Pixels are often used by third parties to deliver personalized ads based on your browsing activity.',
+        descriptionAboutPixelMoreInfo: 'For more information about cookies and pixels, visit the website of the Information Commissioner’s Office (ICO) in the “More information” section at the end of this page.',
+        typeFirstParty: '<strong>First-party cookies</strong>: Set directly by our website to enable basic functionality or improve your experience.',
+        typeThirdParty: '<strong>Third-party cookies</strong>: Set by external partners (e.g., advertisers or social media platforms) to collect data that is sent to these third parties.',
+        usesIntro: 'We use cookies on our website to:',
+        useNavigation: 'Simplify navigation and enable essential features, such as managing preferences.',
+        useSettings: 'Remember personal settings, such as language or region.',
+        useAnalytics: 'Analyze how you use the website to improve its design and functionality.',
+        useTraffic: 'Monitor website traffic and user activity.',
+        useAdvertising: 'Deliver relevant advertisements based on your interests.',
+        usesClosing: 'We do not sell data collected via first-party cookies, but some third parties may access the data from their own cookies.',
+        descriptionCookiesManagement: 'You can update your preferences for the cookies on our website through your profile. Please note that our websites will work without cookies, but you will lose some features and functionality if you choose to disable them.',
+        descriptionCookiesManagementBrowser: 'If you wish to restrict or block web browser cookies which are set on your device then you can do this through your browser settings. Here is how to do this for the most popular browsers, but if yours is not listed you should be able to find this in your browser’s Help section or on aboutcookies.org:',
+        subtitleFirstCookiesCategory: 'Strictly Necessary',
+        subtitleSecondCookiesCategory: 'Functional',
+        subtitleThirdCookiesCategory: 'Performance',
+        subtitleFourthCookiesCategory: 'Targeted Advertising',
+      });
+    });
+  });
 });

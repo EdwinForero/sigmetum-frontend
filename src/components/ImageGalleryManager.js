@@ -11,6 +11,7 @@ import ButtonAlternative from './ButtonAlternative';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
 import { useToast } from '../hooks/useToast';
+import { H1_TOOL } from '../utilities/contentStyles';
 import isSafeImageUrl from '../utilities/isSafeImageUrl';
 
 const INVALID_TITLE = /[/\\,':&#?%"]|\.\.|\p{Cc}/u;
@@ -187,13 +188,13 @@ const ImageGalleryManager = () => {
   const titleError = fieldError?.field === 'title' ? fieldError : null;
 
   return (
-    <div className="flex min-w-0 flex-col gap-3">
+    <div className="flex min-w-0 flex-col gap-stack">
       <div className="flex flex-wrap items-center gap-3">
         <h1
           id={headingId}
           ref={headingRef}
           tabIndex={-1}
-          className="focus-heading py-4 text-[32px] font-bold leading-tight text-brand-deep"
+          className={`focus-heading ${H1_TOOL}`}
         >
           {t('contentManagement.galleryManagementTitle')}
         </h1>
