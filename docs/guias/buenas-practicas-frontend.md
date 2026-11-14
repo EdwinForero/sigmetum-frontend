@@ -42,7 +42,7 @@ La **CI** ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)) ejecuta l
 | **No mutes** props ni estado: copia antes de ordenar o transformar (`[...items].sort(...)`) | `downloadXLSX` mutaba los datos de la pantalla y rompía los filtros (A2). `SortItemsList` ordena en el propio array | Test de no mutación |
 | Reutiliza `ButtonPrincipal`, `ButtonAlternative`, `ToastProvider` (`useToast`) e `InlineError`; `DialogAdvice` y `useDialog` solo para confirmar un borrado o una decisión | Aspecto y comportamiento coherentes: éxito en `role="status"`, error persistente en `role="alert"`, error de campo en línea y un diálogo modal solo cuando hay que decidir (ver [accesibilidad.md](accesibilidad.md) A12) | Revisión |
 | Los tests de componentes que avisan se envuelven en `ToastProvider` y no usan `getByRole('alert')` ni `getByRole('status')` sin filtro | Las dos regiones están siempre montadas; se comprueba el texto y su región (`closest` o `within`), y «no hay error» con `queryByText` nulo | Test del componente |
-| Borra el código que no se usa; no lo dejes comentado | Hay componentes sin uso (`UploadButton`, `ImageCarrousel`) y bloques comentados en `Explore` | `git grep` y revisión |
+| Borra el código que no se usa; no lo dejes comentado | Hay componentes sin uso (`UploadButton`, `ImageCarrousel`) | `git grep` y revisión |
 
 ## 4. Datos y llamadas HTTP
 
@@ -81,7 +81,8 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 | Regla | Por qué |
 |---|---|
 | Tailwind con clases utilitarias y **primero móvil** (`sm:`, `md:`, `lg:` para ampliar) | Es la base actual |
-| Usa los **tokens** de `tailwind.config.js` (`brand`, `brand-dark`, `brand-deep`, `surface`, `ink`, `ink-soft`, `sage`, `moss`, `danger`, `forest`, `sage-soft`, `warning`) y el espaciado con nombre (`gutter*`, `stack*`, `section*` y `nav`, escala {4, 8, 12, 16, 24, 32, 48, 64} px), no hexadecimales arbitrarios; letra con pesos 400 y 700 y la escala de Tailwind de 14 a 48 px (`xs` de 12 px solo en la barra inferior y el banner); no añadas colores nuevos sin decidirlo y sin comprobar el contraste (`src/theme.test.js` fija los valores y los ratios) | Un cambio de marca se hace en un solo sitio (B13, parcial: las públicas, los avisos y `LoginForm` ya usan tokens; quedan hexadecimales en `CategoryFilter`, `Filter`, `Table`, `Login`, `NotFound` y otros). Texto verde sobre fondo claro = `brand-deep`; texto sobre `brand` = `ink`; ver [accesibilidad.md](accesibilidad.md) A1 |
+| Usa los **tokens** de `tailwind.config.js` (`brand`, `brand-dark`, `brand-deep`, `surface`, `ink`, `ink-soft`, `sage`, `moss`, `danger`, `forest`, `sage-soft`, `warning`) y el espaciado con nombre (`gutter*`, `stack*`, `section*` y `nav`, escala {4, 8, 12, 16, 24, 32, 48, 64} px; la altura de la barra inferior, `nav`, sale de `NAV_HEIGHT_PX` en `src/config/layout.js`, que también usa `InfoButton`: no repitas el 72), no hexadecimales arbitrarios; letra con pesos 400 y 700 y la escala de Tailwind de 14 a 48 px (`xs` de 12 px solo en la barra inferior y el banner); no añadas colores nuevos sin decidirlo y sin comprobar el contraste (`src/theme.test.js` fija los valores y los ratios) | Un cambio de marca se hace en un solo sitio (B13, parcial: las públicas, los avisos y `LoginForm` ya usan tokens; quedan hexadecimales en `CategoryFilter`, `Filter`, `Table`, `Login` y otros; `NotFound` ya no los tiene). Texto verde sobre fondo claro = `brand-deep`; texto sobre `brand` = `ink`; ver [accesibilidad.md](accesibilidad.md) A1 |
+| **Los roles de contenido salen de `contentStyles`** (`src/utilities/contentStyles.js`: `PAGE`, `H1`, `H2`, `H3`, `PROSE`, `CARD*`…): un rol, una constante; no repitas sus clases a mano ni uses `text-[Npx]`, hexadecimales ni espaciados fuera de la escala (`contentStyles.test.js` recorre once páginas y once componentes); los valores y el ritmo están en `DESIGN.md` | Una sola escala de títulos y de espaciado en toda la web |
 | Sin anchos ni márgenes fijos en píxeles que rompan en 320 px (`px-40`, `w-[512px]`, `min-w-72` o `max-w-screen`, ya retirados de las páginas privadas); un contenedor `max-w-*` por página y `min-w-0` en los hijos flexibles | Adaptabilidad y zoom: ver [accesibilidad.md](accesibilidad.md) |
 | Antes de elegir un color, comprueba el contraste | Con los tokens nuevos las páginas privadas y las públicas cumplen WCAG AA (el contraste real sobre la foto del hero está por confirmar): ver [accesibilidad.md](accesibilidad.md). Un estado desactivado se resuelve con borde discontinuo y `moss`, no con `opacity-50` (B60 cerrado el 12/11/2026: también en botones de icono, `ButtonAlternative` y `Sidebar`; un estado que se explica por teclado usa `inactive`) |
 
@@ -143,9 +144,9 @@ Todo texto que venga de una persona o de la API y vaya a una expresión regular 
 `npm run lint` falla si hay **errores** o si los **avisos superan el tope** de `--max-warnings` en `package.json`.
 
 - Los avisos (accesibilidad, variables sin usar, `console.log`) son deuda visible: no bloquean, pero **no pueden crecer**.
-- **Cuando corrijas avisos, baja el tope** al nuevo número (el valor actual está en [09](../09-estado-actual-y-deuda-tecnica.md); bajó al retirar los campos de `LoginForm` y otra vez en la auditoría de las páginas privadas, al quitar `div onClick` y `label` sin texto, y en el pulido de las páginas públicas). Un `role="region" tabIndex={0}` (la región con scroll de `Table`) añade un aviso `no-noninteractive-tabindex`. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
+- **Cuando corrijas avisos, baja el tope** al nuevo número (el valor actual está en [09](../09-estado-actual-y-deuda-tecnica.md); bajó al retirar los campos de `LoginForm` y otra vez en la auditoría de las páginas privadas, al quitar `div onClick` y `label` sin texto, y en el pulido de las páginas públicas; y de 18 a 16 el 13/11/2026 al pasar el enlace del banner de cookies a `Link`). Un `role="region" tabIndex={0}` (la región con scroll de `Table`) añade un aviso `no-noninteractive-tabindex`. `npm run quality` falla si el tope es mayor que los avisos reales, para que la mejora no se pierda.
 - No uses `// eslint-disable` sin un comentario que explique el motivo.
-- Una regla de ESLint nueva o relajada se anota en [02](../02-tecnologias.md) y en este documento.
+- Una regla de ESLint nueva o relajada se anota en [02](../02-tecnologias.md) y en este documento. Configuración (13/11/2026): `jsx-a11y/no-redundant-roles` admite `role="list"` en `ul` (`{ ul: ['list'] }`), porque el preflight de Tailwind quita el marcador a las listas sin viñetas y Safari con VoiceOver les quitaría la semántica; no relaja nada más.
 - Los `.mjs` de `plugins/` (scripts y tests de `node:test` del ciclo agéntico) se lintan con las reglas recomendadas de ESLint y los globales de Node; no están sujetos a las reglas de React ni de accesibilidad de `src/`. Esa excepción no relaja nada de `src/`.
 
 ## 15. Anti-patrones que ya están en el código
@@ -160,7 +161,7 @@ No los repitas al escribir código nuevo:
 | Regex construida con texto sin escapar | Corregido en `highlightTerms` | A3 |
 | Campo no controlado | Corregido en `TextInput` | A4 |
 | `console.log` con datos | Corregido en `Filter.js` | M9 |
-| Código muerto y bloques comentados | `UploadButton`, `ImageCarrousel`, `Explore` | M8 |
+| Código muerto | `UploadButton`, `ImageCarrousel` | M8 |
 | `import { React, useState } from 'react'` (`React` no es una exportación con nombre) | Varias páginas | B6 |
 | Nombre de archivo que no sigue la convención | `CSVfunctions.js` | |
 

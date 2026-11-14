@@ -5,6 +5,7 @@ import validateRecipientEmail, {
   RECIPIENTS_MIN,
   RECIPIENTS_MAX,
   normalizeEmail,
+  isValidEmailAddress,
 } from './validateRecipientEmail';
 
 const lista = [{ email: 'Ana@Example.com' }, { email: 'luis@example.com' }];
@@ -22,6 +23,7 @@ describe('validateRecipientEmail', () => {
     ['nombre+tag@sub.dominio.es'],
     ['  ana@example.com  '],
     ['a@b.co'],
+    ['josé@x.es'],
     [`${'a'.repeat(241)}@example.com`],
   ])('acepta %s', (valor) => {
     expect(validateRecipientEmail(valor, [])).toBeNull();
@@ -44,6 +46,9 @@ describe('validateRecipientEmail', () => {
     ['a<b>@example.com', 'email'],
     ['a\u0085b@example.com', 'email'],
     ['a\u2028b@example.com', 'email'],
+    ['ana\u200b@x.es', 'email'],
+    ['ana\u200e@x.es', 'email'],
+    ['ana@exa\u202emple.com', 'email'],
     [`${'a'.repeat(243)}@example.com`, 'email'],
   ])('rechaza %j con %s', (valor, esperado) => {
     expect(validateRecipientEmail(valor, [])).toBe(esperado);
@@ -69,6 +74,23 @@ describe('validateRecipientEmail', () => {
     const copia = JSON.parse(JSON.stringify(lista));
     validateRecipientEmail('ana@example.com', lista);
     expect(lista).toEqual(copia);
+  });
+
+  it.each([
+    ['ana@example.com', true],
+    ['josé@x.es', true],
+    ['a.b+tag@sub.example.org', true],
+    [`${'a'.repeat(242)}@example.com`, true],
+    [`${'a'.repeat(243)}@example.com`, false],
+    ["o'brien@example.com", false],
+    ['a"b@x.es', false],
+    ['a:b@x.es', false],
+    ['ana\u0007@x.es', false],
+    ['ana\u200B@x.es', false],
+    ['a\u2029b@x.es', false],
+    ['sin@punto', false],
+  ])('isValidEmailAddress(%j) da %s', (valor, esperado) => {
+    expect(isValidEmailAddress(valor)).toBe(esperado);
   });
 
   it('normalizeEmail recorta y pasa a minúsculas', () => {

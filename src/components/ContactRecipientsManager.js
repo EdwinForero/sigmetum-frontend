@@ -11,6 +11,7 @@ import ButtonAlternative from './ButtonAlternative';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
 import { useToast } from '../hooks/useToast';
+import { H1_TOOL } from '../utilities/contentStyles';
 import validateRecipientEmail, {
   EMAIL_MAX_LENGTH,
   RECIPIENTS_MAX,
@@ -46,6 +47,8 @@ const ContactRecipientsManager = () => {
   const [busy, setBusy] = useState(null);
   const [fieldError, setFieldError] = useState(null);
   const [announceField, setAnnounceField] = useState(true);
+  // Cuenta los rechazos: es la `key` del error, que se vuelve a montar en cada uno para que el lector lo anuncie otra vez (A5).
+  const [rejection, setRejection] = useState(0);
   const [focusRequest, setFocusRequest] = useState(0);
   const { dialog, showDialog, closeDialog } = useDialog();
 
@@ -87,6 +90,7 @@ const ContactRecipientsManager = () => {
     // Con Enter el foco ya está en el campo y nadie leería el error: se anuncia. Con el clic, el foco vuelve al campo y lo lee aria-describedby.
     setAnnounceField(document.activeElement === inputRef.current);
     setFieldError(key);
+    setRejection((n) => n + 1);
     inputRef.current?.focus();
   };
 
@@ -185,13 +189,13 @@ const ContactRecipientsManager = () => {
   };
 
   return (
-    <div className="flex min-w-0 flex-col gap-3">
+    <div className="flex min-w-0 flex-col gap-stack">
       <div className="flex flex-wrap items-center gap-3">
         <h1
           id={headingId}
           ref={headingRef}
           tabIndex={-1}
-          className="focus-heading py-4 text-[32px] font-bold leading-tight text-brand-deep"
+          className={`focus-heading ${H1_TOOL}`}
         >
           {t('contactRecipients.title')}
         </h1>
@@ -230,7 +234,7 @@ const ContactRecipientsManager = () => {
             aria-describedby={describedBy}
           />
         </form>
-        {fieldError && <InlineError id={errorId} announce={announceField}>{t(FIELD_ERRORS[fieldError])}</InlineError>}
+        {fieldError && <InlineError key={rejection} id={errorId} announce={announceField}>{t(FIELD_ERRORS[fieldError])}</InlineError>}
         {isLoadingList && <p id={loadingHintId} className={HINT_CLASS}>{t('contactRecipients.loadingHint')}</p>}
         {atMax && <p id={maxHintId} className={HINT_CLASS}>{t('contactRecipients.maxReached', { max: RECIPIENTS_MAX })}</p>}
       </div>

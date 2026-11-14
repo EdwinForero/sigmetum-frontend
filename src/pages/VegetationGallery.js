@@ -9,6 +9,7 @@ import Reveal from '../components/Reveal';
 import photoName from '../utilities/photoName';
 import isSafeImageUrl from '../utilities/isSafeImageUrl';
 import { galleryColumns, splitInColumns } from '../utilities/galleryLayout';
+import { PAGE_PADDING, H1 } from '../utilities/contentStyles';
 
 const SKELETON_CELLS = 6;
 
@@ -149,7 +150,7 @@ const VegetationGallery = () => {
 
   // Pistas fijas con minmax(0, 1fr): con pocas fotos nada se estira por encima del máximo de celda.
   const gridProps = {
-    className: 'mt-stack-xl grid gap-x-stack-md',
+    className: 'grid gap-x-stack-md',
     style: { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` },
   };
 
@@ -221,9 +222,9 @@ const VegetationGallery = () => {
   };
 
   return (
-    <div className="pt-stack-xl md:pt-section pb-section">
+    <div className={PAGE_PADDING}>
       <div className="page-container">
-        <h1 className="text-4xl md:text-5xl font-bold leading-tight text-brand-deep">{t('gallery.title')}</h1>
+        <h1 className={H1}>{t('gallery.title')}</h1>
         <LoadSpinner inline label={isLoading ? t('gallery.loading') : undefined} />
         {renderNotice()}
       </div>

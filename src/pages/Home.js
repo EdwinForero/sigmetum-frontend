@@ -12,6 +12,7 @@ import ImageComponent from '../components/ImageComponent.js';
 import Reveal from '../components/Reveal.js';
 import ASSETS, { assetUrl } from '../config/assets';
 import { UNIVERSITIES, ENTITIES } from '../config/institutions';
+import { H2, H3 } from '../utilities/contentStyles';
 
 const COLLABORATORS = {
   uma: [
@@ -36,10 +37,8 @@ const COLLABORATORS = {
 // Solo la lista larga (UMA, 11 nombres) se reparte en columnas; las demás van en una, sin partir nombres.
 const COLLABORATOR_COLUMNS = ['uma'];
 const SECTION = 'page-container py-section md:py-section-lg';
-const H2 = 'text-2xl md:text-4xl font-bold leading-tight text-brand-deep';
-const H3 = 'text-xl md:text-2xl font-bold leading-tight text-brand-deep';
-const GRID = 'mt-stack-lg grid gap-stack-lg sm:grid-cols-2 lg:grid-cols-4';
-const ENTITIES_GRID = 'mt-stack-lg grid gap-stack-lg sm:grid-cols-3';
+const GRID = 'mt-stack grid gap-stack-lg sm:grid-cols-2 lg:grid-cols-4';
+const ENTITIES_GRID = 'mt-stack grid gap-stack-lg sm:grid-cols-3';
 const ITEM = 'flex flex-col items-center gap-stack-sm text-center';
 
 const Home = () => {
@@ -106,14 +105,14 @@ const Home = () => {
         </p>
       </section>
 
-      <section className={SECTION}>
+      <section className="page-container pt-section md:pt-section-lg">
         <h2 className={`${H2} text-center`}>{t('home.projectLeaderTitle')}</h2>
         <Reveal className="mt-stack-lg flex flex-col items-center gap-stack-sm">
           {logo(leader)}
           {names(leader.id)}
         </Reveal>
 
-        <Reveal as="h3" className={`${H3} mt-section text-center`}>{t('home.otherUniversitiesTitle')}</Reveal>
+        <Reveal as="h3" className={`${H3} mt-stack-xl text-center`}>{t('home.otherUniversitiesTitle')}</Reveal>
         <div className={GRID}>
           {otherUniversities.map((university, i) => (
             <Reveal key={university.id} index={i} className={ITEM}>
@@ -123,7 +122,7 @@ const Home = () => {
           ))}
         </div>
 
-        <Reveal as="h3" className={`${H3} mt-section text-center`}>{t('home.collaboratingEntitiesTitle')}</Reveal>
+        <Reveal as="h3" className={`${H3} mt-stack-xl text-center`}>{t('home.collaboratingEntitiesTitle')}</Reveal>
         <div className={ENTITIES_GRID}>
           {ENTITIES.map((entity, i) => (
             <Reveal key={entity.id} index={i} className={ITEM}>{logo(entity)}</Reveal>
@@ -136,14 +135,14 @@ const Home = () => {
         <div className="mt-stack-lg grid gap-stack-xl md:grid-cols-2">
           <ContactForm onLoad={handleOnLoad} onSent={() => contactHeadingRef.current?.focus()} />
           <div className="flex flex-col gap-stack-lg">
-            <div className="border-t border-ink-soft pt-stack-lg">
+            <div className="border-t border-moss pt-stack-lg">
               <h3 className={H3}>{t('home.emailTitle')}</h3>
-              <p className="mt-stack-sm text-base text-ink whitespace-pre-line">{t('home.emailContact')}</p>
+              <p className="mt-stack text-base text-ink whitespace-pre-line">{t('home.emailContact')}</p>
               <EmailContactGrid />
             </div>
-            <div className="border-t border-b border-ink-soft pt-stack-lg pb-stack-lg">
+            <div className="border-t border-b border-moss pt-stack-lg pb-stack-lg">
               <h3 className={H3}>{t('home.locationLabel')}</h3>
-              <p className="mt-stack-sm text-base text-ink whitespace-pre-line">{t('home.locationContent')}</p>
+              <p className="mt-stack text-base text-ink whitespace-pre-line">{t('home.locationContent')}</p>
             </div>
           </div>
         </div>

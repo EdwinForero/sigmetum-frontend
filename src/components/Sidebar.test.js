@@ -82,6 +82,28 @@ describe('Sidebar', () => {
     expect(screen.getAllByRole('link').filter((a) => a.hasAttribute('aria-current'))).toHaveLength(1);
   });
 
+  // B85: la barra final y el «%» de la ruta no quitan el estado activo (React Router sirve la misma página).
+  it.each(['/manage-data/', '/manage-d%61ta', '/MANAGE-DATA', '/Manage-Data//'])(
+    'en %s Datos es el único destino activo, con aria-current="page" y su estilo',
+    (path) => {
+      renderSidebar(path);
+
+      const current = screen.getAllByRole('link').filter((a) => a.hasAttribute('aria-current'));
+      expect(current).toHaveLength(1);
+      expect(current[0]).toBe(screen.getByRole('link', { name: 'Datos' }));
+      expect(current[0]).toHaveAttribute('aria-current', 'page');
+      expect(current[0]).toHaveClass('bg-brand', 'font-bold');
+      expect(screen.getByRole('link', { name: 'Cargar' })).toHaveClass('font-normal');
+    }
+  );
+
+  it.each(['/EXPLORE', '/Explore'])('en %s también solo aparece Filtros, sin enlaces de gestión', (path) => {
+    renderSidebar(path);
+
+    expect(screen.getByRole('button', { name: 'Filtros' })).toBeInTheDocument();
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+  });
+
   it('en /explore solo aparece Filtros, sin ningún enlace de gestión', () => {
     renderSidebar('/explore');
 

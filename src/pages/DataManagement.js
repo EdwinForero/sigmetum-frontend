@@ -10,6 +10,7 @@ import { downloadXLSX } from '../utilities/CSVfunctions';
 import api from '../services/api';
 import useDialog from '../hooks/useDialog';
 import { useToast } from '../hooks/useToast';
+import { H1_TOOL, PROSE } from '../utilities/contentStyles';
 
 const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
   const { t } = useTranslation();
@@ -79,20 +80,20 @@ const DataManagement = ({ onFileDropdownSelect, filteredSpecies }) => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 pb-6 animate-page-fade motion-reduce:animate-none">
+    <div className="page-container pt-stack pb-stack-lg animate-page-fade motion-reduce:animate-none">
       <h1
         ref={headingRef}
         tabIndex={-1}
-        className="focus-heading py-4 text-[32px] font-bold leading-tight text-brand-deep"
+        className={`focus-heading mb-stack-lg ${H1_TOOL}`}
       >
         {t('dataManagement.title')}
       </h1>
 
-      <p className="text-left text-base text-ink sm:text-lg">
+      <p className={PROSE}>
         {t('dataManagement.description')}
       </p>
 
-      <div className="flex flex-wrap items-center gap-3 pt-3">
+      <div className="flex flex-wrap items-center gap-3 pt-stack">
         <label htmlFor={selectId} className="text-lg font-bold leading-tight tracking-[-0.015em] text-ink">
           {t('dataManagement.fileSelectDropdwon.selectFileDropdownLabel')}
         </label>

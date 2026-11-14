@@ -45,7 +45,7 @@ const ProtectedRoute = ({ element, onStatusChange }) => {
       <>
         <p role="status" className="sr-only">{unavailable ? '' : t('login.loading')}</p>
         {unavailable && (
-          <div role="alert" className="p-6 text-[#0C1811]">
+          <div role="alert" className="p-6 text-ink">
             <h1 className="text-2xl font-bold">{t('login.title')}</h1>
             <p>{t('login.serviceUnavailable')}</p>
             <ButtonPrincipal

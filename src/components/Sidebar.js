@@ -1,9 +1,10 @@
 import { useEffect, useId, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ButtonPrincipal from './ButtonPrincipal';
 import useDialogFocus from '../hooks/useDialogFocus';
 import api from '../services/api';
+import { normalizePath } from '../config/routes';
 
 const itemBase =
   'focus-ring-inset flex h-full w-full flex-col items-center justify-center gap-0.5 px-0 text-center text-[11px] leading-tight min-[360px]:px-0.5 min-[360px]:text-xs break-words hyphens-auto text-ink hover:bg-brand md:min-h-[72px] md:rounded-lg md:text-sm';
@@ -26,7 +27,7 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
   const panelId = useId();
   const location = useLocation();
 
-  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const path = normalizePath(location.pathname);
 
   // En /explore solo van las opciones que abren un panel (sin `link`); en el resto, solo los enlaces.
   const filteredMenuOptions = menuOptions.filter((option) => {
@@ -70,13 +71,13 @@ const Sidebar = ({ exploreData, menuOptions, showLogout = false }) => {
           {filteredMenuOptions.map((option) => (
             <li key={option.id} className="h-full min-w-0 flex-1 md:h-auto md:flex-none">
               {option.link ? (
-                <NavLink
+                <Link
                   to={option.link}
-                  end
-                  className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
+                  aria-current={path === option.link ? 'page' : undefined}
+                  className={`${itemBase} ${path === option.link ? itemActive : itemInactive}`}
                 >
                   <NavItem icon={option.icon} label={option.name} />
-                </NavLink>
+                </Link>
               ) : (
                 <button
                   type="button"

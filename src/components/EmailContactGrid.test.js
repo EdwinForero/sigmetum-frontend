@@ -15,8 +15,8 @@ describe('EmailContactGrid', () => {
   it('una columna y dos desde sm, con texto de 16 px', () => {
     const { container } = render(<EmailContactGrid />);
 
-    expect(container.firstChild).toHaveClass('grid', 'grid-cols-1', 'sm:grid-cols-2', 'text-base');
-    expect(container.firstChild).not.toHaveClass('grid-cols-2', 'text-sm');
+    expect(container.firstChild).toHaveClass('grid', 'grid-cols-1', 'sm:grid-cols-2', 'text-base', 'mt-stack');
+    expect(container.firstChild).not.toHaveClass('grid-cols-2', 'text-sm', 'mt-stack-sm');
   });
 
   it('cada correo es un enlace mailto de 44 px, subrayado y que parte la línea', () => {

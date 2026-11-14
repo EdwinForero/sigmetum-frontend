@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
 import ButtonPrincipal from "./ButtonPrincipal";
 import ButtonAlternative from "./ButtonAlternative";
@@ -105,9 +106,8 @@ const CookieBanner = ({ aboveBottomBar = false }) => {
               components={{
                 a: (
                   // Enlace dentro de la frase: objetivo mínimo de 24×24 (WCAG 2.5.8), no los 44 px de los botones.
-                  // Hallazgo (sin cambiar): <a href> recarga la página entera; un Link de react-router no lo haría.
-                  <a
-                    href="/cookies"
+                  <Link
+                    to="/cookies"
                     rel="noopener noreferrer"
                     className="focus-ring inline-flex min-h-6 min-w-6 items-center justify-center rounded underline"
                   />

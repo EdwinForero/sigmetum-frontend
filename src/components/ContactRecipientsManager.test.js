@@ -66,7 +66,7 @@ describe('ContactRecipientsManager', () => {
       const h1 = screen.getAllByRole('heading', { level: 1 });
       expect(h1).toHaveLength(1);
       expect(h1[0]).toHaveAttribute('tabindex', '-1');
-      expect(h1[0]).toHaveClass('focus-heading', 'text-[32px]', 'font-bold', 'leading-tight', 'text-brand-deep');
+      expect(h1[0]).toHaveClass('focus-heading', 'text-3xl', 'font-bold', 'leading-tight', 'text-brand-deep');
       expect(api.getAuth).toHaveBeenCalledTimes(1);
       expect(api.getAuth).toHaveBeenCalledWith('/list-recipients');
     });
@@ -210,6 +210,39 @@ describe('ContactRecipientsManager', () => {
       expect(campo()).toHaveAttribute('aria-describedby', error.id);
       expect(campo()).toHaveFocus();
       expect(api.postAuth).not.toHaveBeenCalled();
+    });
+
+    it('dos Enter seguidos con el mismo error insertan un nodo nuevo cada vez (así se anuncia otra vez) y solo hay uno', async () => {
+      const user = userEvent.setup();
+      await renderManager();
+
+      await user.type(campo(), 'sin-arroba{Enter}');
+      const primero = (await screen.findByText('form.errors.email')).closest('p');
+      await user.keyboard('{Enter}');
+
+      const segundo = screen.getByText('form.errors.email').closest('p');
+      expect(screen.getAllByText('form.errors.email')).toHaveLength(1);
+      expect(segundo).not.toBe(primero);
+      expect(primero.isConnected).toBe(false);
+      expect(segundo).toHaveAttribute('role', 'alert');
+      expect(campo()).toHaveAttribute('aria-describedby', segundo.id);
+    });
+
+    it('un clic con error y después Enter inserta un nodo nuevo con role="alert"', async () => {
+      const user = userEvent.setup();
+      await renderManager();
+
+      await user.type(campo(), 'sin-arroba');
+      await user.click(botonAnadir());
+      const primero = screen.getByText('form.errors.email').closest('p');
+      expect(primero).not.toHaveAttribute('role');
+      await user.keyboard('{Enter}');
+
+      const segundo = screen.getByText('form.errors.email').closest('p');
+      expect(segundo).not.toBe(primero);
+      expect(primero.isConnected).toBe(false);
+      expect(segundo).toHaveAttribute('role', 'alert');
+      expect(campo()).toHaveAttribute('aria-describedby', segundo.id);
     });
 
     it('un error anunciado con Enter y repetido con el clic deja de anunciarse (la decisión se toma en cada rechazo)', async () => {

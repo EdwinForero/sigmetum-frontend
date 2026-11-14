@@ -166,6 +166,37 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
   });
 
+  it.each(['/EXPLORE', '/Explore', '/%45xplore'])('%s se pinta como /explore: barra con Filtros, sin enlaces privados y carga los datos', async (ruta) => {
+    await renderApp(ruta);
+
+    expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'privateNav.filters' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'privateNav.data' })).toBeNull();
+    expect(api.get).toHaveBeenCalledWith('/get-merged-data');
+  });
+
+  it('/MANAGE-DATA con la sesión en ok da barra, Cerrar sesión y pb-nav', async () => {
+    const { container } = await renderApp('/MANAGE-DATA');
+
+    expect(screen.getByRole('navigation', { name: 'privateNav.label' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'login.logOutButton' })).toBeInTheDocument();
+    expect(container.querySelector('.App')).toHaveClass('pb-nav');
+  });
+
+  it('/MANAGE-DATA con la sesión denegada no muestra barra', async () => {
+    protectedMock.status = 'denied';
+    const { container } = await renderApp('/MANAGE-DATA');
+
+    expect(screen.queryByRole('navigation', { name: 'privateNav.label' })).toBeNull();
+    expect(container.querySelector('.App')).not.toHaveClass('pb-nav');
+  });
+
+  it('/NO-EXISTE muestra la página 404', async () => {
+    await renderApp('/NO-EXISTE');
+
+    expect(screen.getByText('notFound.content')).toBeInTheDocument();
+  });
+
   it('en /explore no hay Cerrar sesión', async () => {
     await renderApp('/explore');
 

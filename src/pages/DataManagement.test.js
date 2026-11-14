@@ -133,7 +133,11 @@ describe('DataManagement', () => {
   it('usa el mismo contenedor que las otras páginas privadas', async () => {
     await renderPage();
 
-    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6', 'animate-page-fade', 'motion-reduce:animate-none');
+    expect(container.firstChild).toHaveClass('page-container', 'pt-stack', 'pb-stack-lg', 'animate-page-fade', 'motion-reduce:animate-none');
+    const h1 = screen.getByRole('heading', { level: 1 });
+    expect(h1).toHaveClass('text-3xl', 'mb-stack-lg');
+    expect(h1).not.toHaveClass('py-4');
+    expect(screen.getByText(`${NS}.description`)).toHaveClass('max-w-prose', 'text-ink-soft');
   });
 
   it('sin versiones se ve el vacío, no la tabla ni su placeholder', async () => {

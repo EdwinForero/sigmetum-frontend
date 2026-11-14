@@ -31,7 +31,10 @@ describe('NotFound', () => {
   it('usa el contenedor común, sin colores ni anchos en píxeles propios (el botón trae su min-w compartido)', () => {
     const { container } = renderNotFound();
 
-    expect(container.firstElementChild).toHaveClass('page-container', 'py-section', 'text-center');
+    expect(container.firstElementChild).toHaveClass('page-container', 'pt-stack-xl', 'md:pt-section', 'pb-section', 'md:pb-section-lg', 'text-center');
+    expect(container.firstElementChild.className).not.toMatch(/(^| )py-section/);
+    expect(screen.getByText('notFound.content')).toHaveClass('max-w-prose', 'mx-auto', 'mt-stack-lg', 'text-base', 'md:text-lg', 'text-ink-soft');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveClass('text-4xl', 'md:text-5xl');
     expect(container.innerHTML).not.toMatch(/\[#|max-w-\[|(?<![-\w])w-\[\d+px\]|min-h-screen/);
   });
 

@@ -50,7 +50,7 @@ describe('ImageGalleryManager: estructura', () => {
     expect(h1).toHaveLength(1);
     expect(h1[0]).toHaveTextContent('contentManagement.galleryManagementTitle');
     expect(h1[0]).toHaveAttribute('tabindex', '-1');
-    expect(h1[0]).toHaveClass('focus-heading', 'text-[32px]', 'font-bold', 'leading-tight', 'text-brand-deep');
+    expect(h1[0]).toHaveClass('focus-heading', 'text-3xl', 'font-bold', 'leading-tight', 'text-brand-deep');
     expect(screen.queryAllByRole('heading', { level: 2 })).toHaveLength(0);
     expect(screen.queryByRole('region', { name: 'contentManagement.galleryManagementTitle' })).toBeNull();
   });

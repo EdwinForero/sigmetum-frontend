@@ -303,13 +303,15 @@ describe('VegetationGallery', () => {
         expect(list).toHaveClass('flex', 'flex-col', 'gap-stack');
       });
       const grid = lists[0].parentElement;
-      expect(grid).toHaveClass('mt-stack-xl', 'grid', 'gap-x-stack-md');
+      expect(grid).toHaveClass('grid', 'gap-x-stack-md');
+      expect(grid).not.toHaveClass('mt-stack-xl');
       expect(grid.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
       // La rejilla entra a sangre: solo el margen lateral; el título conserva su posición en .page-container.
       expect(grid.closest('.page-container')).toBeNull();
       expect(grid.parentElement.parentElement).toHaveClass('px-gutter', 'md:px-gutter-md', 'lg:px-gutter-lg');
       expect(screen.getByRole('heading', { level: 1 }).closest('.page-container')).not.toBeNull();
-      expect(container.firstChild).toHaveClass('pt-stack-xl', 'md:pt-section', 'pb-section');
+      expect(container.firstChild).toHaveClass('pt-stack-xl', 'md:pt-section', 'pb-section', 'md:pb-section-lg');
+      expect(screen.getByRole('heading', { level: 1 })).toHaveClass('text-4xl', 'md:text-5xl', 'text-brand-deep');
       expect(container.firstChild).not.toHaveClass('page-container');
     });
 
@@ -321,7 +323,8 @@ describe('VegetationGallery', () => {
       const cells = container.querySelectorAll('.aspect-\\[4\\/3\\]');
       expect(cells).toHaveLength(6);
       const grid = cells[0].parentElement.parentElement;
-      expect(grid).toHaveClass('mt-stack-xl', 'grid', 'gap-x-stack-md');
+      expect(grid).toHaveClass('grid', 'gap-x-stack-md');
+      expect(grid).not.toHaveClass('mt-stack-xl');
       expect(grid.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
       expect(grid.closest('.page-container')).toBeNull();
       expect(Array.from(grid.children).map((column) => column.children.length)).toEqual([2, 2, 2]);

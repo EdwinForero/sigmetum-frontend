@@ -35,7 +35,10 @@ describe('FilesUpload', () => {
     const h1 = screen.getAllByRole('heading', { level: 1 });
     expect(h1).toHaveLength(1);
     expect(h1[0]).toHaveTextContent('uploadFiles.title');
-    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6', 'animate-page-fade', 'motion-reduce:animate-none');
+    expect(container.firstChild).toHaveClass('page-container', 'pt-stack', 'pb-stack-lg', 'animate-page-fade', 'motion-reduce:animate-none');
+    expect(h1[0]).toHaveClass('text-3xl', 'mb-stack-lg');
+    expect(h1[0]).not.toHaveClass('py-4');
+    expect(screen.getByText('uploadFiles.description')).toHaveClass('max-w-prose', 'text-ink-soft');
     const columna = container.querySelector('.max-w-3xl');
     expect(columna).toBeInTheDocument();
     expect(columna).toContainElement(screen.getByText('uploadFiles.description'));

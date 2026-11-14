@@ -39,7 +39,7 @@ describe('RecipientsManagement', () => {
     const { container } = renderPage();
     await screen.findByText('contactRecipients.empty');
 
-    expect(container.firstChild).toHaveClass('mx-auto', 'w-full', 'max-w-6xl', 'px-4', 'sm:px-5', 'pb-6', 'animate-page-fade', 'motion-reduce:animate-none');
+    expect(container.firstChild).toHaveClass('page-container', 'pt-stack', 'pb-stack-lg', 'animate-page-fade', 'motion-reduce:animate-none');
     expect(container.querySelector('.grid')).toBeNull();
     expect(container.querySelector('[class*="lg:col-span-2"]')).toBeNull();
     expect(container.querySelector('[class*="lg:grid-cols"]')).toBeNull();

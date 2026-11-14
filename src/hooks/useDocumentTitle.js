@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LEGACY_REDIRECTS } from '../config/routes';
+import { LEGACY_REDIRECTS, normalizePath } from '../config/routes';
 
 const NOT_FOUND_KEY = 'notFound.title';
 
@@ -27,7 +27,7 @@ const resolveLegacy = (pathname) => {
 };
 
 export const titleKeyFor = (pathname) => {
-  const target = resolveLegacy(pathname);
+  const target = resolveLegacy(normalizePath(pathname));
   const route = Object.keys(PAGE_TITLE_KEYS).find((pattern) => matchPath({ path: pattern, end: true }, target));
   return route ? PAGE_TITLE_KEYS[route] : NOT_FOUND_KEY;
 };

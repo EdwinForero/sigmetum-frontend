@@ -8,10 +8,14 @@ import { assetUrl } from '../config/assets';
 vi.mock('../components/SpeciesCard', () => ({
   default: ({ species }) => <div data-testid="species">{species['Especies Características']}</div>,
 }));
-// Solo el recuento interpola: así se comprueban las cifras sin depender del idioma.
+// Solo el recuento y el nombre de las «i» (infoAbout) interpolan: así se comprueban sin depender del idioma.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key, opts) => (key === 'explore.resultsInfo' ? `${key} ${opts.currentResults}/${opts.totalResults}` : key),
+    t: (key, opts) => {
+      if (key === 'explore.resultsInfo') return `${key} ${opts.currentResults}/${opts.totalResults}`;
+      if (key === 'iconButton.infoAbout') return `${key} ${opts.topic}`;
+      return key;
+    },
     i18n: { language: 'es', changeLanguage: vi.fn() },
   }),
 }));
@@ -192,10 +196,29 @@ describe('Explore', () => {
     }
   });
 
-  it('el título es verde oscuro de marca (brand-deep)', () => {
+  it('las dos «i» de las descargas tienen nombres distintos, con el botón al que explican', () => {
     renderExplore();
 
-    expect(screen.getByRole('heading', { level: 1, name: 'explore.title' })).toHaveClass('text-brand-deep');
+    const glosario = screen.getByRole('button', { name: 'iconButton.infoAbout explore.downloadGlossaryButton' });
+    const resultados = screen.getByRole('button', { name: 'iconButton.infoAbout explore.downloadExcelButton' });
+    expect(glosario).not.toBe(resultados);
+    expect(screen.queryByRole('button', { name: 'iconButton.info' })).toBeNull();
+  });
+
+  it('el título es verde oscuro de marca (brand-deep) y usa la escala pública de h1 (36/48), sin margen propio', () => {
+    renderExplore();
+
+    const h1 = screen.getByRole('heading', { level: 1, name: 'explore.title' });
+    expect(h1).toHaveClass('text-brand-deep', 'text-4xl', 'md:text-5xl', 'font-bold', 'leading-tight');
+    expect(h1.className).not.toMatch(/text-3xl|(^| )mb-/);
+  });
+
+  it('el contenedor usa el relleno de página (32/48 arriba, 48/64 abajo) y el hueco bajo el h1 es solo la fila de estado', () => {
+    renderExplore();
+
+    const container = screen.getByRole('heading', { level: 1, name: 'explore.title' }).parentElement;
+    expect(container).toHaveClass('page-container', 'pt-stack-xl', 'md:pt-section', 'pb-section', 'md:pb-section-lg');
+    expect(container.className).not.toMatch(/(^| )py-stack-xl/);
   });
 
   it('si la descarga del glosario falla avisa con un error persistente, sin diálogo', async () => {

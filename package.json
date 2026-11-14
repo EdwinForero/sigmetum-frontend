@@ -26,7 +26,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "docs:check": "node scripts/docs-check.mjs",
-    "lint": "eslint . --max-warnings 18",
+    "lint": "eslint . --max-warnings 16",
     "e2e": "playwright test",
     "quality": "node scripts/quality-check.mjs",
     "docs:gate": "node plugins/ciclo-agentico/scripts/docs-gate.mjs",

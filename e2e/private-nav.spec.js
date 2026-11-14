@@ -54,3 +54,28 @@ for (const lang of ['es', 'en']) {
     });
   });
 }
+
+// B85: con barra final (o con el «%» de la ruta) la barra de gestión sigue marcando la página actual.
+test.describe('estado activo de la barra de gestión con la ruta alterada', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  for (const path of ['/manage-data/', '/manage-d%61ta']) {
+    test(`${path}: solo «Datos» lleva aria-current="page"`, async ({ page }) => {
+      await page.addInitScript(() => localStorage.setItem('token', 'e2e-token'));
+      await page.route(`${API}/auth`, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+          body: JSON.stringify({ success: true, data: {} }),
+        }),
+      );
+      await page.goto(path);
+      await expect(page.locator(ITEMS)).toHaveCount(6);
+
+      const nav = page.getByRole('navigation', { name: 'Gestión' });
+      await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+      await expect(nav.getByRole('link', { name: 'Datos' })).toHaveAttribute('aria-current', 'page');
+    });
+  }
+});
