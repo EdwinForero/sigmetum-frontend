@@ -3,7 +3,7 @@
 Documento para quien mantiene `sigmetum-infra`. Explica **qué necesita el frontend para compilar, desplegarse y funcionar** en cada entorno.
 
 - Lo verificado contra el código de Terraform está marcado como **(verificado)**. Lo que depende de la cuenta real de AWS, como **(por confirmar)**.
-- Fecha de la verificación: 10/11/2026, contrastada con el código de `sigmetum-infra` (rama `feature/testing`, commit `81d217e`: login SRP del frontend y `VITE_COGNITO_USER_POOL_ID` en Amplify; HEAD `5edc2cd`) y con su `docs/06-estado/estado-y-deuda-tecnica.md` (C18 y C19). Frontend: rama `feature/sigmetum_front_v2`. El flujo completo contra el pool real sigue **(por confirmar en `dev`)**.
+- Fecha de la verificación: 22/11/2026, contrastada con el código de `sigmetum-infra` (rama `feature/testing`, commit `1e0b864`: HEAD tras ordenar el drift del árbol de trabajo; incluye el login SRP del frontend, C18) y con su `docs/06-estado/estado-y-deuda-tecnica.md` (C18 y C19). Frontend: rama `feature/sigmetum_front_v2`. Lo de C18 está **atendido en código y pendiente de `apply`**; el flujo completo contra el pool real sigue **(por confirmar en `dev`)**.
 - Los secretos de `terraform.tfvars` no se han leído; solo se comprobaron los nombres de las variables.
 
 ## 1. Resumen: qué falta para que el frontend funcione
@@ -14,9 +14,9 @@ Ordenado por impacto. Cada punto se explica más abajo.
 |---|---|---|---|
 | **I1** | Amplify define `VITE_API_URL`, pero el frontend lee `VITE_BASE_URL`, `VITE_API_PREFIX` y `VITE_S3_URL` | La web compilada llama a `http://localhost:8000` y no funciona | **Resuelto** en rama `feature/testing` de infra |
 | **I2** | El bucket bloqueaba el acceso público y no había CloudFront | Las imágenes y el PDF daban 403 | **Resuelto** (CloudFront con OAC, `infra:C2`) |
-| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explore` da 404 | **Resuelto en el código** de la rama `feature/testing` de infra (`custom_rule` en `modules/amplify/main.tf`, verificado el 30/10/2026). **Falta aplicarlo** en el Amplify de preproducción, que sigue devolviendo `301` y luego `404` (F16 de `sigmetum-backend/docs/integracion/para-frontend.md`, por confirmar) |
+| **I3** | No hay regla de reescritura de la SPA en Amplify | Recargar o abrir un enlace directo a `/explore` da 404 | **Resuelto y verificado en `dev`** (`infra:C14`, 30/10/2026): regla catch-all (`custom_rule` de `aws_amplify_app.this` en `modules/amplify/main.tf`), vale para `/explore`. `prod`: **(por confirmar)** |
 | **I4** | En `dev`, `backend_url` era `http://…` y Amplify sirve el frontend por HTTPS | Contenido mixto | **Resuelto** (CloudFront delante de Beanstalk en `dev`, `infra:C4`: `backend_url` es `https://`) |
-| **I5** | `ALLOWED_ORIGIN` y las claves del login antiguo en `app_env_vars` | El backend no arrancaba | **Ya no aplica en esos términos:** las claves del login antiguo (`ADMIN_*`, `JWT_*`) se retiraron con el corte a Cognito y `ALLOWED_ORIGIN` está en las plantillas (se rellena tras conocer la URL de Amplify). Sigue abierto, y es del backend, el SMTP |
+| **I5** | `ALLOWED_ORIGIN` y las claves del login antiguo en `app_env_vars` | El backend no arrancaba | **Ya no aplica en esos términos:** las claves del login antiguo (`ADMIN_*`, `JWT_*`) se retiraron con el corte a Cognito y `ALLOWED_ORIGIN` está en las plantillas (en `prod`, con los dos orígenes del frontend; ver la sección 4). Sigue abierto, y es del backend, el SMTP |
 | **I6** | El health check de Beanstalk apunta a `/`, pero el backend solo responde en `/healthcheck` | El entorno puede figurar como no saludable (por confirmar) | **Resuelto** en rama `feature/testing` de infra |
 | **I7** | Nada subía los recursos estáticos (`assets/…`) al bucket | Faltaban logos y banner | **Procedimiento disponible** (`scripts/sync-assets.mjs`, `infra:C7`); pendiente la subida a `prod` |
 
@@ -49,25 +49,25 @@ Vite **incrusta las variables en el JavaScript al compilar**, y solo las que emp
 |---|---|---|---|
 | `VITE_BASE_URL` | Sí | URL **HTTPS** del backend de dev (ver I4) | `https://backend.sigmetum-a.org` |
 | `VITE_API_PREFIX` | Sí | `/api/v1` | `/api/v1` |
-| `VITE_S3_URL` | Sí, **también al compilar** (favicon) | URL pública desde la que se sirven los `assets/…` (ver sección 5) | Igual, para prod. Hoy `s3_url` va vacía en prod: sin favicon. Además debe empezar por `https://` |
+| `VITE_S3_URL` | Sí, **también al compilar** (favicon) | URL pública desde la que se sirven los `assets/…` (ver sección 5) | `s3_url` = `module.storage.cdn_url` en el `module "amplify"` de `environments/prod/main.tf` **(verificado en código)**, pendiente del `apply`; con él sale el favicon. Debe empezar por `https://` |
 | `VITE_COGNITO_USER_POOL_ID` | Sí, **solo en la rama de Amplify** (sin ella el login no funciona; en local no se define y el login no se puede probar, por diseño) | Id del pool de `dev`, `<región>_<id>`: su prefijo es la región del endpoint `cognito-idp` y la parte posterior al guion bajo entra en el cálculo SRP (descripción, sin valor real) | Igual, para el pool de prod |
 | `VITE_COGNITO_CLIENT_ID` | Sí, **solo en la rama de Amplify** | Id del cliente **público** (sin secreto) de la app en el pool de `dev` | Igual, para prod |
 | `VITE_CAROUSEL_IMAGE_KEYS` | No | Vacía (el carrusel no se usa) | Vacía |
 
-**Variables de Cognito (infra:C17 y C18).** `VITE_COGNITO_USER_POOL_ID` y `VITE_COGNITO_CLIENT_ID` son públicas (se incrustan en el JavaScript), no llevan valor por defecto en `src/config/env.js` y van **solo en la rama** de Amplify, como ya hace `modules/amplify/main.tf` **(verificado en el código el 10/11/2026)**. Si faltan, las llamadas a Cognito no se hacen y la pantalla muestra un error traducido (`login.startError`).
+**Variables de Cognito (infra:C17 y C18).** `VITE_COGNITO_USER_POOL_ID` y `VITE_COGNITO_CLIENT_ID` son públicas (se incrustan en el JavaScript), no llevan valor por defecto en `src/config/env.js` y van **solo en la rama** de Amplify, como ya hace `modules/amplify/main.tf` **(verificado en el código el 22/11/2026)**. Si faltan, las llamadas a Cognito no se hacen y la pantalla muestra un error traducido (`login.startError`).
 
-**`VITE_COGNITO_DOMAIN` ya no la lee el frontend.** El login es un formulario propio con SRP (`USER_SRP_AUTH`) contra `https://cognito-idp.<región>.amazonaws.com/`; el Hosted UI, `/auth/callback` y las direcciones de retorno (`redirect_uri`, `logout_uri`) ya no se usan. **Infra ya puede retirar `VITE_COGNITO_DOMAIN` de la rama y las direcciones de retorno del cliente** (el Hosted UI queda activo como respaldo mientras infra decida), **pero antes** debe cumplir lo del apartado siguiente sobre la CSP.
+**`VITE_COGNITO_DOMAIN` ya no la lee el frontend.** El login es un formulario propio con SRP (`USER_SRP_AUTH`) contra `https://cognito-idp.<región>.amazonaws.com/`; el Hosted UI y las direcciones de retorno (`redirect_uri`, `logout_uri`) ya no se usan. **Infra lo atendió en código (`infra:C18`, pendiente de `apply`):** `aws_amplify_branch.this` ya no define `VITE_COGNITO_DOMAIN` y el origen `cognito-idp` de la CSP depende de `cognito_user_pool_id`. El Hosted UI y las direcciones de retorno del cliente (`callback_urls` y `logout_urls` de `aws_cognito_user_pool_client.this`) siguen en el código como respaldo mientras infra decida.
 
 **Qué necesita el frontend del cliente y del pool (verificado en `modules/cognito/main.tf`):** cliente público (`generate_secret = false`) con `ALLOW_USER_SRP_AUTH` y `ALLOW_REFRESH_TOKEN_AUTH`, `enable_token_revocation = true` (para `RevokeToken` al cerrar sesión) y `prevent_user_existence_errors = "ENABLED"`; el pool con MFA TOTP `ON`, `username_attributes = ["email"]` y política de 14 caracteres con mayúsculas, minúsculas, números y símbolos (el frontend la replica como ayuda, Cognito es la autoridad). **El frontend usa el `USER_ID_FOR_SRP` que devuelve Cognito, no el correo escrito.**
 
 **Peticiones del frontend a Cognito:** todas son `POST` desde el navegador a `cognito-idp` (`InitiateAuth`, `RespondToAuthChallenge`, `AssociateSoftwareToken`, `VerifySoftwareToken` y `RevokeToken`), con `Content-Type: application/x-amz-json-1.1` y `X-Amz-Target`. Infra verificó en solo lectura que el endpoint responde el preflight con `Access-Control-Allow-Origin: *` (C18); el flujo completo con SRP, el orden de los retos (`NEW_PASSWORD_REQUIRED`, `MFA_SETUP`, `SOFTWARE_TOKEN_MFA`), el bloqueo por intentos y los avisos de la CSP Report-Only: **(por confirmar en `dev`)**.
 
-**Peticiones a infra (nuevas, 10/11/2026):**
+**Peticiones a infra (10/11/2026): atendidas en código (`infra:C18`), pendientes de `apply`:**
 
-1. **Subir `auth_session_validity` del cliente de 3 a 15 minutos.** Es el tiempo que vale la `Session` de un reto; con los 3 minutos por defecto (`auth_session_validity` no está fijado en `modules/cognito/main.tf`) registrar el TOTP en la aplicación de autenticación puede caducar y el usuario vuelve al primer paso. La duración real de la sesión del reto **(por confirmar en `dev`)**.
-2. **Desacoplar `cognito-idp` de `cognito_domain_url` en la CSP** (`modules/amplify/main.tf:14`): hoy el origen `https://cognito-idp.<región>.amazonaws.com` solo entra en `connect-src` si `var.cognito_domain_url` no está vacío. El frontend ya no usa el dominio del Hosted UI pero sí `cognito-idp`: si se retira `VITE_COGNITO_DOMAIN` y el dominio sigue condicionando la regla, la CSP dejaría de permitir el acceso (hoy es Report-Only, pero dejaría de ser inocua al endurecerla). Hay que hacerlo **antes** de retirar `VITE_COGNITO_DOMAIN`.
+1. **`auth_session_validity` del cliente, de 3 a 15 minutos.** Es el tiempo que vale la `Session` de un reto; con los 3 minutos por defecto registrar el TOTP en la aplicación de autenticación puede caducar y el usuario vuelve al primer paso. `aws_cognito_user_pool_client.this` ya lo fija a 15 (el máximo) **(verificado en código)**. La duración real de la sesión del reto **(por confirmar en `dev`)**.
+2. **`cognito-idp` desacoplado de `cognito_domain_url` en la CSP.** En el `connect-src` del `locals` de `modules/amplify/main.tf`, el origen `https://cognito-idp.<región>.amazonaws.com` entra cuando `var.cognito_user_pool_id` no está vacío **(verificado en código)**; la variable `cognito_domain_url` ya no existe en el módulo.
 
-**Situación actual (verificado, rama `feature/testing` de infra, commit `81d217e`):** `modules/amplify/main.tf` define estas variables en la app y en la rama; la rama añade además las de Cognito (su valor prevalece):
+**Situación actual (verificado en código, rama `feature/testing` de infra, commit `1e0b864`; pendiente de `apply`):** `modules/amplify/main.tf` define estas variables en la app y en la rama; la rama añade además las de Cognito (su valor prevalece):
 
 ```hcl
 # app y rama
@@ -78,7 +78,6 @@ environment_variables = {
   VITE_CAROUSEL_IMAGE_KEYS = var.carousel_image_keys
 }
 # solo la rama (aws_amplify_branch)
-#   VITE_COGNITO_DOMAIN       = var.cognito_domain_url   # ya no la lee el frontend
 #   VITE_COGNITO_CLIENT_ID    = var.cognito_client_id
 #   VITE_COGNITO_USER_POOL_ID = var.cognito_user_pool_id
 ```
@@ -87,11 +86,11 @@ environment_variables = {
 
 **`VITE_S3_URL` también se usa en el build.** El plugin `sigmetum-favicon` de `vite.config.js` la lee al compilar `index.html` para inyectar `<link rel="icon" href="<VITE_S3_URL>/assets/logos/app-logo.jpg">`. Por eso tiene que existir en el entorno del build de Amplify (ya la define en app y rama, ver arriba). El favicon **exige `https://`**: si `s3_url` no empieza por `https://` (por ejemplo `http://`, `//cdn...` o sin esquema), se trata como ausente, no se emite el `<link rel="icon">` y el build lo avisa en su consola (`[sigmetum-favicon] VITE_S3_URL no empieza por https://: no se emite el favicon.`) sin fallar. La barra final no se normaliza (igual que `assetUrl`). **El valor de `s3_url` debe ser `https://` para todo, no solo para el favicon:** `assetUrl` no valida el esquema, así que con `http://` el favicon no sale y el resto de recursos se pediría igualmente, pero sería contenido mixto en una web servida por `https://` y el navegador lo bloquearía **(por confirmar: razonamiento, no comprobado en navegador)**. Ni `seguridad.md` ni `npm run quality` lo detectan: solo buscan `http://` literales en el código, no el valor de una variable de entorno (B20 en `docs/09`). Qué ocurre según el valor de `s3_url`:
 
-- Vacía (hoy en `prod`, `environments/prod/main.tf`): el build no falla y la web se publica **sin favicon** (el navegador usa el suyo). No hay icono de respaldo.
-- Con la URL de CloudFront en `https://` (hoy en `dev`: `module.storage.cdn_url`): el favicon sale de ahí. Para que aparezca en prod hay que rellenar `s3_url` con CloudFront cuando I2 se resuelva.
+- Vacía: el build no falla y la web se publica **sin favicon** (el navegador usa el suyo). No hay icono de respaldo. Hoy no es el caso de ningún entorno en el código.
+- Con la URL de CloudFront en `https://` (`module.storage.cdn_url`, ya en `dev` y, en el código, también en `prod`; en `prod`, pendiente del `apply` y de una compilación nueva): el favicon sale de ahí. I2 está resuelto (`infra:C2`).
 - Cambiar el valor exige un **nuevo despliegue**, porque queda incrustado en `index.html` y en el JavaScript.
 
-El resto de pendientes del despliegue de preproducción (reescritura de la SPA aplicada, cabeceras C11, entorno sin datos) están en F16 de `docs/09`; no se repiten aquí.
+El resto de pendientes del despliegue de preproducción (reescritura de la SPA: verificada en `dev` y por confirmar en `prod`, `infra:C14`; cabeceras C11; entorno sin datos) están en F16 de `docs/09`; no se repiten aquí.
 
 Resuelve I1. La descripción de `backend_url` en `variables.tf` también se corrigió (antes hablaba de `REACT_APP_API_URL`).
 
@@ -102,8 +101,8 @@ El frontend y el backend se despliegan por separado. Para que se entiendan:
 | Requisito | Detalle | Estado |
 |---|---|---|
 | HTTPS en el backend | El frontend se sirve por HTTPS; el navegador bloquea peticiones `http://` desde una página `https://` | `dev` ya es `https://` (CloudFront delante de Beanstalk, I4 resuelto). `prod` usa `https://backend.sigmetum-a.org` |
-| `ALLOWED_ORIGIN` | El backend usa CORS con **un único origen exacto**: debe ser el del frontend de ese entorno | Está en las plantillas `.example` y se rellena en la segunda vuelta de `apply`, tras conocer la URL de Amplify |
-| `COGNITO_USER_POOL_ID` | El backend valida el token de acceso de Cognito (el `Bearer` que envía el frontend); `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `JWT_SECRET` y `JWT_EXPIRATION` se retiraron con el corte a Cognito (`infra:C19`) | `app_env_vars` lo recibe del módulo `cognito` |
+| `ALLOWED_ORIGIN` | El backend usa CORS con una **lista separada por comas**, y cada origen se compara de forma exacta: debe incluir el del frontend de ese entorno | Está en las plantillas `.example`. `dev`: la URL de la rama, fijada en el `apply` del 10/11/2026 (`infra:C8`); el valor real del `terraform.tfvars` **(por confirmar)**, no se lee. `prod`: los dos orígenes en código (`infra:C9`), pendiente del `apply` |
+| `COGNITO_USER_POOL_ID` | El backend valida el token de acceso de Cognito (el `Bearer` que envía el frontend); `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `JWT_SECRET` y `JWT_EXPIRATION` se retiraron con el corte a Cognito (`infra:S18`) | `app_env_vars` lo recibe del módulo `cognito` (`COGNITO_USER_POOL_ID = module.cognito.user_pool_id` en `environments/dev/main.tf` y `environments/prod/main.tf`) |
 | Variables ya definidas | `PORT`, `AWS_REGION`, `AWS_BUCKET_NAME`, `EMAIL`, `EMAIL_PASSWORD` | Correcto |
 | Health check | El backend responde `200 ok` en `/healthcheck`. En `/` devuelve 404 | Resuelto en infra (I6, `infra:C6`) |
 | Rate limit del login (`POST /log`) | **Ya no lo usa el frontend** (el login es de Cognito); sigue siendo informativo para el backend. Era 10 intentos cada 15 min **por IP**. Detrás del balanceador, sin `trust proxy`, todos los usuarios pueden compartir la misma IP | Por confirmar; revisar con el backend |
@@ -112,10 +111,10 @@ El frontend y el backend se despliegan por separado. Para que se entiendan:
 
 | Entorno | Valor |
 |---|---|
-| `dev` | La URL de la rama en Amplify. El output `branch_url` construye `https://${var.branch}.${domain}`; con una rama `feature/testing`, Amplify sustituye la `/` por `-`, así que la URL real sería `https://feature-testing.<id>.amplifyapp.com` **(por confirmar)**. Conviene corregir el output |
-| `prod` | El dominio final del frontend. `modules/dns` solo crea `backend.sigmetum-a.org`: **falta el dominio del frontend** (por ejemplo `sigmetum-a.org` o `www.`, asociado a la rama `master` con `aws_amplify_domain_association`) |
+| `dev` | `https://feature-testing.<id>.amplifyapp.com`: el output `branch_url` ya sustituye la `/` por `-` (`replace(var.branch, "/", "-")`, `infra:C8`, **verificado**). Es el valor de `site_origins` en `dev` (sin dominio propio) |
+| `prod` | Apex y `www` en código (`infra:C9`: `custom_domains` del `module "amplify"` de `environments/prod/main.tf`, asociados a `master` con `aws_amplify_domain_association.this`): `https://<dominio>,https://www.<dominio>`, el valor de `site_origins` en `prod`. Pendiente del `apply`; el backend se aplica antes |
 
-Como el origen permitido depende de la URL de Amplify, que se conoce tras crear la app, hay dos vueltas de `terraform apply`, o bien se usa un dominio propio desde el principio.
+En `dev` ya no hacen falta dos vueltas de `terraform apply`: la URL de la rama se conoce y quedó fijada en el `apply` del 10/11/2026 (`infra:C8`). En `prod` el dominio propio está en el código (`infra:C9`), así que los dos orígenes se conocen de antemano; falta el `apply`, y el backend debe aplicarse antes con `ALLOWED_ORIGIN` ya actualizado.
 
 ## 5. Recursos estáticos que el frontend pide al bucket
 
@@ -131,13 +130,13 @@ El frontend arma las URLs como `VITE_S3_URL` + `/` + clave (`assetUrl` en [src/c
 | `assets/logos/other-universities/UAL.jpg`, `UGR.jpg`, `UHU.jpg`, `UJA.jpg` | Logos de otras universidades |
 | `assets/logos/collaborators/EFYVE.jpg`, `GEOSPACE.jpg`, `MaFo.jpg` | Logos de entidades colaboradoras |
 
-**Problema (I2, verificado):** `modules/storage` activa `block_public_acls`, `block_public_policy`, `ignore_public_acls` y `restrict_public_buckets`. Con eso, ninguna de esas URLs es accesible desde el navegador. No hay CloudFront en el repositorio.
+**Cómo se resuelve (I2, `infra:C2` y `infra:C13`, verificado en código):** `modules/storage` mantiene `block_public_acls`, `block_public_policy`, `ignore_public_acls` y `restrict_public_buckets`, así que el bucket sigue privado. Delante hay CloudFront con OAC (`aws_cloudfront_distribution.app` y `aws_cloudfront_origin_access_control.app`), y la sentencia `AllowCloudFrontOAC` de `aws_s3_bucket_policy.app` da `s3:GetObject` solo sobre `assets/*`. `VITE_S3_URL` apunta a `module.storage.cdn_url`. El efecto real en el Amplify desplegado **(por confirmar)**; en `prod`, pendiente del `apply`.
 
-**Opciones para resolverlo:**
+**Opciones que se valoraron (decisión: A, `infra:C2`):**
 
 | Opción | Ventaja | Inconveniente |
 |---|---|---|
-| **A. CloudFront con OAC delante del bucket, solo para `assets/*`** (recomendada) | El bucket sigue privado; caché global; `VITE_S3_URL` apunta a la distribución | Añade un módulo nuevo |
+| **A. CloudFront con OAC delante del bucket, solo para `assets/*`** (**elegida**) | El bucket sigue privado; caché global; `VITE_S3_URL` apunta a la distribución | Añade un módulo nuevo |
 | B. Meter los recursos en la carpeta `public/` del frontend | Sin bucket ni CloudFront para esto; se versionan con el código | Los PDF e imágenes pesados engordan el repositorio |
 | C. Política de bucket que permita lectura pública solo de `assets/*` | La más simple | Hay que relajar el bloqueo de acceso público, que hoy es una garantía de seguridad |
 
@@ -145,13 +144,13 @@ El frontend arma las URLs como `VITE_S3_URL` + `/` + clave (`assetUrl` en [src/c
 
 Los datos (`data/…`) y las imágenes de la galería (`gallery/…`) **no** se sirven por esta vía: el backend los entrega (JSON directo o URLs prefirmadas de 1 hora). Así que el acceso público solo hace falta para `assets/*`.
 
-**I7:** nada en el repositorio sube esos ficheros al bucket. Hace falta documentar y automatizar el proceso (por ejemplo, un `aws s3 sync assets/ s3://<bucket>/assets/` tras el `apply`) o elegir la opción B.
+**I7 (`infra:C7`):** ningún recurso de Terraform sube esos ficheros, pero `scripts/sync-assets.mjs` de `sigmetum-infra` sube una carpeta local a `s3://<bucket>/assets/` con `aws s3 sync` (sin `--delete`). El bucket de `dev` ya contiene los ficheros de `assets/` (subidos a mano, según el estado de infra); la subida a `prod` está pendiente.
 
 ## 6. Reglas de Amplify
 
 ### Reescritura de la SPA (I3)
 
-El frontend es una SPA con enrutado en el navegador (`/explore`, `/login`, `/about-us`, `/manage-terms`...). Sin esta regla, abrir o recargar una de esas URLs da 404. **La regla no cambia con las rutas en inglés** (es un catch-all sin lista de rutas; verificado en `sigmetum-infra/modules/amplify/main.tf:87-92`), y el callback de Cognito `/auth/callback` y el cierre de sesión `/` tampoco cambian. Desde el 12/11/2026 las URL españolas antiguas (`/explorar`, `/galeria`, `/sobre-nosotros`, `/cargar-archivos`, `/administrar-datos`, `/administrar-contenido`) **redirigen solo en el cliente (sin 301)**: un 301 para QR, favoritos externos o buscadores sería una regla de infra, y los documentos de `sigmetum-infra` que citan `/explorar` como ejemplo los actualiza el usuario (por confirmar si hay QR o enlaces externos).
+El frontend es una SPA con enrutado en el navegador (`/explore`, `/login`, `/about-us`, `/manage-terms`...). Sin esta regla, abrir o recargar una de esas URLs da 404. **La regla no cambia con las rutas en inglés** (es un catch-all sin lista de rutas; verificado el 22/11/2026 en el `custom_rule` catch-all de `aws_amplify_app.this`, `sigmetum-infra/modules/amplify/main.tf`). Desde el 12/11/2026 las URL españolas antiguas (`/explorar`, `/galeria`, `/sobre-nosotros`, `/cargar-archivos`, `/administrar-datos`, `/administrar-contenido`) **redirigen solo en el cliente (sin 301)**: un 301 para QR, favoritos externos o buscadores sería una regla de infra, y los documentos de `sigmetum-infra` que citan `/explorar` como ejemplo los actualiza el usuario (por confirmar si hay QR o enlaces externos).
 
 ```hcl
 custom_rule {
@@ -161,7 +160,7 @@ custom_rule {
 }
 ```
 
-Es la regla para SPA que recomienda la documentación de Amplify, ampliada con las extensiones `woff2`, `webp` y `pdf`. Se añade al recurso `aws_amplify_app`.
+Es la regla para SPA que recomienda la documentación de Amplify, ampliada con las extensiones `woff2`, `webp` y `pdf`. Es idéntica a la de `aws_amplify_app.this` **(verificado)**, que lleva además una regla anterior, `/assets/<*>` (estado `200`, destino `/assets/<*>`), para los ficheros con hash.
 
 ### Cabeceras de caché
 
@@ -181,7 +180,7 @@ El frontend carga recursos de estos orígenes; si se añade una política `Conte
 | `fonts.googleapis.com`, `fonts.gstatic.com` | Tipografías (Amaranth, Sen; ya no Mukta Malar) y el subconjunto de Material Symbols (`icon_names`, 21 iconos, `display=block`); `index.html` añade `preconnect` a los dos orígenes (el de `gstatic` con `crossorigin`) y el código `watchIconFont` va en el bundle, sin `script-src` en línea. Una petición real con ese `icon_names` devolvió HTTP 200 y un `@font-face` woff2 (comprobado el 11/11/2026); la CSP actual es Report-Only y ya incluye googleapis y gstatic |
 | La URL de `VITE_S3_URL` | Logos, banner y glosario |
 | La URL de `VITE_BASE_URL` | Llamadas a la API (`connect-src`) |
-| `https://cognito-idp.<región>.amazonaws.com` | `connect-src`: todas las peticiones del acceso, los retos, la renovación y la revocación son `POST` `fetch` a ese origen. Hoy infra solo lo incluye si existe `cognito_domain_url` (ver las peticiones a infra de la sección 3). Ya no hay navegación al Hosted UI **(por confirmar en `dev`: avisos de la CSP Report-Only)** |
+| `https://cognito-idp.<región>.amazonaws.com` | `connect-src`: todas las peticiones del acceso, los retos, la renovación y la revocación son `POST` `fetch` a ese origen. Infra lo incluye cuando `cognito_user_pool_id` no está vacío (`infra:C18`, pendiente de `apply`; ver la sección 3). Ya no hay navegación al Hosted UI **(por confirmar en `dev`: avisos de la CSP Report-Only)** |
 | URLs prefirmadas de S3 (`*.s3.<región>.amazonaws.com`) | Fotos de la galería (`img-src`) |
 | `ipni.org`, enlaces de la política de cookies | Solo enlaces externos, no cargan recursos. El enlace «Leer más» de cada especie va a `https://www.ipni.org/search?q=<nombre>` (desde el 12/11/2026; antes `/?q=`, que abría la portada sin buscar). La API JSON `https://www.ipni.org/api/1/search` solo la usa el script local `scripts/ipni-check.mjs` (en Node, no en el navegador: no afecta a la CSP) |
 | `data/contact/recipients.json` (S3 del backend) | **Requisito de despliegue de BL1:** crear el fichero con `[]` en cada entorno antes de desplegar el backend. Sin cambios de infraestructura: el rol de Elastic Beanstalk ya tiene `GetObject`, `PutObject` y `DeleteObject` sobre `data/*`; por S15, un `GetObject` sobre una clave que no existe da `AccessDenied` y no `NoSuchKey`, de ahí el fichero inicial |
@@ -197,7 +196,7 @@ El frontend no incluye secretos. Los tokens de sesión (acceso y refresco de Cog
 | Región de `sigmetum-infra` | `<región>` (la de `environments/*/providers.tf`; el prefijo del id del pool de Cognito es la misma región) |
 | Buckets | `sigmetum-app-assets-dev` / `sigmetum-app-assets-prod` (verificado en `environments/*/terraform.tfvars.example`) |
 | `index.html` del frontend | Ya no fija ningún favicon (se quitó la URL del bucket antiguo): se inyecta al compilar desde `VITE_S3_URL` |
-| DNS | Solo `backend.sigmetum-a.org` (CNAME al endpoint de Beanstalk). Falta el del frontend |
+| DNS | `backend.sigmetum-a.org` (CNAME al endpoint de Beanstalk). En `prod`, el apex y `www` del frontend los crea `modules/amplify` en el código (`infra:C9`: `aws_amplify_domain_association.this`, `aws_route53_record.apex` y `aws_route53_record.subdomain`), pendiente del `apply`. `dev` no tiene dominio propio (su `module "amplify"` no pasa `custom_domains`) |
 
 ## 8. Comprobación tras desplegar
 
