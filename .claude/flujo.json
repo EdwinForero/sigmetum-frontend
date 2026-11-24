@@ -27,7 +27,6 @@
   "docsRegla": "docs/guias/mantenimiento.md",
   "specsDir": "docs/specs",
   "maxVueltas": 3,
-  "consultor": "ninguno",
   "estilo": "i-have-adhd",
   "perfiles": [
     "base",

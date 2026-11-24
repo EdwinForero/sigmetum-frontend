@@ -26,7 +26,8 @@ function archivos(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const ruta = join(dir, e.name);
     if (e.isDirectory()) return ruta === join(raiz, 'tests') ? [] : archivos(ruta);
-    return [ruta];
+    // El texto de una licencia de terceros va literal («EXPRESS OR IMPLIED» en la MIT): no se escanea.
+    return e.name === 'LICENSE' ? [] : [ruta];
   });
 }
 

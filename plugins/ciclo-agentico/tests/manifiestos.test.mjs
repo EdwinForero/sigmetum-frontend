@@ -11,15 +11,37 @@ const leer = (nombre) =>
 test('plugin.json declara nombre y versión', () => {
   const plugin = leer('plugin.json');
   assert.equal(plugin.name, 'ciclo-agentico');
-  assert.equal(plugin.version, '0.1.2');
+  assert.equal(plugin.version, '0.1.4');
 });
 
 test('el primer encabezado del CHANGELOG es la versión de plugin.json', () => {
   const texto = readFileSync(join(raiz, 'CHANGELOG.md'), 'utf8');
   const primero = /^## (.+)$/m.exec(texto);
   assert.ok(primero, 'el CHANGELOG no tiene entradas');
-  assert.equal(primero[1].trim(), '0.1.2');
+  assert.equal(primero[1].trim(), '0.1.4');
   assert.equal(primero[1].trim(), leer('plugin.json').version);
+});
+
+test('CHANGELOG resume el contenido de la versión 0.1.4', () => {
+  const texto = readFileSync(join(raiz, 'CHANGELOG.md'), 'utf8').replace(/\r\n/g, '\n');
+  const inicio = texto.indexOf('## 0.1.4');
+  const fin = texto.indexOf('## 0.1.3');
+  assert.ok(inicio !== -1 && fin > inicio, 'faltan las entradas 0.1.4 y 0.1.3 en ese orden');
+  const seccion = texto.slice(inicio, fin);
+  for (const pieza of ['ub-mode', 'MIT', 'Modo ub', 'developer', 'commit', 'Octopus', 'consultor']) {
+    assert.ok(seccion.includes(pieza), `la entrada 0.1.4 no menciona ${pieza}`);
+  }
+});
+
+test('CHANGELOG resume el contenido de la versión 0.1.3', () => {
+  const texto = readFileSync(join(raiz, 'CHANGELOG.md'), 'utf8').replace(/\r\n/g, '\n');
+  const inicio = texto.indexOf('## 0.1.3');
+  const fin = texto.indexOf('## 0.1.2');
+  assert.ok(inicio !== -1 && fin > inicio, 'faltan las entradas 0.1.3 y 0.1.2 en ese orden');
+  const seccion = texto.slice(inicio, fin);
+  for (const pieza of ['llm-council', '/ciclo', 'Consejo', 'Segunda opinión']) {
+    assert.ok(seccion.includes(pieza), `la entrada 0.1.3 no menciona ${pieza}`);
+  }
 });
 
 test('CHANGELOG resume el contenido de la versión 0.1.2', () => {

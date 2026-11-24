@@ -241,7 +241,6 @@ test('ejecutar lee del disco el aviso para PR que está en cambios', () => {
       verificacion: {},
       specsDir: 'docs/specs',
       maxVueltas: 1,
-      consultor: 'ninguno',
       estilo: 'ninguno',
       perfiles: ['base'],
     };
@@ -300,7 +299,6 @@ function ejecutarEnRepo(preparar) {
       verificacion: {},
       specsDir: 'docs/specs',
       maxVueltas: 1,
-      consultor: 'ninguno',
       estilo: 'ninguno',
       perfiles: ['base'],
     };

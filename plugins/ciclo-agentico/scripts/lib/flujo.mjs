@@ -64,7 +64,9 @@ export function validarFlujo(obj) {
   exigir('verificacion', esObjeto, 'un objeto');
   exigir('specsDir', esTexto, 'un texto');
   exigir('maxVueltas', (v) => Number.isInteger(v) && v >= 1, 'un entero mayor o igual que 1');
-  exigir('consultor', (v) => v === 'octopus' || v === 'ninguno', '"octopus" o "ninguno"');
+  if (obj.consultor !== undefined) {
+    problemas.push('El campo "consultor" ya no existe (se retiró Octopus en 0.1.4): quítalo de flujo.json');
+  }
   exigir('estilo', (v) => v === 'i-have-adhd' || v === 'ninguno', '"i-have-adhd" o "ninguno"');
   exigir('perfiles', esListaTexto, 'una lista de textos');
   exigir('docsObligatorios', esListaTexto, 'una lista de textos');

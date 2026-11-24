@@ -13,6 +13,8 @@ Roles y límites:
 
 Principios de trabajo: skill `principios` del plugin (fuente única; no se copian aquí).
 
+Opcionales, solo bajo petición: consejo (skill `llm-council`, que `/ciclo` ofrece en la puerta del plan) y modo ub (skill `ub-mode`, que se pasa al `developer`). La segunda opinión usa siempre la revisión de código de Superpowers.
+
 Cierre documental obligatorio: ninguna iteración termina sin el documento `estado` al día y `docs-gate` en verde.
 
 Nadie del ciclo hace commit, push ni `git add`: el commit lo hace el usuario tras la puerta final.

@@ -142,7 +142,7 @@ test('ciclo.md: regla Modelos y segunda opinión con opus y high en la llamada',
     '- **Modelos**:',
     'no pasan `model` ni `effort`',
     'la propia llamada',
-    'la llamada lleva `model` opus y `effort` high',
+    'la llamada a `Agent` lleva `model` opus y `effort` high',
   ]) {
     assert.ok(reglas.includes(frase), `las Reglas no incluyen: ${frase}`);
   }

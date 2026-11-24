@@ -21,6 +21,8 @@ Las features y los fixes con agentes pasan por `/ciclo <tarea>` (plugin [ciclo-a
 - `developer`: implementa el plan con el cambio mínimo (TDD: aquí hay base de tests); no edita documentos.
 - `tester-documentador`: ejecuta la verificación, pone los documentos al día y propone el mensaje de commit; no edita código.
 
+Opcionales, solo bajo petición: consejo (skill `llm-council`, que `/ciclo` ofrece en la puerta del plan) y modo ub (skill `ub-mode`, que se pasa al `developer`). La segunda opinión usa siempre la revisión de código de Superpowers.
+
 Ningún rol hace commit, push ni `git add`: el commit lo haces tú tras la puerta final. Principios de trabajo: skill [principios](plugins/ciclo-agentico/skills/principios/SKILL.md). El ciclo **no sustituye** a las guías ni a las reglas de este archivo: las aplica.
 
 ## Antes de empezar: lee la guía que corresponda a la tarea

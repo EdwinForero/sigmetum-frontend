@@ -26,14 +26,6 @@
       "revisado": { "version": "0.4.1", "commit": "1ecea19" }
     },
     {
-      "id": "octo@nyldn-plugins",
-      "rol": "consultor",
-      "perfil": "base",
-      "marketplace": "https://github.com/nyldn/claude-octopus.git",
-      "plataformas": ["linux", "darwin"],
-      "revisado": { "version": "11.15.1", "commit": "ee7bcb4" }
-    },
-    {
       "id": "impeccable@impeccable",
       "rol": "estilo-ui",
       "perfil": "frontend",

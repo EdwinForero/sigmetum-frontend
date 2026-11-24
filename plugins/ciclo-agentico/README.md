@@ -24,6 +24,14 @@ Nota: puede que Claude Code exija el prefijo del plugin (`/ciclo-agentico:ciclo`
 
 Los cuatro roles (`agents/`) precargan la skill `principios`, que contiene los principios de trabajo y el contrato de salida común; cada rol solo añade qué es su resultado. Las reglas de git (no commit, no push, no `git add`, ni `stash`, `checkout`, `restore`, `reset` o `clean`) se repiten a propósito en la sección Límites de cada rol: son de seguridad y no deben depender de que la precarga de la skill funcione.
 
+## Consejo (opcional)
+
+La skill `llm-council` (cinco asesores, revisión anónima y veredicto) no la usa ningún rol: solo `/ciclo`, y solo si el usuario acepta. Se ofrece en la puerta del paso 2 cuando el plan trae alternativas reales; su veredicto solo informa. Origen y límites en la propia skill (el repositorio de origen no declara licencia: por confirmar).
+
+## Modo ub (opcional)
+
+La skill `ub-mode` (hacerlo funcionar, luego bien hecho, luego práctica; MIT, con su `LICENSE`) no la precarga ningún rol: solo `/ciclo`, y solo si el usuario la pide, en el paso 3 y pasándole su ruta al `developer`. Su sección «Uso dentro de /ciclo» anula lo que choca con este flujo (commit y push, limpieza del árbol) y no instala sus herramientas externas sin aprobación.
+
 ## Modelos y esfuerzo por rol
 
 Cada rol fija su `model` y su `effort` en el frontmatter de `agents/`:

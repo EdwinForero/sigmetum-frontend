@@ -13,7 +13,6 @@
   "docsRegla": "docs/guias/documentacion.md",
   "specsDir": "docs/specs",
   "maxVueltas": 3,
-  "consultor": "ninguno",
   "estilo": "ninguno",
   "perfiles": ["base"],
   "criticidad": ["autenticación", "dependencias", "contratos con otros repositorios", "CI"],

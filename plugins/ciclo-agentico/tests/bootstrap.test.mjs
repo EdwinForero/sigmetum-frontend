@@ -187,7 +187,10 @@ test('planificar con perfiles base y backend omite impeccable', () => {
   });
   assert.ok(!faltantes.some((d) => d.id.startsWith('impeccable')));
   assert.ok(!omitidos.some((o) => o.dep.id.startsWith('impeccable')));
-  assert.ok(faltantes.some((d) => d.id === 'octo@nyldn-plugins'));
+});
+
+test('el catálogo ya no incluye Octopus', () => {
+  assert.ok(!catalogo.some((d) => d.id.startsWith('octo@') || d.rol === 'consultor'));
 });
 
 test('planificar con perfil frontend incluye impeccable', () => {
@@ -200,18 +203,19 @@ test('planificar con perfil frontend incluye impeccable', () => {
   assert.ok(faltantes.some((d) => d.id === 'impeccable@impeccable'));
 });
 
-test('planificar en win32 omite Octopus con motivo que menciona Windows y WSL', () => {
+test('planificar en win32 omite una dependencia solo de Linux y macOS con motivo que menciona Windows y WSL', () => {
+  const soloUnix = { id: 'x@ejemplo', rol: 'complemento', perfil: 'base', marketplace: 'ejemplo/x', plataformas: ['linux', 'darwin'] };
   const { faltantes, omitidos } = planificar({
-    catalogo,
+    catalogo: [soloUnix],
     perfiles: ['base'],
     instalados: [],
     plataforma: 'win32',
   });
-  const octo = omitidos.find((o) => o.dep.id === 'octo@nyldn-plugins');
-  assert.ok(octo);
-  assert.match(octo.motivo, /Windows/);
-  assert.match(octo.motivo, /WSL/);
-  assert.ok(!faltantes.some((d) => d.id === 'octo@nyldn-plugins'));
+  const omitido = omitidos.find((o) => o.dep.id === 'x@ejemplo');
+  assert.ok(omitido);
+  assert.match(omitido.motivo, /Windows/);
+  assert.match(omitido.motivo, /WSL/);
+  assert.deepEqual(faltantes, []);
 });
 
 test('planificar con todo instalado no deja faltantes', () => {
@@ -314,7 +318,7 @@ test('argumentoSeguro acepta valores del catálogo y rechaza metacaracteres', ()
   for (const ok of [
     'obra/superpowers-marketplace',
     'superpowers@superpowers-marketplace',
-    'https://github.com/nyldn/claude-octopus.git',
+    'https://github.com/ejemplo/marketplace.git',
   ]) {
     assert.equal(argumentoSeguro(ok), true, ok);
   }

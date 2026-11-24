@@ -1,5 +1,23 @@
 # Cambios
 
+## 0.1.4
+
+Modo ub opcional y retirada de Octopus. Contiene:
+
+- **Sin Octopus**: se quita de `dependencias.json`; el campo `consultor` desaparece de `flujo.json`, de la plantilla y de `/ciclo-init` (el validador pide quitarlo si aparece); la segunda opinión usa siempre `superpowers:requesting-code-review`. La lógica genérica de `plataformas` de `bootstrap-agentes` se mantiene.
+- **`llm-council` afinada**: su `description` solo la activa bajo petición (sin los disparadores automáticos del original) y `/ciclo` la nombra, igual que `ub-mode`, con el prefijo `ciclo-agentico:`.
+
+- **Skill `ub-mode`**: texto original de https://github.com/unclebob/ub-mode (Robert C. Martin, licencia MIT, con su `LICENSE` junto a la skill) más una sección propia de uso dentro de `/ciclo`: sin commit ni push, sin instalar herramientas externas sin aprobación.
+- **`/ciclo`**: regla nueva «Modo ub»: solo bajo petición del usuario; en el paso 3 el orquestador pasa al `developer` la ruta de la skill y lo dice en la puerta.
+
+## 0.1.3
+
+Consejo opcional. Contiene:
+
+- **Skill `llm-council`**: cinco asesores en paralelo, revisión anónima entre ellos y veredicto del presidente (método de Karpathy; texto original de https://github.com/aiwithremy/claude-skills-llm-council, sin licencia declarada: por confirmar), más una sección propia de uso dentro de `/ciclo`.
+- **`/ciclo`**: regla nueva «Consejo»: solo bajo petición, se ofrece en la puerta del paso 2 cuando el plan trae alternativas reales, solo informa y su veredicto va en la línea Segunda opinión.
+
+
 ## 0.1.2
 
 Specs por mes y retención. Contiene:

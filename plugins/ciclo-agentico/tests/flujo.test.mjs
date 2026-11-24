@@ -12,7 +12,6 @@ const valido = () => ({
   verificacion: { lint: 'npm run lint' },
   specsDir: 'docs/specs',
   maxVueltas: 3,
-  consultor: 'octopus',
   estilo: 'i-have-adhd',
   perfiles: ['backend'],
   docsObligatorios: ['docs/estado.md'],
@@ -87,10 +86,10 @@ test('maxVueltas no entero es problema', () => {
   assert.equal(validarFlujo({ ...valido(), maxVueltas: 1.5 }).ok, false);
 });
 
-test('consultor desconocido es problema', () => {
-  const { ok, problemas } = validarFlujo({ ...valido(), consultor: 'otro' });
+test('consultor ya no existe: su presencia es problema con la indicación de quitarlo', () => {
+  const { ok, problemas } = validarFlujo({ ...valido(), consultor: 'ninguno' });
   assert.equal(ok, false);
-  assert.ok(problemas.some((p) => p.includes('consultor')));
+  assert.ok(problemas.some((p) => p.includes('"consultor"') && p.includes('quítalo')));
 });
 
 test('estilo desconocido es problema', () => {
@@ -120,7 +119,7 @@ test('docsPorArea con valores que no son arrays de strings es problema', () => {
 });
 
 test('acumula todos los problemas', () => {
-  const { problemas } = validarFlujo({ ...valido(), maxVueltas: 0, consultor: 'otro', guias: 'x' });
+  const { problemas } = validarFlujo({ ...valido(), maxVueltas: 0, estilo: 'otro', guias: 'x' });
   assert.ok(problemas.length >= 3);
 });
 

@@ -190,7 +190,7 @@ test('ciclo.md: frontmatter, pasos 0 a 5 y piezas del orquestador', () => {
   }
   const piezas = [
     'puerta humana', 'maxVueltas', 'refresh-estado', 'docs-gate', 'bootstrap-agentes', 'criticidad',
-    'consultor', 'estilo', 'AskUserQuestion', 'understand-anything:understand-diff',
+    'estilo', 'AskUserQuestion', 'understand-anything:understand-diff',
     'diagram-design:diagram-design', 'El orquestador nunca hace commit',
   ];
   for (const pieza of piezas) {
@@ -249,7 +249,6 @@ test('ciclo.md: preexistentes aceptados, relanzamiento vigilado, reserva solo in
     'envuelto en las mismas fotos de código antes y después (puntos 1 y 3)',
     'git diff HEAD',
     'Solo informa: no se corrige nada',
-    'que `/octo:review` acepte un plan',
     'Límite conocido de la foto',
     'Revisar requisitos',
   ]) {
@@ -396,12 +395,23 @@ test('refresh-estado: los avisos para PR no cuentan como specs abiertas', () => 
   );
 });
 
-test('ciclo-init.md: comprueba dependencias antes de decidir consultor y estilo', () => {
+test('el plugin ya no nombra Octopus ni el campo consultor', () => {
+  const textos = [
+    ['commands', 'ciclo.md'], ['commands', 'ciclo-init.md'], ['README.md'],
+    ['templates', 'flujo.json'], ['.claude-plugin', 'dependencias.json'],
+  ];
+  for (const partes of textos) {
+    const texto = leerTexto(...partes);
+    assert.ok(!/octopus|octo:|consultor/i.test(texto), `${partes.join('/')} nombra Octopus o consultor`);
+  }
+});
+
+test('ciclo-init.md: comprueba dependencias antes de decidir perfiles y estilo', () => {
   const texto = leerTexto('commands', 'ciclo-init.md');
   const dependencias = texto.indexOf('scripts/bootstrap-agentes.mjs" --dry-run');
-  const decision = texto.indexOf('`consultor` y `estilo`');
-  assert.ok(dependencias !== -1 && decision !== -1, 'faltan los textos de dependencias o de consultor y estilo');
-  assert.ok(dependencias < decision, 'la comprobación de dependencias va después de decidir consultor y estilo');
+  const decision = texto.indexOf('`perfiles` y `estilo`');
+  assert.ok(dependencias !== -1 && decision !== -1, 'faltan los textos de dependencias o de perfiles y estilo');
+  assert.ok(dependencias < decision, 'la comprobación de dependencias va después de decidir perfiles y estilo');
   assert.ok(texto.includes('según la salida del paso 1'), 'la decisión no se apoya en la comprobación de dependencias');
 });
 
